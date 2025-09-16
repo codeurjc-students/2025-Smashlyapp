@@ -1,37 +1,7 @@
 
-<div style="display: flex; align-items: center; justify-content: space-between;">
-  <div>
-    <h1 style="
-        font-size: 2.5rem; 
-        font-weight: 800; 
-        margin: 0;
-        font-family: 'Arial Black', sans-serif;
-    ">
-      <span style="
-        background: linear-gradient(90deg, #00c853, #b2ff59); 
-        -webkit-background-clip: text; 
-        -webkit-text-fill-color: transparent;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
-      ">
-        Smashly App - 
-      </span>
-      <span style="
-        background: linear-gradient(90deg, #ffd600, #ffea00); 
-        -webkit-background-clip: text; 
-        -webkit-text-fill-color: transparent;
-        text-shadow: 1px 1px 3px rgba(0,0,0,0.25);
-      ">
-        Your game, your racket
-      </span>
-    </h1>
-  </div>
-  <div>
-    <img src="public/images/icons/smashly-icon.png" 
-         alt="Smashly App Icon" 
-         style="height: 130px;">
-  </div>
-</div>
-
+<p align="center">
+  <img src="public/images/icons/smashly-banner.svg" alt="Smashly App - Your game, your racket" />
+</p>
 
 ---
 
