@@ -21,7 +21,7 @@ The application provides a **detailed catalog and intelligent comparator** 📊 
 3. **📅 [Planification](#planification)**
 4. **⚙️ [Functionalities](#functionalities)**
 5. **📊 [Analysis](#analysis)**
-6. **🔄 [Following](#following)**
+6. **🔄 [Tracking](#following)**
 7. **👥 [Authors](#authors)**
 
 ---
