@@ -1,0 +1,515 @@
+{
+  "info": {
+    "name": "Smashly API - Complete Collection",
+    "description": "Colección completa para testear la API de Smashly - Sistema de Recomendación de Palas de Pádel con IA",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001/api",
+      "type": "default"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "default"
+    },
+    {
+      "key": "test_racket_id",
+      "value": "1",
+      "type": "default"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Health Check",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/health",
+              "host": ["{{base_url}}"],
+              "path": ["health"]
+            },
+            "description": "Verifica que la API esté funcionando correctamente"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Autenticación (Auth)",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tu_email@ejemplo.com\",\n  \"password\": \"tu_password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Inicia sesión con email y contraseña. Guarda el access_token en {{auth_token}}"
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo_usuario@ejemplo.com\",\n  \"password\": \"password123\",\n  \"metadata\": {\n    \"full_name\": \"Nuevo Usuario\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Registra un nuevo usuario en el sistema"
+          }
+        },
+        {
+          "name": "Get Current User",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Obtiene información del usuario autenticado"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refresh_token\": \"tu_refresh_token_aqui\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/refresh",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "refresh"]
+            },
+            "description": "Refresca el token de acceso usando el refresh token"
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "logout"]
+            },
+            "description": "Cierra la sesión del usuario"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Palas (Rackets)",
+      "item": [
+        {
+          "name": "Obtener todas las palas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets?page=1&limit=50",
+              "host": ["{{base_url}}"],
+              "path": ["rackets"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "50"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Buscar palas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/search?q=Babolat&page=1&limit=20",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "search"],
+              "query": [
+                {"key": "q", "value": "Babolat"},
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "20"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Filtros avanzados",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/filter?brand=NOX&min_price=100&max_price=300&level=Intermedio&limit=3",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "filter"],
+              "query": [
+                {"key": "brand", "value": "NOX", "description": "Marca específica (también acepta 'marca')"},
+                {"key": "min_price", "value": "100", "description": "Precio mínimo (también acepta 'precio_min')"},
+                {"key": "max_price", "value": "300", "description": "Precio máximo (también acepta 'precio_max')"},
+                {"key": "level", "value": "Intermedio", "description": "Nivel: Principiante, Intermedio, Avanzado (también acepta 'nivel_de_juego')"},
+                {"key": "shape", "value": "Redonda", "description": "Forma: Redonda, Lágrima, Diamante (también acepta 'forma')", "disabled": true},
+                {"key": "bestseller", "value": "true", "description": "Solo bestsellers (también acepta 'es_bestseller')", "disabled": true},
+                {"key": "on_sale", "value": "true", "description": "Solo ofertas (también acepta 'en_oferta')", "disabled": true},
+                {"key": "limit", "value": "3", "description": "Límite de resultados"}
+              ]
+            },
+            "description": "Filtra palas por múltiples criterios. Acepta parámetros en inglés y español."
+          }
+        },
+        {
+          "name": "Palas bestsellers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/bestsellers",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "bestsellers"]
+            }
+          }
+        },
+        {
+          "name": "Palas en oferta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/offers",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "offers"]
+            }
+          }
+        },
+        {
+          "name": "Obtener marcas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/brands",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "brands"]
+            }
+          }
+        },
+        {
+          "name": "Estadísticas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/stats",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "stats"]
+            }
+          }
+        },
+        {
+          "name": "Palas por marca",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/brands/Babolat",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "brands", "Babolat"]
+            }
+          }
+        },
+        {
+          "name": "Pala por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/rackets/{{test_racket_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["rackets", "{{test_racket_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Usuarios (Users)",
+      "item": [
+        {
+          "name": "Obtener perfil",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Crear perfil",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nickname\": \"padel_pro_2025\",\n  \"full_name\": \"Juan Pérez\",\n  \"peso\": 75,\n  \"altura\": 180,\n  \"fecha_nacimiento\": \"1990-05-15\",\n  \"nivel_juego\": \"Intermedio\",\n  \"limitaciones\": \"Lesión en hombro derecho\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"peso\": 77,\n  \"nivel_juego\": \"Avanzado\",\n  \"limitaciones\": \"\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar perfil",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Verificar nickname disponible",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/nickname/nuevo_nickname/available",
+              "host": ["{{base_url}}"],
+              "path": ["users", "nickname", "nuevo_nickname", "available"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Recomendaciones IA",
+      "item": [
+        {
+          "name": "Obtener recomendaciones",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"experience\": \"intermediate\",\n  \"playStyle\": \"aggressive\",\n  \"budget\": 200,\n  \"preferences\": {\n    \"weight\": \"medium\",\n    \"shape\": \"round\",\n    \"level\": \"Intermedio\"\n  },\n  \"gameLevel\": \"Intermedio\",\n  \"playingStyle\": \"Agresivo\",\n  \"height\": \"180\",\n  \"weight\": \"75\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recommendations",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations"]
+            }
+          }
+        },
+        {
+          "name": "Comparar palas",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"racketIds\": [1, 5, 12]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recommendations/compare",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations", "compare"]
+            }
+          }
+        },
+        {
+          "name": "Historial de recomendaciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/recommendations/history?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations", "history"],
+              "query": [
+                {"key": "page", "value": "1"},
+                {"key": "limit", "value": "10"}
+              ]
+            }
+          }
+        },
+        {
+          "name": "Registrar interacción",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{auth_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"racketId\": 5,\n  \"interactionType\": \"like\",\n  \"rating\": 4,\n  \"metadata\": {\n    \"source\": \"recommendation\",\n    \"context\": \"ai_suggestion\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recommendations/interaction",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations", "interaction"]
+            }
+          }
+        },
+        {
+          "name": "Validar formulario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"gameLevel\": \"Intermedio\",\n  \"playingStyle\": \"Agresivo\",\n  \"budget\": \"200\",\n  \"height\": \"180\",\n  \"weight\": \"75\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/recommendations/validate-form",
+              "host": ["{{base_url}}"],
+              "path": ["recommendations", "validate-form"]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
