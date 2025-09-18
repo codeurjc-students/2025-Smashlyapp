@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { FiEye, FiEyeOff, FiLock, FiMail, FiUser } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../contexts/AuthContext.tsx";
 
 const Container = styled.div`
   min-height: 100vh;
@@ -133,16 +135,14 @@ const ErrorMessage = styled.span`
   display: block;
 `;
 
-const ForgotPassword = styled.button`
+const ForgotPassword = styled(Link)`
   color: #16a34a;
   font-size: 0.875rem;
-  background: none;
-  border: none;
+  text-decoration: none;
   font-weight: 500;
   align-self: flex-end;
   margin-top: -0.5rem;
   transition: color 0.2s ease;
-  cursor: pointer;
 
   &:hover {
     color: #059669;
@@ -212,6 +212,7 @@ interface FormErrors {
 }
 
 const LoginPage: React.FC = () => {
+  const { signIn } = useAuth();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
@@ -267,23 +268,41 @@ const LoginPage: React.FC = () => {
 
     setLoading(true);
 
-    // Simular un delay de autenticación para el diseño
-    setTimeout(() => {
-      setLoading(false);
-      
-      // Simular login exitoso y redirigir a la página principal
-      console.log("Login simulado con:", formData);
-      alert("¡Bienvenido a Smashly! (Login simulado)");
+    try {
+      // Iniciar sesión usando el contexto de autenticación
+      const { error } = await signIn(formData.email, formData.password);
+
+      if (error) {
+        // Mensajes más específicos para errores comunes
+        if (error.message.includes('Email not confirmed') || 
+            error.message.includes('email_not_confirmed') ||
+            error.message.includes('confirm')) {
+          toast.error(
+            "Tu cuenta aún no está confirmada. Revisa tu email y haz clic en el enlace de confirmación.",
+            { duration: 6000 }
+          );
+        } else if (error.message.includes('Invalid credentials') || 
+                   error.message.includes('invalid_credentials')) {
+          toast.error("Email o contraseña incorrectos");
+        } else {
+          toast.error(error.message);
+        }
+        return;
+      }
+
+      // Login exitoso
+      toast.success("¡Bienvenido a Smashly!");
+
+      // Redirigir a la página principal
       navigate("/");
-    }, 1500);
-  };
-
-  const handleForgotPassword = () => {
-    alert("Funcionalidad de recuperación de contraseña (Solo diseño)");
-  };
-
-  const handleRegister = () => {
-    alert("Funcionalidad de registro (Solo diseño)");
+    } catch (error: any) {
+      console.error("Error during login:", error);
+      const errorMessage =
+        error?.message || "Error inesperado durante el inicio de sesión";
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -347,7 +366,7 @@ const LoginPage: React.FC = () => {
             {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
           </InputGroup>
 
-          <ForgotPassword onClick={handleForgotPassword}>
+          <ForgotPassword to="/forgot-password">
             ¿Olvidaste tu contraseña?
           </ForgotPassword>
 
@@ -358,19 +377,7 @@ const LoginPage: React.FC = () => {
 
         <RegisterLink>
           <RegisterText>
-            ¿No tienes cuenta? <button 
-              onClick={handleRegister}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#16a34a',
-                fontWeight: '600',
-                cursor: 'pointer',
-                textDecoration: 'underline'
-              }}
-            >
-              Regístrate gratis
-            </button>
+            ¿No tienes cuenta? <Link to="/register">Regístrate gratis</Link>
           </RegisterText>
         </RegisterLink>
       </LoginCard>

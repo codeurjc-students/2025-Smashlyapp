@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
   FiActivity,
   FiAlertCircle,
@@ -10,40 +11,10 @@ import {
   FiTrendingUp,
   FiUser,
 } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
-
-// Static data interfaces
-interface StaticUser {
-  id: string;
-  email: string;
-}
-
-interface StaticUserProfile {
-  full_name: string;
-  nickname: string;
-  peso: number;
-  altura: number;
-  fecha_nacimiento: string;
-  nivel_juego: string;
-  limitaciones: string;
-}
-
-// Static example data
-const staticUser: StaticUser = {
-  id: "user-123",
-  email: "carlos.martinez@email.com"
-};
-
-const staticUserProfile: StaticUserProfile = {
-  full_name: "Carlos Martínez",
-  nickname: "CarlosPadel",
-  peso: 75.5,
-  altura: 180,
-  fecha_nacimiento: "1990-03-15",
-  nivel_juego: "Intermedio Alto",
-  limitaciones: "Molestias ocasionales en el codo derecho. Prefiero palas con balance medio-bajo para reducir las vibraciones."
-};
+import { useAuth } from "../contexts/AuthContext";
+import { UserProfileService } from "../services/userProfileService";
 
 // Styled Components
 const Container = styled.div`
@@ -324,20 +295,39 @@ interface UserProfileFormData {
 }
 
 const UserProfilePage: React.FC = () => {
+  const { user, userProfile, refreshUserProfile } = useAuth();
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<UserProfileFormData>({
-    full_name: staticUserProfile.full_name,
-    peso: staticUserProfile.peso.toString(),
-    altura: staticUserProfile.altura.toString(),
-    fecha_nacimiento: staticUserProfile.fecha_nacimiento,
-    nivel_juego: staticUserProfile.nivel_juego,
-    limitaciones: staticUserProfile.limitaciones,
+    full_name: "",
+    peso: "",
+    altura: "",
+    fecha_nacimiento: "",
+    nivel_juego: "",
+    limitaciones: "",
   });
 
-  // Static user and profile data
-  const user = staticUser;
-  const userProfile = staticUserProfile;
+  // Cargar datos del perfil cuando el componente se monta
+  useEffect(() => {
+    if (userProfile) {
+      setFormData({
+        full_name: userProfile.full_name || "",
+        peso: userProfile.peso?.toString() || "",
+        altura: userProfile.altura?.toString() || "",
+        fecha_nacimiento: userProfile.fecha_nacimiento || "",
+        nivel_juego: userProfile.nivel_juego || "",
+        limitaciones: userProfile.limitaciones || "",
+      });
+    }
+  }, [userProfile]);
+
+  // Redirigir si no hay usuario autenticado
+  useEffect(() => {
+    if (!user) {
+      navigate("/login");
+    }
+  }, [user, navigate]);
 
   const handleInputChange = (
     e: React.ChangeEvent<
@@ -356,7 +346,7 @@ const UserProfilePage: React.FC = () => {
       formData.peso &&
       (isNaN(Number(formData.peso)) || Number(formData.peso) <= 0)
     ) {
-      alert("El peso debe ser un número válido mayor a 0");
+      toast.error("El peso debe ser un número válido mayor a 0");
       return false;
     }
 
@@ -364,7 +354,7 @@ const UserProfilePage: React.FC = () => {
       formData.altura &&
       (isNaN(Number(formData.altura)) || Number(formData.altura) <= 0)
     ) {
-      alert("La altura debe ser un número válido mayor a 0");
+      toast.error("La altura debe ser un número válido mayor a 0");
       return false;
     }
 
@@ -374,7 +364,7 @@ const UserProfilePage: React.FC = () => {
       const age = today.getFullYear() - birthDate.getFullYear();
 
       if (age < 5 || age > 120) {
-        alert("Por favor, ingresa una fecha de nacimiento válida");
+        toast.error("Por favor, ingresa una fecha de nacimiento válida");
         return false;
       }
     }
@@ -390,22 +380,29 @@ const UserProfilePage: React.FC = () => {
     }
 
     if (!user) {
-      alert("Usuario no autenticado");
+      toast.error("Usuario no autenticado");
       return;
     }
 
     setLoading(true);
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulate successful update
-      alert("Perfil actualizado correctamente");
+      const updates = {
+        full_name: formData.full_name || undefined,
+        peso: formData.peso ? Number(formData.peso) : undefined,
+        altura: formData.altura ? Number(formData.altura) : undefined,
+        fecha_nacimiento: formData.fecha_nacimiento || undefined,
+        nivel_juego: formData.nivel_juego || undefined,
+        limitaciones: formData.limitaciones || undefined,
+      };
+
+      await UserProfileService.updateUserProfile(user.id, updates);
+      await refreshUserProfile(); // Actualizar el perfil en el contexto
+      toast.success("Perfil actualizado correctamente");
       setIsEditing(false);
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      alert(error.message || "Error al actualizar el perfil");
+      toast.error(error.message || "Error al actualizar el perfil");
     } finally {
       setLoading(false);
     }
@@ -428,7 +425,7 @@ const UserProfilePage: React.FC = () => {
   };
 
   if (!user) {
-    return null; // Shouldn't happen in static version
+    return null; // El useEffect redirigirá al login
   }
 
   return (

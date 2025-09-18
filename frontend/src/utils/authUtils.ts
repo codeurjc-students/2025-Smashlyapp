@@ -187,7 +187,7 @@ declare global {
 }
 
 // Exponer utilidades en desarrollo
-if (import.meta.env.DEV) {
+if ((import.meta as any).env?.DEV) {
   window.__smashly_auth_utils = {
     forceClean: forceCleanAuthStorage,
     diagnose: diagnoseAuthState,

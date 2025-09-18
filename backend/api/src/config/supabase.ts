@@ -36,6 +36,12 @@ export const supabase: SupabaseClient = createClient(supabaseUrl, supabaseKey, {
       "X-Client-Info": "smashly-api@1.0.0",
     },
   },
+  // Configuración optimizada para alto volumen
+  realtime: {
+    params: {
+      eventsPerSecond: 10,
+    },
+  },
 });
 
 // Cliente administrativo con service role (si está disponible)

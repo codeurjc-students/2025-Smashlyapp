@@ -1,21 +1,102 @@
 import { motion } from "framer-motion";
 import React from "react";
 import {
-  FiChevronRight,
+  FiClock,
   FiLayers,
   FiSearch,
   FiStar,
   FiTarget,
-  FiTrendingUp,
-  FiZap
+  FiTrendingUp
 } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 const Container = styled.div`
   min-height: 100vh;
   background: linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
   padding: 2rem 0;
+  position: relative;
+`;
+
+const ContentWrapper = styled.div`
+  filter: blur(3px);
+  pointer-events: none;
+  user-select: none;
+`;
+
+const ComingSoonOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(5px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 8rem;
+  z-index: 1000;
+
+  @media (max-width: 768px) {
+    padding-top: 6rem;
+  }
+`;
+
+const ComingSoonCard = styled(motion.div)`
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  box-shadow: 0 25px 80px rgba(22, 163, 74, 0.2);
+  border: 1px solid rgba(22, 163, 74, 0.1);
+  text-align: center;
+  max-width: 500px;
+  margin: 0 1rem;
+
+  @media (max-width: 768px) {
+    padding: 2rem 1.5rem;
+    margin: 0 1rem;
+  }
+`;
+
+const ComingSoonIcon = styled.div`
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  color: white;
+  box-shadow: 0 10px 30px rgba(22, 163, 74, 0.3);
+`;
+
+const ComingSoonTitle = styled.h1`
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const ComingSoonSubtitle = styled.p`
+  font-size: 1.1rem;
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+  font-weight: 500;
+`;
+
+const ComingSoonDescription = styled.p`
+  font-size: 0.95rem;
+  color: #9ca3af;
+  line-height: 1.5;
 `;
 
 const HeroSection = styled.div`
@@ -198,12 +279,6 @@ const StatLabel = styled.div`
 `;
 
 const RacketsPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleNavigate = (path: string) => {
-    navigate(path);
-  };
-
   const features = [
     {
       id: 1,
@@ -243,117 +318,127 @@ const RacketsPage: React.FC = () => {
 
   return (
     <Container>
-      <HeroSection>
-        <MainTitle>
-          Comparador de <HighlightText>Palas de Pádel</HighlightText>
-        </MainTitle>
-        <Subtitle>
-          Encuentra la pala perfecta para tu estilo de juego, compara modelos y
-          descubre las mejores opciones del mercado con inteligencia artificial.
-        </Subtitle>
-      </HeroSection>
+      {/* Contenido borroso en el fondo */}
+      <ContentWrapper>
+        <HeroSection>
+          <MainTitle>
+            Comparador de <HighlightText>Palas de Pádel</HighlightText>
+          </MainTitle>
+          <Subtitle>
+            Encuentra la pala perfecta para tu estilo de juego, compara modelos y
+            descubre las mejores opciones del mercado con inteligencia artificial.
+          </Subtitle>
+        </HeroSection>
 
-      <FeaturesGrid>
-        {features.map((feature, index) => (
-          <FeatureCard
-            key={feature.id}
-            isRecommended={feature.isRecommended}
-            initial={{ opacity: 0, y: 50 }}
+        <FeaturesGrid>
+          {features.map((feature, index) => (
+            <FeatureCard
+              key={feature.id}
+              isRecommended={feature.isRecommended}
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+            >
+              {feature.isRecommended && (
+                <RecommendedBadge>
+                  <FiStar size={14} style={{ marginRight: "0.25rem" }} />
+                  Recomendado
+                </RecommendedBadge>
+              )}
+
+              <IconContainer>{feature.icon}</IconContainer>
+
+              <FeatureTitle>{feature.title}</FeatureTitle>
+              <FeatureDescription>{feature.description}</FeatureDescription>
+              <FeatureDetailText>{feature.detail}</FeatureDetailText>
+
+              <ActionButton
+                disabled={true}
+                style={{
+                  background: "#9ca3af",
+                  cursor: "not-allowed",
+                }}
+              >
+                <FiTarget size={16} />
+                Próximamente
+              </ActionButton>
+            </FeatureCard>
+          ))}
+        </FeaturesGrid>
+
+        <StatsSection>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
-            onClick={() => feature.available && handleNavigate(feature.path)}
-            style={{
-              cursor: feature.available ? "pointer" : "default",
-              opacity: feature.available ? 1 : 0.7,
-            }}
+            transition={{ duration: 0.5, delay: 0.6 }}
           >
-            {feature.isRecommended && (
-              <RecommendedBadge>
-                <FiStar size={14} style={{ marginRight: "0.25rem" }} />
-                Recomendado
-              </RecommendedBadge>
-            )}
-
-            <IconContainer>{feature.icon}</IconContainer>
-
-            <FeatureTitle>{feature.title}</FeatureTitle>
-            <FeatureDescription>{feature.description}</FeatureDescription>
-            <FeatureDetailText>{feature.detail}</FeatureDetailText>
-
-            <ActionButton
-              whileHover={{ scale: feature.available ? 1.02 : 1 }}
-              whileTap={{ scale: feature.available ? 0.98 : 1 }}
-              disabled={!feature.available}
+            <h3
               style={{
-                background: feature.available
-                  ? "linear-gradient(135deg, #16a34a 0%, #15803d 100%)"
-                  : "#9ca3af",
-                cursor: feature.available ? "pointer" : "not-allowed",
+                fontSize: "1.5rem",
+                fontWeight: "700",
+                color: "#1f2937",
+                marginBottom: "0.5rem",
               }}
             >
-              {feature.available ? (
-                <>
-                  {feature.isRecommended ? (
-                    <FiZap size={16} />
-                  ) : (
-                    <FiTarget size={16} />
-                  )}
-                  {feature.action}
-                  <FiChevronRight size={16} />
-                </>
-              ) : (
-                <>
-                  <FiTarget size={16} />
-                  Próximamente
-                </>
-              )}
-            </ActionButton>
-          </FeatureCard>
-        ))}
-      </FeaturesGrid>
+              ¿Por qué elegir nuestro comparador?
+            </h3>
+            <p
+              style={{
+                fontSize: "1rem",
+                color: "#6b7280",
+                marginBottom: "2rem",
+              }}
+            >
+              Datos actualizados y análisis con inteligencia artificial
+            </p>
 
-      <StatsSection>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.6 }}
+            <StatsGrid>
+              <StatCard>
+                <StatNumber>800+</StatNumber>
+                <StatLabel>Palas analizadas</StatLabel>
+              </StatCard>
+              <StatCard>
+                <StatNumber>AI</StatNumber>
+                <StatLabel>Análisis con IA</StatLabel>
+              </StatCard>
+              <StatCard>
+                <StatNumber>24/7</StatNumber>
+                <StatLabel>Disponible siempre</StatLabel>
+              </StatCard>
+            </StatsGrid>
+          </motion.div>
+        </StatsSection>
+      </ContentWrapper>
+
+      {/* Overlay de "Próximamente" */}
+      <ComingSoonOverlay>
+        <ComingSoonCard
+          initial={{ opacity: 0, scale: 0.8, y: 50 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ 
+            duration: 0.8,
+            type: "spring",
+            stiffness: 100,
+            damping: 15
+          }}
         >
-          <h3
-            style={{
-              fontSize: "1.5rem",
-              fontWeight: "700",
-              color: "#1f2937",
-              marginBottom: "0.5rem",
-            }}
-          >
-            ¿Por qué elegir nuestro comparador?
-          </h3>
-          <p
-            style={{
-              fontSize: "1rem",
-              color: "#6b7280",
-              marginBottom: "2rem",
-            }}
-          >
-            Datos actualizados y análisis con inteligencia artificial
-          </p>
-
-          <StatsGrid>
-            <StatCard>
-              <StatNumber>800+</StatNumber>
-              <StatLabel>Palas analizadas</StatLabel>
-            </StatCard>
-            <StatCard>
-              <StatNumber>AI</StatNumber>
-              <StatLabel>Análisis con IA</StatLabel>
-            </StatCard>
-            <StatCard>
-              <StatNumber>24/7</StatNumber>
-              <StatLabel>Disponible siempre</StatLabel>
-            </StatCard>
-          </StatsGrid>
-        </motion.div>
-      </StatsSection>
+          <ComingSoonIcon>
+            <FiClock size={32} />
+          </ComingSoonIcon>
+          
+          <ComingSoonTitle>Próximamente</ComingSoonTitle>
+          
+          <ComingSoonSubtitle>
+            Estamos trabajando en algo increíble para ti
+          </ComingSoonSubtitle>
+          
+          <ComingSoonDescription>
+            El comparador de palas de pádel más avanzado está en desarrollo. 
+            Pronto podrás encontrar la pala perfecta para tu estilo de juego 
+            con la ayuda de inteligencia artificial.
+          </ComingSoonDescription>
+        </ComingSoonCard>
+      </ComingSoonOverlay>
     </Container>
   );
 };

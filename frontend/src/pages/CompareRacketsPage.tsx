@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   FiCheck,
   FiFilter,
@@ -11,122 +11,9 @@ import {
   FiX,
 } from "react-icons/fi";
 import styled from "styled-components";
-
-// Tipos estáticos
-interface StaticRacket {
-  nombre: string;
-  marca: string;
-  modelo: string;
-  precio_actual: number;
-  precio_original?: number;
-  en_oferta: boolean;
-  descuento_porcentaje?: number;
-  es_bestseller: boolean;
-  imagen: string;
-}
-
-interface StaticComparisonResults {
-  generalAnalysis: string;
-  racketAnalysis: Array<{
-    name: string;
-    keyAttributes: string;
-    recommendedFor: string;
-    whyThisRacket: string;
-    pros: string[];
-    cons: string[];
-  }>;
-  finalRecommendation: {
-    bestOverall: string;
-    bestValue: string;
-    bestForBeginners?: string;
-    bestForAdvanced?: string;
-    reasoning: string;
-  };
-}
-
-// Datos estáticos de ejemplo
-const staticRackets: StaticRacket[] = [
-  {
-    nombre: "pala-adidas-metalbone-2024",
-    marca: "Adidas",
-    modelo: "Metalbone 2024",
-    precio_actual: 289.95,
-    precio_original: 339.95,
-    en_oferta: true,
-    descuento_porcentaje: 15,
-    es_bestseller: true,
-    imagen: "/images/palas/adidas-metalbone.jpg"
-  },
-  {
-    nombre: "pala-wilson-bela-pro-2024",
-    marca: "Wilson",
-    modelo: "Bela Pro 2024",
-    precio_actual: 195.00,
-    en_oferta: false,
-    es_bestseller: true,
-    imagen: "/images/palas/wilson-bela-pro.jpg"
-  },
-  {
-    nombre: "pala-head-delta-hybrid",
-    marca: "Head",
-    modelo: "Delta Hybrid",
-    precio_actual: 159.99,
-    precio_original: 199.99,
-    en_oferta: true,
-    descuento_porcentaje: 20,
-    es_bestseller: false,
-    imagen: "/images/palas/head-delta-hybrid.jpg"
-  },
-  {
-    nombre: "pala-bullpadel-vertex-2024",
-    marca: "Bullpadel",
-    modelo: "Vertex 2024",
-    precio_actual: 249.99,
-    en_oferta: false,
-    es_bestseller: false,
-    imagen: "/images/palas/bullpadel-vertex.jpg"
-  }
-];
-
-const staticBrands = ["Todas", "Adidas", "Wilson", "Head", "Bullpadel"];
-
-// Datos de análisis comparativo estático
-const staticComparisonData: StaticComparisonResults = {
-  generalAnalysis: "Estas tres palas representan diferentes filosofías de juego. La Adidas Metalbone es ideal para jugadores de ataque que buscan potencia máxima, la Wilson Bela Pro ofrece el equilibrio perfecto entre control y potencia para jugadores versátiles, mientras que la Head Delta Hybrid se enfoca en el control y la precisión para jugadores técnicos.",
-  racketAnalysis: [
-    {
-      name: "Adidas Metalbone 2024",
-      keyAttributes: "Marco de carbono EVA dura, forma diamante, balance alto. Diseñada para máxima potencia.",
-      recommendedFor: "Jugadores avanzados de ataque, estilo agresivo, físico fuerte.",
-      whyThisRacket: "Su construcción premium y diseño específico para potencia la convierten en la elección de profesionales.",
-      pros: ["Potencia excepcional", "Calidad de construcción premium", "Durabilidad excelente", "Diseño atractivo"],
-      cons: ["Requiere técnica avanzada", "Puede ser pesada para principiantes", "Precio elevado"]
-    },
-    {
-      name: "Wilson Bela Pro 2024",
-      keyAttributes: "Forma lágrima, balance medio, fibra de carbono con EVA soft. Versatilidad total.",
-      recommendedFor: "Jugadores intermedios a avanzados, estilo polivalente, todos los niveles.",
-      whyThisRacket: "Ofrece el equilibrio perfecto entre todas las características que busca un jugador moderno.",
-      pros: ["Muy versátil", "Fácil manejo", "Excelente relación calidad-precio", "Tolerante con errores"],
-      cons: ["Puede quedarse corta para especialistas", "No destaca en un área específica"]
-    },
-    {
-      name: "Head Delta Hybrid",
-      keyAttributes: "Forma redonda, balance bajo, tecnología híbrida. Enfoque en control y precisión.",
-      recommendedFor: "Jugadores de control, principiantes avanzados, estilo defensivo.",
-      whyThisRacket: "Su tecnología híbrida única combina diferentes materiales para maximizar el control.",
-      pros: ["Control excepcional", "Muy manejable", "Ideal para aprender", "Precio competitivo"],
-      cons: ["Menos potencia", "Puede limitar el juego ofensivo", "No tan durable como otras"]
-    }
-  ],
-  finalRecommendation: {
-    bestOverall: "Wilson Bela Pro 2024",
-    bestValue: "Head Delta Hybrid",
-    bestForBeginners: "Head Delta Hybrid",
-    bestForAdvanced: "Adidas Metalbone 2024",
-    reasoning: "La Wilson Bela Pro 2024 gana por versatilidad, ofreciendo un rendimiento excelente en todas las áreas sin sacrificios importantes. Es la elección más segura para la mayoría de jugadores."
-  }
-};
+import { useComparison } from "../contexts/ComparisonContext";
+import { useRackets } from "../contexts/RacketsContext";
+import { Racket, RacketComparison } from "../types/racket";
 
 const Container = styled.div`
   min-height: 100vh;
@@ -582,36 +469,6 @@ const ProsConsText = styled.span`
   line-height: 1.5;
 `;
 
-const FloatingCompareButton = styled(motion.button)`
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  background: #16a34a;
-  color: white;
-  border: none;
-  border-radius: 50px;
-  padding: 1rem 2rem;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 10px 30px rgba(22, 163, 74, 0.3);
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  &:hover {
-    background: #15803d;
-  }
-
-  @media (max-width: 768px) {
-    bottom: 1rem;
-    right: 1rem;
-    left: 1rem;
-    justify-content: center;
-  }
-`;
-
 const LoadingContainer = styled.div`
   display: flex;
   align-items: center;
@@ -641,76 +498,68 @@ const EmptyState = styled.div`
 `;
 
 const CompareRacketsPage: React.FC = () => {
-  // Estados estáticos
-  const [filteredRackets, setFilteredRackets] = useState<StaticRacket[]>(staticRackets);
+  const { rackets, loading } = useRackets();
+  const [filteredRackets, setFilteredRackets] = useState<Racket[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBrand, setSelectedBrand] = useState("Todas");
   const [showComparison, setShowComparison] = useState(false);
-  const [comparisonResults, setComparisonResults] = useState<StaticComparisonResults | null>(null);
-  const [selectedRackets, setSelectedRackets] = useState<StaticRacket[]>([]);
+  const [comparisonResults, setComparisonResults] =
+    useState<RacketComparison | null>(null);
 
-  // Valores estáticos
-  const loading = false;
-  
-  // Filtrar palas basado en búsqueda y marca
-  const filterRackets = () => {
-    let filtered = staticRackets;
+  const {
+    rackets: selectedRackets,
+    addRacket,
+    removeRacket,
+    isRacketInComparison,
+  } = useComparison();
 
-    // Filtrar por búsqueda
+  // Update filtered rackets when rackets change
+  useEffect(() => {
+    setFilteredRackets(rackets); // Usar todas las palas sin limitación
+  }, [rackets]);
+
+  // Filter rackets based on search and brand
+  useEffect(() => {
+    let filtered = rackets;
+
+    // Filter by search query
     if (searchQuery) {
       filtered = filtered.filter(
-        (racket) =>
+        (racket: Racket) =>
           racket.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          racket.marca.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          racket.modelo.toLowerCase().includes(searchQuery.toLowerCase())
+          (racket.marca && racket.marca.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (racket.modelo && racket.modelo.toLowerCase().includes(searchQuery.toLowerCase()))
       );
     }
 
-    // Filtrar por marca
+    // Filter by brand
     if (selectedBrand !== "Todas") {
       filtered = filtered.filter(
-        (racket) => racket.marca === selectedBrand
+        (racket: Racket) => racket.marca === selectedBrand
       );
     }
 
     setFilteredRackets(filtered);
-  };
+  }, [searchQuery, selectedBrand, rackets]);
 
-  // Efecto para filtrar
-  React.useEffect(() => {
-    filterRackets();
-  }, [searchQuery, selectedBrand]);
+  // Get unique brands
+  const uniqueBrands: string[] = [
+    "Todas",
+    ...(Array.from(
+      new Set(rackets.map((racket: Racket) => racket.marca))
+    ) as string[]),
+  ];
 
-  // Obtener marcas únicas
-  const uniqueBrands: string[] = staticBrands;
-
-  // Manejar selección de pala
-  const handleRacketSelection = (racket: StaticRacket) => {
-    const isSelected = selectedRackets.some(r => r.nombre === racket.nombre);
-    
-    if (isSelected) {
-      setSelectedRackets(selectedRackets.filter(r => r.nombre !== racket.nombre));
+  // Handle racket selection
+  const handleRacketSelection = (racket: Racket) => {
+    if (isRacketInComparison(racket.nombre)) {
+      removeRacket(racket.nombre);
     } else {
-      if (selectedRackets.length < 3) {
-        setSelectedRackets([...selectedRackets, racket]);
-      }
+      addRacket(racket);
     }
   };
 
-  // Verificar si una pala está seleccionada
-  const isRacketInComparison = (racketName: string) => {
-    return selectedRackets.some(r => r.nombre === racketName);
-  };
-
-  // Mostrar comparación (solo si hay 2 o 3 palas seleccionadas)
-  const showComparisonModal = () => {
-    if (selectedRackets.length >= 2) {
-      setComparisonResults(staticComparisonData);
-      setShowComparison(true);
-    }
-  };
-
-  // Cerrar modal de comparación
+  // Close comparison modal
   const closeComparison = () => {
     setShowComparison(false);
     setComparisonResults(null);
@@ -852,23 +701,6 @@ const CompareRacketsPage: React.FC = () => {
           </RacketsGrid>
         )}
       </MainContent>
-
-      {/* Floating Compare Button */}
-      <AnimatePresence>
-        {selectedRackets.length >= 2 && (
-          <FloatingCompareButton
-            initial={{ opacity: 0, y: 100 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 100 }}
-            onClick={showComparisonModal}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <FiTrendingUp />
-            Comparar {selectedRackets.length} palas
-          </FloatingCompareButton>
-        )}
-      </AnimatePresence>
 
       {/* Comparison Results Modal */}
       <AnimatePresence>

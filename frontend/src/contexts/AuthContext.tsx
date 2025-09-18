@@ -1,22 +1,27 @@
-import { AuthError, Session, User } from "@supabase/supabase-js";
 import React, {
   createContext,
   ReactNode,
   useContext,
   useEffect,
   useState,
+  useMemo,
 } from "react";
-import { supabase } from "../config/supabase";
+import { apiRequest } from "../config/api";
 import {
   UserProfile,
   UserProfileService,
-} from "../services/userProfileService";
-import {
-  detectOrphanedTokens,
-  forceCleanAuthStorage,
-} from "../utils/authUtils";
+} from "../services/userProfileService.ts";
 
 // Interfaces para TypeScript
+interface AuthError {
+  message: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+}
+
 interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
@@ -52,119 +57,63 @@ export const useAuth = (): AuthContextType => {
   return context;
 };
 
-// Proveedor del contexto
+// Provider del contexto de autenticación
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
-  // Función utilitaria para limpiar completamente el almacenamiento de auth
-  const clearAuthStorage = () => {
-    forceCleanAuthStorage();
+  // Función para obtener el token de localStorage
+  const getToken = (): string | null => {
+    return localStorage.getItem('auth_token');
   };
 
-  // Función para cargar el perfil del usuario
-  const loadUserProfile = async (userId: string) => {
-    try {
-      console.log("Loading user profile for userId:", userId);
-      const profile = await UserProfileService.getUserProfile(userId);
-
-      if (!profile) {
-        console.warn("No profile found for user:", userId);
-        // Solo crear perfil automático durante el login, no durante el registro
-        // Durante el registro, el perfil debería haberse creado ya
-        setUserProfile(null);
-        return;
-      }
-
-      setUserProfile(profile);
-    } catch (error) {
-      console.error("Error loading user profile:", error);
-      setUserProfile(null);
-    }
+  // Función para guardar el token
+  const setToken = (token: string) => {
+    localStorage.setItem('auth_token', token);
   };
 
+  // Función para eliminar el token
+  const removeToken = () => {
+    localStorage.removeItem('auth_token');
+  };
+
+  // Verificar autenticación al cargar
   useEffect(() => {
-    // Detectar tokens huérfanos al inicializar (solo en desarrollo)
-    if (import.meta.env.DEV) {
-      const orphanedTokens = detectOrphanedTokens();
-      if (orphanedTokens.length > 0) {
-        console.warn(
-          "🚨 Orphaned tokens detected during init:",
-          orphanedTokens
-        );
-      }
-    }
-
-    // Obtener sesión actual
-    const getSession = async () => {
+    const checkAuth = async () => {
       try {
-        const {
-          data: { session },
-          error,
-        } = await supabase.auth.getSession();
+        const token = getToken();
+        if (!token) {
+          setLoading(false);
+          return;
+        }
 
-        if (error) {
-          console.error("Error getting session:", error.message);
-          // Si hay error obteniendo la sesión, limpiar storage por si hay tokens corruptos
-          clearAuthStorage();
-          setUser(null);
-          setUserProfile(null);
-        } else if (session?.user) {
-          // Verificar que la sesión sea válida
-          const now = Math.floor(Date.now() / 1000);
-          const expiresAt = session.expires_at;
-
-          if (expiresAt && expiresAt < now) {
-            console.warn("Session expired, cleaning up");
-            clearAuthStorage();
-            setUser(null);
-            setUserProfile(null);
-          } else {
-            setUser(session.user);
-            await loadUserProfile(session.user.id);
+        // Verificar si el token es válido obteniendo el usuario actual
+        const response = await apiRequest('/auth/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`
           }
-        } else {
-          // No hay sesión válida, asegurar que no hay tokens huérfanos
-          clearAuthStorage();
-          setUser(null);
-          setUserProfile(null);
+        });
+
+        if (response.user) {
+          setUser(response.user);
+          
+          // Cargar perfil del usuario
+          const profile = await UserProfileService.getUserProfile(token);
+          setUserProfile(profile);
         }
       } catch (error) {
-        console.error("Error in getSession:", error);
-        // En caso de error crítico, limpiar todo
-        clearAuthStorage();
-        setUser(null);
-        setUserProfile(null);
+        console.error('Error checking auth:', error);
+        removeToken();
       } finally {
         setLoading(false);
       }
     };
 
-    getSession();
-
-    // Escuchar cambios de autenticación
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(
-      async (_event, session: Session | null) => {
-        if (session?.user) {
-          setUser(session.user);
-          await loadUserProfile(session.user.id);
-        } else {
-          // Cuando no hay sesión, limpiar completamente
-          clearAuthStorage();
-          setUser(null);
-          setUserProfile(null);
-        }
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    checkAuth();
   }, []);
 
-  // Función para registrar usuario
+  // Función de registro
   const signUp = async (
     email: string,
     password: string,
@@ -172,188 +121,182 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     fullName?: string
   ): Promise<{ data: any; error: AuthError | null }> => {
     try {
-      // Primero verificar si el nickname está disponible
-      const isAvailable = await UserProfileService.isNicknameAvailable(
-        nickname
-      );
-      if (!isAvailable) {
-        return {
-          data: null,
-          error: { message: "El nickname ya está en uso" } as AuthError,
-        };
-      }
+      setLoading(true);
 
-      // Crear usuario en Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+      const response = await apiRequest('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify({
+          email,
+          password,
+          nickname,
+          full_name: fullName
+        })
       });
 
-      if (error) {
-        return { data, error };
-      }
+      console.log('Register response received:', response);
 
-      // Si el usuario se creó correctamente, crear el perfil
-      if (data.user) {
-        try {
-          console.log("Creating profile with nickname:", nickname);
-          const profile = await UserProfileService.createUserProfile(
-            data.user.id,
-            email,
-            nickname,
-            fullName
-          );
-          console.log("Profile created successfully:", profile);
-          setUserProfile(profile);
-        } catch (profileError) {
-          console.error("Error creating user profile:", profileError);
-          // Opcionalmente, podrías eliminar el usuario de Auth si falla la creación del perfil
-          // Pero por ahora solo logueamos el error
+      // Verificar si la respuesta es exitosa y tiene datos
+      if (response.success && response.data) {
+        console.log('Registration successful, processing data...');
+        const { access_token, user, message } = response.data;
+        
+        // Si hay un mensaje sobre confirmación de email
+        if (message && message.includes('email')) {
+          console.log('Email confirmation required');
+          return { 
+            data: { requiresEmailConfirmation: true, message }, 
+            error: null 
+          };
+        }
+        
+        if (access_token) {
+          console.log('Setting token and user...');
+          setToken(access_token);
+          setUser(user);
+          
+          // Crear perfil del usuario si no existe
+          try {
+            const profile = await UserProfileService.createUserProfile(access_token, {
+              email,
+              nickname,
+              full_name: fullName
+            });
+            setUserProfile(profile);
+          } catch (profileError) {
+            console.warn('Error creating profile:', profileError);
+          }
+
+          console.log('Registration completed successfully');
+          return { data: response.data, error: null };
         }
       }
 
-      return { data, error };
-    } catch (error) {
-      console.error("SignUp error:", error);
-      return {
-        data: null,
-        error: { message: "Error inesperado durante el registro" } as AuthError,
+      console.log('Registration failed or no token received');
+      return { data: null, error: { message: 'Error en el registro' } };
+    } catch (error: any) {
+      console.error('SignUp error details:', error);
+      
+      // Mejorar mensajes de error específicos
+      let errorMessage = error.message || 'Error en el registro';
+      
+      if (errorMessage.includes('email rate limit exceeded')) {
+        errorMessage = 'Límite de registros alcanzado. Por favor, espera unos minutos antes de intentar de nuevo.';
+      } else if (errorMessage.includes('email already exists') || errorMessage.includes('duplicate key value violates unique constraint')) {
+        errorMessage = 'Este email ya está registrado. Usa otro email o inicia sesión.';
+      } else if (errorMessage.includes('nickname already exists')) {
+        errorMessage = 'Este nickname ya está en uso. Elige otro nickname.';
+      } else if (errorMessage.includes('Database error saving new user') || errorMessage.includes('Error al registrar usuario')) {
+        errorMessage = 'Error en el servidor al crear la cuenta. Por favor, inténtalo de nuevo más tarde o contacta con soporte si el problema persiste.';
+      } else if (errorMessage.includes('Invalid email format')) {
+        errorMessage = 'El formato del email no es válido.';
+      } else if (errorMessage.includes('Password too weak')) {
+        errorMessage = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula, un número y un carácter especial.';
+      } else if (errorMessage.includes('400')) {
+        errorMessage = 'Los datos proporcionados no son válidos. Verifica que todos los campos estén completos y correctos.';
+      }
+      
+      return { 
+        data: null, 
+        error: { message: errorMessage } 
       };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Función para iniciar sesión
+  // Función de inicio de sesión
   const signIn = async (
     email: string,
     password: string
   ): Promise<{ data: any; error: AuthError | null }> => {
     try {
-      console.log("Attempting to sign in with email:", email);
+      setLoading(true);
 
-      // Validar que el email y password no estén vacíos
-      if (!email || !password) {
-        return {
-          data: null,
-          error: { message: "Email y contraseña son requeridos" } as AuthError,
-        };
-      }
-
-      // Intentar login con Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim().toLowerCase(), // Normalizar email
-        password,
+      const response = await apiRequest('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email,
+          password
+        })
       });
 
-      if (error) {
-        console.error("Supabase auth error:", error);
+      // Verificar si la respuesta es exitosa y tiene datos
+      if (response.success && response.data) {
+        const { access_token, user } = response.data;
+        
+        if (access_token) {
+          setToken(access_token);
+          setUser(user);
 
-        // Proporcionar mensajes de error más específicos
-        let errorMessage = "Error durante el inicio de sesión";
+          // Cargar perfil del usuario
+          const profile = await UserProfileService.getUserProfile(access_token);
+          setUserProfile(profile);
 
-        switch (error.message) {
-          case "Invalid login credentials":
-            errorMessage =
-              "Credenciales inválidas. Verifica tu email y contraseña.";
-            break;
-          case "Email not confirmed":
-            errorMessage =
-              "Por favor confirma tu email antes de iniciar sesión.";
-            break;
-          case "Too many requests":
-            errorMessage =
-              "Demasiados intentos. Espera un momento antes de intentar de nuevo.";
-            break;
-          case "User not found":
-            errorMessage = "No existe una cuenta con este email.";
-            break;
-          default:
-            errorMessage = error.message;
-        }
-
-        return {
-          data,
-          error: { ...error, message: errorMessage } as AuthError,
-        };
-      }
-
-      // Si el login es exitoso, cargar el perfil del usuario
-      if (data.user && !error) {
-        console.log(
-          "Login successful, loading user profile for:",
-          data.user.id
-        );
-        try {
-          await loadUserProfile(data.user.id);
-        } catch (profileError) {
-          console.warn("Error loading user profile after login:", profileError);
-          // No fallar el login si hay problemas cargando el perfil
+          return { data: response.data, error: null };
         }
       }
 
-      return { data, error };
-    } catch (error) {
-      console.error("SignIn unexpected error:", error);
-      return {
-        data: null,
-        error: {
-          message:
-            "Error inesperado durante el inicio de sesión. Verifica tu conexión a internet.",
-        } as AuthError,
+      return { data: null, error: { message: 'Credenciales inválidas' } };
+    } catch (error: any) {
+      return { 
+        data: null, 
+        error: { message: error.message || 'Error en el inicio de sesión' } 
       };
+    } finally {
+      setLoading(false);
     }
   };
 
-  // Función para recargar el perfil del usuario
-  const refreshUserProfile = async (): Promise<void> => {
-    if (user) {
-      await loadUserProfile(user.id);
-    }
-  };
-
-  // Función para cerrar sesión
+  // Función de cierre de sesión
   const signOut = async (): Promise<{ error: AuthError | null }> => {
     try {
-      // Limpiar el estado local primero
-      setUser(null);
-      setUserProfile(null);
-
-      // Limpiar completamente el almacenamiento de auth
-      clearAuthStorage();
-
-      // Intentar cerrar sesión con Supabase
-      const { error } = await supabase.auth.signOut();
-
-      if (error) {
-        console.warn("Supabase signOut error, but local state cleared:", error);
-        // Como ya limpiamos el estado local y el storage, considerar exitoso
-        return { error: null };
+      const token = getToken();
+      if (token) {
+        // Intentar cerrar sesión en el servidor
+        await apiRequest('/auth/logout', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
       }
-
-      return { error };
     } catch (error) {
-      console.error("SignOut error:", error);
-
-      // Aún en caso de error total, asegurar limpieza del estado local
+      console.warn('Error during server logout:', error);
+    } finally {
+      // Limpiar estado local siempre
+      removeToken();
       setUser(null);
       setUserProfile(null);
-      clearAuthStorage();
+    }
 
-      // Considerar exitoso ya que limpiamos todo localmente
-      return { error: null };
+    return { error: null };
+  };
+
+  // Función para refrescar el perfil del usuario
+  const refreshUserProfile = async (): Promise<void> => {
+    try {
+      const token = getToken();
+      if (!token) return;
+
+      const profile = await UserProfileService.getUserProfile(token);
+      setUserProfile(profile);
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
     }
   };
 
-  // Valor del contexto
-  const value: AuthContextType = {
+  const isAuthenticated = !!user;
+
+  const value: AuthContextType = useMemo(() => ({
     user,
     userProfile,
+    loading,
     signUp,
     signIn,
     signOut,
     refreshUserProfile,
-    loading,
-    isAuthenticated: !!user,
-  };
+    isAuthenticated,
+  }), [user, userProfile, loading, isAuthenticated]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

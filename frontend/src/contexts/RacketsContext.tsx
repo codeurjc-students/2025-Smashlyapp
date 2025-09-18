@@ -47,20 +47,20 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
       setLoading(true);
       setError(null);
 
-      // Intentar cargar desde Supabase primero
+      // Intentar cargar desde la API primero
       try {
         const data = await RacketService.getAllRackets();
         setRackets(data);
-      } catch (supabaseError) {
+      } catch (apiError) {
         console.warn(
-          "Error loading from Supabase, falling back to JSON:",
-          supabaseError
+          "Error loading from API, falling back to JSON:",
+          apiError
         );
 
-        // Fallback a JSON si Supabase falla
+        // Fallback a JSON si la API falla
         const response = await fetch("/palas_padel.json");
         if (!response.ok) {
-          throw new Error("No se pudo cargar ni desde Supabase ni desde JSON");
+          throw new Error("No se pudo cargar ni desde la API ni desde JSON");
         }
 
         const jsonData = await response.json();
@@ -117,8 +117,8 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
     return rackets.filter(
       (racket) =>
         racket.nombre.toLowerCase().includes(lowerQuery) ||
-        racket.marca.toLowerCase().includes(lowerQuery) ||
-        racket.modelo.toLowerCase().includes(lowerQuery)
+        (racket.marca?.toLowerCase() || '').includes(lowerQuery) ||
+        (racket.modelo?.toLowerCase() || '').includes(lowerQuery)
     );
   };
 

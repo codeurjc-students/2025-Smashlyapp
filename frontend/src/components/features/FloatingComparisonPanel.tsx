@@ -12,7 +12,7 @@ import {
 import styled from "styled-components";
 import { useComparison } from "../../contexts/ComparisonContext";
 import { Racket, RacketComparison } from "../../types/racket";
-import { compareRackets } from "../../utils/gemini";
+// import { compareRackets } from "../../utils/gemini";
 
 const FloatingPanel = styled(motion.div)`
   position: fixed;
@@ -404,7 +404,17 @@ const FloatingComparisonPanel: React.FC<FloatingComparisonPanelProps> = ({
 
     try {
       setIsComparing(true);
-      const results = await compareRackets(rackets);
+      // const results = await compareRackets(rackets);
+      // Funcionalidad de comparación con IA deshabilitada
+      const results: RacketComparison = {
+        generalAnalysis: "Funcionalidad de comparación con IA no disponible",
+        racketAnalysis: [],
+        finalRecommendation: {
+          bestOverall: "No disponible",
+          bestValue: "No disponible", 
+          reasoning: "Funcionalidad de comparación con IA deshabilitada"
+        }
+      };
       setComparisonResults(results);
       setShowComparison(true);
     } catch (error: any) {
@@ -457,7 +467,7 @@ const FloatingComparisonPanel: React.FC<FloatingComparisonPanelProps> = ({
           {rackets.map((racket: Racket) => (
             <RacketItem key={racket.nombre}>
               <RacketImage
-                src={racket.imagen}
+                src={racket.imagen || "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=80&h=80&fit=crop"}
                 alt={racket.nombre}
                 onError={(e) => {
                   e.currentTarget.src =
@@ -536,7 +546,7 @@ const FloatingComparisonPanel: React.FC<FloatingComparisonPanelProps> = ({
                     <RacketAnalysisCard key={index}>
                       <RacketAnalysisHeader>
                         <RacketAnalysisImage
-                          src={rackets[index]?.imagen}
+                          src={rackets[index]?.imagen || "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=120&h=120&fit=crop"}
                           alt={analysis.name}
                           onError={(e) => {
                             e.currentTarget.src =
@@ -610,7 +620,11 @@ const FloatingComparisonPanel: React.FC<FloatingComparisonPanelProps> = ({
                     Recomendación Final
                   </AnalysisTitle>
                   <AnalysisText>
-                    {comparisonResults.finalRecommendation}
+                    <strong>Mejor Opción General:</strong> {comparisonResults.finalRecommendation.bestOverall}
+                    <br />
+                    <strong>Mejor Relación Calidad-Precio:</strong> {comparisonResults.finalRecommendation.bestValue}
+                    <br />
+                    <strong>Razonamiento:</strong> {comparisonResults.finalRecommendation.reasoning}
                   </AnalysisText>
                 </AnalysisSection>
               </ModalBody>

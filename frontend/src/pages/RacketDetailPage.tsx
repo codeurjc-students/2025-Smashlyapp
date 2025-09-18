@@ -1,80 +1,21 @@
+import { useComparison } from "../contexts/ComparisonContext";
+import { useRackets } from "../contexts/RacketsContext";
+import { Racket } from "../types/racket";
+import { shouldDisplayCharacteristic } from "../utils/characteristicsUtils";
 import { motion } from "framer-motion";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import {
     FiArrowLeft,
     FiExternalLink,
     FiInfo,
+    FiLoader,
     FiStar,
     FiTag,
     FiTrendingUp,
 } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
-
-// Static data type
-interface StaticRacket {
-  nombre: string;
-  marca: string;
-  modelo: string;
-  precio_actual: number;
-  precio_original?: number;
-  en_oferta: boolean;
-  descuento_porcentaje: number;
-  es_bestseller: boolean;
-  imagen: string;
-  enlace: string;
-  scrapeado_en: string;
-  caracteristicas_marca?: string;
-  caracteristicas_color?: string;
-  caracteristicas_color_2?: string;
-  caracteristicas_balance?: string;
-  caracteristicas_nucleo?: string;
-  caracteristicas_cara?: string;
-  caracteristicas_dureza?: string;
-  caracteristicas_nivel_de_juego?: string;
-  caracteristicas_acabado?: string;
-  caracteristicas_forma?: string;
-  caracteristicas_superficie?: string;
-  caracteristicas_tipo_de_juego?: string;
-  caracteristicas_coleccion_jugadores?: string;
-  caracteristicas_jugador?: string;
-  especificaciones?: Record<string, string | number>;
-}
-
-// Static example racket data
-const staticRacket: StaticRacket = {
-  nombre: "pala-adidas-metalbone-2024",
-  marca: "Adidas",
-  modelo: "Metalbone 2024",
-  precio_actual: 289.95,
-  precio_original: 339.95,
-  en_oferta: true,
-  descuento_porcentaje: 15,
-  es_bestseller: true,
-  imagen: "/images/palas/adidas-metalbone.jpg",
-  enlace: "https://www.padelnuestro.com/pala-adidas-metalbone-2024",
-  scrapeado_en: "2024-03-15T10:30:00Z",
-  caracteristicas_marca: "Adidas",
-  caracteristicas_color: "Negro",
-  caracteristicas_color_2: "Amarillo",
-  caracteristicas_balance: "Alto",
-  caracteristicas_nucleo: "EVA Soft",
-  caracteristicas_cara: "Carbono 3K",
-  caracteristicas_dureza: "Media",
-  caracteristicas_nivel_de_juego: "Avanzado",
-  caracteristicas_acabado: "Rugoso",
-  caracteristicas_forma: "Lágrima",
-  caracteristicas_superficie: "Rugosa",
-  caracteristicas_tipo_de_juego: "Potencia",
-  caracteristicas_coleccion_jugadores: "Profesional",
-  caracteristicas_jugador: "Ale Galán",
-  especificaciones: {
-    peso: "365-375g",
-    grosor: "38mm",
-    material_marco: "Carbono",
-    material_cara: "Carbono 3K"
-  }
-};
 
 // Styled Components
 const Container = styled.div`
@@ -490,7 +431,7 @@ const SpecificationValue = styled.span`
 `;
 
 // Helper functions for characteristics
-const getCharacteristicsFromRacket = (racket: StaticRacket): Record<string, string> => {
+const getCharacteristicsFromRacket = (racket: Racket): Record<string, string> => {
   const characteristics: Record<string, string> = {};
   
   // Map individual characteristic properties to a characteristics object
@@ -510,13 +451,6 @@ const getCharacteristicsFromRacket = (racket: StaticRacket): Record<string, stri
   if (racket.caracteristicas_jugador) characteristics.jugador = racket.caracteristicas_jugador;
   
   return characteristics;
-};
-
-// Static function to check if a characteristic should be displayed
-const shouldDisplayCharacteristic = (_key: string, value: string): boolean => {
-  if (!value || value.trim() === '') return false;
-  if (value.toLowerCase() === 'n/a' || value.toLowerCase() === 'no disponible') return false;
-  return true;
 };
 
 const getCharacteristicLabel = (key: string): string => {
@@ -621,47 +555,153 @@ const getCharacteristicIcon = (
   return icons[key] || { icon: "🔹", color: "#16a34a" };
 };
 
+const LoadingContainer = styled.div`
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+`;
+
+const LoadingSpinner = styled(motion.div)`
+  color: #16a34a;
+`;
+
+const LoadingText = styled.div`
+  color: #6b7280;
+  font-size: 1.125rem;
+`;
+
+const ErrorContainer = styled.div`
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  text-align: center;
+  padding: 2rem;
+`;
+
+const ErrorIcon = styled.div`
+  font-size: 4rem;
+  color: #ef4444;
+`;
+
+const ErrorText = styled.h2`
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #374151;
+`;
+
+const ErrorDescription = styled.p`
+  color: #6b7280;
+  max-width: 500px;
+`;
+
 // Component
 const RacketDetailPage: React.FC = () => {
   // Hooks
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { addRacket, isRacketInComparison, count } = useComparison();
+  const { rackets, loading } = useRackets();
 
-  // Static state
-  const [comparisonRackets, setComparisonRackets] = useState<string[]>([]);
-  
-  // Use static racket data
-  const racket = staticRacket;
+  // State
+  const [racket, setRacket] = useState<Racket | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // Handle add to comparison (static version)
+  // Get racket ID from URL params
+  const racketId = searchParams.get("id");
+
+  // Load racket data
+  useEffect(() => {
+    if (!racketId) {
+      setError("No se especificó el ID de la pala");
+      return;
+    }
+
+    // Find racket by name (for backward compatibility with existing URLs)
+    const decodedRacketId = decodeURIComponent(racketId);
+    const foundRacket = rackets.find((pala) => pala.nombre === decodedRacketId);
+
+    if (!foundRacket) {
+      setError("No se encontró la pala solicitada");
+      return;
+    }
+
+    setRacket(foundRacket);
+  }, [racketId, rackets]);
+
+  // Handle add to comparison
   const handleAddToComparison = () => {
     if (!racket) return;
 
     // Check if already in comparison
-    if (comparisonRackets.includes(racket.nombre)) {
-      alert("Esta pala ya está en el comparador");
+    if (isRacketInComparison(racket.nombre)) {
+      toast.error("Esta pala ya está en el comparador");
       return;
     }
 
-    // Check if we have space (max 3)
-    if (comparisonRackets.length >= 3) {
-      alert("Ya tienes 3 palas en el comparador. Elimina una para añadir esta.");
+    // Try to add
+    const success = addRacket(racket);
+
+    if (!success) {
+      if (count >= 3) {
+        toast.error(
+          "Ya tienes 3 palas en el comparador. Elimina una para añadir esta."
+        );
+      }
       return;
     }
 
-    // Add to comparison
-    setComparisonRackets([...comparisonRackets, racket.nombre]);
-    alert(`${racket.marca} ${racket.modelo} añadida al comparador (${comparisonRackets.length + 1}/3)`);
-  };
-
-  // Check if racket is in comparison
-  const isRacketInComparison = (racketName: string) => {
-    return comparisonRackets.includes(racketName);
+    // Success
+    toast.success(
+      `${racket.marca} ${racket.modelo} añadida al comparador (${count + 1}/3)`
+    );
   };
 
   // Handle navigation to comparison
   const handleGoToComparison = () => {
     navigate("/compare-rackets");
   };
+
+  // Loading state (check if rackets are still loading from context)
+  if (loading) {
+    return (
+      <Container>
+        <LoadingContainer>
+          <LoadingSpinner
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          >
+            <FiLoader size={48} />
+          </LoadingSpinner>
+          <LoadingText>Cargando información de la pala...</LoadingText>
+        </LoadingContainer>
+      </Container>
+    );
+  }
+
+  // Error state
+  if (error || !racket) {
+    return (
+      <Container>
+        <ErrorContainer>
+          <ErrorIcon>⚠️</ErrorIcon>
+          <ErrorText>Pala no encontrada</ErrorText>
+          <ErrorDescription>
+            {error || "No se pudo encontrar la información de esta pala."}
+          </ErrorDescription>
+          <BackButton to="/catalog">
+            <FiArrowLeft />
+            Volver al catálogo
+          </BackButton>
+        </ErrorContainer>
+      </Container>
+    );
+  }
 
   return (
     <Container>
@@ -749,14 +789,14 @@ const RacketDetailPage: React.FC = () => {
                 ) : (
                   <>
                     <FiTrendingUp />
-                    Añadir al Comparador ({comparisonRackets.length}/3)
+                    Añadir al Comparador ({count}/3)
                   </>
                 )}
               </SecondaryButton>
 
-              {comparisonRackets.length > 0 && (
+              {count > 0 && (
                 <SecondaryButton onClick={handleGoToComparison}>
-                  Ir al Comparador ({comparisonRackets.length})
+                  Ir al Comparador ({count})
                 </SecondaryButton>
               )}
             </ActionButtons>

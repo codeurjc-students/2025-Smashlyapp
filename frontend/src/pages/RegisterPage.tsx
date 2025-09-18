@@ -1,7 +1,9 @@
 import React, { useState } from "react";
+import toast from "react-hot-toast";
 import { FiEye, FiEyeOff, FiLock, FiMail, FiUser } from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../contexts/AuthContext.tsx";
 
 const Container = styled.div`
   min-height: 100vh;
@@ -222,6 +224,7 @@ interface FormErrors {
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -318,16 +321,31 @@ const RegisterPage: React.FC = () => {
 
     setLoading(true);
 
-    // Simulate registration process
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Simulate successful registration
-      alert("¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta.");
-      navigate("/login");
+      const { data, error } = await signUp(
+        formData.email.trim(),
+        formData.password,
+        formData.nickname.trim(),
+        formData.fullName.trim() || undefined
+      );
+
+      if (error) {
+        toast.error(error.message || "Error al crear la cuenta");
+        return;
+      }
+
+      if (data?.requiresEmailConfirmation) {
+        toast.success(
+          "¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta antes de iniciar sesión.",
+          { duration: 6000 }
+        );
+        navigate("/login");
+      } else if (data?.user) {
+        toast.success("¡Cuenta creada exitosamente!");
+        navigate("/");
+      }
     } catch (error) {
-      alert("Error inesperado. Inténtalo de nuevo.");
+      toast.error("Error inesperado. Inténtalo de nuevo.");
       console.error("Registration error:", error);
     } finally {
       setLoading(false);

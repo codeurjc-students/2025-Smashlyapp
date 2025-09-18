@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import { FiMenu, FiSearch, FiX } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { FiLogOut, FiMenu, FiSearch, FiUser, FiX } from "react-icons/fi";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { useAuth } from "../../contexts/AuthContext.tsx";
+import GlobalSearch from "../features/GlobalSearch";
 
 const HeaderContainer = styled.header`
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -272,10 +274,82 @@ const MobileMenuButton = styled.button`
   }
 `;
 
+const UserMenu = styled.div`
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+`;
+
+const MobileUserSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+`;
+
+const UserButton = styled(Link)<{ isMobile?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: ${(props) =>
+    props.isMobile ? "#f9fafb" : "rgba(255, 255, 255, 0.1)"};
+  border: ${(props) =>
+    props.isMobile
+      ? "2px solid #e5e7eb"
+      : "1px solid rgba(255, 255, 255, 0.2)"};
+  color: ${(props) => (props.isMobile ? "#374151" : "white")};
+  padding: ${(props) => (props.isMobile ? "12px 16px" : "8px 16px")};
+  border-radius: ${(props) => (props.isMobile ? "12px" : "8px")};
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+
+  &:hover {
+    background: ${(props) =>
+      props.isMobile ? "#16a34a" : "rgba(255, 255, 255, 0.15)"};
+    color: ${(props) => (props.isMobile ? "white" : "white")};
+    border-color: ${(props) => (props.isMobile ? "#16a34a" : "transparent")};
+    text-decoration: none;
+  }
+`;
+
+const LogoutButton = styled.button<{ disabled?: boolean; isMobile?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: transparent;
+  border: ${(props) =>
+    props.isMobile
+      ? "2px solid #ef4444"
+      : "1px solid rgba(255, 255, 255, 0.3)"};
+  color: ${(props) => (props.isMobile ? "#ef4444" : "white")};
+  padding: ${(props) => (props.isMobile ? "12px 16px" : "8px 16px")};
+  border-radius: ${(props) => (props.isMobile ? "12px" : "8px")};
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  font-weight: 500;
+  transition: all 0.2s ease;
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
+
+  &:hover {
+    background: ${(props) => {
+      if (props.disabled) return "transparent";
+      return props.isMobile ? "#ef4444" : "rgba(255, 255, 255, 0.1)";
+    }};
+    color: ${(props) => {
+      if (props.disabled) return props.isMobile ? "#ef4444" : "white";
+      return props.isMobile ? "white" : "white";
+    }};
+  }
+`;
+
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, userProfile, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -295,6 +369,57 @@ const Header: React.FC = () => {
 
   const isActive = (path: string) => location.pathname === path;
 
+  const handleLogout = async () => {
+    // Confirmación opcional
+    const confirmLogout = window.confirm(
+      "¿Estás seguro de que quieres cerrar sesión?"
+    );
+    if (!confirmLogout) return;
+
+    setIsLoggingOut(true);
+    try {
+      const { error } = await signOut();
+
+      // Siempre navegar a la página de inicio después del logout,
+      // independientemente de si hubo error (porque el estado local se limpia)
+      navigate("/");
+
+      if (error) {
+        console.warn(
+          "Error during logout, but proceeding with navigation:",
+          error
+        );
+        // No mostrar error al usuario si el estado local se limpió correctamente
+        // toast o console log en lugar de alert molesto
+        console.log("Sesión cerrada localmente (con advertencias)");
+      } else {
+        console.log("Sesión cerrada exitosamente");
+      }
+
+      // Forzar reload de la página para asegurar limpieza completa del estado
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+    } catch (error) {
+      console.error("Unexpected error during logout:", error);
+
+      // Aún con error, navegar al inicio y limpiar estado
+      navigate("/");
+
+      // Reload para asegurar limpieza
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
+
+      // Solo mostrar error si es algo crítico
+      console.warn(
+        "Error inesperado al cerrar sesión, pero sesión limpiada localmente."
+      );
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   const closeAllMenus = () => {
     setIsMenuOpen(false);
     setIsMobileSearchOpen(false);
@@ -307,35 +432,44 @@ const Header: React.FC = () => {
           <img src="/images/icons/smashly-large-icon.ico" alt="Smashly" />
         </Logo>
 
-        {/* Central Search Bar (Desktop) - Static */}
+        {/* Central Search Bar (Desktop) */}
         <CentralSearchContainer>
-          <div style={{ 
-            padding: '8px 16px', 
-            background: 'rgba(255, 255, 255, 0.1)', 
-            borderRadius: '8px', 
-            color: 'white',
-            fontSize: '14px'
-          }}>
-            Búsqueda (próximamente)
-          </div>
+          <GlobalSearch onSearchToggle={() => {}} isInHeader={true} />
         </CentralSearchContainer>
 
         {/* Desktop Auth */}
         <AuthButtons>
-          <AuthButton
-            to="/login"
-            variant="secondary"
-            onClick={closeAllMenus}
-          >
-            Iniciar sesión
-          </AuthButton>
-          <AuthButton
-            to="/register"
-            variant="primary"
-            onClick={closeAllMenus}
-          >
-            Registrarse
-          </AuthButton>
+          {user ? (
+            <UserMenu>
+              <UserButton to="/profile" onClick={closeAllMenus}>
+                <FiUser />
+                {userProfile?.nickname ||
+                  user.email?.split("@")[0] ||
+                  "Usuario"}
+              </UserButton>
+              <LogoutButton onClick={handleLogout} disabled={isLoggingOut}>
+                <FiLogOut />
+                {isLoggingOut ? "Cerrando..." : "Cerrar sesión"}
+              </LogoutButton>
+            </UserMenu>
+          ) : (
+            <>
+              <AuthButton
+                to="/login"
+                variant="secondary"
+                onClick={closeAllMenus}
+              >
+                Iniciar sesión
+              </AuthButton>
+              <AuthButton
+                to="/register"
+                variant="primary"
+                onClick={closeAllMenus}
+              >
+                Registrarse
+              </AuthButton>
+            </>
+          )}
         </AuthButtons>
 
         {/* Mobile Elements */}
@@ -350,18 +484,12 @@ const Header: React.FC = () => {
 
         {/* Mobile Menu Dropdown */}
         <MobileMenuDropdown isOpen={isMenuOpen || isMobileSearchOpen}>
-          {/* Mobile Search Section - Static */}
+          {/* Mobile Search Section */}
           <MobileSearchContainer isOpen={isMobileSearchOpen}>
-            <div style={{ 
-              padding: '8px 16px', 
-              background: '#f3f4f6', 
-              borderRadius: '8px', 
-              color: '#6b7280',
-              fontSize: '14px',
-              textAlign: 'center'
-            }}>
-              Búsqueda (próximamente)
-            </div>
+            <GlobalSearch
+              onSearchToggle={setIsMobileSearchOpen}
+              isInHeader={true}
+            />
           </MobileSearchContainer>
 
           {/* Navigation Section */}
@@ -377,65 +505,81 @@ const Header: React.FC = () => {
                 >
                   Inicio
                 </NavLink>
-                <div 
-                  style={{
-                    color: "#9ca3af",
-                    padding: "12px 0",
-                    borderLeft: "3px solid transparent",
-                    paddingLeft: "16px",
-                    marginLeft: "-1rem",
-                    cursor: "not-allowed"
-                  }}
+                <NavLink
+                  to="/catalog"
+                  isActive={isActive("/catalog")}
+                  isMobile
+                  onClick={closeAllMenus}
                 >
-                  Catálogo de Palas (próximamente)
-                </div>
-                <div 
-                  style={{
-                    color: "#9ca3af",
-                    padding: "12px 0",
-                    borderLeft: "3px solid transparent",
-                    paddingLeft: "16px",
-                    marginLeft: "-1rem",
-                    cursor: "not-allowed"
-                  }}
+                  Catálogo de Palas
+                </NavLink>
+                <NavLink
+                  to="/rackets"
+                  isActive={isActive("/rackets")}
+                  isMobile
+                  onClick={closeAllMenus}
                 >
-                  Comparar palas (próximamente)
-                </div>
-                <div 
-                  style={{
-                    color: "#9ca3af",
-                    padding: "12px 0",
-                    borderLeft: "3px solid transparent",
-                    paddingLeft: "16px",
-                    marginLeft: "-1rem",
-                    cursor: "not-allowed"
-                  }}
+                  Comparar palas
+                </NavLink>
+                <NavLink
+                  to="/faq"
+                  isActive={isActive("/faq")}
+                  isMobile
+                  onClick={closeAllMenus}
                 >
-                  FAQ (próximamente)
-                </div>
+                  FAQ
+                </NavLink>
               </MobileNavSection>
 
               {/* Auth Section */}
               <MobileAuthSection>
-                <MobileNavTitle>Acceso</MobileNavTitle>
-                <MobileAuthButtons>
-                  <AuthButton
-                    to="/register"
-                    variant="primary"
-                    isMobile
-                    onClick={closeAllMenus}
-                  >
-                    Registrarse
-                  </AuthButton>
-                  <AuthButton
-                    to="/login"
-                    variant="secondary"
-                    isMobile
-                    onClick={closeAllMenus}
-                  >
-                    Iniciar sesión
-                  </AuthButton>
-                </MobileAuthButtons>
+                {user ? (
+                  <>
+                    <MobileNavTitle>Mi cuenta</MobileNavTitle>
+                    <MobileUserSection>
+                      <UserButton
+                        to="/profile"
+                        isMobile
+                        onClick={closeAllMenus}
+                      >
+                        <FiUser />
+                        {userProfile?.nickname ||
+                          user.email?.split("@")[0] ||
+                          "Usuario"}
+                      </UserButton>
+                      <LogoutButton
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        isMobile
+                      >
+                        <FiLogOut />
+                        {isLoggingOut ? "Cerrando..." : "Cerrar sesión"}
+                      </LogoutButton>
+                    </MobileUserSection>
+                  </>
+                ) : (
+                  <>
+                    <MobileNavTitle>Acceso</MobileNavTitle>
+                    <MobileAuthButtons>
+                      <AuthButton
+                        to="/register"
+                        variant="primary"
+                        isMobile
+                        onClick={closeAllMenus}
+                      >
+                        Registrarse
+                      </AuthButton>
+                      <AuthButton
+                        to="/login"
+                        variant="secondary"
+                        isMobile
+                        onClick={closeAllMenus}
+                      >
+                        Iniciar sesión
+                      </AuthButton>
+                    </MobileAuthButtons>
+                  </>
+                )}
               </MobileAuthSection>
             </>
           )}
