@@ -15,13 +15,13 @@ module.exports = {
     '!src/server.ts',
     '!src/__tests__/**',
   ],
-  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup/testSetup.ts'],
+  // setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup/testSetup.ts'], // Removed - no longer needed
   testTimeout: 10000,
   verbose: true,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
-  moduleNameMapping: {
+  moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1'
   }
 };
