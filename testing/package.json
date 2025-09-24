@@ -1,0 +1,39 @@
+{
+  "name": "smashly-testing",
+  "version": "1.0.0",
+  "description": "Testing suite for Smashly App - E2E, Unit and Integration Tests",
+  "scripts": {
+    "setup:test-db": "node setup/setupTestDatabase.js",
+    "test:unit:backend": "cd ../backend/api && npm test",
+    "test:integration:backend": "cd ../backend/api && npm run test:integration",
+    "test:api": "jest tests/api --config jest.api.config.js",
+    "test:e2e": "mvn test -Dtest=E2ETestSuite",
+    "test:e2e:setup": "node setup/setupE2EEnvironment.js",
+    "test:all": "npm run test:unit:backend && npm run test:integration:backend && npm run test:api && npm run test:e2e",
+    "start:test-server": "cd ../backend/api && npm run start:test",
+    "clean:test-data": "node setup/cleanTestData.js"
+  },
+  "keywords": [
+    "testing",
+    "e2e",
+    "selenium",
+    "jest",
+    "junit",
+    "padel",
+    "rackets"
+  ],
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2",
+    "@supabase/supabase-js": "^2.50.2",
+    "dotenv": "^16.3.1",
+    "@playwright/test": "^1.40.0"
+  },
+  "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2"
+  }
+}
