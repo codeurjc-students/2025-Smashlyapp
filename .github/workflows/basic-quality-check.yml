@@ -14,28 +14,28 @@ jobs:
   backend-basic:
     name: 🖥️ Backend Basic Check
     runs-on: ubuntu-latest
-
+    
     defaults:
       run:
         working-directory: ./backend/api
-
+    
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
-
+      
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: "./backend/api/package-lock.json"
-
+      
       - name: 📦 Install dependencies
         run: npm ci
-
+      
       - name: 🔧 Compile TypeScript
         run: npm run build
-
+      
       - name: 🧪 Run unit tests
         run: npm run test:unit
         env:
@@ -44,7 +44,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
+      
       - name: 📊 Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -61,34 +61,34 @@ jobs:
   frontend-basic:
     name: 🌐 Frontend Basic Check
     runs-on: ubuntu-latest
-
+    
     defaults:
       run:
         working-directory: ./frontend
-
+    
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
-
+      
       - name: 🟢 Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20"
           cache: "npm"
           cache-dependency-path: "./frontend/package-lock.json"
-
+      
       - name: 📦 Install dependencies
         run: npm ci
-
+      
       - name: 🔧 Build application
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
+      
       - name: 🧪 Run unit tests
         run: npm run test:unit
-
+      
       - name: 📊 Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -103,13 +103,11 @@ jobs:
   # RESUMEN FINAL
   # ===========================
   basic-quality-summary:
-    name: � Basic Quality Summary
-    runs-on: ubuntu-latest
-    needs: [backend-basic, frontend-basic]
+    name: 📋 Basic Quality Summary
     runs-on: ubuntu-latest
     needs: [backend-basic, frontend-basic]
     if: always()
-
+    
     steps:
       - name: ✅ Quality check passed
         if: needs.backend-basic.result == 'success' && needs.frontend-basic.result == 'success'
@@ -119,13 +117,11 @@ jobs:
           echo "✅ Backend unit tests: SUCCESS"
           echo "✅ Frontend build: SUCCESS"
           echo "✅ Frontend unit tests: SUCCESS"
-
-
+      
       - name: ❌ Quality check failed
         if: needs.backend-basic.result == 'failure' || needs.frontend-basic.result == 'failure'
         run: |
           echo "💥 Some basic quality checks failed!"
           echo "Backend status: ${{ needs.backend-basic.result }}"
           echo "Frontend status: ${{ needs.frontend-basic.result }}"
-
           exit 1
