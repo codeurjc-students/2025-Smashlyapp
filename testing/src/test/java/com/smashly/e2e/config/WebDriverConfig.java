@@ -44,6 +44,11 @@ public class WebDriverConfig {
                 }
                 firefoxOptions.addArguments("--no-sandbox");
                 firefoxOptions.addArguments("--disable-dev-shm-usage");
+                firefoxOptions.addArguments("--disable-gpu");
+                firefoxOptions.addArguments("--window-size=1920,1080");
+                // Add CI-specific options
+                firefoxOptions.addArguments("--disable-web-security");
+                firefoxOptions.addArguments("--allow-running-insecure-content");
                 driver = new FirefoxDriver(firefoxOptions);
                 break;
 
@@ -77,6 +82,11 @@ public class WebDriverConfig {
                 chromeOptions.addArguments("--disable-dev-shm-usage");
                 chromeOptions.addArguments("--disable-gpu");
                 chromeOptions.addArguments("--window-size=1920,1080");
+                // Add CI-specific options for better stability
+                chromeOptions.addArguments("--disable-web-security");
+                chromeOptions.addArguments("--allow-running-insecure-content");
+                chromeOptions.addArguments("--disable-features=VizDisplayCompositor");
+                chromeOptions.addArguments("--remote-debugging-port=9222");
                 driver = new ChromeDriver(chromeOptions);
                 break;
         }
@@ -106,13 +116,13 @@ public class WebDriverConfig {
      * Gets frontend URL from system properties
      */
     public static String getFrontendUrl() {
-        return System.getProperty("frontend.url", "http://localhost:5173");
+        return System.getProperty("test.base.url", System.getProperty("frontend.url", "http://localhost:3000"));
     }
 
     /**
      * Gets API URL from system properties
      */
     public static String getApiUrl() {
-        return System.getProperty("api.url", "http://localhost:3001");
+        return System.getProperty("test.api.url", System.getProperty("api.url", "http://localhost:3001"));
     }
 }
