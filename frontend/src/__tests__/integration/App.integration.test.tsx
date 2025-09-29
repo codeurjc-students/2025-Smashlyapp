@@ -96,7 +96,7 @@ describe("App Integration Tests - Real API Connection", () => {
           selector: "h3",
         });
         expect(racketElements.length).toBeGreaterThan(0);
-        expect(racketElements.length).toBeLessThanOrEqualTo(20);
+        expect(racketElements.length).toBeLessThanOrEqual(20);
 
         console.log(
           `✅ Rendered ${racketElements.length} racket cards correctly`
