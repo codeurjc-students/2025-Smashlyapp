@@ -14,7 +14,7 @@ import App from "../../App";
 
 // Mock de fetch para simular respuestas de la API
 const mockFetch = vi.fn();
-global.fetch = mockFetch;
+(globalThis as any).fetch = mockFetch;
 
 // Datos mock que simulan la respuesta de la API
 const mockRacketsData = {
