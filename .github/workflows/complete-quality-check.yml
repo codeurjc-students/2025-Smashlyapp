@@ -7,8 +7,8 @@ on:
   workflow_dispatch: # Para pruebas manuales
 
 env:
-  NODE_VERSION: '20'
-  JAVA_VERSION: '11'
+  NODE_VERSION: "20"
+  JAVA_VERSION: "11"
 
 jobs:
   # ===========================
@@ -17,28 +17,28 @@ jobs:
   backend-complete:
     name: 🖥️ Backend Complete Tests
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
         working-directory: ./backend/api
-    
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 🟢 Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: './backend/api/package-lock.json'
-      
+          cache: "npm"
+          cache-dependency-path: "./backend/api/package-lock.json"
+
       - name: 📦 Install dependencies
         run: npm ci
-      
+
       - name: 🔧 Build application
         run: npm run build
-      
+
       - name: 🧪 Run unit tests
         run: npm run test:unit
         env:
@@ -47,7 +47,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      
+
       - name: 🔗 Run integration tests
         run: npm run test:integration
         env:
@@ -56,7 +56,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      
+
       - name: 📊 Generate coverage report
         run: npm run test:coverage
         env:
@@ -65,14 +65,14 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      
+
       - name: 📤 Upload backend coverage
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
           path: ./backend/api/coverage/
           retention-days: 30
-      
+
       - name: 🔍 Check coverage threshold
         run: |
           COVERAGE=$(npm run test:coverage -- --silent | grep -o "All files.*[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*" | head -1)
@@ -96,47 +96,47 @@ jobs:
   frontend-complete:
     name: 🌐 Frontend Complete Tests
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
         working-directory: ./frontend
-    
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 🟢 Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: './frontend/package-lock.json'
-      
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
       - name: 📦 Install dependencies
         run: npm ci
-      
+
       - name: 🔧 Build application
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      
+
       - name: 🧪 Run unit tests
         run: npm run test:unit
-      
+
       - name: 🔗 Run integration tests
         run: npm run test:integration
-      
+
       - name: 📊 Generate coverage report
         run: npm run test:coverage
-      
+
       - name: 📤 Upload frontend coverage
         uses: actions/upload-artifact@v4
         with:
           name: frontend-coverage
           path: ./frontend/coverage/
           retention-days: 30
-      
+
       - name: 🔍 Check coverage threshold
         run: |
           # Vitest genera el reporte de cobertura en formato JSON
@@ -159,37 +159,29 @@ jobs:
   static-analysis:
     name: 🔍 Static Code Analysis
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Necesario para SonarQube
-      
+
       - name: 🟢 Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
+          cache: "npm"
+
       # Setup backend for analysis
       - name: 📦 Install backend dependencies
         working-directory: ./backend/api
         run: npm ci
-      
-      - name: 🔍 Lint backend
-        working-directory: ./backend/api
-        run: npm run lint
-      
+
       # Setup frontend for analysis
       - name: 📦 Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
-      
-      - name: 🔍 Lint frontend
-        working-directory: ./frontend
-        run: npm run lint
-      
+
       # SonarQube Analysis
       - name: 🔬 SonarQube Analysis
         uses: SonarSource/sonarqube-scan-action@master
@@ -204,7 +196,7 @@ jobs:
             -Dsonar.tests=backend/api/src/__tests__,frontend/src/__tests__
             -Dsonar.typescript.lcov.reportPaths=backend/api/coverage/lcov.info,frontend/coverage/lcov.info
             -Dsonar.exclusions=**/*.test.ts,**/*.test.tsx,**/node_modules/**,**/dist/**,**/coverage/**
-      
+
       - name: 🎯 SonarQube Quality Gate Check
         uses: SonarSource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
@@ -219,61 +211,61 @@ jobs:
     name: 🎭 E2E Tests
     runs-on: ubuntu-latest
     needs: [backend-complete, frontend-complete]
-    
+
     strategy:
       matrix:
         browser: [chrome, firefox]
       fail-fast: false
-    
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: ☕ Setup Java ${{ env.JAVA_VERSION }}
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: "temurin"
           java-version: ${{ env.JAVA_VERSION }}
-      
+
       - name: 🟢 Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
+          cache: "npm"
+
       # Configurar browsers
       - name: 🌐 Setup Chrome
         if: matrix.browser == 'chrome'
         uses: browser-actions/setup-chrome@v1
         with:
           chrome-version: stable
-      
+
       - name: 🦊 Setup Firefox
         if: matrix.browser == 'firefox'
         uses: browser-actions/setup-firefox@v1
         with:
           firefox-version: latest
-      
+
       # Preparar aplicación
       - name: 📦 Install backend dependencies
         working-directory: ./backend/api
         run: npm ci
-      
+
       - name: 📦 Install frontend dependencies
         working-directory: ./frontend
         run: npm ci
-      
+
       - name: 🔧 Build backend
         working-directory: ./backend/api
         run: npm run build
-      
+
       - name: 🔧 Build frontend
         working-directory: ./frontend
         run: npm run build
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      
+
       # Iniciar aplicación en background
       - name: 🚀 Start backend server
         working-directory: ./backend/api
@@ -288,7 +280,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           FRONTEND_URL: http://localhost:3000
-      
+
       - name: 🌐 Start frontend server
         working-directory: ./frontend
         run: |
@@ -297,7 +289,7 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      
+
       # Esperar que los servicios estén listos
       - name: ⏳ Wait for services
         run: |
@@ -306,7 +298,7 @@ jobs:
           echo "Waiting for frontend..."
           timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
           echo "Services are ready!"
-      
+
       # Ejecutar tests E2E
       - name: 🧪 Run E2E tests (${{ matrix.browser }})
         working-directory: ./testing
@@ -316,7 +308,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-      
+
       # Cleanup
       - name: 🧹 Stop services
         if: always()
@@ -327,7 +319,7 @@ jobs:
           if [ -f "./frontend/frontend.pid" ]; then
             kill $(cat ./frontend/frontend.pid) || true
           fi
-      
+
       - name: 📊 Upload E2E test results (${{ matrix.browser }})
         uses: actions/upload-artifact@v4
         if: always()
@@ -344,38 +336,38 @@ jobs:
   security-scan:
     name: 🔒 Security Scan
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: ⬇️ Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: 🟢 Setup Node.js ${{ env.NODE_VERSION }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-      
+          cache: "npm"
+
       - name: 🔍 Audit backend dependencies
         working-directory: ./backend/api
         run: |
           npm ci
           npm audit --audit-level=moderate
-      
+
       - name: 🔍 Audit frontend dependencies
         working-directory: ./frontend
         run: |
           npm ci
           npm audit --audit-level=moderate
-      
+
       - name: 🛡️ Run CodeQL Analysis
         uses: github/codeql-action/init@v2
         with:
           languages: typescript, javascript
-      
+
       - name: 🔧 Build for CodeQL
         working-directory: ./backend/api
         run: npm run build
-      
+
       - name: 📊 Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
 
@@ -385,9 +377,16 @@ jobs:
   complete-quality-summary:
     name: 📋 Complete Quality Summary
     runs-on: ubuntu-latest
-    needs: [backend-complete, frontend-complete, static-analysis, e2e-tests, security-scan]
+    needs:
+      [
+        backend-complete,
+        frontend-complete,
+        static-analysis,
+        e2e-tests,
+        security-scan,
+      ]
     if: always()
-    
+
     steps:
       - name: ✅ All checks passed
         if: needs.backend-complete.result == 'success' && needs.frontend-complete.result == 'success' && needs.static-analysis.result == 'success' && needs.e2e-tests.result == 'success' && needs.security-scan.result == 'success'
@@ -400,7 +399,7 @@ jobs:
           echo "✅ Security scan: SUCCESS"
           echo ""
           echo "🚀 This code is ready to merge to main!"
-      
+
       - name: ❌ Some checks failed
         if: needs.backend-complete.result == 'failure' || needs.frontend-complete.result == 'failure' || needs.static-analysis.result == 'failure' || needs.e2e-tests.result == 'failure' || needs.security-scan.result == 'failure'
         run: |

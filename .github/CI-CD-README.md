@@ -18,12 +18,14 @@ Este documento describe la implementación completa del sistema de Integración 
 El sistema de CI/CD implementado cumple con los siguientes requisitos del TFG:
 
 ### ✅ Control de Calidad Básico
+
 - Se ejecuta en cada commit a ramas de funcionalidad
 - **Backend**: Compilación + Tests unitarios
 - **Frontend**: Build + Tests unitarios
 - **Lint**: Análisis estático básico
 
 ### ✅ Control de Calidad Completo
+
 - Se ejecuta en Pull Requests a `main`
 - **Backend**: Tests unitarios + integración + sistema
 - **Frontend**: Tests unitarios + integración + sistema
@@ -39,23 +41,23 @@ graph TB
     B --> C{Pass?}
     C -->|No| D[❌ Block Push]
     C -->|Yes| E[✅ Allow Push]
-    
+
     F[Pull Request to main] --> G[Complete Quality Check]
     G --> H[Backend Tests]
     G --> I[Frontend Tests]
     G --> J[E2E Tests]
     G --> K[Security Scan]
     G --> L[Static Analysis]
-    
+
     H --> M{All Pass?}
     I --> M
     J --> M
     K --> M
     L --> M
-    
+
     M -->|No| N[❌ Block Merge]
     M -->|Yes| O[✅ Allow Merge]
-    
+
     O --> P[Deploy to Production]
 ```
 
@@ -88,6 +90,7 @@ Ejecuta el script para configurar automáticamente:
 ```
 
 O configura manualmente en `Settings` → `Branches`:
+
 - ✅ Require pull request reviews (1 approval)
 - ✅ Require status checks to pass
 - ✅ Require branches to be up to date
@@ -100,8 +103,9 @@ O configura manualmente en `Settings` → `Branches`:
 **Trigger**: Push a cualquier rama excepto `main`
 
 **Jobs**:
+
 - 🖥️ **Backend Basic**: Compilación TypeScript + Tests unitarios
-- 🌐 **Frontend Basic**: Build Vite + Tests unitarios  
+- 🌐 **Frontend Basic**: Build Vite + Tests unitarios
 - 🔍 **Lint Check**: ESLint backend + frontend
 - 📋 **Summary**: Resumen de resultados
 
@@ -112,6 +116,7 @@ O configura manualmente en `Settings` → `Branches`:
 **Trigger**: Pull Request a `main`
 
 **Jobs**:
+
 - 🖥️ **Backend Complete**: Unit + Integration + Coverage (>70%)
 - 🌐 **Frontend Complete**: Unit + Integration + Coverage (>70%)
 - 🔍 **Static Analysis**: ESLint + SonarQube + CodeQL
@@ -126,6 +131,7 @@ O configura manualmente en `Settings` → `Branches`:
 **Trigger**: Merge a `main`
 
 **Jobs**:
+
 - 🔍 **Pre-deploy Validation**: Smoke tests
 - 📦 **Build Artifacts**: Construcción para producción
 - 🐳 **Docker Build**: Imágenes containerizadas
@@ -149,6 +155,7 @@ npm run test:coverage
 ```
 
 **Ubicación**: `backend/api/src/__tests__/`
+
 - `unit/`: Tests con mocks (sin BD real)
 - `integration/`: Tests con BD real
 - `controllers/`: Tests de endpoints
@@ -168,6 +175,7 @@ npm run test:coverage
 ```
 
 **Ubicación**: `frontend/src/__tests__/`
+
 - `unit/`: Tests de componentes con mocks
 - `integration/`: Tests de integración con API mock
 
@@ -230,14 +238,16 @@ mvn test -Dtest=E2ETestSuite -Dtest.headless=true
 ### 🐳 Containerización
 
 **Backend** (`backend/api/Dockerfile`):
+
 - Base: `node:20-alpine`
 - Multi-stage build
 - Non-root user
 - Health checks
 
 **Frontend** (`frontend/Dockerfile`):
+
 - Build: `node:20-alpine`
-- Runtime: `nginx:alpine`  
+- Runtime: `nginx:alpine`
 - Custom nginx config
 - Security headers
 
@@ -258,26 +268,31 @@ mvn test -Dtest=E2ETestSuite -Dtest.headless=true
 ## 🎯 Best Practices Implementadas
 
 ### ✅ Fail Fast
+
 - Lint errors bloquean el pipeline
 - Tests unitarios antes que integración
 - Basic checks en cada commit
 
 ### ✅ Parallel Execution
+
 - Jobs independientes en paralelo
 - Matrix strategy para multi-browser
 - Optimización de tiempos
 
 ### ✅ Idempotency
+
 - Builds reproducibles
 - Cache de dependencias
 - Cleanup automático
 
 ### ✅ Security First
+
 - Secrets en GitHub Secrets
 - Analysis automático de vulnerabilidades
 - Branch protection rules
 
 ### ✅ Observability
+
 - Logs detallados
 - Artifacts persistentes
 - Status checks claros
@@ -287,16 +302,19 @@ mvn test -Dtest=E2ETestSuite -Dtest.headless=true
 ### ❌ Common Issues
 
 **1. Tests failing in CI but passing locally**
+
 - Verificar variables de entorno
 - Revisar timeouts en headless browser
 - Comprobar diferencias de timezone
 
 **2. E2E tests timing out**
+
 - Aumentar timeouts en WebDriver config
 - Verificar que servicios estén ready
 - Revisar health check endpoints
 
 **3. Coverage below threshold**
+
 - Añadir tests para código no cubierto
 - Revisar exclusions en jest/vitest config
 - Verificar que tests se ejecutan correctamente
@@ -307,7 +325,7 @@ mvn test -Dtest=E2ETestSuite -Dtest.headless=true
 # Debug backend locally
 npm run test:unit -- --verbose
 
-# Debug frontend locally  
+# Debug frontend locally
 npm run test:coverage
 
 # Debug E2E locally
@@ -334,6 +352,6 @@ npm run lint
 ✅ **Multi-browser E2E** - Chrome y Firefox en paralelo  
 ✅ **Branch protection** - Merge bloqueado si fallan los checks  
 ✅ **Containerización** - Docker para deploy  
-✅ **Seguridad** - Secrets management y vulnerability scanning  
+✅ **Seguridad** - Secrets management y vulnerability scanning
 
 🎉 **¡Sistema CI/CD completamente funcional y listo para producción!**

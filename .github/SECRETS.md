@@ -12,6 +12,7 @@ Este archivo documenta todos los secretos que deben configurarse en GitHub para 
 ## 🔑 Secretos requeridos
 
 ### Supabase Configuration
+
 ```
 SUPABASE_URL=https://lrdgyfmkkboyhoycrnov.supabase.co
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyZGd5Zm1ra2JveWhveWNybm92Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1MTQ3MTg0NSwiZXhwIjoyMDY3MDQ3ODQ1fQ.etjT9fa5Ev8OX56IP1mRRwh-Ow7lZl93MfLvxfTM8mc
@@ -19,11 +20,13 @@ SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsI
 ```
 
 ### JWT Configuration
+
 ```
 JWT_SECRET=ykVwy+BFSupNZmY9CqoStbZBXUZgFAEWk1KjgvBQW7Ht5u50YnUfIiUC/A53EOh5KCjP5410fprs/TtVyI72ew==
 ```
 
 ### SonarQube Configuration (opcional)
+
 ```
 SONAR_TOKEN=your_sonarqube_token_here
 SONAR_HOST_URL=https://sonarcloud.io
@@ -32,6 +35,7 @@ SONAR_HOST_URL=https://sonarcloud.io
 ## 📝 Cómo obtener los tokens de SonarQube
 
 ### Para SonarCloud (recomendado)
+
 1. Ve a [SonarCloud](https://sonarcloud.io)
 2. Inicia sesión con tu cuenta de GitHub
 3. Ve a **My Account** → **Security**
@@ -42,6 +46,7 @@ SONAR_HOST_URL=https://sonarcloud.io
    - Project Name: Smashly - Padel Rackets App
 
 ### Para SonarQube local
+
 1. Instala SonarQube localmente
 2. Ve a Administration → Security → Users
 3. Genera un token para el usuario admin
@@ -66,13 +71,16 @@ Para verificar que los secretos están bien configurados:
 ## 🔒 Seguridad adicional
 
 ### Recomendaciones:
+
 - Usa diferentes bases de datos para testing y producción
 - Rota los tokens periódicamente
 - Monitorea el uso de la API de Supabase
 - Considera usar GitHub Environments para separar staging/production
 
 ### Branch Protection Rules
+
 Configura estas reglas en **Settings** → **Branches** → **Add rule**:
+
 - Require pull request reviews before merging
 - Require status checks to pass before merging
 - Require branches to be up to date before merging
