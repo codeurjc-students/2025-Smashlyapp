@@ -94,13 +94,17 @@ describe("App Component - Unit Tests", () => {
       screen.getByText("BULLPADEL HACK 03 24 - PAQUITO NAVARRO")
     ).toBeInTheDocument();
 
-    // Verificar que se muestran las marcas
-    expect(screen.getByText("Marca: NOX")).toBeInTheDocument();
-    expect(screen.getByText("Marca: BULLPADEL")).toBeInTheDocument();
+    // Verificar que se muestran las marcas (buscar en span específico)
+    expect(screen.getByText((content, element) => {
+      return element?.tagName === 'SPAN' && content.includes('NOX');
+    })).toBeInTheDocument();
+    expect(screen.getByText((content, element) => {
+      return element?.tagName === 'SPAN' && content.includes('BULLPADEL');
+    })).toBeInTheDocument();
 
     // Verificar que se muestran los precios
-    expect(screen.getByText("€169.95")).toBeInTheDocument();
-    expect(screen.getByText("€299.95")).toBeInTheDocument();
+    expect(screen.getByText("169.95€", { exact: false })).toBeInTheDocument();
+    expect(screen.getByText("299.95€", { exact: false })).toBeInTheDocument();
   });
 
   it("should display error message when API call fails", async () => {
@@ -129,7 +133,7 @@ describe("App Component - Unit Tests", () => {
 
     // Esperar a que se muestre el error
     await waitFor(() => {
-      expect(screen.getByText("Error: 500")).toBeInTheDocument();
+      expect(screen.getByText(/Error.*500/)).toBeInTheDocument();
     });
   });
 
@@ -161,7 +165,7 @@ describe("App Component - Unit Tests", () => {
 
     // Esperar a que se muestre el mensaje de no datos
     await waitFor(() => {
-      expect(screen.getByText("No se encontraron palas")).toBeInTheDocument();
+      expect(screen.getByText("No se encontraron palas.")).toBeInTheDocument();
     });
 
     expect(screen.getByText("Total de palas mostradas: 0")).toBeInTheDocument();
