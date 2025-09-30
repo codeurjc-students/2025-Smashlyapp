@@ -36,6 +36,7 @@ public class WebDriverConfig {
         WebDriver driver;
 
         switch (browser) {
+            /* Configuration for Firefox */
             case "firefox":
                 WebDriverManager.firefoxdriver().setup();
                 FirefoxOptions firefoxOptions = new FirefoxOptions();
@@ -46,12 +47,12 @@ public class WebDriverConfig {
                 firefoxOptions.addArguments("--disable-dev-shm-usage");
                 firefoxOptions.addArguments("--disable-gpu");
                 firefoxOptions.addArguments("--window-size=1920,1080");
-                // Add CI-specific options
                 firefoxOptions.addArguments("--disable-web-security");
                 firefoxOptions.addArguments("--allow-running-insecure-content");
                 driver = new FirefoxDriver(firefoxOptions);
                 break;
 
+            /* Configuration for Edge */
             case "edge":
                 try {
                     // Try WebDriverManager first
@@ -71,6 +72,7 @@ public class WebDriverConfig {
                 driver = new EdgeDriver(edgeOptions);
                 break;
 
+            /* Configuration for Chrome (default) */
             case "chrome":
             default:
                 WebDriverManager.chromedriver().setup();
