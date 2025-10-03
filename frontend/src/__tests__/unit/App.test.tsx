@@ -1,13 +1,3 @@
-/**
- * PRUEBAS UNITARIAS - CLIENTE
- *
- * Requisitos del TFG:
- * ✅ Prueba de la funcionalidad del componente con un doble de los servicios y un DOM virtual
- *
- * Estas pruebas verifican que el componente App funciona correctamente
- * usando mocks para simular las llamadas a la API.
- */
-
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import App from "../../App";
@@ -95,12 +85,16 @@ describe("App Component - Unit Tests", () => {
     ).toBeInTheDocument();
 
     // Verificar que se muestran las marcas (buscar en span específico)
-    expect(screen.getByText((content, element) => {
-      return element?.tagName === 'SPAN' && content.includes('NOX');
-    })).toBeInTheDocument();
-    expect(screen.getByText((content, element) => {
-      return element?.tagName === 'SPAN' && content.includes('BULLPADEL');
-    })).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => {
+        return element?.tagName === "SPAN" && content.includes("NOX");
+      })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText((content, element) => {
+        return element?.tagName === "SPAN" && content.includes("BULLPADEL");
+      })
+    ).toBeInTheDocument();
 
     // Verificar que se muestran los precios
     expect(screen.getByText("169.95€", { exact: false })).toBeInTheDocument();

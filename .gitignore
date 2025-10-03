@@ -342,3 +342,5 @@ Thumbs.db
 # Other
 *.orig
 .merge_file_*
+
+.scannerwork/

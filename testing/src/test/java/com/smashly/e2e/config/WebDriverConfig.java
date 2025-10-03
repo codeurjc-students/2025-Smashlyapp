@@ -118,7 +118,7 @@ public class WebDriverConfig {
      * Gets frontend URL from system properties
      */
     public static String getFrontendUrl() {
-        return System.getProperty("test.base.url", System.getProperty("frontend.url", "http://localhost:3000"));
+        return System.getProperty("test.base.url", System.getProperty("frontend.url", "http://localhost:5173"));
     }
 
     /**

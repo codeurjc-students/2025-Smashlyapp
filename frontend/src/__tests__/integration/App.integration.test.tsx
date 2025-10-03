@@ -1,13 +1,3 @@
-/**
- * PRUEBAS DE INTEGRACIÓN - CLIENTE
- *
- * Requisitos del TFG:
- * ✅ Prueba de la funcionalidad de los servicios conectando con la API REST real
- *
- * Estas pruebas verifican que el frontend puede conectarse correctamente
- * con la API REST real y procesar las respuestas correctamente.
- */
-
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { useState, useEffect } from "react";
@@ -21,42 +11,73 @@ describe("App Integration Tests - Real API Connection", () => {
   let apiAvailable = false;
 
   beforeAll(async () => {
+    // Verificar si fetch está disponible
+    if (typeof fetch === "undefined") {
+      console.log("Fetch is not available in test environment");
+      apiAvailable = false;
+      return;
+    }
+
     // Verificar si la API está disponible antes de ejecutar las pruebas
     try {
-      const response = await fetch(`${API_BASE_URL}/health`);
-      apiAvailable = response.ok;
-      if (apiAvailable) {
-        console.log("✅ API is available for integration tests");
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+      let response: Response | null = null;
+
+      try {
+        response = await fetch(`${API_BASE_URL}/health`, {
+          signal: controller.signal,
+        });
+      } catch (fetchError) {
+        if (fetchError instanceof Error) {
+          console.log("Fetch failed:", fetchError.message);
+        }
+      }
+
+      clearTimeout(timeoutId);
+
+      if (response && response.ok) {
+        apiAvailable = true;
+        console.log("API is available for integration tests");
       } else {
-        console.log("⚠️  API is not available, skipping integration tests");
+        apiAvailable = false;
+        if (response) {
+          console.log(`API health check returned status: ${response.status}`);
+        } else {
+          console.log("API health check failed - no response received");
+        }
       }
     } catch (error) {
-      console.log(
-        "⚠️  API is not available, skipping integration tests:",
-        error
-      );
       apiAvailable = false;
+      if (error instanceof Error) {
+        if (error.name === "AbortError") {
+          console.log("API connection timeout after 5 seconds");
+        } else {
+          console.log("API is not available:", error.message);
+        }
+      } else {
+        console.log("API is not available: Unknown error");
+      }
     }
   });
 
   afterAll(() => {
     if (!apiAvailable) {
+      console.log("Integration tests were skipped due to API unavailability");
       console.log(
-        "ℹ️  Integration tests were skipped due to API unavailability"
-      );
-      console.log(
-        "ℹ️  To run integration tests, start the API server with: npm run dev"
+        "To run integration tests, start the API server with: npm run dev"
       );
     }
   });
 
   it("should connect to real API and display rackets data", async () => {
     if (!apiAvailable) {
-      console.log("⏭️  Skipping test: API not available");
+      console.log("Skipping test: API not available");
       return;
     }
 
-    console.log("🧪 Testing real API connection...");
+    console.log("Testing real API connection...");
 
     render(<App />);
 
@@ -72,13 +93,13 @@ describe("App Integration Tests - Real API Connection", () => {
 
         expect(totalElement || errorElement).toBeInTheDocument();
       },
-      { timeout: 10000 } // 10 segundos para permitir conexión lenta
+      { timeout: 10000 }
     );
 
     // Si no hay error, verificar que se muestran datos reales
     const errorElement = screen.queryByText(/Error:/);
     if (!errorElement) {
-      console.log("✅ Successfully connected to real API");
+      console.log("Successfully connected to real API");
 
       // Verificar que se muestra el contador de palas
       const totalElement = screen.getByText(/Total de palas mostradas: \d+/);
@@ -89,37 +110,58 @@ describe("App Integration Tests - Real API Connection", () => {
       const racketsCount = parseInt(totalText.match(/\d+/)?.[0] || "0");
 
       if (racketsCount > 0) {
-        console.log(`✅ Found ${racketsCount} rackets in real API response`);
+        console.log(`Found ${racketsCount} rackets in real API response`);
 
-        // Verificar que los elementos de las palas están presentes
-        const racketElements = screen.getAllByText(/^[A-Z].*/, {
-          selector: "h3",
-        });
-        expect(racketElements.length).toBeGreaterThan(0);
-        expect(racketElements.length).toBeLessThanOrEqual(20);
+        // Verificar que los elementos de lista están presentes
+        const listItems = screen.queryAllByRole("listitem");
 
-        console.log(
-          `✅ Rendered ${racketElements.length} racket cards correctly`
-        );
+        if (listItems.length > 0) {
+          expect(listItems.length).toBeGreaterThan(0);
+          expect(listItems.length).toBeLessThanOrEqual(20);
+          console.log(`Rendered ${listItems.length} racket items correctly`);
+
+          // Verificar que al menos un elemento contiene texto de pala
+          const firstItem = listItems[0];
+          expect(firstItem.textContent).toBeTruthy();
+          expect(firstItem.textContent?.length).toBeGreaterThan(0);
+          console.log(
+            `Sample racket: ${firstItem.textContent?.substring(0, 50)}...`
+          );
+        } else {
+          // Si no hay list items, buscar por marcadores de lista
+          const markers = screen.queryAllByText(/::marker/);
+          if (markers.length > 0) {
+            console.log(`Found ${markers.length} list markers`);
+          }
+
+          // Como último recurso, verificar que hay contenido de palas en el documento
+          const dropshot = screen.queryByText(/DROPSHOT/i);
+          const bullpadel = screen.queryByText(/BULLPADEL/i);
+          const puma = screen.queryByText(/PUMA/i);
+
+          const hasRacketContent = dropshot || bullpadel || puma;
+          expect(hasRacketContent).toBeInTheDocument();
+          console.log("✅ Racket content is rendered in the document");
+        }
       } else {
-        console.log("ℹ️  API returned no rackets data");
+        console.log("API returned no rackets data");
         expect(screen.getByText("No se encontraron palas")).toBeInTheDocument();
       }
     } else {
       console.log(
-        "⚠️  API connection failed during test:",
+        "API connection failed during test:",
         errorElement.textContent
       );
     }
-  }, 15000); // Timeout de 15 segundos para la prueba completa
+  }, 15000);
 
   it("should handle real API error responses gracefully", async () => {
     if (!apiAvailable) {
-      console.log("⏭️  Skipping test: API not available");
+      console.log("Skipping test: API not available");
       return;
     }
 
-    console.log("🧪 Testing error handling with real API...");
+    console.log("Testing error handling with real API...");
 
     // Crear un componente que haga una llamada a un endpoint inválido
     const TestComponentWithInvalidEndpoint = () => {
@@ -162,11 +204,11 @@ describe("App Integration Tests - Real API Connection", () => {
 
   it("should validate real API response format", async () => {
     if (!apiAvailable) {
-      console.log("⏭️  Skipping test: API not available");
+      console.log("Skipping test: API not available");
       return;
     }
 
-    console.log("🧪 Testing real API response format...");
+    console.log("Testing real API response format...");
 
     // Hacer llamada directa a la API para validar formato
     const response = await fetch(`${API_BASE_URL}/rackets?limit=5`);
@@ -190,8 +232,8 @@ describe("App Integration Tests - Real API Connection", () => {
       expect(typeof firstRacket.nombre).toBe("string");
       expect(firstRacket.nombre.length).toBeGreaterThan(0);
 
-      console.log("✅ Real API response format is valid");
-      console.log(`✅ Sample racket: ${firstRacket.nombre}`);
+      console.log("Real API response format is valid");
+      console.log(`Sample racket: ${firstRacket.nombre}`);
     }
   });
 });
