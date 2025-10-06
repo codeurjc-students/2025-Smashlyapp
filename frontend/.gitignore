@@ -1,0 +1,54 @@
+# .gitignore para la carpeta frontend (Vite + React + TypeScript)
+
+# Dependencias
+node_modules/
+
+# Build output
+dist/
+build/
+lib/
+out/
+.vite/
+.vite/deps/
+
+# Vite cache
+.cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Environment variables (no subir secretos locales)
+.env
+.env.*
+
+# Tests / coverage
+coverage/
+coverage-final.json
+.nyc_output/
+.vitest/
+test-results/
+*.lcov
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# Editor/IDE
+.idea/
+*.iml
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Storybook
+storybook-static/
+
+# Optional: local lock/cache for pnpm
+.pnpm-store/
+
+# Keep example env files
+!.env.example

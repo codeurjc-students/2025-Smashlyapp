@@ -1,0 +1,66 @@
+# .gitignore for the `testing` module
+# Ignore Maven/Java build output and test artifacts
+target/
+**/target/
+*.class
+
+# Surefire / Failsafe test reports
+**/surefire-reports/
+**/failsafe-reports/
+
+# JaCoCo and coverage artifacts
+jacoco.exec
+coverage/ 
+coverage-reports/
+
+# Eclipse/IntelliJ/VSCode project files
+.idea/
+*.iml
+.classpath
+.project
+.settings/
+.vscode/
+
+# macOS / Windows junk
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+
+# Environment files (ignore local secrets). If you intentionally commit a .env, remove this line.
+.env
+.env.*
+
+# Node (if any test helpers use node)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# WebDriver / browser driver caches
+selenium-standalone/
+webdriver/*
+drivers/
+
+# Maven wrapper and local repo caches
+.mvn/
+repository/
+
+# Binary artifacts
+*.jar
+*.war
+*.ear
+
+# IDE run/debug and workspace configs
+.idea/
+*.iml
+.vscode/
+
+# test compiled classes under target/test-classes
+target/test-classes/
+
+# keep examples or template envs
+!.env.example
