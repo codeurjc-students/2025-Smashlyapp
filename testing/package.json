@@ -1,0 +1,48 @@
+{
+  "name": "smashly-testing",
+  "version": "1.0.0",
+  "description": "Testing suite for Smashly App - E2E, Unit and Integration Tests",
+  "scripts": {
+    "setup:test-db": "node setup/setupTestDatabase.js",
+    "test:unit:backend": "cd ../backend/api && npm run test:unit",
+    "test:integration:backend": "cd ../backend/api && npm run test:integration",
+    "test:unit:frontend": "cd ../frontend && npm run test:unit",
+    "test:integration:frontend": "cd ../frontend && npm run test:integration",
+    "test:api": "jest tests/api --config jest.api.config.js",
+    "test:e2e": "mvn test -Dtest=E2ETestSuite",
+    "test:e2e:headless": "mvn test -Dtest=E2ETestSuite -Dtest.headless=true",
+    "test:e2e:chrome": "mvn test -Dtest=E2ETestSuite -Dtest.browser=chrome",
+    "test:e2e:firefox": "mvn test -Dtest=E2ETestSuite -Pfirefox",
+    "test:coverage:backend": "cd ../backend/api && npm run test:coverage",
+    "test:coverage:frontend": "cd ../frontend && npm run test:coverage",
+    "test:coverage:e2e": "mvn test -Dtest=E2ETestSuite jacoco:report",
+    "test:all": "npm run test:unit:backend && npm run test:integration:backend && npm run test:unit:frontend && npm run test:integration:frontend && npm run test:e2e",
+    "test:all:coverage": "npm run test:coverage:backend && npm run test:coverage:frontend && npm run test:coverage:e2e",
+    "start:test-server": "cd ../backend/api && npm run start:test",
+    "clean:test-data": "node setup/cleanTestData.js"
+  },
+  "keywords": [
+    "testing",
+    "e2e",
+    "selenium",
+    "jest",
+    "junit",
+    "padel",
+    "rackets"
+  ],
+  "devDependencies": {
+    "@playwright/test": "^1.40.0",
+    "@supabase/supabase-js": "^2.50.2",
+    "@types/jest": "^29.5.8",
+    "@types/supertest": "^6.0.2",
+    "dotenv": "^16.3.1",
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2",
+    "undici": "^7.16.0"
+  },
+  "dependencies": {
+    "@paralleldrive/cuid2": "^2.2.2"
+  }
+}
