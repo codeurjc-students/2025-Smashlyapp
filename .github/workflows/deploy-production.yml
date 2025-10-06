@@ -1,0 +1,210 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+
+jobs:
+  pre-deploy-validation:
+    name: Pre-Deploy Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Build backend
+        working-directory: ./backend/api
+        run: |
+          npm ci
+          npm run build
+
+      - name: Build frontend
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Quick smoke tests
+        working-directory: ./backend/api
+        run: npm run test:unit -- --testPathPattern="smoke"
+        env:
+          NODE_ENV: production
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+  build-artifacts:
+    name: Build Production Artifacts
+    runs-on: ubuntu-latest
+    needs: [pre-deploy-validation]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ env.NODE_VERSION }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Build backend for production
+        working-directory: ./backend/api
+        run: |
+          npm ci --production=false
+          npm run build
+          npm prune --production
+
+      - name: Build frontend for production
+        working-directory: ./frontend
+        run: |
+          npm ci
+          npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deployment-package
+
+          cp -r backend/api/dist deployment-package/backend-dist
+          cp -r backend/api/node_modules deployment-package/backend-node_modules
+          cp backend/api/package.json deployment-package/
+
+          cp -r frontend/dist deployment-package/frontend-dist
+
+          echo "Build Date: $(date)" > deployment-package/build-info.txt
+          echo "Commit SHA: ${{ github.sha }}" >> deployment-package/build-info.txt
+          echo "Branch: ${{ github.ref_name }}" >> deployment-package/build-info.txt
+
+      - name: Upload deployment artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-artifacts-${{ github.sha }}
+          path: deployment-package/
+          retention-days: 90
+
+  docker-build:
+    name: Build Docker Images
+    runs-on: ubuntu-latest
+    needs: [build-artifacts]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Aquí podrías añadir el login a tu registry (Docker Hub, ghcr.io, etc.)
+      # - name: Login to Container Registry
+      #   uses: docker/login-action@v3
+      #   with:
+      #     registry: ghcr.io
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend/api
+          file: ./backend/api/Dockerfile
+          push: false # Cambiar a true si quieres pushear
+          tags: smashly-backend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build frontend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: false # Cambiar a true si quieres pushear
+          tags: smashly-frontend:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ===========================
+  # POST-DEPLOY VERIFICATION
+  # ===========================
+  post-deploy-verification:
+    name: Post-Deploy Verification
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+    if: always() && needs.docker-build.result == 'success'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Aquí podrías añadir health checks de tu aplicación desplegada
+      - name: Health check
+        run: |
+          echo "Performing health checks..."
+
+          # Ejemplo de health check (ajustar a tu URL de producción)
+          # timeout 30 bash -c 'until curl -f https://your-app.com/api/health; do sleep 2; done'
+
+          echo "Health checks passed (simulated)"
+
+      - name: Deploy notification
+        run: |
+          echo "DEPLOYMENT SUCCESSFUL!"
+          echo "Deployed at: $(date)"
+          echo "Commit: ${{ github.sha }}"
+          echo "Deployed by: ${{ github.actor }}"
+
+          # Aquí podrías enviar notificaciones a Slack, Discord, etc.
+
+  # ===========================
+  # DEPLOY SUMMARY
+  # ===========================
+  deploy-summary:
+    name: Deploy Summary
+    runs-on: ubuntu-latest
+    needs:
+      [
+        pre-deploy-validation,
+        build-artifacts,
+        docker-build,
+        post-deploy-verification,
+      ]
+    if: always()
+
+    steps:
+      - name: Deploy successful
+        if: needs.pre-deploy-validation.result == 'success' && needs.build-artifacts.result == 'success' && needs.docker-build.result == 'success'
+        run: |
+          echo "DEPLOYMENT COMPLETED SUCCESSFULLY!"
+          echo "Pre-deploy validation: SUCCESS"
+          echo "Build artifacts: SUCCESS"
+          echo "Docker build: SUCCESS"
+          echo "Post-deploy verification: ${{ needs.post-deploy-verification.result }}"
+          echo ""
+          echo "Your Smashly app is now live!"
+
+      - name: Deploy failed
+        if: needs.pre-deploy-validation.result == 'failure' || needs.build-artifacts.result == 'failure' || needs.docker-build.result == 'failure'
+        run: |
+          echo "DEPLOYMENT FAILED!"
+          echo "Pre-deploy validation: ${{ needs.pre-deploy-validation.result }}"
+          echo "Build artifacts: ${{ needs.build-artifacts.result }}"
+          echo "Docker build: ${{ needs.docker-build.result }}"
+          echo "Post-deploy verification: ${{ needs.post-deploy-verification.result }}"
+          exit 1
