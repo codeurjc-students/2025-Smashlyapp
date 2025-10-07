@@ -21,6 +21,7 @@ public class RestAssuredApiSystemTest {
 
     // ID de una pala que se usará en las pruebas (se obtiene dinámicamente)
     private static Integer testRacketId;
+    // Nombre de la pala usada en pruebas (se obtiene dinámicamente)
     private static String testRacketName;
 
     /**
