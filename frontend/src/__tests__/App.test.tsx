@@ -1,6 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import "@testing-library/jest-dom";
+import matchers from "@testing-library/jest-dom/matchers";
+
+// Integrate jest-dom matchers with Vitest's expect
+expect.extend(matchers);
+
 import App from "../App";
 
 // Mock de fetch
