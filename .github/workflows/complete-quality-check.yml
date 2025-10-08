@@ -211,7 +211,7 @@ jobs:
       - name: Start frontend server
         working-directory: ./frontend
         run: |
-          npm run preview -- --port 3000 &
+          npm run preview -- --port 5173 --host 0.0.0.0 &
           echo $! > frontend.pid
         env:
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -222,15 +222,19 @@ jobs:
         run: |
           echo "Waiting for backend..."
           timeout 60 bash -c 'until curl -f http://localhost:3001/api/health; do sleep 2; done'
+          echo "Backend is ready!"
+          
           echo "Waiting for frontend..."
-          timeout 60 bash -c 'until curl -f http://localhost:3000; do sleep 2; done'
-          echo "Services are ready!"
+          timeout 60 bash -c 'until curl -f http://localhost:5173; do sleep 2; done'
+          echo "Frontend is ready!"
+          
+          echo "All services are ready!"
 
       # Ejecutar tests E2E
       - name: Run E2E tests (${{ matrix.browser }})
         run: |
           cd testing
-          mvn test -Dtest=E2ETestSuite -Dtest.browser=${{ matrix.browser }} -Dtest.headless=true
+          mvn test -Dtest=E2ETestSuite -Dtest.browser=${{ matrix.browser }} -Dtest.headless=true -Dfrontend.url=http://localhost:5173 -Dapi.url=http://localhost:3001
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
