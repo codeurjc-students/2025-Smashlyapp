@@ -172,6 +172,27 @@ jobs:
             echo "SonarQube secrets configured."
           fi
 
+      # Debug step to help identify why the scanner may try localhost:9000
+      - name: Debug Sonar config (safe)
+        if: always()
+        run: |
+          echo "Checking presence and common misconfiguration of Sonar secrets..."
+          if [ -z "${{ secrets.SONAR_HOST_URL }}" ] ; then
+            echo "SONAR_HOST_URL is not set"
+          else
+            # compare to the common default that causes the runner to connect to localhost
+            if [ "${{ secrets.SONAR_HOST_URL }}" = "http://localhost:9000" ] ; then
+              echo "WARNING: SONAR_HOST_URL is set to http://localhost:9000 (will fail on runner)"
+            else
+              echo "SONAR_HOST_URL is set and does not equal http://localhost:9000"
+            fi
+          fi
+          if [ -z "${{ secrets.SONAR_TOKEN }}" ] ; then
+            echo "SONAR_TOKEN is not set"
+          else
+            echo "SONAR_TOKEN is set"
+          fi
+
       # SonarQube Analysis
       - name: SonarQube Analysis
         if: steps.check-sonar.outputs.sonar_configured == 'true'
