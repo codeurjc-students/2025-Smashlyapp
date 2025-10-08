@@ -90,7 +90,7 @@ jobs:
   # FRONTEND - Tests Completos
   # ===========================
   frontend-complete:
-    name: 🌐 Frontend Complete Tests
+    name: Frontend Complete Tests
     runs-on: ubuntu-latest
 
     defaults:
