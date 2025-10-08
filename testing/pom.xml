@@ -19,9 +19,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         
         <!-- Dependencies versions -->
-        <selenium.version>4.15.0</selenium.version>
+        <selenium.version>4.26.0</selenium.version>
         <junit.version>5.10.0</junit.version>
-        <webdrivermanager.version>5.6.2</webdrivermanager.version>
+        <webdrivermanager.version>5.9.2</webdrivermanager.version>
         <assertj.version>3.24.2</assertj.version>
         <maven.surefire.version>3.2.2</maven.surefire.version>
         

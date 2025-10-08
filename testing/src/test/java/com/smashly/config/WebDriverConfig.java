@@ -83,21 +83,33 @@ public class WebDriverConfig {
     private static WebDriver createEdgeDriver(boolean headless) {
         System.out.println("Configuring WebDriver for Microsoft Edge on Windows...");
 
-        // Setup for Edge
         try {
-            WebDriverManager.edgedriver().setup();
+            // Force WebDriverManager to download the latest version
+            System.out.println("Setting up Edge WebDriver...");
+            WebDriverManager.edgedriver()
+                    .clearDriverCache() // Clear old drivers
+                    .clearResolutionCache() // Clear resolution cache
+                    .forceDownload() // Force download of latest driver
+                    .setup();
+            System.out.println("Edge WebDriver setup completed.");
         } catch (Exception e) {
-            System.out.println("WebDriverManager failed, using system Edge driver as fallback.");
+            System.err.println("WebDriverManager failed: " + e.getMessage());
+            System.out.println("Attempting to use system Edge driver as fallback...");
         }
 
         EdgeOptions edgeOptions = new EdgeOptions();
-        if (headless) {
-            edgeOptions.addArguments("--headless");
-        }
+
+        // Add arguments for better stability
+        edgeOptions.addArguments("--remote-allow-origins=*");
+        edgeOptions.addArguments("--disable-blink-features=AutomationControlled");
         edgeOptions.addArguments("--no-sandbox");
         edgeOptions.addArguments("--disable-dev-shm-usage");
         edgeOptions.addArguments("--disable-gpu");
         edgeOptions.addArguments("--window-size=1920,1080");
+
+        if (headless) {
+            edgeOptions.addArguments("--headless=new"); // Use new headless mode
+        }
 
         WebDriver driver = new EdgeDriver(edgeOptions);
         System.out.println("Microsoft Edge WebDriver created successfully.");
