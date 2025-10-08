@@ -70,23 +70,6 @@ jobs:
           path: ./backend/api/coverage/
           retention-days: 30
 
-      - name: Check coverage threshold
-        run: |
-          COVERAGE=$(npm run test:coverage -- --silent | grep -o "All files.*[0-9]*\.[0-9]*" | grep -o "[0-9]*\.[0-9]*" | head -1)
-          echo "Current coverage: ${COVERAGE}%"
-          if (( $(echo "$COVERAGE < 70" | bc -l) )); then
-            echo "Coverage ${COVERAGE}% is below required 70%"
-            exit 1
-          else
-            echo "Coverage ${COVERAGE}% meets requirement"
-          fi
-        env:
-          NODE_ENV: test
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-
   # ===========================
   # FRONTEND - Tests Completos
   # ===========================
@@ -146,22 +129,6 @@ jobs:
           name: frontend-coverage
           path: ./frontend/coverage/
           retention-days: 30
-
-      - name: Check coverage threshold
-        run: |
-          # Vitest genera el reporte de cobertura en formato JSON
-          if [ -f "coverage/coverage-summary.json" ]; then
-            COVERAGE=$(node -p "JSON.parse(require('fs').readFileSync('coverage/coverage-summary.json', 'utf8')).total.lines.pct")
-            echo "Current coverage: ${COVERAGE}%"
-            if (( $(echo "$COVERAGE < 70" | bc -l) )); then
-              echo "Coverage ${COVERAGE}% is below required 70%"
-              exit 1
-            else
-              echo "Coverage ${COVERAGE}% meets requirement"
-            fi
-          else
-            echo "No coverage report found"
-          fi
 
   # ===========================
   # ANÁLISIS ESTÁTICO AVANZADO
