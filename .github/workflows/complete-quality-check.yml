@@ -41,27 +41,27 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SMASHLY.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Run integration tests
         run: npm run test:integration
         env:
           NODE_ENV: test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SMASHLY.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Generate coverage report
         run: npm run test:coverage
         env:
           NODE_ENV: test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SMASHLY.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Upload backend coverage
         uses: actions/upload-artifact@v4
@@ -83,9 +83,9 @@ jobs:
         env:
           NODE_ENV: test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SMASHLY.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
   # ===========================
   # FRONTEND - Tests Completos
@@ -116,8 +116,8 @@ jobs:
       - name: Build application
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       - name: Run unit tests
         run: npm run test:unit
@@ -289,8 +289,8 @@ jobs:
         working-directory: ./frontend
         run: npm run build
         env:
-          VITE_SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       # Iniciar aplicación en background
       - name: Start backend server
@@ -302,9 +302,9 @@ jobs:
           NODE_ENV: test
           PORT: 3001
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SMASHLY.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
           FRONTEND_URL: http://localhost:3000
 
       - name: Start frontend server
@@ -313,8 +313,8 @@ jobs:
           npm run preview -- --port 3000 &
           echo $! > frontend.pid
         env:
-          VITE_SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          VITE_SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       # Esperar que los servicios estén listos
       - name: Wait for services
@@ -331,9 +331,9 @@ jobs:
         run: |
           mvn test -Dtest=E2ETestSuite -Dtest.browser=${{ matrix.browser }} -Dtest.headless=true
         env:
-          SUPABASE_URL: ${{ secrets.SMASHLY.SUPABASE_URL }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SMASHLY.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_ANON_KEY: ${{ secrets.SMASHLY.SUPABASE_ANON_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
 
       # Cleanup
       - name: Stop services
