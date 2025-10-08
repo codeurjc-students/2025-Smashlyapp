@@ -294,8 +294,8 @@ jobs:
 
       # Ejecutar tests E2E
       - name: Run E2E tests (${{ matrix.browser }})
-        working-directory: ./testing
         run: |
+          cd testing
           mvn test -Dtest=E2ETestSuite -Dtest.browser=${{ matrix.browser }} -Dtest.headless=true
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
