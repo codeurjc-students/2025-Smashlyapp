@@ -1,0 +1,115 @@
+openapi: 3.0.0
+info:
+  title: Smashly App - API Documentation
+  description: Documentación de la API de Smashly App
+  version: 1.0.0
+servers:
+  - url: http://localhost:3001/api
+    description: Servidor de producción
+paths:
+  /health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: Servicio OK
+
+  /rackets:
+    get:
+      summary: Obtener palas (con paginación opcional)
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Lista de palas
+
+  /rackets/search:
+    get:
+      summary: Buscar palas por query
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Resultados de búsqueda
+
+  /rackets/filter:
+    get:
+      summary: Filtrar palas con filtros avanzados
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Palas filtradas
+
+  /rackets/bestsellers:
+    get:
+      summary: Obtener palas más vendidas
+      responses:
+        "200":
+          description: Lista de bestsellers
+
+  /rackets/offers:
+    get:
+      summary: Obtener palas en oferta
+      responses:
+        "200":
+          description: Lista de ofertas
+
+  /rackets/brands:
+    get:
+      summary: Obtener marcas disponibles
+      responses:
+        "200":
+          description: Lista de marcas
+
+  /rackets/stats:
+    get:
+      summary: Estadísticas de palas
+      responses:
+        "200":
+          description: Estadísticas
+
+  /rackets/brands/{brand}:
+    get:
+      summary: Obtener palas por marca
+      parameters:
+        - in: path
+          name: brand
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Palas de la marca
+
+  /rackets/{id}:
+    get:
+      summary: Obtener una pala por ID
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle de la pala
+        "404":
+          description: Pala no encontrada
