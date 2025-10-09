@@ -11,6 +11,9 @@ import racketRoutes from "./routes/rackets";
 import userRoutes from "./routes/users";
 import healthRoutes from "./routes/health";
 import authRoutes from "./routes/auth";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
+import path from "path";
 
 // Validar configuración al iniciar
 validateConfig();
@@ -71,13 +74,31 @@ app.use("/api/auth", authRoutes);
 app.use("/api/rackets", racketRoutes);
 app.use("/api/users", userRoutes);
 
+// Swagger UI - servir OpenAPI spec desde docs/api-docs.yaml
+try {
+  const swaggerPath = path.join(__dirname, "../docs/api-docs.yaml");
+  const swaggerDocument = YAML.load(swaggerPath);
+
+  // UI en /api-docs
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+  // Spec JSON en /api-docs/spec
+  app.get("/api-docs/spec", (req, res) => {
+    res.json(swaggerDocument);
+  });
+} catch (err) {
+  console.warn(
+    "Swagger UI no iniciado: no se pudo cargar docs/api-docs.yaml",
+    err
+  );
+}
+
 // Endpoint de documentación básica
 app.get("/api/docs", (req, res) => {
   res.json({
     title: "Smashly API Documentation",
     version: "1.0.0",
-    description:
-      "API REST para sistema de gestión de palas de pádel",
+    description: "API REST para sistema de gestión de palas de pádel",
     endpoints: {
       health: "GET /api/health - Health check",
       auth: {

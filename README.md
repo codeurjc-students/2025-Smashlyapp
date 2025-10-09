@@ -1,4 +1,3 @@
-
 <p align="center">
   <img src="public/images/icons/smashly-banner.svg" alt="Smashly App - Your game, your racket" />
 </p>
@@ -16,6 +15,7 @@ The application provides a **detailed catalog and intelligent comparator** 📊 
 ---
 
 ## 📗 Documentation
+
 1. **🎯 [Objectives](docs/objectives.md)**
 2. **📋 [Methodology](docs/methodology.md)**
 3. **📅 [Planification](docs/planification.md)**
@@ -23,6 +23,7 @@ The application provides a **detailed catalog and intelligent comparator** 📊 
 5. **📊 [Analysis](docs/analysis.md)**
 6. **🔄 [Following](docs/following.md)**
 7. **👥 [Authors](docs/authors.md)**
+8. **🧑🏻‍💻 [Development guide](docs/development-guide.md)**
 
 ---
 

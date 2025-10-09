@@ -233,7 +233,6 @@ test-results/
 coverage/
 .nyc_output/
 junit.xml
-*.xml
 
 # E2E testing
 testing/screenshots/
