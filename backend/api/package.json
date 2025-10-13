@@ -18,7 +18,7 @@
     "lint": "eslint src --ext .js",
     "lint:fix": "eslint src --ext .ts --fix",
     "clean": "rimraf dist",
-    "generate-api-docs": "redoc-cli bundle docs/api-docs.yaml -o ../../docs/index.html"
+    "generate-api-docs": "redocly build-docs ../../docs/api-docs.yaml -o ../../docs/index.html"
   },
   "keywords": [
     "padel",
@@ -45,6 +45,7 @@
     "yamljs": "^0.3.0"
   },
   "devDependencies": {
+    "@redocly/cli": "^2.5.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
@@ -65,7 +66,6 @@
     "eslint": "^8.55.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
-    "redoc-cli": "^0.13.21",
     "rimraf": "^5.0.5",
     "supertest": "^6.3.3",
     "swagger-jsdoc": "^6.2.8",
