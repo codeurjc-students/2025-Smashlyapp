@@ -17,7 +17,8 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint src --ext .js",
     "lint:fix": "eslint src --ext .ts --fix",
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "generate-api-docs": "redoc-cli bundle docs/api-docs.yaml -o ../../docs/api-docs.html"
   },
   "keywords": [
     "padel",
@@ -64,6 +65,7 @@
     "eslint": "^8.55.0",
     "jest": "^29.7.0",
     "nodemon": "^3.0.1",
+    "redoc-cli": "^0.13.21",
     "rimraf": "^5.0.5",
     "supertest": "^6.3.3",
     "swagger-jsdoc": "^6.2.8",
