@@ -9,7 +9,7 @@ import {
 /**
  * Función auxiliar para calcular el mejor precio entre las tiendas disponibles
  */
-function calculateBestPrice(racket: any): {
+export function calculateBestPrice(racket: any): {
   precio_actual: number;
   precio_original: number | null;
   descuento_porcentaje: number;
@@ -81,7 +81,7 @@ function calculateBestPrice(racket: any): {
 /**
  * Función auxiliar para procesar los datos de la base de datos y agregar campos computados
  */
-function processRacketData(rawData: any[]): Racket[] {
+export function processRacketData(rawData: any[]): Racket[] {
   return rawData.map((item) => {
     const bestPrice = calculateBestPrice(item);
 

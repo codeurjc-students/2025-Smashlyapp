@@ -113,3 +113,6 @@ static/
 *.sqlite
 *.sqlite3
 *.db
+
+
+coverage-backend

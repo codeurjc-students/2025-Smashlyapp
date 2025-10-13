@@ -2,8 +2,12 @@ package com.smashly.config;
 
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.edge.EdgeDriver;
 import org.openqa.selenium.edge.EdgeOptions;
+import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
@@ -12,10 +16,11 @@ import java.time.Duration;
 
 /**
  * WebDriver configuration factory for E2E tests
- * Automatically selects Safari on macOS and Edge on Windows
+ * Supports Safari (macOS), Edge (Windows), Chrome, and Firefox
  */
 public class WebDriverConfig {
 
+    private static final String BROWSER_PROPERTY = "test.browser";
     private static final String HEADLESS_PROPERTY = "test.headless";
     private static final String TIMEOUT_PROPERTY = "test.timeout";
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
@@ -24,8 +29,8 @@ public class WebDriverConfig {
     private static final int DEFAULT_TIMEOUT = 10;
 
     /**
-     * Creates and configures a WebDriver instance based on the operating system.
-     * Uses Safari on macOS and Edge on Windows.
+     * Creates and configures a WebDriver instance based on system properties or OS.
+     * Priority: test.browser property > OS detection
      */
     public static WebDriver createDriver() {
         System.out.println("Detecting operating system: " + OS_NAME);
@@ -33,15 +38,39 @@ public class WebDriverConfig {
         boolean headless = Boolean
                 .parseBoolean(System.getProperty(HEADLESS_PROPERTY, String.valueOf(DEFAULT_HEADLESS)));
 
+        // Check for explicit browser property first
+        String browserProperty = System.getProperty(BROWSER_PROPERTY);
         WebDriver driver;
 
-        if (isMacOS()) {
-            driver = createSafariDriver(headless);
-        } else if (isWindows()) {
-            driver = createEdgeDriver(headless);
+        if (browserProperty != null && !browserProperty.isEmpty()) {
+            System.out.println("Using browser from property: " + browserProperty);
+            switch (browserProperty.toLowerCase()) {
+                case "chrome":
+                    driver = createChromeDriver(headless);
+                    break;
+                case "firefox":
+                    driver = createFirefoxDriver(headless);
+                    break;
+                case "edge":
+                    driver = createEdgeDriver(headless);
+                    break;
+                case "safari":
+                    driver = createSafariDriver(headless);
+                    break;
+                default:
+                    System.out.println("Unknown browser: " + browserProperty + ". Defaulting to Chrome.");
+                    driver = createChromeDriver(headless);
+            }
         } else {
-            System.out.println("Unsupported OS detected. Defaulting to Edge driver.");
-            driver = createEdgeDriver(headless);
+            // Auto-detect based on OS
+            if (isMacOS()) {
+                driver = createSafariDriver(headless);
+            } else if (isWindows()) {
+                driver = createEdgeDriver(headless);
+            } else {
+                System.out.println("Linux/Unix detected. Defaulting to Chrome.");
+                driver = createChromeDriver(headless);
+            }
         }
 
         // Configure timeouts
@@ -78,30 +107,110 @@ public class WebDriverConfig {
     }
 
     /**
+     * Creates and configures a Chrome WebDriver instance.
+     */
+    private static WebDriver createChromeDriver(boolean headless) {
+        System.out.println("Configuring WebDriver for Chrome...");
+
+        try {
+            WebDriverManager.chromedriver().setup();
+            System.out.println("Chrome WebDriver setup completed.");
+        } catch (Exception e) {
+            System.err.println("WebDriverManager error: " + e.getMessage());
+            throw new RuntimeException("Failed to setup Chrome WebDriver", e);
+        }
+
+        ChromeOptions chromeOptions = new ChromeOptions();
+        chromeOptions.addArguments("--remote-allow-origins=*");
+        chromeOptions.addArguments("--disable-blink-features=AutomationControlled");
+        chromeOptions.addArguments("--no-sandbox");
+        chromeOptions.addArguments("--disable-dev-shm-usage");
+        chromeOptions.addArguments("--disable-gpu");
+        chromeOptions.addArguments("--window-size=1920,1080");
+
+        if (headless) {
+            chromeOptions.addArguments("--headless=new");
+        }
+
+        try {
+            WebDriver driver = new ChromeDriver(chromeOptions);
+            System.out.println("Chrome WebDriver created successfully.");
+            return driver;
+        } catch (Exception e) {
+            System.err.println("Failed to create Chrome WebDriver: " + e.getMessage());
+            throw new RuntimeException("Could not initialize Chrome WebDriver", e);
+        }
+    }
+
+    /**
+     * Creates and configures a Firefox WebDriver instance.
+     */
+    private static WebDriver createFirefoxDriver(boolean headless) {
+        System.out.println("Configuring WebDriver for Firefox...");
+
+        try {
+            WebDriverManager.firefoxdriver().setup();
+            System.out.println("Firefox WebDriver setup completed.");
+        } catch (Exception e) {
+            System.err.println("WebDriverManager error: " + e.getMessage());
+            throw new RuntimeException("Failed to setup Firefox WebDriver", e);
+        }
+
+        FirefoxOptions firefoxOptions = new FirefoxOptions();
+        firefoxOptions.addArguments("--width=1920");
+        firefoxOptions.addArguments("--height=1080");
+
+        if (headless) {
+            firefoxOptions.addArguments("--headless");
+        }
+
+        try {
+            WebDriver driver = new FirefoxDriver(firefoxOptions);
+            System.out.println("Firefox WebDriver created successfully.");
+            return driver;
+        } catch (Exception e) {
+            System.err.println("Failed to create Firefox WebDriver: " + e.getMessage());
+            throw new RuntimeException("Could not initialize Firefox WebDriver", e);
+        }
+    }
+
+    /**
      * Creates and configures an Edge WebDriver instance for Windows.
      */
     private static WebDriver createEdgeDriver(boolean headless) {
-        System.out.println("Configuring WebDriver for Microsoft Edge on Windows...");
+        System.out.println("Configuring WebDriver for Microsoft Edge...");
 
-        // Setup for Edge
         try {
-            WebDriverManager.edgedriver().setup();
+            WebDriverManager.edgedriver()
+                    .clearDriverCache()
+                    .clearResolutionCache()
+                    .setup();
+            System.out.println("Edge WebDriver setup completed.");
         } catch (Exception e) {
-            System.out.println("WebDriverManager failed, using system Edge driver as fallback.");
+            System.err.println("WebDriverManager error: " + e.getMessage());
+            throw new RuntimeException("Failed to setup Edge WebDriver", e);
         }
 
         EdgeOptions edgeOptions = new EdgeOptions();
-        if (headless) {
-            edgeOptions.addArguments("--headless");
-        }
+        edgeOptions.addArguments("--remote-allow-origins=*");
+        edgeOptions.addArguments("--disable-blink-features=AutomationControlled");
         edgeOptions.addArguments("--no-sandbox");
         edgeOptions.addArguments("--disable-dev-shm-usage");
         edgeOptions.addArguments("--disable-gpu");
         edgeOptions.addArguments("--window-size=1920,1080");
 
-        WebDriver driver = new EdgeDriver(edgeOptions);
-        System.out.println("Microsoft Edge WebDriver created successfully.");
-        return driver;
+        if (headless) {
+            edgeOptions.addArguments("--headless=new");
+        }
+
+        try {
+            WebDriver driver = new EdgeDriver(edgeOptions);
+            System.out.println("Microsoft Edge WebDriver created successfully.");
+            return driver;
+        } catch (Exception e) {
+            System.err.println("Failed to create Edge WebDriver: " + e.getMessage());
+            throw new RuntimeException("Could not initialize Edge WebDriver", e);
+        }
     }
 
     /**
