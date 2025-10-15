@@ -4,7 +4,7 @@ import app from "./app";
 // Cargar variables de entorno
 dotenv.config();
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 const server = app.listen(PORT, () => {
   console.log(`🚀 Smashly API server running on port ${PORT}`);

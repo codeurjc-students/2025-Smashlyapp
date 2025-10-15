@@ -2,7 +2,7 @@ import { ApiConfig } from "../types";
 
 // Configuración principal de la API
 export const config: ApiConfig = {
-  port: parseInt(process.env.PORT || "3001", 10),
+  port: parseInt(process.env.PORT || "3000", 10),
   nodeEnv: process.env.NODE_ENV || "development",
   corsOrigin:
     process.env.NODE_ENV === "production"

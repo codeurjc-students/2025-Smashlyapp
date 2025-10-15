@@ -518,7 +518,6 @@ const RacketDetailPage: React.FC = () => {
           </ErrorDescription>
           <BackButton to="/catalog">
             <FiArrowLeft />
-            Volver al catálogo
           </BackButton>
         </ErrorContainer>
       </Container>
@@ -531,8 +530,7 @@ const RacketDetailPage: React.FC = () => {
       <Header>
         <HeaderContent>
           <BackButton to="/catalog">
-            <FiArrowLeft />
-            Volver
+            <FiArrowLeft />            
           </BackButton>
           <HeaderTitle>Detalles de la Pala</HeaderTitle>
         </HeaderContent>
