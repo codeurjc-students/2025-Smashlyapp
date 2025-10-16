@@ -186,15 +186,3 @@ declare global {
   }
 }
 
-// Exponer utilidades en desarrollo
-if (import.meta.env.DEV) {
-  window.__smashly_auth_utils = {
-    forceClean: forceCleanAuthStorage,
-    diagnose: diagnoseAuthState,
-    detectOrphaned: detectOrphanedTokens,
-  };
-
-  console.log(
-    "🛠️ Auth utils available in dev mode. Use window.__smashly_auth_utils"
-  );
-}
