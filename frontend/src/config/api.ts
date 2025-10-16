@@ -5,7 +5,7 @@
 
 // URL base de la API
 export const API_URL =
-  (import.meta as any).env?.VITE_API_URL || "http://localhost:3000";
+  (import.meta as any).env?.VITE_API_URL || "http://localhost:443";
 
 // Endpoints de la API
 export const API_ENDPOINTS = {

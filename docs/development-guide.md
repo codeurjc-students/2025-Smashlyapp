@@ -209,7 +209,7 @@ cd 2025-Smashlyapp
 cd backend/api
 npm ci
 npm run build
-export PORT=3000 NODE_ENV=development
+export PORT=443 NODE_ENV=development
 npm start
 ```
 
@@ -219,7 +219,7 @@ npm start
 cd frontend
 npm ci
 npm run build
-npm run preview -- --port 3000
+npm run preview -- --port 443
 ```
 
 #### 💾 Base de datos (Supabase)
@@ -234,9 +234,9 @@ SUPABASE_SERVICE_ROLE_KEY=
 
 Accesos locales:
 
-- 🌐 SPA → [http://localhost:3000](http://localhost:3000)
-- ⚙️ API → [http://localhost:3000/api/health](http://localhost:3000/api/health)
-- 📘 Docs → [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+- 🌐 SPA → [http://localhost:443](http://localhost:443)
+- ⚙️ API → [http://localhost:443/api/health](http://localhost:443/api/health)
+- 📘 Docs → [http://localhost:443/api/docs](http://localhost:443/api/docs)
 
 ---
 
@@ -272,8 +272,8 @@ npm run test:coverage
 ```bash
 cd testing
 mvn test -Dtest.browser=chrome -Dtest.headless=true \
-  -Dapi.url=http://localhost:3000 \
-  -Dfrontend.url=http://localhost:3000
+  -Dapi.url=http://localhost:443 \
+  -Dfrontend.url=http://localhost:443
 ```
 
 ---

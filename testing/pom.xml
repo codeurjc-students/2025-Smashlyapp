@@ -28,11 +28,11 @@
         <!-- Test configuration -->
         <test.browser>chrome</test.browser>
         <test.headless>true</test.headless>
-        <test.base.url>http://localhost:3000</test.base.url>
-        <test.api.url>http://localhost:3000</test.api.url>
+        <test.base.url>http://localhost:443</test.base.url>
+        <test.api.url>http://localhost:443</test.api.url>
         <test.timeout>10</test.timeout>
         <frontend.url>http://localhost:5173</frontend.url>
-        <api.url>http://localhost:3000</api.url>
+        <api.url>http://localhost:443</api.url>
     </properties>
 
     <dependencies>

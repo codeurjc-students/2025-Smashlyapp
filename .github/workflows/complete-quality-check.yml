@@ -201,12 +201,12 @@ jobs:
           echo $! > backend.pid
         env:
           NODE_ENV: test
-          PORT: 3000
+          PORT: 443
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          FRONTEND_URL: http://localhost:3000
+          FRONTEND_URL: http://localhost:443
 
       - name: Start frontend server
         working-directory: ./frontend
@@ -221,7 +221,7 @@ jobs:
       - name: Wait for services
         run: |
           echo "Waiting for backend..."
-          timeout 60 bash -c 'until curl -f http://localhost:3000/api/health; do sleep 2; done'
+          timeout 60 bash -c 'until curl -f http://localhost:443/api/health; do sleep 2; done'
           echo "Backend is ready!"
 
           echo "Waiting for frontend..."
@@ -234,7 +234,7 @@ jobs:
       - name: Run E2E tests (${{ matrix.browser }})
         run: |
           cd testing
-          mvn test -Dtest=E2ETestSuite -Dtest.browser=${{ matrix.browser }} -Dtest.headless=true -Dfrontend.url=http://localhost:5173 -Dapi.url=http://localhost:3000
+          mvn test -Dtest=E2ETestSuite -Dtest.browser=${{ matrix.browser }} -Dtest.headless=true -Dfrontend.url=http://localhost:5173 -Dapi.url=http://localhost:443
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}

@@ -1,7 +1,5 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
 import styled from "styled-components";
-import FloatingComparisonPanel from "../features/FloatingComparisonPanel";
 import Footer from "./Footer";
 import Header from "./Header";
 import SubHeader from "./SubHeader";
@@ -22,10 +20,6 @@ const Main = styled.main`
 `;
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const location = useLocation();
-
-  // Solo mostrar el panel de comparación en la página de comparador de palas
-  const showComparisonPanel = location.pathname === "/compare-rackets";
 
   return (
     <LayoutContainer>
@@ -33,7 +27,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <SubHeader />
       <Main>{children}</Main>
       <Footer />
-      {showComparisonPanel && <FloatingComparisonPanel />}
     </LayoutContainer>
   );
 };

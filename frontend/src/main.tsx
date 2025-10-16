@@ -33,7 +33,7 @@ createRoot(document.getElementById("root")!).render(
                 color: "#fff",
               },
               success: {
-                duration: 3000,
+                duration: 443,
                 iconTheme: {
                   primary: "#16a34a",
                   secondary: "#fff",

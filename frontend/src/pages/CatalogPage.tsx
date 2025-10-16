@@ -898,7 +898,7 @@ const CatalogPage: React.FC = () => {
         )}
       </MainContent>
 
-      {/* Floating Comparison Panel */}
+      Floating Comparison Panel
       <AnimatePresence>
         {count > 0 && (
           <FloatingPanel
