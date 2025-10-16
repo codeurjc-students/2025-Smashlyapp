@@ -289,9 +289,9 @@ interface UserProfileFormData {
   full_name: string;
   peso: string;
   altura: string;
-  fecha_nacimiento: string;
-  nivel_juego: string;
-  limitaciones: string;
+  birthdate: string;
+  game_level: string;
+  limitations: string;
 }
 
 const UserProfilePage: React.FC = () => {
@@ -303,9 +303,9 @@ const UserProfilePage: React.FC = () => {
     full_name: "",
     peso: "",
     altura: "",
-    fecha_nacimiento: "",
-    nivel_juego: "",
-    limitaciones: "",
+    birthdate: "",
+    game_level: "",
+    limitations: "",
   });
 
   // Cargar datos del perfil cuando el componente se monta
@@ -313,11 +313,11 @@ const UserProfilePage: React.FC = () => {
     if (userProfile) {
       setFormData({
         full_name: userProfile.full_name || "",
-        peso: userProfile.peso?.toString() || "",
-        altura: userProfile.altura?.toString() || "",
-        fecha_nacimiento: userProfile.fecha_nacimiento || "",
-        nivel_juego: userProfile.nivel_juego || "",
-        limitaciones: userProfile.limitaciones || "",
+        peso: userProfile.weight?.toString() || "",
+        altura: userProfile.height?.toString() || "",
+        birthdate: userProfile.birthdate || "",
+        game_level: userProfile.game_level || "",
+        limitations: userProfile.limitations?.[0] || "", // Tomar el primer elemento del array
       });
     }
   }, [userProfile]);
@@ -358,8 +358,8 @@ const UserProfilePage: React.FC = () => {
       return false;
     }
 
-    if (formData.fecha_nacimiento) {
-      const birthDate = new Date(formData.fecha_nacimiento);
+    if (formData.birthdate) {
+      const birthDate = new Date(formData.birthdate);
       const today = new Date();
       const age = today.getFullYear() - birthDate.getFullYear();
 
@@ -389,11 +389,11 @@ const UserProfilePage: React.FC = () => {
     try {
       const updates = {
         full_name: formData.full_name || undefined,
-        peso: formData.peso ? Number(formData.peso) : undefined,
-        altura: formData.altura ? Number(formData.altura) : undefined,
-        fecha_nacimiento: formData.fecha_nacimiento || undefined,
-        nivel_juego: formData.nivel_juego || undefined,
-        limitaciones: formData.limitaciones || undefined,
+        weight: formData.peso ? Number(formData.peso) : undefined,
+        height: formData.altura ? Number(formData.altura) : undefined,
+        birthdate: formData.birthdate || undefined,
+        game_level: formData.game_level || undefined,
+        limitations: formData.limitations ? [formData.limitations] : undefined, // Convertir a array
       };
 
       await UserProfileService.updateUserProfile(updates);
@@ -486,21 +486,21 @@ const UserProfilePage: React.FC = () => {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label htmlFor="fecha_nacimiento">
+                  <Label htmlFor="birthdate">
                     <FiCalendar size={16} />
                     Fecha de Nacimiento
                   </Label>
                   <Input
-                    id="fecha_nacimiento"
-                    name="fecha_nacimiento"
+                    id="birthdate"
+                    name="birthdate"
                     type="date"
-                    value={formData.fecha_nacimiento}
+                    value={formData.birthdate}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   />
-                  {formData.fecha_nacimiento && (
+                  {formData.birthdate && (
                     <HelperText>
-                      Edad: {calculateAge(formData.fecha_nacimiento)} años
+                      Edad: {calculateAge(formData.birthdate)} años
                     </HelperText>
                   )}
                 </FormGroup>
@@ -563,30 +563,26 @@ const UserProfilePage: React.FC = () => {
 
               <FormGrid>
                 <FormGroup>
-                  <Label htmlFor="nivel_juego">
+                  <Label htmlFor="game_level">
                     <FiTrendingUp size={16} />
                     Nivel de Juego
                   </Label>
                   <Select
-                    id="nivel_juego"
-                    name="nivel_juego"
-                    value={formData.nivel_juego}
+                    id="game_level"
+                    name="game_level"
+                    value={formData.game_level}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   >
                     <option value="">Selecciona tu nivel</option>
-                    <option value="Principiante">
+                    <option value="principiante">
                       Principiante (1.0 - 2.5)
                     </option>
-                    <option value="Intermedio Bajo">
-                      Intermedio Bajo (3.0 - 3.5)
+                    <option value="intermedio">
+                      Intermedio (3.0 - 4.5)
                     </option>
-                    <option value="Intermedio">Intermedio (4.0 - 4.5)</option>
-                    <option value="Intermedio Alto">
-                      Intermedio Alto (5.0 - 5.5)
-                    </option>
-                    <option value="Avanzado">Avanzado (6.0 - 6.5)</option>
-                    <option value="Experto">Experto (7.0+)</option>
+                    <option value="avanzado">Avanzado (5.0 - 6.5)</option>
+                    <option value="profesional">Profesional (7.0+)</option>
                   </Select>
                   <HelperText>
                     Basado en el sistema de clasificación Playtomic o similar
@@ -600,15 +596,15 @@ const UserProfilePage: React.FC = () => {
               </SectionTitle>
 
               <FormGroup>
-                <Label htmlFor="limitaciones">
+                <Label htmlFor="limitations">
                   <FiAlertCircle size={16} />
                   Limitaciones o Condiciones Especiales
                 </Label>
                 <TextArea
-                  id="limitaciones"
-                  name="limitaciones"
+                  id="limitations"
+                  name="limitations"
                   placeholder="Ej: Problemas de codo, espalda, muñeca, preferencias especiales, etc."
-                  value={formData.limitaciones}
+                  value={formData.limitations}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                 />

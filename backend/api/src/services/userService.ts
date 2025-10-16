@@ -64,11 +64,11 @@ export class UserService {
           email: profileData.email,
           nickname: profileData.nickname,
           full_name: profileData.fullName || "",
-          peso: profileData.peso,
-          altura: profileData.altura,
-          fecha_nacimiento: profileData.fecha_nacimiento,
-          nivel_juego: profileData.nivel_juego,
-          limitaciones: profileData.limitaciones,
+          weight: profileData.weight,
+          height: profileData.height,
+          birthdate: profileData.birthdate,
+          game_level: profileData.game_level,
+          limitations: profileData.limitations,
         })
         .select()
         .single();
@@ -237,12 +237,12 @@ export class UserService {
             "created_at",
             new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
           ),
-        client.from("user_profiles").select("nivel_juego"),
+        client.from("user_profiles").select("game_level"),
       ]);
 
       const byLevel: Record<string, number> = {};
       levelResult.data?.forEach((user) => {
-        const level = user.nivel_juego || "No especificado";
+        const level = user.game_level || "No especificado";
         byLevel[level] = (byLevel[level] || 0) + 1;
       });
 
@@ -284,11 +284,11 @@ export class UserService {
       errors.push("Email inválido");
     }
 
-    if (data.peso && (data.peso < 30 || data.peso > 200)) {
+    if (data.weight && (data.weight < 30 || data.weight > 200)) {
       errors.push("El peso debe estar entre 30 y 200 kg");
     }
 
-    if (data.altura && (data.altura < 100 || data.altura > 250)) {
+    if (data.height && (data.height < 100 || data.height > 250)) {
       errors.push("La altura debe estar entre 100 y 250 cm");
     }
 

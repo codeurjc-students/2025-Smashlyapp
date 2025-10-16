@@ -1,5 +1,6 @@
 import { useComparison } from "@/contexts/ComparisonContext";
 import { useRackets } from "@/contexts/RacketsContext";
+import { useAuth } from "@/contexts/AuthContext";
 import { Racket } from "@/types/racket";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
@@ -12,9 +13,11 @@ import {
   FiStar,
   FiTag,
   FiTrendingUp,
+  FiHeart,
 } from "react-icons/fi";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
+import { AddToListModal } from "../components/features/AddToListModal";
 
 // Styled Components
 const Container = styled.div`
@@ -429,10 +432,12 @@ const RacketDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { addRacket, isRacketInComparison, count } = useComparison();
   const { rackets, loading } = useRackets();
+  const { isAuthenticated } = useAuth();
 
   // State
   const [racket, setRacket] = useState<Racket | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showAddToListModal, setShowAddToListModal] = useState(false);
 
   // Get racket ID from URL params
   const racketId = searchParams.get("id");
@@ -530,7 +535,7 @@ const RacketDetailPage: React.FC = () => {
       <Header>
         <HeaderContent>
           <BackButton to="/catalog">
-            <FiArrowLeft />            
+            <FiArrowLeft />
           </BackButton>
           <HeaderTitle>Detalles de la Pala</HeaderTitle>
         </HeaderContent>
@@ -597,7 +602,13 @@ const RacketDetailPage: React.FC = () => {
                 Ver en Padel Nuestro
               </PrimaryButton>
 
-              <SecondaryButton
+              {isAuthenticated && (
+                <SecondaryButton onClick={() => setShowAddToListModal(true)}>
+                  <FiHeart />
+                  Añadir a mis listas
+                </SecondaryButton>
+              )}
+              {/* <SecondaryButton
                 onClick={handleAddToComparison}
                 disabled={isRacketInComparison(racket.nombre)}
               >
@@ -618,7 +629,7 @@ const RacketDetailPage: React.FC = () => {
                 <SecondaryButton onClick={handleGoToComparison}>
                   Ir al Comparador ({count})
                 </SecondaryButton>
-              )}
+              )} */}
             </ActionButtons>
           </InfoSection>
         </MainCard>
@@ -704,7 +715,7 @@ const RacketDetailPage: React.FC = () => {
             </SpecificationsCard>
           )}
 
-        {/* Recommendation Card */}
+        {/* Recommendation Card
         <RecommendationCard
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -734,8 +745,18 @@ const RacketDetailPage: React.FC = () => {
               ✨ Buscar mi pala ideal
             </RecommendationButton>
           </div>
-        </RecommendationCard>
+        </RecommendationCard> */}
       </Content>
+
+      {/* Modal para añadir a listas */}
+      {racket && (
+        <AddToListModal
+          isOpen={showAddToListModal}
+          onClose={() => setShowAddToListModal(false)}
+          racketId={racket.id || 0}
+          racketName={`${racket.marca} ${racket.modelo}`}
+        />
+      )}
     </Container>
   );
 };

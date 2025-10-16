@@ -5,11 +5,11 @@ export interface UserProfile {
   nickname: string;
   full_name?: string;
   avatar_url?: string;
-  peso?: number;
-  altura?: number;
-  fecha_nacimiento?: string;
-  nivel_juego?: string;
-  limitaciones?: string;
+  weight?: number; // peso en la base de datos
+  height?: number; // altura en la base de datos
+  birthdate?: string; // fecha_nacimiento en la base de datos
+  game_level?: string; // nivel_juego en la base de datos
+  limitations?: string[]; // limitaciones en la base de datos (array)
   created_at?: string;
   updated_at?: string;
 }
@@ -19,11 +19,11 @@ export interface CreateUserProfileRequest {
   email: string;
   nickname: string;
   fullName?: string;
-  peso?: number;
-  altura?: number;
-  fecha_nacimiento?: string;
-  nivel_juego?: string;
-  limitaciones?: string;
+  weight?: number;
+  height?: number;
+  birthdate?: string;
+  game_level?: string;
+  limitations?: string[];
 }
 
 // Interfaz para actualizar un perfil de usuario
@@ -31,11 +31,11 @@ export interface UpdateUserProfileRequest {
   nickname?: string;
   full_name?: string;
   avatar_url?: string;
-  peso?: number;
-  altura?: number;
-  fecha_nacimiento?: string;
-  nivel_juego?: string;
-  limitaciones?: string;
+  weight?: number;
+  height?: number;
+  birthdate?: string;
+  game_level?: string;
+  limitations?: string[];
 }
 
 // Tipos para autenticación y autorización

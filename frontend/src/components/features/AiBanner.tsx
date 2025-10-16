@@ -172,7 +172,7 @@ const AiBanner: React.FC = () => {
         </FeaturesRow>
 
         <CTASection>
-          <CTAButton
+          {/* <CTAButton
             variant="primary"
             onClick={() => navigate("/rackets")}
             whileHover={{ scale: 1.05 }}
@@ -190,6 +190,10 @@ const AiBanner: React.FC = () => {
           >
             <FiTrendingUp />
             Comparar Palas
+          </CTAButton> */}
+          <CTAButton>
+            <FiZap />
+            Pronto Disponible
           </CTAButton>
         </CTASection>
       </BannerContent>

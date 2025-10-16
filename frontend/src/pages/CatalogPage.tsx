@@ -1,20 +1,23 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import {
-    FiCheck,
-    FiGrid,
-    FiList,
-    FiSearch,
-    FiStar,
-    FiTag,
-    FiTrendingUp,
-    FiX,
+  FiCheck,
+  FiGrid,
+  FiList,
+  FiSearch,
+  FiStar,
+  FiTag,
+  FiTrendingUp,
+  FiX,
+  FiHeart,
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useComparison } from "../contexts/ComparisonContext";
 import { useRackets } from "../contexts/RacketsContext";
+import { useAuth } from "../contexts/AuthContext";
 import { Racket } from "../types/racket";
+import { AddToListModal } from "../components/features/AddToListModal";
 
 // Styled Components
 const Container = styled.div`
@@ -526,6 +529,7 @@ const CatalogPage: React.FC = () => {
   const navigate = useNavigate();
   const { rackets, loading } = useRackets();
   const { addRacket, isRacketInComparison, count } = useComparison();
+  const { isAuthenticated } = useAuth();
 
   // State
   const [filteredRackets, setFilteredRackets] = useState<Racket[]>([]);
@@ -537,6 +541,8 @@ const CatalogPage: React.FC = () => {
   const [sortBy, setSortBy] = useState("name");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [displayCount, setDisplayCount] = useState(12);
+  const [showAddToListModal, setShowAddToListModal] = useState(false);
+  const [selectedRacket, setSelectedRacket] = useState<Racket | null>(null);
 
   // Filter and search effect
   useEffect(() => {
@@ -700,7 +706,6 @@ const CatalogPage: React.FC = () => {
           </StatsContainer>
         </HeaderContent>
       </Header>
-
       {/* Main Content */}
       <MainContent>
         {/* Filters */}
@@ -862,7 +867,20 @@ const CatalogPage: React.FC = () => {
                       >
                         Ver detalles
                       </ViewDetailsButton>
-                      <AddToCompareButton
+                      {isAuthenticated && (
+                        <ViewDetailsButton
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedRacket(racket);
+                            setShowAddToListModal(true);
+                          }}
+                          style={{ background: "#15803d" }}
+                        >
+                          <FiHeart size={14} />
+                          Mis listas
+                        </ViewDetailsButton>
+                      )}
+                      {/* <AddToCompareButton
                         disabled={isRacketInComparison(racket.nombre)}
                         onClick={(e) => handleAddToComparison(racket, e)}
                       >
@@ -877,7 +895,7 @@ const CatalogPage: React.FC = () => {
                             Comparar
                           </>
                         )}
-                      </AddToCompareButton>
+                      </AddToCompareButton> */}
                     </ActionButtons>
                   </RacketInfo>
                 </RacketCard>
@@ -897,8 +915,6 @@ const CatalogPage: React.FC = () => {
           </>
         )}
       </MainContent>
-
-      Floating Comparison Panel
       <AnimatePresence>
         {count > 0 && (
           <FloatingPanel
@@ -918,6 +934,18 @@ const CatalogPage: React.FC = () => {
           </FloatingPanel>
         )}
       </AnimatePresence>
+      {/* Modal para añadir a listas */}
+      {selectedRacket && (
+        <AddToListModal
+          isOpen={showAddToListModal}
+          onClose={() => {
+            setShowAddToListModal(false);
+            setSelectedRacket(null);
+          }}
+          racketId={selectedRacket.id || 0}
+          racketName={`${selectedRacket.marca} ${selectedRacket.modelo}`}
+        />
+      )}
     </Container>
   );
 };

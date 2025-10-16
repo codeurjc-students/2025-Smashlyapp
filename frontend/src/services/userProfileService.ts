@@ -12,11 +12,11 @@ export interface UserProfile {
   nickname: string;
   full_name?: string;
   avatar_url?: string;
-  peso?: number;
-  altura?: number;
-  fecha_nacimiento?: string;
-  nivel_juego?: string;
-  limitaciones?: string;
+  weight?: number;
+  height?: number;
+  birthdate?: string;
+  game_level?: string;
+  limitations?: string[]; // Array de strings en Supabase
   created_at?: string;
   updated_at?: string;
 }
