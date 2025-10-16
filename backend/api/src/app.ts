@@ -80,7 +80,11 @@ try {
   const swaggerDocument = YAML.load(swaggerPath);
 
   // UI en /api-docs
-  app.use("/api/v1/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use(
+    "/api/v1/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument)
+  );
 
   // Spec JSON en /api-docs/spec
   app.get("/api/v1/api-docs/spec", (req, res) => {
@@ -143,11 +147,11 @@ app.use("*", (req, res) => {
     error: "Endpoint not found",
     message: `Route ${req.originalUrl} not found`,
     availableRoutes: [
-      "/api/health",
-      "/api/rackets",
-      "/api/users",
-      "/api/recommendations",
-      "/api/docs",
+      "/api/v1/health",
+      "/api/v1/auth",
+      "/api/v1/rackets",
+      "/api/v1/users",
+      "/api/v1/docs",
     ],
   });
 });

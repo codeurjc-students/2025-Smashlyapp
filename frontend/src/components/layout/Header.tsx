@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { FiMenu, FiSearch, FiX } from "react-icons/fi";
+import { FiMenu, FiSearch, FiX, FiUser } from "react-icons/fi";
 import { Link, useLocation } from "react-router-dom";
 import styled from "styled-components";
-// import { useAuth } from "../../contexts/AuthContext.tsx";
+import { useAuth } from "../../contexts/AuthContext";
 import GlobalSearch from "../features/GlobalSearch";
 
 const HeaderContainer = styled.header`
@@ -150,6 +150,7 @@ const NavLink = styled(Link)<{ isActive: boolean; isMobile?: boolean }>`
       : "transparent"};
   display: block;
   position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 
   ${(props) =>
     props.isMobile &&
@@ -210,6 +211,8 @@ const AuthButton = styled(Link)<{
   transition: all 0.2s ease;
   text-align: center;
   display: block;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 
   ${(props) => {
     if (props.isMobile) {
@@ -267,7 +270,7 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const location = useLocation();
-  // const { user, userProfile, signOut } = useAuth();
+  const { user, userProfile, signOut } = useAuth();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -305,18 +308,41 @@ const Header: React.FC = () => {
         </CentralSearchContainer>
 
         <AuthButtons>
-          <>
-            <AuthButton to="/login" variant="secondary" onClick={closeAllMenus}>
-              Iniciar sesión
-            </AuthButton>
-            <AuthButton
-              to="/register"
-              variant="primary"
-              onClick={closeAllMenus}
-            >
-              Registrarse
-            </AuthButton>
-          </>
+          {userProfile ? (
+            <>
+              <NavLink to="/profile" isActive={isActive("/profile")}>
+                <FiUser style={{ marginRight: "8px" }} />
+                {userProfile.nickname || userProfile.email}
+              </NavLink>
+              <AuthButton
+                as="button"
+                variant="secondary"
+                onClick={async () => {
+                  await signOut();
+                  closeAllMenus();
+                }}
+              >
+                Cerrar sesión
+              </AuthButton>
+            </>
+          ) : (
+            <>
+              <AuthButton
+                to="/login"
+                variant="secondary"
+                onClick={closeAllMenus}
+              >
+                Iniciar sesión
+              </AuthButton>
+              <AuthButton
+                to="/register"
+                variant="primary"
+                onClick={closeAllMenus}
+              >
+                Registrarse
+              </AuthButton>
+            </>
+          )}
         </AuthButtons>
 
         {/* Mobile Elements */}
@@ -376,6 +402,56 @@ const Header: React.FC = () => {
                 >
                   FAQ
                 </NavLink>
+              </MobileNavSection>
+
+              {/* Auth Section for Mobile */}
+              <MobileNavSection>
+                <MobileNavTitle>Cuenta</MobileNavTitle>
+                {userProfile ? (
+                  <>
+                    <NavLink
+                      to="/profile"
+                      isActive={isActive("/profile")}
+                      isMobile
+                      onClick={closeAllMenus}
+                    >
+                      <FiUser style={{ marginRight: "8px" }} />
+                      {userProfile.nickname || userProfile.email}
+                    </NavLink>
+                    <AuthButton
+                      as="button"
+                      variant="secondary"
+                      isMobile
+                      onClick={async () => {
+                        await signOut();
+                        closeAllMenus();
+                      }}
+                      style={{ cursor: "pointer", marginTop: "0.5rem" }}
+                    >
+                      Cerrar sesión
+                    </AuthButton>
+                  </>
+                ) : (
+                  <>
+                    <AuthButton
+                      to="/login"
+                      variant="secondary"
+                      isMobile
+                      onClick={closeAllMenus}
+                    >
+                      Iniciar sesión
+                    </AuthButton>
+                    <AuthButton
+                      to="/register"
+                      variant="primary"
+                      isMobile
+                      onClick={closeAllMenus}
+                      style={{ marginTop: "0.5rem" }}
+                    >
+                      Registrarse
+                    </AuthButton>
+                  </>
+                )}
               </MobileNavSection>
             </>
           )}

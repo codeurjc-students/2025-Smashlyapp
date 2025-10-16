@@ -73,10 +73,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const profile = await UserProfileService.getUserProfile();
 
       if (!profile) {
-        console.warn("No profile found for authenticated user.");
+        console.warn(
+          "No profile found for authenticated user. User needs to complete profile setup."
+        );
+        // No limpiamos el token aquí, el usuario está autenticado pero sin perfil completo
         setUser(null);
         setUserProfile(null);
-        clearAuthStorage();
         return;
       }
 
@@ -85,15 +87,25 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log("User profile loaded successfully:", profile);
     } catch (error) {
       console.error("Error loading user profile:", error);
-      setUser(null);
-      setUserProfile(null);
-      clearAuthStorage();
+      // Solo limpiamos en caso de error de autenticación, no si falta el perfil
+      if (
+        error instanceof Error &&
+        (error.message.includes("401") || error.message.includes("Token"))
+      ) {
+        setUser(null);
+        setUserProfile(null);
+        clearAuthStorage();
+      } else {
+        // Otros errores no deberían cerrar la sesión
+        setUser(null);
+        setUserProfile(null);
+      }
     }
   };
 
   useEffect(() => {
     // Detectar tokens huérfanos al inicializar (solo en desarrollo)
-    if (process.env.NODE_ENV === 'development') {
+    if (process.env.NODE_ENV === "development") {
       const orphanedTokens = detectOrphanedTokens();
       if (orphanedTokens.length > 0) {
         console.warn(
@@ -155,16 +167,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!response.ok || !result.success) {
         const errorMessage =
-          result.message || result.error || "Error desconocido durante el registro";
+          result.message ||
+          result.error ||
+          "Error desconocido durante el registro";
         console.error("API SignUp error:", errorMessage);
         return { data: null, error: errorMessage };
       }
 
-      const { token, user: registeredUser } = result.data;
+      const { access_token, user: registeredUser } = result.data;
 
-      if (token) {
+      if (access_token) {
         console.log("Registration successful, storing token...");
-        setAuthToken(token);
+        setAuthToken(access_token);
         await loadUserProfile();
       }
 
@@ -204,31 +218,38 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (!response.ok || !result.success) {
         const errorMessage =
-          result.message || result.error || "Error desconocido durante el inicio de sesión";
+          result.message ||
+          result.error ||
+          "Error desconocido durante el inicio de sesión";
         console.error("API SignIn error:", errorMessage);
 
         // Proporcionar mensajes de error más específicos
         let friendlyErrorMessage = errorMessage;
 
-        if (errorMessage.toLowerCase().includes("invalid") || 
-            errorMessage.toLowerCase().includes("incorrect")) {
-          friendlyErrorMessage = "Credenciales inválidas. Verifica tu email y contraseña.";
+        if (
+          errorMessage.toLowerCase().includes("invalid") ||
+          errorMessage.toLowerCase().includes("incorrect")
+        ) {
+          friendlyErrorMessage =
+            "Credenciales inválidas. Verifica tu email y contraseña.";
         } else if (errorMessage.toLowerCase().includes("not found")) {
           friendlyErrorMessage = "No existe una cuenta con este email.";
         } else if (errorMessage.toLowerCase().includes("not confirmed")) {
-          friendlyErrorMessage = "Por favor confirma tu email antes de iniciar sesión.";
+          friendlyErrorMessage =
+            "Por favor confirma tu email antes de iniciar sesión.";
         } else if (errorMessage.toLowerCase().includes("too many")) {
-          friendlyErrorMessage = "Demasiados intentos. Espera un momento antes de intentar de nuevo.";
+          friendlyErrorMessage =
+            "Demasiados intentos. Espera un momento antes de intentar de nuevo.";
         }
 
         return { data: null, error: friendlyErrorMessage };
       }
 
-      const { token, user: loggedInUser } = result.data;
+      const { access_token, user: loggedInUser } = result.data;
 
-      if (token) {
+      if (access_token) {
         console.log("Login successful, storing token...");
-        setAuthToken(token);
+        setAuthToken(access_token);
         await loadUserProfile();
       }
 
