@@ -1,4 +1,9 @@
-import { supabase } from "../config/supabase";
+import {
+  API_ENDPOINTS,
+  buildApiUrl,
+  getCommonHeaders,
+  ApiResponse,
+} from "../config/api";
 
 // Interfaz para el perfil de usuario
 export interface UserProfile {
@@ -16,172 +21,142 @@ export interface UserProfile {
   updated_at?: string;
 }
 
+/**
+ * Helper para manejar respuestas de la API
+ */
+async function handleApiResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      errorData.message || `Error: ${response.status} ${response.statusText}`
+    );
+  }
+
+  const data: ApiResponse<T> = await response.json();
+
+  if (!data.success) {
+    throw new Error(data.message || data.error || "Error desconocido");
+  }
+
+  return data.data as T;
+}
+
 export class UserProfileService {
   /**
    * Crea un perfil de usuario después del registro
+   * Nota: El backend ya maneja la verificación de perfiles existentes y nicknames
+   * El userId se obtiene del token JWT en el backend
    */
   static async createUserProfile(
-    userId: string,
-    email: string,
     nickname: string,
     fullName?: string
   ): Promise<UserProfile> {
     try {
-      // Verificar si ya existe un perfil
-      const existingProfile = await this.getUserProfile(userId);
-      if (existingProfile) {
-        console.log("Profile already exists for user:", userId);
-        return existingProfile;
-      }
+      const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
+      const response = await fetch(url, {
+        method: "POST",
+        headers: getCommonHeaders(),
+        body: JSON.stringify({
+          nickname,
+          full_name: fullName || "",
+        }),
+      });
 
-      // El nickname ya fue verificado como disponible en el AuthContext
-      // Solo verificamos si realmente no está disponible por race condition
-      const isStillAvailable = await this.isNicknameAvailable(nickname);
-      if (!isStillAvailable) {
+      const profile = await handleApiResponse<UserProfile>(response);
+      console.log("User profile created successfully:", profile);
+      return profile;
+    } catch (error: any) {
+      console.error("Error creating user profile:", error);
+      if (error.message?.includes("nickname")) {
         throw new Error(`El nickname '${nickname}' ya no está disponible`);
       }
-
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .insert({
-          id: userId,
-          email,
-          nickname: nickname,
-          full_name: fullName || "",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        })
-        .select()
-        .single();
-
-      if (error) {
-        console.error("Error creating user profile:", error);
-        throw new Error(
-          `Error al crear el perfil de usuario: ${error.message}`
-        );
-      }
-
-      console.log("User profile created successfully:", data);
-      return data;
-    } catch (error: any) {
-      console.error("Unexpected error in createUserProfile:", error);
-      if (error.message?.includes("Error al crear el perfil")) {
-        throw error;
-      }
-      throw new Error("Error inesperado al crear el perfil de usuario");
+      throw new Error(error.message || "Error inesperado al crear el perfil de usuario");
     }
   }
 
   /**
-   * Obtiene el perfil de un usuario por su ID
+   * Obtiene el perfil del usuario autenticado desde la API REST
+   * El userId se obtiene del token JWT en el backend
    */
-  static async getUserProfile(userId: string): Promise<UserProfile | null> {
+  static async getUserProfile(): Promise<UserProfile | null> {
     try {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
+      const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
+      const response = await fetch(url, {
+        method: "GET",
+        headers: getCommonHeaders(),
+      });
 
-      if (error) {
-        if (error.code === "PGRST116") {
-          // No se encontró el perfil
-          console.log("User profile not found for userId:", userId);
-          return null;
-        }
-        console.error("Error fetching user profile:", error);
-        throw new Error(
-          `Error al obtener el perfil de usuario: ${error.message}`
-        );
+      if (response.status === 404) {
+        console.log("User profile not found");
+        return null;
       }
 
-      return data;
+      return await handleApiResponse<UserProfile>(response);
     } catch (error: any) {
-      console.error("Unexpected error in getUserProfile:", error);
-      if (error.message?.includes("Error al obtener el perfil")) {
-        throw error;
+      console.error("Error fetching user profile:", error);
+      if (error.message?.includes("404")) {
+        return null;
       }
-      throw new Error("Error inesperado al obtener el perfil de usuario");
+      throw new Error(error.message || "Error inesperado al obtener el perfil de usuario");
     }
   }
 
   /**
-   * Actualiza el perfil de un usuario
+   * Actualiza el perfil del usuario autenticado
+   * El userId se obtiene del token JWT en el backend
    */
   static async updateUserProfile(
-    userId: string,
     updates: Partial<Omit<UserProfile, "id" | "created_at">>
   ): Promise<UserProfile> {
     try {
-      const { data, error } = await supabase
-        .from("user_profiles")
-        .update({
-          ...updates,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", userId)
-        .select()
-        .single();
+      const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
+      const response = await fetch(url, {
+        method: "PUT",
+        headers: getCommonHeaders(),
+        body: JSON.stringify(updates),
+      });
 
-      if (error) {
-        console.error("Error updating user profile:", error);
-        throw new Error(
-          `Error al actualizar el perfil de usuario: ${error.message}`
-        );
-      }
-
-      return data;
+      return await handleApiResponse<UserProfile>(response);
     } catch (error: any) {
-      console.error("Unexpected error in updateUserProfile:", error);
-      if (error.message?.includes("Error al actualizar el perfil")) {
-        throw error;
-      }
-      throw new Error("Error inesperado al actualizar el perfil de usuario");
+      console.error("Error updating user profile:", error);
+      throw new Error(error.message || "Error inesperado al actualizar el perfil de usuario");
     }
   }
 
   /**
    * Verifica si un nickname ya está en uso
+   * Nota: Esta funcionalidad debería implementarse en el backend
+   * Por ahora, intentamos crear/actualizar y manejamos el error
    */
-  static async isNicknameAvailable(
-    nickname: string,
-    excludeUserId?: string
-  ): Promise<boolean> {
-    let query = supabase
-      .from("user_profiles")
-      .select("id")
-      .eq("nickname", nickname);
-
-    if (excludeUserId) {
-      query = query.neq("id", excludeUserId);
-    }
-
-    const { data, error } = await query;
-
-    if (error) {
+  static async isNicknameAvailable(): Promise<boolean> {
+    try {
+      // TODO: Implementar endpoint en backend para verificar disponibilidad
+      // Por ahora asumimos que está disponible hasta que se intente usar
+      console.warn("isNicknameAvailable: Esta funcionalidad debe implementarse en el backend");
+      return true;
+    } catch (error: any) {
       console.error("Error checking nickname availability:", error);
-      throw new Error(
-        `Error al verificar disponibilidad del nickname: ${error.message}`
-      );
+      throw new Error(error.message || "Error al verificar disponibilidad del nickname");
     }
-
-    return data.length === 0;
   }
 
   /**
-   * Elimina un perfil de usuario
+   * Elimina el perfil del usuario autenticado
+   * Nota: Esta funcionalidad debería implementarse en el backend
+   * El userId se obtiene del token JWT en el backend
    */
-  static async deleteUserProfile(userId: string): Promise<void> {
-    const { error } = await supabase
-      .from("user_profiles")
-      .delete()
-      .eq("id", userId);
+  static async deleteUserProfile(): Promise<void> {
+    try {
+      const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
+      const response = await fetch(url, {
+        method: "DELETE",
+        headers: getCommonHeaders(),
+      });
 
-    if (error) {
+      await handleApiResponse<void>(response);
+    } catch (error: any) {
       console.error("Error deleting user profile:", error);
-      throw new Error(
-        `Error al eliminar el perfil de usuario: ${error.message}`
-      );
+      throw new Error(error.message || "Error al eliminar el perfil de usuario");
     }
   }
 }
