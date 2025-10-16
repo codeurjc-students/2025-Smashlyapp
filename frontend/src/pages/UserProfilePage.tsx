@@ -578,9 +578,7 @@ const UserProfilePage: React.FC = () => {
                     <option value="principiante">
                       Principiante (1.0 - 2.5)
                     </option>
-                    <option value="intermedio">
-                      Intermedio (3.0 - 4.5)
-                    </option>
+                    <option value="intermedio">Intermedio (3.0 - 4.5)</option>
                     <option value="avanzado">Avanzado (5.0 - 6.5)</option>
                     <option value="profesional">Profesional (7.0+)</option>
                   </Select>

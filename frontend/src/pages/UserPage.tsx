@@ -383,9 +383,7 @@ const UserPage: React.FC = () => {
                 <FiCalendar />
                 Fecha de Nacimiento
               </DetailLabel>
-              <DetailValue>
-                {formatDate(userProfile.birthdate)}
-              </DetailValue>
+              <DetailValue>{formatDate(userProfile.birthdate)}</DetailValue>
             </DetailCard>
 
             <DetailCard>

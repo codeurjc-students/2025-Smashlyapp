@@ -70,7 +70,9 @@ export class UserProfileService {
       if (error.message?.includes("nickname")) {
         throw new Error(`El nickname '${nickname}' ya no está disponible`);
       }
-      throw new Error(error.message || "Error inesperado al crear el perfil de usuario");
+      throw new Error(
+        error.message || "Error inesperado al crear el perfil de usuario"
+      );
     }
   }
 
@@ -97,7 +99,9 @@ export class UserProfileService {
       if (error.message?.includes("404")) {
         return null;
       }
-      throw new Error(error.message || "Error inesperado al obtener el perfil de usuario");
+      throw new Error(
+        error.message || "Error inesperado al obtener el perfil de usuario"
+      );
     }
   }
 
@@ -119,7 +123,9 @@ export class UserProfileService {
       return await handleApiResponse<UserProfile>(response);
     } catch (error: any) {
       console.error("Error updating user profile:", error);
-      throw new Error(error.message || "Error inesperado al actualizar el perfil de usuario");
+      throw new Error(
+        error.message || "Error inesperado al actualizar el perfil de usuario"
+      );
     }
   }
 
@@ -132,11 +138,15 @@ export class UserProfileService {
     try {
       // TODO: Implementar endpoint en backend para verificar disponibilidad
       // Por ahora asumimos que está disponible hasta que se intente usar
-      console.warn("isNicknameAvailable: Esta funcionalidad debe implementarse en el backend");
+      console.warn(
+        "isNicknameAvailable: Esta funcionalidad debe implementarse en el backend"
+      );
       return true;
     } catch (error: any) {
       console.error("Error checking nickname availability:", error);
-      throw new Error(error.message || "Error al verificar disponibilidad del nickname");
+      throw new Error(
+        error.message || "Error al verificar disponibilidad del nickname"
+      );
     }
   }
 
@@ -156,7 +166,9 @@ export class UserProfileService {
       await handleApiResponse<void>(response);
     } catch (error: any) {
       console.error("Error deleting user profile:", error);
-      throw new Error(error.message || "Error al eliminar el perfil de usuario");
+      throw new Error(
+        error.message || "Error al eliminar el perfil de usuario"
+      );
     }
   }
 }
