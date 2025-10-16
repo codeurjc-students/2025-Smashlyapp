@@ -10,29 +10,29 @@ export const API_URL =
 // Endpoints de la API
 export const API_ENDPOINTS = {
   // Rackets
-  RACKETS: "/api/rackets",
-  RACKETS_BY_ID: (id: number) => `/api/rackets/${id}`,
-  RACKETS_SEARCH: "/api/rackets/search",
-  RACKETS_FILTER: "/api/rackets/filter",
-  RACKETS_BESTSELLERS: "/api/rackets/bestsellers",
-  RACKETS_OFFERS: "/api/rackets/offers",
-  RACKETS_BRANDS: "/api/rackets/brands",
-  RACKETS_STATS: "/api/rackets/stats",
-  RACKETS_BY_BRAND: (brand: string) => `/api/rackets/brands/${brand}`,
+  RACKETS: "/api/v1/rackets",
+  RACKETS_BY_ID: (id: number) => `/api/v1/rackets/${id}`,
+  RACKETS_SEARCH: "/api/v1/rackets/search",
+  RACKETS_FILTER: "/api/v1/rackets/filter",
+  RACKETS_BESTSELLERS: "/api/v1/rackets/bestsellers",
+  RACKETS_OFFERS: "/api/v1/rackets/offers",
+  RACKETS_BRANDS: "/api/v1/rackets/brands",
+  RACKETS_STATS: "/api/v1/rackets/stats",
+  RACKETS_BY_BRAND: (brand: string) => `/api/v1/rackets/brands/${brand}`,
 
   // Users
-  USERS_PROFILE: "/api/users/profile",
-  USERS_FAVORITES: "/api/users/favorites",
-  USERS_FAVORITE_BY_ID: (id: number) => `/api/users/favorites/${id}`,
+  USERS_PROFILE: "/api/v1/users/profile",
+  USERS_FAVORITES: "/api/v1/users/favorites",
+  USERS_FAVORITE_BY_ID: (id: number) => `/api/v1/users/favorites/${id}`,
 
   // Auth
-  AUTH_LOGIN: "/api/auth/login",
-  AUTH_REGISTER: "/api/auth/register",
-  AUTH_LOGOUT: "/api/auth/logout",
-  AUTH_ME: "/api/auth/me",
+  AUTH_LOGIN: "/api/v1/auth/login",
+  AUTH_REGISTER: "/api/v1/auth/register",
+  AUTH_LOGOUT: "/api/v1/auth/logout",
+  AUTH_ME: "/api/v1/auth/me",
 
   // Health
-  HEALTH: "/api/health",
+  HEALTH: "/api/v1/health",
 } as const;
 
 /**

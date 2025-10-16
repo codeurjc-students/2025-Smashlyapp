@@ -2,6 +2,20 @@
  * Utilidades para el manejo de autenticación y limpieza de tokens
  */
 
+export const setAuthToken = (token: string): void => {
+  localStorage.setItem("auth_token", token);
+  console.log("🔑 Auth token set.");
+};
+
+export const removeAuthToken = (): void => {
+  localStorage.removeItem("auth_token");
+  console.log("🗑️ Auth token removed.");
+};
+
+export const getAuthToken = (): string | null => {
+  return localStorage.getItem("auth_token");
+};
+
 /**
  * Limpia completamente todos los tokens y datos de autenticación del almacenamiento local
  * Esta función es útil para forzar un logout completo cuando hay problemas con tokens persistentes

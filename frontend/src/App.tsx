@@ -6,58 +6,62 @@ import CatalogPage from "./pages/CatalogPage";
 import ComingSoonPage from "./pages/ComingSoonPage";
 import HomePage from "./pages/HomePage";
 import RacketDetailPage from "./pages/RacketDetailPage";
+import FAQPage from "./pages/FAQPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   return (
-    // <AuthProvider>
-    <RacketsProvider>
-      <ComparisonProvider>
-        <Layout>
-          <Routes>
-            {/* Página principal */}
-            <Route path="/" element={<HomePage />} />
+    <AuthProvider>
+      <RacketsProvider>
+        <ComparisonProvider>
+          <Layout>
+            <Routes>
+              {/* Página principal */}
+              <Route path="/" element={<HomePage />} />
 
-            {/* Páginas de catálogo y detalle */}
-            <Route path="/catalog" element={<CatalogPage />} />
-            <Route path="/racket-detail" element={<RacketDetailPage />} />
+              {/* Páginas de catálogo y detalle */}
+              <Route path="/catalog" element={<CatalogPage />} />
+              <Route path="/racket-detail" element={<RacketDetailPage />} />
 
-            {/* Páginas próximamente */}
-            <Route path="/rackets" element={<ComingSoonPage />} />
-            <Route path="/compare" element={<ComingSoonPage />} />
-            <Route path="/faq" element={<ComingSoonPage />} />
-            <Route path="/login" element={<ComingSoonPage />} />
-            <Route path="/register" element={<ComingSoonPage />} />
+              {/* Páginas próximamente */}
+              <Route path="/rackets" element={<ComingSoonPage />} />
+              <Route path="/compare" element={<ComingSoonPage />} />
+              <Route path="/faq" element={<FAQPage />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
 
-            {/* Ruta 404 - página no encontrada */}
-            <Route
-              path="*"
-              element={
-                <div
-                  style={{
-                    minHeight: "60vh",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    flexDirection: "column",
-                    gap: "1rem",
-                  }}
-                >
-                  <h1>404 - Página no encontrada</h1>
-                  <p>La página que buscas no existe.</p>
-                  <a
-                    href="/"
-                    style={{ color: "#16a34a", textDecoration: "none" }}
+              {/* Ruta 404 - página no encontrada */}
+              <Route
+                path="*"
+                element={
+                  <div
+                    style={{
+                      minHeight: "60vh",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      flexDirection: "column",
+                      gap: "1rem",
+                    }}
                   >
-                    ← Volver al inicio
-                  </a>
-                </div>
-              }
-            />
-          </Routes>
-        </Layout>
-      </ComparisonProvider>
-    </RacketsProvider>
-    // </AuthProvider>
+                    <h1>404 - Página no encontrada</h1>
+                    <p>La página que buscas no existe.</p>
+                    <a
+                      href="/"
+                      style={{ color: "#16a34a", textDecoration: "none" }}
+                    >
+                      ← Volver al inicio
+                    </a>
+                  </div>
+                }
+              />
+            </Routes>
+          </Layout>
+        </ComparisonProvider>
+      </RacketsProvider>
+    </AuthProvider>
   );
 }
 
