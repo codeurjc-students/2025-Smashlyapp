@@ -36,9 +36,9 @@ export interface StorePrice {
 export interface Racket {
   id?: number;
   nombre: string;
-  marca?: string | null;
-  modelo?: string | null;
-  imagen?: string | null;
+  marca: string;
+  modelo: string;
+  imagen: string;
   es_bestseller: boolean;
   en_oferta: boolean;
   scrapeado_en?: string;
@@ -90,10 +90,10 @@ export interface Racket {
   updated_at?: string;
   
   // Campos computados para compatibilidad con el código existente
-  precio_actual?: number;
-  precio_original?: number | null;
-  descuento_porcentaje?: number;
-  enlace?: string;
+  precio_actual: number;
+  precio_original: number;
+  descuento_porcentaje: number;
+  enlace: string;
   fuente?: string;
 }
 
