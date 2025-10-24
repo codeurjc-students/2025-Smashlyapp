@@ -266,6 +266,44 @@ const AuthButton = styled(Link)<{
   }}
 `;
 
+const LogoutButton = styled.button<{
+  variant?: "primary" | "secondary";
+  isMobile?: boolean;
+}>`
+  padding: ${(props) => (props.isMobile ? "12px 16px" : "8px 20px")};
+  border-radius: ${(props) => (props.isMobile ? "12px" : "8px")};
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  text-align: center;
+  display: block;
+  cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background: transparent;
+  color: white;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-decoration: none;
+  }
+
+  ${(props) =>
+    props.isMobile &&
+    `
+    background: transparent;
+    color: #374151;
+    border: 2px solid #e5e7eb;
+    
+    &:hover {
+      background: #f9fafb;
+      border-color: #16a34a;
+      color: #16a34a;
+      text-decoration: none;
+    }
+  `}
+`;
+
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
@@ -314,8 +352,7 @@ const Header: React.FC = () => {
                 <FiUser style={{ marginRight: "8px" }} />
                 {userProfile.nickname || userProfile.email}
               </NavLink>
-              <AuthButton
-                as="button"
+              <LogoutButton
                 variant="secondary"
                 onClick={async () => {
                   await signOut();
@@ -323,7 +360,7 @@ const Header: React.FC = () => {
                 }}
               >
                 Cerrar sesión
-              </AuthButton>
+              </LogoutButton>
             </>
           ) : (
             <>
@@ -418,8 +455,7 @@ const Header: React.FC = () => {
                       <FiUser style={{ marginRight: "8px" }} />
                       {userProfile.nickname || userProfile.email}
                     </NavLink>
-                    <AuthButton
-                      as="button"
+                    <LogoutButton
                       variant="secondary"
                       isMobile
                       onClick={async () => {
@@ -429,7 +465,7 @@ const Header: React.FC = () => {
                       style={{ cursor: "pointer", marginTop: "0.5rem" }}
                     >
                       Cerrar sesión
-                    </AuthButton>
+                    </LogoutButton>
                   </>
                 ) : (
                   <>

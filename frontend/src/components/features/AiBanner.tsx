@@ -1,7 +1,6 @@
 import { motion } from "framer-motion";
 import React from "react";
-import { FiChevronRight, FiTarget, FiTrendingUp, FiZap } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
+import { FiTarget, FiTrendingUp, FiZap } from "react-icons/fi";
 import styled from "styled-components";
 
 const BannerContainer = styled(motion.div)`
@@ -135,8 +134,6 @@ const CTAButton = styled(motion.button)<{ variant?: "primary" | "secondary" }>`
 `;
 
 const AiBanner: React.FC = () => {
-  const navigate = useNavigate();
-
   return (
     <BannerContainer
       initial={{ opacity: 0, y: 50 }}

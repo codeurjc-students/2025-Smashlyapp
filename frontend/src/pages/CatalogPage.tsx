@@ -1,13 +1,11 @@
 import { AnimatePresence, motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
 import {
-  FiCheck,
   FiGrid,
   FiList,
   FiSearch,
   FiStar,
   FiTag,
-  FiTrendingUp,
   FiX,
   FiHeart,
 } from "react-icons/fi";
@@ -395,29 +393,6 @@ const ViewDetailsButton = styled.button`
   }
 `;
 
-const AddToCompareButton = styled.button<{ disabled?: boolean }>`
-  flex: 1;
-  background: ${(props) => (props.disabled ? "#f3f4f6" : "white")};
-  color: ${(props) => (props.disabled ? "#9ca3af" : "#16a34a")};
-  border: 2px solid ${(props) => (props.disabled ? "#e5e7eb" : "#16a34a")};
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  opacity: ${(props) => (props.disabled ? "0.6" : "1")};
-
-  &:hover:not(:disabled) {
-    background: #f0f9ff;
-    transform: translateY(-1px);
-  }
-`;
-
 const LoadMoreButton = styled(motion.button)`
   display: block;
   margin: 3rem auto 0;
@@ -528,7 +503,7 @@ const CompareButton = styled.button`
 const CatalogPage: React.FC = () => {
   const navigate = useNavigate();
   const { rackets, loading } = useRackets();
-  const { addRacket, isRacketInComparison, count } = useComparison();
+  const { count } = useComparison();
   const { isAuthenticated } = useAuth();
 
   // State
@@ -621,13 +596,6 @@ const CatalogPage: React.FC = () => {
   // Handlers
   const handleRacketClick = (racket: Racket) => {
     navigate(`/racket-detail?id=${encodeURIComponent(racket.nombre)}`);
-  };
-
-  const handleAddToComparison = (racket: Racket, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (!isRacketInComparison(racket.nombre)) {
-      addRacket(racket);
-    }
   };
 
   const handleLoadMore = () => {

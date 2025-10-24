@@ -2,7 +2,6 @@ import React, { useEffect } from "react";
 import styled from "styled-components";
 import { FiX, FiPlus, FiList, FiCheck } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
-import { List } from "../../types/list";
 import { useList } from "../../contexts/ListsContext";
 
 interface AddToListModalProps {
@@ -222,7 +221,7 @@ export const AddToListModal: React.FC<AddToListModalProps> = ({
   racketId,
   racketName,
 }) => {
-  const { lists, loading, fetchLists, addRacketToList, createList } = useList();
+  const { lists, loading, fetchLists, addRacketToList } = useList();
   const [addingToListId, setAddingToListId] = React.useState<string | null>(
     null
   );

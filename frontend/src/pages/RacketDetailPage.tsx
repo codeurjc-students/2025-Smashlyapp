@@ -1,10 +1,8 @@
-import { useComparison } from "@/contexts/ComparisonContext";
 import { useRackets } from "@/contexts/RacketsContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { Racket } from "@/types/racket";
 import { motion } from "framer-motion";
 import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
 import {
   FiArrowLeft,
   FiExternalLink,
@@ -12,10 +10,9 @@ import {
   FiLoader,
   FiStar,
   FiTag,
-  FiTrendingUp,
   FiHeart,
 } from "react-icons/fi";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { AddToListModal } from "../components/features/AddToListModal";
 
@@ -429,8 +426,6 @@ const ErrorDescription = styled.p`
 const RacketDetailPage: React.FC = () => {
   // Hooks
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { addRacket, isRacketInComparison, count } = useComparison();
   const { rackets, loading } = useRackets();
   const { isAuthenticated } = useAuth();
 
@@ -460,39 +455,6 @@ const RacketDetailPage: React.FC = () => {
 
     setRacket(foundRacket);
   }, [racketId, rackets]);
-
-  // Handle add to comparison
-  const handleAddToComparison = () => {
-    if (!racket) return;
-
-    // Check if already in comparison
-    if (isRacketInComparison(racket.nombre)) {
-      toast.error("Esta pala ya está en el comparador");
-      return;
-    }
-
-    // Try to add
-    const success = addRacket(racket);
-
-    if (!success) {
-      if (count >= 3) {
-        toast.error(
-          "Ya tienes 3 palas en el comparador. Elimina una para añadir esta."
-        );
-      }
-      return;
-    }
-
-    // Success
-    toast.success(
-      `${racket.marca} ${racket.modelo} añadida al comparador (${count + 1}/3)`
-    );
-  };
-
-  // Handle navigation to comparison
-  const handleGoToComparison = () => {
-    navigate("/compare-rackets");
-  };
 
   // Loading state (check if rackets are still loading from context)
   if (loading) {
@@ -715,7 +677,7 @@ const RacketDetailPage: React.FC = () => {
             </SpecificationsCard>
           )}
 
-        {/* Recommendation Card
+        {/* Recommendation Card */}
         <RecommendationCard
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -745,7 +707,7 @@ const RacketDetailPage: React.FC = () => {
               ✨ Buscar mi pala ideal
             </RecommendationButton>
           </div>
-        </RecommendationCard> */}
+        </RecommendationCard>
       </Content>
 
       {/* Modal para añadir a listas */}

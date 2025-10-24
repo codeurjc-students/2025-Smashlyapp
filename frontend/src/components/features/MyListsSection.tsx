@@ -1,13 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import {
-  FiList,
-  FiPlus,
-  FiEdit2,
-  FiTrash2,
-  FiEye,
-  FiPackage,
-} from "react-icons/fi";
+import { FiList, FiPlus, FiTrash2, FiEye, FiPackage } from "react-icons/fi";
 import { useList } from "../../contexts/ListsContext";
 import { CreateListModal } from "./CreateListModal";
 import { ViewListModal } from "./ViewListModal";
@@ -177,23 +170,6 @@ const RacketCount = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
   color: #16a34a;
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #6b7280;
-`;
-
-const EmptyIcon = styled.div`
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-`;
-
-const EmptyText = styled.p`
-  font-size: 1.125rem;
-  margin: 0 0 1.5rem 0;
 `;
 
 const LoadingState = styled.div`
