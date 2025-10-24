@@ -173,7 +173,7 @@ describe("RacketService - Integration Tests (with Real DB)", () => {
           if (page1.pagination.total > 5) {
             expect(page1.data.length).toBeGreaterThan(0);
             expect(page1.data.length).toBeLessThanOrEqual(5);
-            
+
             if (page1.pagination.total > 10) {
               expect(page2.data.length).toBeGreaterThan(0);
               expect(page2.data.length).toBeLessThanOrEqual(5);
@@ -199,7 +199,7 @@ describe("RacketService - Integration Tests (with Real DB)", () => {
 
         // Test health endpoint
         const healthResponse = await request(app)
-          .get("/api/health")
+          .get("/api/v1/health")
           .expect(200);
 
         // FIX: Check for the 'status' property inside the 'data' object and expect 'OK' in uppercase.
@@ -207,7 +207,7 @@ describe("RacketService - Integration Tests (with Real DB)", () => {
 
         // Test rackets list endpoint
         const racketsResponse = await request(app)
-          .get("/api/rackets?limit=10")
+          .get("/api/v1/rackets?limit=10")
           .expect(200);
 
         expect(racketsResponse.body).toHaveProperty("success", true);
@@ -217,7 +217,7 @@ describe("RacketService - Integration Tests (with Real DB)", () => {
         // Test search endpoint if we have data
         if (racketsResponse.body.data.length > 0) {
           const searchResponse = await request(app)
-            .get("/api/rackets/search?q=NOX")
+            .get("/api/v1/rackets/search?q=NOX")
             .expect(200);
 
           expect(searchResponse.body).toHaveProperty("success", true);
@@ -226,7 +226,7 @@ describe("RacketService - Integration Tests (with Real DB)", () => {
 
         // Test stats endpoint
         const statsResponse = await request(app)
-          .get("/api/rackets/stats")
+          .get("/api/v1/rackets/stats")
           .expect(200);
 
         expect(statsResponse.body).toHaveProperty("success", true);
@@ -242,13 +242,13 @@ describe("RacketService - Integration Tests (with Real DB)", () => {
         console.log("Testing API error handling...");
 
         // Test invalid search query
-        await request(app).get("/api/rackets/search?q=a").expect(400);
+        await request(app).get("/api/v1/rackets/search?q=a").expect(400);
 
         // Test invalid racket ID
-        await request(app).get("/api/rackets/invalid-id").expect(400);
+        await request(app).get("/api/v1/rackets/invalid-id").expect(400);
 
         // Test non-existent racket
-        await request(app).get("/api/rackets/999999").expect(404);
+        await request(app).get("/api/v1/rackets/999999").expect(404);
 
         console.log("Error handling integration tests passed");
       }
