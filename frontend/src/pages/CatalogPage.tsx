@@ -873,6 +873,22 @@ const CatalogPage: React.FC = () => {
               ))}
             </RacketsGrid>
 
+            {/* Counter for E2E tests - visually hidden but accessible to screen readers and Selenium */}
+            <p 
+              data-testid="rackets-count" 
+              style={{ 
+                clip: 'rect(0 0 0 0)', 
+                clipPath: 'inset(50%)',
+                height: '1px',
+                overflow: 'hidden',
+                position: 'absolute',
+                whiteSpace: 'nowrap',
+                width: '1px'
+              }}
+            >
+              Total de palas mostradas: {displayedRackets.length}
+            </p>
+
             {displayedRackets.length < filteredRackets.length && (
               <LoadMoreButton
                 onClick={handleLoadMore}
