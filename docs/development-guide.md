@@ -1,6 +1,7 @@
 <div align="center">
 
 # 🎾 **Smashly — Guía de Desarrollo**
+
 </div>
 
 ---
@@ -46,6 +47,7 @@
 Smashly es una **aplicación web SPA (Single Page Application)** que separa la presentación (frontend) y la lógica de negocio (backend), ofreciendo una experiencia fluida sin recargas completas de página.
 
 ### 🔧 Partes del sistema
+
 - **Frontend:** React + Vite + TypeScript — consume la API REST.
 - **Backend:** Node.js + Express (TypeScript) — expone la API REST, aplica seguridad y gestiona la persistencia.
 - **Base de datos:** Supabase (PostgreSQL gestionado).
@@ -84,8 +86,8 @@ Smashly es una **aplicación web SPA (Single Page Application)** que separa la p
 
 ## 🛠️ **Herramientas**
 
-| Herramienta          | Uso principal                     |
-| -------------------- | --------------------------------- |
+| Herramienta           | Uso principal                     |
+| --------------------- | --------------------------------- |
 | 💻 **VS Code**        | IDE principal                     |
 | 📦 **npm**            | Gestión de dependencias JS/TS     |
 | ☕ **Maven**          | Tests E2E (Java)                  |
@@ -134,18 +136,18 @@ flowchart LR
 
 #### 🧱 Frontend (Vitest + Testing Library)
 
-* Unit: `frontend/src/__tests__/unit/*`
-* Integration: `frontend/src/__tests__/integration/*`
+- Unit: `frontend/src/__tests__/unit/*`
+- Integration: `frontend/src/__tests__/integration/*`
 
 #### ⚙️ Backend (Jest + Supertest)
 
-* Unit: `backend/api/src/__tests__/unit/*`
-* Integration: `backend/api/src/__tests__/integration/*`
+- Unit: `backend/api/src/__tests__/unit/*`
+- Integration: `backend/api/src/__tests__/integration/*`
 
 #### 🌐 Sistema / E2E (Java + Maven)
 
-* API: `RestAssuredApiSystemTest.java`
-* UI: `FrontendSystemTest.java`
+- API: `RestAssuredApiSystemTest.java`
+- UI: `FrontendSystemTest.java`
 
 > 📘 Trazabilidad funcional disponible en `docs/functionalities.md`
 
@@ -169,14 +171,14 @@ flowchart LR
 
 ## 🌀 **Proceso de desarrollo**
 
-* 🔁 Iterativo e incremental, basado en principios ágiles (XP / Kanban).
-* 📋 Gestión de tareas: *GitHub Issues + Projects (Kanban).*
-* 🌿 Ramas: `feature/...`, `fix/...`, PRs hacia `main`.
-* 🤖 **CI/CD (GitHub Actions):**
+- 🔁 Iterativo e incremental, basado en principios ágiles (XP / Kanban).
+- 📋 Gestión de tareas: _GitHub Issues + Projects (Kanban)._
+- 🌿 Ramas: `feature/...`, `fix/...`, PRs hacia `main`.
+- 🤖 **CI/CD (GitHub Actions):**
 
-  * `basic-quality-check.yml` → compilación, tests, cobertura, Sonar.
-  * `complete-quality-check.yml` → E2E (Chrome/Firefox), seguridad, CodeQL.
-  * `deploy-production.yml` → despliegue con contenedores.
+  - `basic-quality-check.yml` → compilación, tests, cobertura, Sonar.
+  - `complete-quality-check.yml` → E2E (Chrome/Firefox), seguridad, CodeQL.
+  - `deploy-production.yml` → despliegue con contenedores.
 
 > 🎯 Cobertura mínima exigida: **70%**
 
@@ -193,9 +195,9 @@ cd 2025-Smashlyapp
 
 **Requisitos locales:**
 
-* Node.js ≥ 18
-* Java ≥ 11 + Maven
-* Docker (opcional para orquestación local)
+- Node.js ≥ 18
+- Java ≥ 11 + Maven
+- Docker (opcional para orquestación local)
 
 ---
 
@@ -207,7 +209,7 @@ cd 2025-Smashlyapp
 cd backend/api
 npm ci
 npm run build
-export PORT=3001 NODE_ENV=development
+export PORT=443 NODE_ENV=development
 npm start
 ```
 
@@ -217,7 +219,7 @@ npm start
 cd frontend
 npm ci
 npm run build
-npm run preview -- --port 3000
+npm run preview -- --port 443
 ```
 
 #### 💾 Base de datos (Supabase)
@@ -232,16 +234,16 @@ SUPABASE_SERVICE_ROLE_KEY=
 
 Accesos locales:
 
-* 🌐 SPA → [http://localhost:3000](http://localhost:3000)
-* ⚙️ API → [http://localhost:3001/api/health](http://localhost:3001/api/health)
-* 📘 Docs → [http://localhost:3001/api/docs](http://localhost:3001/api/docs)
+- 🌐 SPA → [http://localhost:443](http://localhost:443)
+- ⚙️ API → [http://localhost:443/api/health](http://localhost:443/api/health)
+- 📘 Docs → [http://localhost:443/api/docs](http://localhost:443/api/docs)
 
 ---
 
 ### 🧠 **Uso de herramientas (API, IDE, etc.)**
 
-* **VS Code:** ejecutar scripts npm y tests desde el panel integrado.
-* **Postman:** colección en `docs/postman/smashly.postman_collection.json` con endpoints de ejemplo (`/api/rackets`, `/api/health`, etc.).
+- **VS Code:** ejecutar scripts npm y tests desde el panel integrado.
+- **Postman:** colección en `docs/postman/smashly.postman_collection.json` con endpoints de ejemplo (`/api/rackets`, `/api/health`, etc.).
 
 ---
 
@@ -270,8 +272,8 @@ npm run test:coverage
 ```bash
 cd testing
 mvn test -Dtest.browser=chrome -Dtest.headless=true \
-  -Dapi.url=http://localhost:3001 \
-  -Dfrontend.url=http://localhost:3000
+  -Dapi.url=http://localhost:443 \
+  -Dfrontend.url=http://localhost:443
 ```
 
 ---
@@ -284,6 +286,7 @@ mvn test -Dtest.browser=chrome -Dtest.headless=true \
    cd frontend && npm run build
    cd ../backend/api && npm run build
    ```
+
 2. **Construir y subir imágenes Docker (si aplica)**
 3. **Crear una release en GitHub**
    Incluyendo changelog, binarios y artifacts (`coverage/`, `reports/`).
@@ -292,7 +295,6 @@ mvn test -Dtest.browser=chrome -Dtest.headless=true \
 
 <div align="center">
 
-*Smashly © 2025 — Trabajo Fin de Grado*
+_Smashly © 2025 — Trabajo Fin de Grado_
 
 </div>
-

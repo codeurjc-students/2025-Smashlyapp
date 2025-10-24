@@ -13,17 +13,17 @@ const userProfileSchema = Joi.object({
     .pattern(/^[a-zA-Z0-9_]+$/)
     .required(),
   fullName: Joi.string().optional().allow(""),
-  peso: Joi.number().min(30).max(200).optional(),
-  altura: Joi.number().min(100).max(250).optional(),
-  fecha_nacimiento: Joi.string().isoDate().optional(),
-  nivel_juego: Joi.string()
+  weight: Joi.number().min(30).max(200).optional(),
+  height: Joi.number().min(100).max(250).optional(),
+  birthdate: Joi.string().isoDate().optional(),
+  game_level: Joi.string()
     .optional()
-    .valid("Principiante", "Intermedio", "Avanzado", "Profesional"),
-  limitaciones: Joi.string().optional().allow(""),
+    .valid("principiante", "intermedio", "avanzado", "profesional"),
+  limitations: Joi.array().items(Joi.string()).optional(),
 });
 
 /**
- * Schema para validar actualización de perfil
+ * Schema para validar actualizaciones de perfil
  */
 const updateProfileSchema = Joi.object({
   nickname: Joi.string()
@@ -33,13 +33,13 @@ const updateProfileSchema = Joi.object({
     .optional(),
   full_name: Joi.string().optional().allow(""),
   avatar_url: Joi.string().uri().optional().allow(""),
-  peso: Joi.number().min(30).max(200).optional(),
-  altura: Joi.number().min(100).max(250).optional(),
-  fecha_nacimiento: Joi.string().isoDate().optional(),
-  nivel_juego: Joi.string()
+  weight: Joi.number().min(30).max(200).optional(),
+  height: Joi.number().min(100).max(250).optional(),
+  birthdate: Joi.string().isoDate().optional(),
+  game_level: Joi.string()
     .optional()
-    .valid("Principiante", "Intermedio", "Avanzado", "Profesional"),
-  limitaciones: Joi.string().optional().allow(""),
+    .valid("principiante", "intermedio", "avanzado", "profesional"),
+  limitations: Joi.array().items(Joi.string()).optional(),
 });
 
 /**

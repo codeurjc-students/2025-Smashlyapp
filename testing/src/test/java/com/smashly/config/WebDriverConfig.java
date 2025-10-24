@@ -246,6 +246,6 @@ public class WebDriverConfig {
      * Gets API URL from system properties.
      */
     public static String getApiUrl() {
-        return System.getProperty("test.api.url", System.getProperty("api.url", "http://localhost:3001"));
+        return System.getProperty("test.api.url", System.getProperty("api.url", "http://localhost:443"));
     }
 }

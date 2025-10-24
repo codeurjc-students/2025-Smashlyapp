@@ -1,72 +1,72 @@
-import { useState, useEffect } from 'react';
-import { Racket } from './types';
-
-const API_BASE_URL = 'http://localhost:3001/api';
+import { Route, Routes } from "react-router-dom";
+import Layout from "./components/layout/Layout";
+import { ComparisonProvider } from "./contexts/ComparisonContext";
+import { RacketsProvider } from "./contexts/RacketsContext";
+import { ListsProvider } from "./contexts/ListsContext";
+import CatalogPage from "./pages/CatalogPage";
+import ComingSoonPage from "./pages/ComingSoonPage";
+import HomePage from "./pages/HomePage";
+import RacketDetailPage from "./pages/RacketDetailPage";
+import FAQPage from "./pages/FAQPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import UserPage from "./pages/UserPage";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
-  const [rackets, setRackets] = useState<Racket[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchRackets = async () => {
-      try {
-        setLoading(true);
-        const response = await fetch(`${API_BASE_URL}/rackets?limit=20`);
-        
-        if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
-        }
-        
-        const data = await response.json();
-        
-        if (data.success && Array.isArray(data.data)) {
-          setRackets(data.data.slice(0, 20)); // Asegurar máximo 20 elementos
-        } else {
-          throw new Error('Formato de respuesta inválido');
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error desconocido');
-        console.error('Error fetching rackets:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRackets();
-  }, []);
-
-  if (loading) {
-    return <div>Cargando palas...</div>;
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
   return (
-    <div>
-      <h1>Smashly - Catálogo de Palas de Pádel</h1>
-      <p>Mostrando las primeras 20 palas disponibles:</p>
-      
-      {rackets.length === 0 ? (
-        <p>No se encontraron palas.</p>
-      ) : (
-        <ul>
-          {rackets.map((racket, index) => (
-            <li key={racket.id || index}>
-              <strong>{racket.nombre}</strong>
-              {racket.marca && <span> - {racket.marca}</span>}
-              {racket.precio_actual && (
-                <span> - {racket.precio_actual}€</span>
-              )}
-            </li>
-          ))}
-        </ul>
-      )}
-      
-      <p>Total de palas mostradas: {rackets.length}</p>
-    </div>
+    <AuthProvider>
+      <RacketsProvider>
+        <ComparisonProvider>
+          <ListsProvider>
+            <Layout>
+              <Routes>
+                {/* Página principal */}
+                <Route path="/" element={<HomePage />} />
+
+                {/* Páginas de catálogo y detalle */}
+                <Route path="/catalog" element={<CatalogPage />} />
+                <Route path="/racket-detail" element={<RacketDetailPage />} />
+
+                {/* Páginas próximamente */}
+                <Route path="/rackets" element={<ComingSoonPage />} />
+                <Route path="/compare" element={<ComingSoonPage />} />
+                <Route path="/faq" element={<FAQPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/profile" element={<UserPage />} />
+
+                {/* Ruta 404 - página no encontrada */}
+                <Route
+                  path="*"
+                  element={
+                    <div
+                      style={{
+                        minHeight: "60vh",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexDirection: "column",
+                        gap: "1rem",
+                      }}
+                    >
+                      <h1>404 - Página no encontrada</h1>
+                      <p>La página que buscas no existe.</p>
+                      <a
+                        href="/"
+                        style={{ color: "#16a34a", textDecoration: "none" }}
+                      >
+                        ← Volver al inicio
+                      </a>
+                    </div>
+                  }
+                />
+              </Routes>
+            </Layout>
+          </ListsProvider>
+        </ComparisonProvider>
+      </RacketsProvider>
+    </AuthProvider>
   );
 }
 

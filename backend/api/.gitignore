@@ -109,6 +109,13 @@ jest-coverage/
 uploads/
 static/
 
+# SSL Certificates (auto-generated for development)
+certs/
+*.pem
+*.key
+*.crt
+*.cert
+
 # Database
 *.sqlite
 *.sqlite3

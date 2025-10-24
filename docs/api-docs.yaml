@@ -4,7 +4,7 @@ info:
   description: Documentación de la API de Smashly App
   version: 1.0.0
 servers:
-  - url: http://localhost:3001/api
+  - url: http://localhost:443/api
     description: Servidor de producción
 paths:
   /health:

@@ -41,7 +41,12 @@ app.use(
     origin:
       process.env.NODE_ENV === "production"
         ? process.env.FRONTEND_URL
-        : ["http://localhost:3000", "http://localhost:5173"],
+        : [
+            "http://localhost:443",
+            "http://localhost:5173",
+            "https://localhost:443",
+            "https://localhost:5173",
+          ],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -60,7 +65,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use("/api/", limiter);
+app.use("/api/v1/", limiter);
 
 // Middleware general
 app.use(compression());
@@ -69,10 +74,10 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // Rutas principales
-app.use("/api/health", healthRoutes);
-app.use("/api/auth", authRoutes);
-app.use("/api/rackets", racketRoutes);
-app.use("/api/users", userRoutes);
+app.use("/api/v1/health", healthRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/rackets", racketRoutes);
+app.use("/api/v1/users", userRoutes);
 
 // Swagger UI - servir OpenAPI spec desde docs/api-docs.yaml
 try {
@@ -80,10 +85,14 @@ try {
   const swaggerDocument = YAML.load(swaggerPath);
 
   // UI en /api-docs
-  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+  app.use(
+    "/api/v1/api-docs",
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerDocument)
+  );
 
   // Spec JSON en /api-docs/spec
-  app.get("/api-docs/spec", (req, res) => {
+  app.get("/api/v1/api-docs/spec", (req, res) => {
     res.json(swaggerDocument);
   });
 } catch (err) {
@@ -94,7 +103,7 @@ try {
 }
 
 // Endpoint de documentación básica
-app.get("/api/docs", (req, res) => {
+app.get("/api/v1/docs", (req, res) => {
   res.json({
     title: "Smashly API Documentation",
     version: "1.0.0",
@@ -143,11 +152,11 @@ app.use("*", (req, res) => {
     error: "Endpoint not found",
     message: `Route ${req.originalUrl} not found`,
     availableRoutes: [
-      "/api/health",
-      "/api/rackets",
-      "/api/users",
-      "/api/recommendations",
-      "/api/docs",
+      "/api/v1/health",
+      "/api/v1/auth",
+      "/api/v1/rackets",
+      "/api/v1/users",
+      "/api/v1/docs",
     ],
   });
 });

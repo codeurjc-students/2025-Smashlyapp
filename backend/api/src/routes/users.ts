@@ -6,6 +6,7 @@ import {
   schemas,
   validateIdParam,
 } from "../middleware/validation";
+import { ListController } from "../controllers/listController";
 
 const router = Router();
 
@@ -42,5 +43,34 @@ router.get("/search", UserController.searchUsers);
 
 // GET /api/users/stats - Obtiene estadísticas de usuarios (admin)
 router.get("/stats", authenticateUser, UserController.getUserStats);
+
+// GET /api/users/lists - Obtener todas las listas del usuario
+router.get("/lists", authenticateUser, ListController.getUserLists);
+
+// POST /api/users/lists - Crear nueva lista
+router.post("/lists", authenticateUser, ListController.createList);
+
+// GET /api/users/lists/:id - Obtener lista específica con sus palas
+router.get("/lists/:id", authenticateUser, ListController.getListById);
+
+// PUT /api/users/lists/:id - Actualizar lista
+router.put("/lists/:id", authenticateUser, ListController.updateList);
+
+// DELETE /api/users/lists/:id - Eliminar lista
+router.delete("/lists/:id", authenticateUser, ListController.deleteList);
+
+// POST /api/users/lists/:id/rackets - Añadir pala a lista
+router.post(
+  "/lists/:id/rackets",
+  authenticateUser,
+  ListController.addRacketToList
+);
+
+// DELETE /api/users/lists/:id/rackets/:racketId - Quitar pala de lista
+router.delete(
+  "/lists/:id/rackets/:racketId",
+  authenticateUser,
+  ListController.removeRacketFromList
+);
 
 export default router;

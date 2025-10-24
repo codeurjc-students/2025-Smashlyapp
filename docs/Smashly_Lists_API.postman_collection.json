@@ -1,0 +1,395 @@
+{
+  "info": {
+    "name": "Smashly - Listas de Palas API",
+    "_postman_id": "smashly-lists-api-2025",
+    "description": "Colección de Postman para probar los endpoints de listas de palas favoritas en Smashly API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:443",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "list_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "racket_id",
+      "value": "1",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.token) {",
+                  "        pm.collectionVariables.set('auth_token', jsonData.data.token);",
+                  "        console.log('Token guardado: ' + jsonData.data.token);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"tu-email@ejemplo.com\",\n  \"password\": \"tu-password\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "login"]
+            },
+            "description": "Inicia sesión y guarda el token automáticamente"
+          },
+          "response": []
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo-usuario@ejemplo.com\",\n  \"password\": \"password123\",\n  \"nickname\": \"usuario_test\",\n  \"fullName\": \"Usuario Test\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "auth", "register"]
+            },
+            "description": "Registra un nuevo usuario"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de autenticación"
+    },
+    {
+      "name": "Listas",
+      "item": [
+        {
+          "name": "Obtener todas las listas del usuario",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.length > 0) {",
+                  "        pm.collectionVariables.set('list_id', jsonData.data[0].id);",
+                  "        console.log('Primera lista guardada: ' + jsonData.data[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/lists",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "lists"]
+            },
+            "description": "Obtiene todas las listas del usuario autenticado con el contador de palas"
+          },
+          "response": []
+        },
+        {
+          "name": "Crear nueva lista",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.id) {",
+                  "        pm.collectionVariables.set('list_id', jsonData.data.id);",
+                  "        console.log('Nueva lista creada con ID: ' + jsonData.data.id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mis palas favoritas\",\n  \"description\": \"Palas que me gustaría probar o comprar\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/lists",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "lists"]
+            },
+            "description": "Crea una nueva lista de palas. La descripción es opcional."
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener lista por ID con palas",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/lists/{{list_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "lists", "{{list_id}}"]
+            },
+            "description": "Obtiene una lista específica con todas sus palas incluidas"
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar lista",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Mis palas favoritas actualizadas\",\n  \"description\": \"Nueva descripción de la lista\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/lists/{{list_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "lists", "{{list_id}}"]
+            },
+            "description": "Actualiza el nombre y/o descripción de una lista"
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar lista",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/lists/{{list_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "lists", "{{list_id}}"]
+            },
+            "description": "Elimina una lista y todas sus relaciones con palas"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gestionar listas de palas"
+    },
+    {
+      "name": "Palas en Listas",
+      "item": [
+        {
+          "name": "Añadir pala a lista",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"racket_id\": {{racket_id}}\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/lists/{{list_id}}/rackets",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "lists", "{{list_id}}", "rackets"]
+            },
+            "description": "Añade una pala a una lista específica. Devuelve error si la pala ya está en la lista."
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar pala de lista",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/lists/{{list_id}}/rackets/{{racket_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "lists", "{{list_id}}", "rackets", "{{racket_id}}"]
+            },
+            "description": "Elimina una pala específica de una lista"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gestionar palas dentro de las listas"
+    },
+    {
+      "name": "Palas (Referencia)",
+      "item": [
+        {
+          "name": "Obtener todas las palas",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    if (jsonData.data && jsonData.data.length > 0) {",
+                  "        pm.collectionVariables.set('racket_id', jsonData.data[0].id);",
+                  "        console.log('Primera pala guardada: ' + jsonData.data[0].id);",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/rackets?limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "rackets"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Obtiene palas para usar en las pruebas. Guarda automáticamente el ID de la primera pala."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints auxiliares para obtener IDs de palas"
+    }
+  ]
+}
