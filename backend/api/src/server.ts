@@ -7,8 +7,9 @@ import app from "./app";
 // Cargar variables de entorno
 dotenv.config();
 
-const PORT = process.env.PORT || 443;
-const USE_HTTPS = process.env.USE_HTTPS === "true" || PORT === 443;
+const PORT = process.env.PORT || 3000;
+// Solo usar HTTPS si USE_HTTPS está explícitamente configurado como "true"
+const USE_HTTPS = process.env.USE_HTTPS === "true";
 
 let server;
 
