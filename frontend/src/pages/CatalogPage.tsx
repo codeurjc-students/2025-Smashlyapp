@@ -244,14 +244,17 @@ const SortSelect = styled.select`
   }
 `;
 
-const RacketsGrid = styled.div<{ view: "grid" | "list" }>`
+const RacketsGrid = styled.ul<{ view: "grid" | "list" }>`
   display: grid;
   grid-template-columns: ${(props) =>
     props.view === "grid" ? "repeat(auto-fill, minmax(280px, 1fr))" : "1fr"};
   gap: ${(props) => (props.view === "grid" ? "1.5rem" : "1rem")};
+  list-style: none;
+  padding: 0;
+  margin: 0;
 `;
 
-const RacketCard = styled(motion.div)<{ view: "grid" | "list" }>`
+const RacketCard = styled(motion.li)<{ view: "grid" | "list" }>`
   background: white;
   border-radius: 16px;
   overflow: hidden;
