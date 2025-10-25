@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { MyListsSection } from "../components/features/MyListsSection";
 import { EditProfileModal } from "../components/features/EditProfileModal";
+import { UserReviews } from "../components/features/UserReviews";
 import { UserProfileService } from "../services/userProfileService";
 import toast from "react-hot-toast";
 
@@ -468,6 +469,9 @@ const UserPage: React.FC = () => {
             </DetailCard>
           </DetailGrid>
         </DetailsSection>
+
+        {/* Sección de Reviews del usuario */}
+        {userProfile?.id && <UserReviews userId={userProfile.id} />}
       </ContentWrapper>
 
       {/* Modal para editar perfil */}

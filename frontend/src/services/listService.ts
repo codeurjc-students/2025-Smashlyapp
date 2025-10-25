@@ -20,7 +20,7 @@ export class ListService {
       throw new Error("No hay token de autenticación");
     }
 
-    const response = await fetch(`${API_URL}/users/lists`, {
+    const response = await fetch(`${API_URL}/api/v1/lists`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -46,7 +46,7 @@ export class ListService {
       throw new Error("No hay token de autenticación");
     }
 
-    const response = await fetch(`${API_URL}/users/lists/${listId}`, {
+    const response = await fetch(`${API_URL}/api/v1/lists/${listId}`, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -72,7 +72,7 @@ export class ListService {
       throw new Error("No hay token de autenticación");
     }
 
-    const response = await fetch(`${API_URL}/users/lists`, {
+    const response = await fetch(`${API_URL}/api/v1/lists`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -102,7 +102,7 @@ export class ListService {
       throw new Error("No hay token de autenticación");
     }
 
-    const response = await fetch(`${API_URL}/users/lists/${listId}`, {
+    const response = await fetch(`${API_URL}/api/v1/lists/${listId}`, {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -129,7 +129,7 @@ export class ListService {
       throw new Error("No hay token de autenticación");
     }
 
-    const response = await fetch(`${API_URL}/users/lists/${listId}`, {
+    const response = await fetch(`${API_URL}/api/v1/lists/${listId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -155,7 +155,7 @@ export class ListService {
       throw new Error("No hay token de autenticación");
     }
 
-    const response = await fetch(`${API_URL}/users/lists/${listId}/rackets`, {
+    const response = await fetch(`${API_URL}/api/v1/lists/${listId}/rackets`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -183,7 +183,7 @@ export class ListService {
     }
 
     const response = await fetch(
-      `${API_URL}/users/lists/${listId}/rackets/${racketId}`,
+      `${API_URL}/api/v1/lists/${listId}/rackets/${racketId}`,
       {
         method: "DELETE",
         headers: {

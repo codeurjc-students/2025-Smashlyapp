@@ -11,6 +11,8 @@ import racketRoutes from "./routes/rackets";
 import userRoutes from "./routes/users";
 import healthRoutes from "./routes/health";
 import authRoutes from "./routes/auth";
+import reviewRoutes from "./routes/reviewRoutes";
+import listRoutes from "./routes/list";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import path from "path";
@@ -78,6 +80,8 @@ app.use("/api/v1/health", healthRoutes);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/rackets", racketRoutes);
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/reviews", reviewRoutes); // Rutas de reviews (monta todas las sub-rutas)
+app.use("/api/v1/lists", listRoutes); // Rutas de listas
 
 // Swagger UI - servir OpenAPI spec desde docs/api-docs.yaml
 try {
@@ -157,6 +161,7 @@ app.use("*", (req, res) => {
       "/api/v1/rackets",
       "/api/v1/users",
       "/api/v1/docs",
+      "/api/v1/reviews",
     ],
   });
 });

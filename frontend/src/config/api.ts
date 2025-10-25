@@ -36,23 +36,32 @@ export const API_ENDPOINTS = {
 } as const;
 
 /**
- * Helper para construir URLs completas
+ * Helper para construir URLs completas de la API
  */
 export const buildApiUrl = (
   endpoint: string,
   params?: Record<string, any>
 ): string => {
-  const url = new URL(endpoint, API_URL);
+  // Asegurarse de que API_URL no termine con / y endpoint no comience con /
+  const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+  let url = `${baseUrl}${path}`;
 
   if (params) {
+    const queryParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        url.searchParams.append(key, String(value));
+        queryParams.append(key, String(value));
       }
     });
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
   }
 
-  return url.toString();
+  return url;
 };
 
 /**
