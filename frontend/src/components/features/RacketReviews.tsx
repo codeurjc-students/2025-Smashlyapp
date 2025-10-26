@@ -6,7 +6,7 @@
 import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { reviewService } from "../../services/reviewService";
-import type { ReviewsResponse, ReviewWithUser } from "../../types/review";
+import type { ReviewsResponse } from "../../types/review";
 import { ReviewItem } from "./ReviewItem";
 import { ReviewForm } from "./ReviewForm";
 import { ReviewFilters } from "./ReviewFilters";
@@ -31,6 +31,12 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
   const [page, setPage] = useState(1);
 
   const loadReviews = async () => {
+    // No cargar reviews si el usuario no está autenticado
+    if (!user) {
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -52,7 +58,7 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
 
   useEffect(() => {
     loadReviews();
-  }, [racketId, rating, sort, page]);
+  }, [racketId, rating, sort, page, user]);
 
   const handleReviewCreated = () => {
     setShowForm(false);
@@ -76,10 +82,7 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
   return (
     <Container>
       <Header>
-        <Title>
-          Opiniones de usuarios
-          {reviewsData && <Count>({reviewsData.stats.totalReviews})</Count>}
-        </Title>
+        <Title>Opiniones de usuarios</Title>
 
         {user && !userHasReview && (
           <AddButton onClick={() => setShowForm(!showForm)}>
@@ -97,8 +100,22 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
         />
       )}
 
+      {/* Mensaje para usuarios no autenticados */}
+      {!user && (
+        <GuestMessage>
+          <GuestIcon>🔒</GuestIcon>
+          <GuestTitle>Inicia sesión para ver las opiniones</GuestTitle>
+          <GuestText>
+            Descubre qué opinan otros jugadores sobre esta pala.
+            <GuestLink href="/login"> Inicia sesión</GuestLink> o
+            <GuestLink href="/register"> regístrate</GuestLink> para acceder a
+            las valoraciones de la comunidad.
+          </GuestText>
+        </GuestMessage>
+      )}
+
       {/* Estadísticas */}
-      {reviewsData && reviewsData.stats.totalReviews > 0 && (
+      {user && reviewsData && reviewsData.stats.totalReviews > 0 && (
         <Stats>
           <AverageRating>
             <RatingValue>
@@ -143,18 +160,22 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
       )}
 
       {/* Filtros */}
-      <ReviewFilters
-        rating={rating}
-        sort={sort}
-        onRatingChange={setRating}
-        onSortChange={setSort}
-      />
+      {user && (
+        <ReviewFilters
+          rating={rating}
+          sort={sort}
+          onRatingChange={setRating}
+          onSortChange={setSort}
+        />
+      )}
 
       {/* Lista de reviews */}
-      {loading && <LoadingMessage>Cargando opiniones...</LoadingMessage>}
-      {error && <ErrorMessage>{error}</ErrorMessage>}
+      {user && loading && (
+        <LoadingMessage>Cargando opiniones...</LoadingMessage>
+      )}
+      {user && error && <ErrorMessage>{error}</ErrorMessage>}
 
-      {!loading && reviewsData && reviewsData.reviews.length === 0 && (
+      {user && !loading && reviewsData && reviewsData.reviews.length === 0 && (
         <EmptyMessage>
           {rating
             ? `No hay opiniones con ${rating} estrellas`
@@ -162,7 +183,7 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
         </EmptyMessage>
       )}
 
-      {!loading && reviewsData && reviewsData.reviews.length > 0 && (
+      {user && !loading && reviewsData && reviewsData.reviews.length > 0 && (
         <>
           <ReviewsList>
             {reviewsData.reviews.map((review) => (
@@ -205,7 +226,7 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
 
 // Styled Components
 const Container = styled.div`
-  margin-top: 3rem;
+  margin-top: 0rem;
   padding: 2rem;
   background: white;
   border-radius: 12px;
@@ -392,4 +413,48 @@ const PaginationButton = styled.button`
 const PageInfo = styled.div`
   font-size: 0.875rem;
   color: #666;
+`;
+
+const GuestMessage = styled.div`
+  padding: 3rem 2rem;
+  background: linear-gradient(135deg, #16a34a 0%, #107a37 100%);
+  border-radius: 12px;
+  text-align: center;
+  margin: 2rem 0;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+`;
+
+const GuestIcon = styled.div`
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+`;
+
+const GuestTitle = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+`;
+
+const GuestText = styled.p`
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.95);
+  line-height: 1.6;
+  max-width: 600px;
+  margin: 0 auto;
+`;
+
+const GuestLink = styled.a`
+  color: white;
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.5);
+  transition: all 0.2s;
+  padding-bottom: 2px;
+
+  &:hover {
+    border-bottom-color: white;
+    opacity: 0.9;
+  }
 `;

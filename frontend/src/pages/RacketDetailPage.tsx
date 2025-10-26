@@ -678,6 +678,9 @@ const RacketDetailPage: React.FC = () => {
             </SpecificationsCard>
           )}
 
+        {/* Sección de Reviews */}
+        {racket.id && <RacketReviews racketId={racket.id} />}
+
         {/* Recommendation Card */}
         <RecommendationCard
           initial={{ opacity: 0, y: 20 }}
@@ -709,9 +712,6 @@ const RacketDetailPage: React.FC = () => {
             </RecommendationButton>
           </div>
         </RecommendationCard>
-
-        {/* Sección de Reviews */}
-        {racket.id && <RacketReviews racketId={racket.id} />}
       </Content>
 
       {/* Modal para añadir a listas */}
