@@ -10,6 +10,8 @@ import {
   FiGlobe,
 } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { AdminService } from "../../services/adminService";
+import { Store } from "../../services/storeService";
 
 const Container = styled.div`
   display: flex;
@@ -222,24 +224,11 @@ const LoadingContainer = styled.div`
   color: #666;
 `;
 
-interface StoreRequest {
-  id: number;
-  nombre: string;
-  direccion: string;
-  ciudad: string;
-  email: string;
-  telefono?: string;
-  website?: string;
-  status: "pending" | "approved" | "rejected";
-  requester: string;
-  requestDate: string;
-}
-
 type ViewMode = "all" | "pending";
 
 const StoreRequestsManager: React.FC = () => {
-  const [requests, setRequests] = useState<StoreRequest[]>([]);
-  const [filteredRequests, setFilteredRequests] = useState<StoreRequest[]>([]);
+  const [requests, setRequests] = useState<Store[]>([]);
+  const [filteredRequests, setFilteredRequests] = useState<Store[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("pending");
   const [loading, setLoading] = useState(true);
@@ -254,49 +243,14 @@ const StoreRequestsManager: React.FC = () => {
 
   const loadRequests = async () => {
     try {
-      // TODO: Implementar llamada real a la API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockRequests: StoreRequest[] = [
-        {
-          id: 1,
-          nombre: "Padel Pro Shop Madrid",
-          direccion: "Calle Mayor 123",
-          ciudad: "Madrid",
-          email: "info@padelpromadrid.com",
-          telefono: "+34 912 345 678",
-          website: "https://padelpromadrid.com",
-          status: "pending",
-          requester: "tienda_madrid",
-          requestDate: "2025-10-28",
-        },
-        {
-          id: 2,
-          nombre: "World Padel Barcelona",
-          direccion: "Av. Diagonal 456",
-          ciudad: "Barcelona",
-          email: "contacto@worldpadelbarcelona.com",
-          telefono: "+34 934 567 890",
-          website: "https://worldpadelbcn.com",
-          status: "pending",
-          requester: "wpb_admin",
-          requestDate: "2025-10-27",
-        },
-        {
-          id: 3,
-          nombre: "Padel Store Valencia",
-          direccion: "Calle Colón 789",
-          ciudad: "Valencia",
-          email: "info@padelvalencia.es",
-          status: "approved",
-          requester: "valencia_store",
-          requestDate: "2025-10-25",
-        },
-      ];
-
-      setRequests(mockRequests);
+      setLoading(true);
+      console.log("🏪 Loading store requests...");
+      const storeRequests = await AdminService.getStoreRequests();
+      console.log("🏪 Store requests loaded:", storeRequests);
+      console.log("🏪 Number of requests:", storeRequests.length);
+      setRequests(storeRequests);
     } catch (error) {
-      console.error("Error loading store requests:", error);
+      console.error("❌ Error loading store requests:", error);
       toast.error("Error al cargar las solicitudes de tiendas");
     } finally {
       setLoading(false);
@@ -306,31 +260,35 @@ const StoreRequestsManager: React.FC = () => {
   const filterRequests = () => {
     let filtered = requests;
 
+    console.log("🔍 Filtering requests...");
+    console.log("🔍 Total requests:", requests.length);
+    console.log("🔍 View mode:", viewMode);
+
     // Filtrar por modo de vista
     if (viewMode === "pending") {
-      filtered = filtered.filter((r) => r.status === "pending");
+      filtered = filtered.filter((r) => !r.verified);
+      console.log("🔍 After pending filter:", filtered.length);
     }
 
     // Filtrar por búsqueda
     if (searchTerm) {
       filtered = filtered.filter(
         (r) =>
-          r.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          r.ciudad.toLowerCase().includes(searchTerm.toLowerCase())
+          r.store_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          r.location.toLowerCase().includes(searchTerm.toLowerCase())
       );
+      console.log("🔍 After search filter:", filtered.length);
     }
 
+    console.log("🔍 Final filtered requests:", filtered);
     setFilteredRequests(filtered);
   };
 
-  const handleApprove = async (requestId: number) => {
+  const handleApprove = async (requestId: string) => {
     try {
-      // TODO: Implementar llamada a la API
-      setRequests(
-        requests.map((r) =>
-          r.id === requestId ? { ...r, status: "approved" as const } : r
-        )
-      );
+      await AdminService.verifyStore(requestId);
+      // Remover de la lista de pending
+      setRequests(requests.filter((r) => r.id !== requestId));
       toast.success("Solicitud de tienda aprobada");
     } catch (error) {
       console.error("Error approving request:", error);
@@ -338,14 +296,11 @@ const StoreRequestsManager: React.FC = () => {
     }
   };
 
-  const handleReject = async (requestId: number) => {
+  const handleReject = async (requestId: string) => {
     try {
-      // TODO: Implementar llamada a la API
-      setRequests(
-        requests.map((r) =>
-          r.id === requestId ? { ...r, status: "rejected" as const } : r
-        )
-      );
+      await AdminService.rejectStore(requestId);
+      // Remover de la lista
+      setRequests(requests.filter((r) => r.id !== requestId));
       toast.success("Solicitud de tienda rechazada");
     } catch (error) {
       console.error("Error rejecting request:", error);
@@ -394,52 +349,59 @@ const StoreRequestsManager: React.FC = () => {
           {filteredRequests.map((request) => (
             <RequestCard key={request.id}>
               <CardHeader>
-                <StoreName>{request.nombre}</StoreName>
-                <StatusBadge status={request.status}>
-                  {request.status === "approved"
-                    ? "Aprobada"
-                    : request.status === "rejected"
-                    ? "Rechazada"
-                    : "Pendiente"}
+                <StoreName>{request.store_name}</StoreName>
+                <StatusBadge status={request.verified ? "approved" : "pending"}>
+                  {request.verified ? "Verificada" : "Pendiente"}
                 </StatusBadge>
               </CardHeader>
 
               <RequestDate>
-                Solicitado el {new Date(request.requestDate).toLocaleDateString()}
+                Solicitado el{" "}
+                {new Date(request.created_at).toLocaleDateString()}
               </RequestDate>
 
               <InfoItem>
                 <FiMapPin />
-                {request.direccion}, {request.ciudad}
+                {request.location}
               </InfoItem>
 
               <InfoItem>
                 <FiMail />
-                {request.email}
+                {request.contact_email}
               </InfoItem>
 
-              {request.telefono && (
+              {request.phone_number && (
                 <InfoItem>
                   <FiPhone />
-                  {request.telefono}
+                  {request.phone_number}
                 </InfoItem>
               )}
 
-              {request.website && (
+              {request.website_url && (
                 <InfoItem>
                   <FiGlobe />
                   <a
-                    href={request.website}
+                    href={request.website_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{ color: "#16a34a", textDecoration: "none" }}
                   >
-                    {request.website}
+                    {request.website_url}
                   </a>
                 </InfoItem>
               )}
 
-              {request.status === "pending" && (
+              {request.short_description && (
+                <InfoItem style={{ display: "block", marginTop: "0.5rem" }}>
+                  <strong>Descripción:</strong> {request.short_description}
+                </InfoItem>
+              )}
+
+              <InfoItem style={{ display: "block", fontSize: "0.875rem", color: "#6b7280" }}>
+                <strong>Razón Social:</strong> {request.legal_name} ({request.cif_nif})
+              </InfoItem>
+
+              {!request.verified && (
                 <ActionsContainer>
                   <ActionButton
                     variant="approve"

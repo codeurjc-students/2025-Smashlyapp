@@ -47,16 +47,20 @@ export interface AdminUser {
 }
 
 export interface StoreRequest {
-  id: number;
-  nombre: string;
-  direccion: string;
-  ciudad: string;
-  email: string;
-  telefono?: string;
-  website?: string;
-  status: "pending" | "approved" | "rejected";
-  requester: string;
-  requestDate: string;
+  id: string;
+  store_name: string;
+  legal_name: string;
+  cif_nif: string;
+  contact_email: string;
+  phone_number: string;
+  website_url?: string;
+  logo_url?: string;
+  short_description?: string;
+  location: string;
+  verified: boolean;
+  admin_user_id: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface RacketRequest {
@@ -259,6 +263,36 @@ export class AdminService {
   static async deleteRacket(racketId: number): Promise<void> {
     const response = await fetch(
       buildApiUrl(`${API_ENDPOINTS.RACKETS}/${racketId}`),
+      {
+        method: "DELETE",
+        headers: getCommonHeaders(),
+      }
+    );
+
+    await handleApiResponse<void>(response);
+  }
+
+  /**
+   * Verifica/aprueba una tienda
+   */
+  static async verifyStore(storeId: string): Promise<any> {
+    const response = await fetch(
+      buildApiUrl(API_ENDPOINTS.ADMIN.VERIFY_STORE(storeId)),
+      {
+        method: "POST",
+        headers: getCommonHeaders(),
+      }
+    );
+
+    return handleApiResponse<any>(response);
+  }
+
+  /**
+   * Rechaza una solicitud de tienda
+   */
+  static async rejectStore(storeId: string): Promise<void> {
+    const response = await fetch(
+      buildApiUrl(API_ENDPOINTS.ADMIN.REJECT_STORE(storeId)),
       {
         method: "DELETE",
         headers: getCommonHeaders(),

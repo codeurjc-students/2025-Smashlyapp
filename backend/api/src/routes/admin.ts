@@ -45,4 +45,16 @@ router.get("/racket-requests", AdminController.getRacketRequests);
  */
 router.get("/store-requests", AdminController.getStoreRequests);
 
+/**
+ * POST /api/v1/admin/stores/:id/verify
+ * Aprobar/verificar una tienda
+ */
+router.post("/stores/:id/verify", AdminController.verifyStore);
+
+/**
+ * DELETE /api/v1/admin/stores/:id/reject
+ * Rechazar una solicitud de tienda
+ */
+router.delete("/stores/:id/reject", AdminController.rejectStore);
+
 export default router;

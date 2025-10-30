@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { RequestWithUser, ApiResponse } from "../types";
 import { supabase } from "../config/supabase";
+import { storeService } from "../services/storeService";
 
 export class AdminController {
   /**
@@ -16,7 +17,7 @@ export class AdminController {
 
       // Obtener total de palas
       const { count: totalRackets } = await supabase
-        .from("palas")
+        .from("rackets")
         .select("*", { count: "exact", head: true });
 
       // Obtener total de reviews
@@ -33,6 +34,18 @@ export class AdminController {
         .select("*", { count: "exact", head: true })
         .gte("updated_at", thirtyDaysAgo.toISOString());
 
+      // Obtener total de tiendas verificadas
+      const { count: totalStores } = await supabase
+        .from("stores")
+        .select("*", { count: "exact", head: true })
+        .eq("verified", true);
+
+      // Obtener solicitudes pendientes (tiendas no verificadas)
+      const { count: pendingRequests } = await supabase
+        .from("stores")
+        .select("*", { count: "exact", head: true })
+        .eq("verified", false);
+
       // Calcular cambios (simulado por ahora)
       const usersChange = 12.5;
       const racketsChange = 8.3;
@@ -40,9 +53,9 @@ export class AdminController {
       const metrics = {
         totalUsers: totalUsers || 0,
         totalRackets: totalRackets || 0,
-        totalStores: 0, // TODO: Implementar cuando tengamos tabla de tiendas
+        totalStores: totalStores || 0,
         totalReviews: totalReviews || 0,
-        pendingRequests: 0, // TODO: Implementar cuando tengamos tabla de solicitudes
+        pendingRequests: pendingRequests || 0,
         activeUsers: activeUsers || 0,
         usersChange,
         racketsChange,
@@ -217,21 +230,82 @@ export class AdminController {
 
   /**
    * GET /api/v1/admin/store-requests
-   * Obtiene todas las solicitudes de tiendas (simulado por ahora)
+   * Obtiene todas las solicitudes de tiendas pendientes de verificación
    */
   static async getStoreRequests(
     req: RequestWithUser,
     res: Response
   ): Promise<void> {
     try {
-      // TODO: Implementar cuando tengamos tabla de solicitudes
+      // Obtener tiendas no verificadas
+      const pendingStores = await storeService.getAllStores(false);
+      
       res.json({
         success: true,
-        data: [],
+        data: pendingStores,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: any) {
       console.error("Error in getStoreRequests:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error del servidor",
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * POST /api/v1/admin/stores/:id/verify
+   * Aprobar/verificar una tienda
+   */
+  static async verifyStore(
+    req: RequestWithUser,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      
+      const store = await storeService.verifyStore(id);
+      
+      res.json({
+        success: true,
+        data: store,
+        message: "Tienda verificada exitosamente",
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: any) {
+      console.error("Error in verifyStore:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error del servidor",
+        message: error.message,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * DELETE /api/v1/admin/stores/:id/reject
+   * Rechazar una solicitud de tienda
+   */
+  static async rejectStore(
+    req: RequestWithUser,
+    res: Response
+  ): Promise<void> {
+    try {
+      const { id } = req.params;
+      
+      await storeService.rejectStore(id);
+      
+      res.json({
+        success: true,
+        message: "Solicitud de tienda rechazada",
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: any) {
+      console.error("Error in rejectStore:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
