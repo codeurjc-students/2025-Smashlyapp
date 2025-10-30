@@ -53,12 +53,33 @@ export async function authenticateUser(
       return;
     }
 
+    // Obtener el rol del usuario desde la base de datos
+    console.log(`🔍 Fetching role for user ID: ${user.id}`);
+    
+    const { data: userData, error: dbError } = await supabase
+      .from("user_profiles")
+      .select("*")
+      .eq("id", user.id)
+      .single();
+
+    console.log(`📊 Database query result:`, {
+      userData,
+      error: dbError?.message,
+      roleFromDB: userData?.role,
+    });
+
+    if (dbError) {
+      console.warn("⚠️ Warning: Could not fetch user role from database:", dbError.message);
+    }
+
     // Agregar información del usuario al request
     req.user = {
       id: user.id,
       email: user.email || "",
-      role: user.user_metadata?.role || "user",
+      role: userData?.role || user.user_metadata?.role || "player",
     };
+
+    console.log(`✅ User authenticated: ${user.email} (${req.user.role})`);
 
     next();
   } catch (error: any) {

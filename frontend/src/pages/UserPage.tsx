@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
 import styled from "styled-components";
 import {
   FiEdit2,
@@ -243,6 +243,11 @@ const UserPage: React.FC = () => {
   const navigate = useNavigate();
   const { userProfile, loading, refreshUserProfile } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
+
+  // Redirigir a los administradores al panel de admin
+  if (!loading && userProfile && userProfile.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
 
   const handleEditProfile = () => {
     setShowEditModal(true);

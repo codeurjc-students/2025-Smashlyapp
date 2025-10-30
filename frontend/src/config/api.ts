@@ -31,6 +31,14 @@ export const API_ENDPOINTS = {
   AUTH_LOGOUT: "/api/v1/auth/logout",
   AUTH_ME: "/api/v1/auth/me",
 
+  // Admin
+  ADMIN: {
+    METRICS: "/api/v1/admin/metrics",
+    USERS: "/api/v1/admin/users",
+    RACKET_REQUESTS: "/api/v1/admin/racket-requests",
+    STORE_REQUESTS: "/api/v1/admin/store-requests",
+  },
+
   // Health
   HEALTH: "/api/v1/health",
 } as const;
