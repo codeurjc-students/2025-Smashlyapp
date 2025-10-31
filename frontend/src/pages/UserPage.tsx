@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import styled from "styled-components";
 import {
   FiEdit2,
@@ -13,6 +13,7 @@ import {
 import { useAuth } from "../contexts/AuthContext";
 import { MyListsSection } from "../components/features/MyListsSection";
 import { EditProfileModal } from "../components/features/EditProfileModal";
+import { UserReviews } from "../components/features/UserReviews";
 import { UserProfileService } from "../services/userProfileService";
 import toast from "react-hot-toast";
 
@@ -243,6 +244,11 @@ const UserPage: React.FC = () => {
   const { userProfile, loading, refreshUserProfile } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // Redirigir a los administradores al panel de admin
+  if (!loading && userProfile && userProfile.role?.toLowerCase() === 'admin') {
+    return <Navigate to="/admin" replace />;
+  }
+
   const handleEditProfile = () => {
     setShowEditModal(true);
   };
@@ -468,6 +474,9 @@ const UserPage: React.FC = () => {
             </DetailCard>
           </DetailGrid>
         </DetailsSection>
+
+        {/* Sección de Reviews del usuario */}
+        {userProfile?.id && <UserReviews userId={userProfile.id} />}
       </ContentWrapper>
 
       {/* Modal para editar perfil */}

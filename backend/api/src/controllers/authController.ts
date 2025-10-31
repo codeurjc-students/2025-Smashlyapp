@@ -64,7 +64,7 @@ export class AuthController {
    */
   static async register(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password, metadata } = req.body;
+      const { email, password, nickname, full_name, metadata } = req.body;
 
       if (!email || !password) {
         res.status(400).json({
@@ -76,15 +76,22 @@ export class AuthController {
         return;
       }
 
+      console.log("Registering user with:", { email, nickname, full_name });
+
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: metadata || {},
+          data: {
+            nickname: nickname,
+            full_name: full_name,
+            ...(metadata || {}),
+          },
         },
       });
 
       if (error) {
+        console.error("Supabase signUp error:", error);
         res.status(400).json({
           success: false,
           error: "Error al registrar usuario",
@@ -94,17 +101,83 @@ export class AuthController {
         return;
       }
 
-      res.status(201).json({
+      if (!data.user) {
+        res.status(400).json({
+          success: false,
+          error: "Error al crear usuario",
+          message: "No se pudo crear el usuario",
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      // Crear perfil de usuario
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from("user_profiles")
+          .insert({
+            id: data.user.id,
+            email: email,
+            nickname: nickname || email.split("@")[0],
+            full_name: full_name || null,
+            role: "Player",
+          })
+          .select()
+          .single();
+
+        if (profileError) {
+          console.error("Error creating user profile:", profileError);
+          // No retornar error, el usuario ya fue creado
+        } else {
+          console.log("User profile created:", profileData);
+        }
+      } catch (profileErr) {
+        console.error("Exception creating user profile:", profileErr);
+      }
+
+      // Si no hay sesión (email no confirmado), intentar hacer login automático
+      let finalSession = data.session;
+      let finalAccessToken = data.session?.access_token;
+
+      if (!finalAccessToken) {
+        console.log("⚠️ No access token from signUp, attempting auto-login...");
+        try {
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+
+          if (!loginError && loginData.session) {
+            console.log("✅ Auto-login successful, got access token");
+            finalSession = loginData.session;
+            finalAccessToken = loginData.session.access_token;
+          } else {
+            console.log("⚠️ Auto-login failed:", loginError?.message);
+          }
+        } catch (loginErr) {
+          console.error("Exception during auto-login:", loginErr);
+        }
+      }
+
+      const responseData = {
         success: true,
         data: {
           user: data.user,
-          session: data.session,
+          session: finalSession,
+          access_token: finalAccessToken,
+          refresh_token: finalSession?.refresh_token,
+          expires_at: finalSession?.expires_at,
           message: data.user?.email_confirmed_at
             ? "Usuario registrado exitosamente"
             : "Usuario registrado. Revisa tu email para confirmar la cuenta.",
         },
         timestamp: new Date().toISOString(),
-      } as ApiResponse);
+      } as ApiResponse;
+
+      console.log("📤 Sending response with access_token:", responseData.data.access_token ? "Present (length: " + responseData.data.access_token.length + ")" : "MISSING");
+      console.log("📤 Full response data keys:", Object.keys(responseData.data));
+
+      res.status(201).json(responseData);
     } catch (error: any) {
       console.error("Error in register:", error);
       res.status(500).json({

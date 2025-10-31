@@ -15,6 +15,7 @@ import {
 import { Link, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { AddToListModal } from "../components/features/AddToListModal";
+import { RacketReviews } from "../components/features/RacketReviews";
 
 // Styled Components
 const Container = styled.div`
@@ -676,6 +677,9 @@ const RacketDetailPage: React.FC = () => {
               </SpecificationsGrid>
             </SpecificationsCard>
           )}
+
+        {/* Sección de Reviews */}
+        {racket.id && <RacketReviews racketId={racket.id} />}
 
         {/* Recommendation Card */}
         <RecommendationCard

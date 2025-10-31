@@ -31,28 +31,52 @@ export const API_ENDPOINTS = {
   AUTH_LOGOUT: "/api/v1/auth/logout",
   AUTH_ME: "/api/v1/auth/me",
 
+  // Stores
+  STORES: "/api/v1/stores",
+  STORES_BY_ID: (id: string) => `/api/v1/stores/${id}`,
+  STORES_MY_STORE: "/api/v1/stores/my-store",
+
+  // Admin
+  ADMIN: {
+    METRICS: "/api/v1/admin/metrics",
+    USERS: "/api/v1/admin/users",
+    RACKET_REQUESTS: "/api/v1/admin/racket-requests",
+    STORE_REQUESTS: "/api/v1/admin/store-requests",
+    VERIFY_STORE: (id: string) => `/api/v1/admin/stores/${id}/verify`,
+    REJECT_STORE: (id: string) => `/api/v1/admin/stores/${id}/reject`,
+  },
+
   // Health
   HEALTH: "/api/v1/health",
 } as const;
 
 /**
- * Helper para construir URLs completas
+ * Helper para construir URLs completas de la API
  */
 export const buildApiUrl = (
   endpoint: string,
   params?: Record<string, any>
 ): string => {
-  const url = new URL(endpoint, API_URL);
+  // Asegurarse de que API_URL no termine con / y endpoint no comience con /
+  const baseUrl = API_URL.endsWith("/") ? API_URL.slice(0, -1) : API_URL;
+  const path = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+
+  let url = `${baseUrl}${path}`;
 
   if (params) {
+    const queryParams = new URLSearchParams();
     Object.entries(params).forEach(([key, value]) => {
       if (value !== undefined && value !== null) {
-        url.searchParams.append(key, String(value));
+        queryParams.append(key, String(value));
       }
     });
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
   }
 
-  return url.toString();
+  return url;
 };
 
 /**

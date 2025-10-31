@@ -15,6 +15,7 @@ import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../contexts/AuthContext";
 import { UserProfileService } from "../services/userProfileService";
+import { UserReviews } from "../components/features/UserReviews";
 
 // Styled Components
 const Container = styled.div`
@@ -307,6 +308,12 @@ const UserProfilePage: React.FC = () => {
     game_level: "",
     limitations: "",
   });
+
+  // Debug: verificar user ID
+  useEffect(() => {
+    console.log("👤 User object in UserProfilePage:", user);
+    console.log("🆔 User ID:", user?.id);
+  }, [user]);
 
   // Cargar datos del perfil cuando el componente se monta
   useEffect(() => {
@@ -635,6 +642,23 @@ const UserProfilePage: React.FC = () => {
             </form>
           </FormContainer>
         </ProfileCard>
+
+        {/* Sección de Reviews del usuario */}
+        {user?.id ? (
+          <UserReviews userId={user.id} />
+        ) : (
+          <div
+            style={{
+              padding: "2rem",
+              textAlign: "center",
+              background: "white",
+              borderRadius: "12px",
+              marginTop: "2rem",
+            }}
+          >
+            <p>Cargando información del usuario...</p>
+          </div>
+        )}
       </Content>
     </Container>
   );

@@ -28,7 +28,7 @@ interface AuthContextType {
     password: string,
     nickname: string,
     fullName?: string
-  ) => Promise<{ data: UserProfile | null; error: string | null }>;
+  ) => Promise<{ data: UserProfile | null; error: string | null; token?: string }>;
   signIn: (
     email: string,
     password: string
@@ -147,7 +147,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
     nickname: string,
     fullName?: string
-  ): Promise<{ data: UserProfile | null; error: string | null }> => {
+  ): Promise<{ data: UserProfile | null; error: string | null; token?: string }> => {
     try {
       console.log("Attempting to sign up with email:", email);
 
@@ -165,6 +165,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       const result = await response.json();
 
+      console.log("🔍 Backend response:", JSON.stringify(result, null, 2));
+      console.log("🔍 Response status:", response.status);
+      console.log("🔍 Response OK:", response.ok);
+
       if (!response.ok || !result.success) {
         const errorMessage =
           result.message ||
@@ -174,7 +178,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { data: null, error: errorMessage };
       }
 
+      console.log("🔍 result.data:", result.data);
       const { access_token, user: registeredUser } = result.data;
+      console.log("🔍 access_token extracted:", access_token ? "Present (length: " + access_token.length + ")" : "MISSING");
+      console.log("🔍 user extracted:", registeredUser ? "Present" : "Missing");
 
       if (access_token) {
         console.log("Registration successful, storing token...");
@@ -182,7 +189,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         await loadUserProfile();
       }
 
-      return { data: registeredUser || userProfile, error: null };
+      return { data: registeredUser || userProfile, error: null, token: access_token };
     } catch (error: any) {
       console.error("SignUp unexpected error:", error);
       return {

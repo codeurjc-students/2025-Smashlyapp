@@ -11,6 +11,7 @@ import FAQPage from "./pages/FAQPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import UserPage from "./pages/UserPage";
+import AdminPanelPage from "./pages/AdminPanelPage";
 import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegisterPage />} />
                 <Route path="/profile" element={<UserPage />} />
+                <Route path="/admin" element={<AdminPanelPage />} />
 
                 {/* Ruta 404 - página no encontrada */}
                 <Route

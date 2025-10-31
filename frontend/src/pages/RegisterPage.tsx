@@ -1,9 +1,23 @@
 import React, { useState } from "react";
 import toast from "react-hot-toast";
-import { FiEye, FiEyeOff, FiLock, FiMail, FiUser } from "react-icons/fi";
+import {
+  FiEye,
+  FiEyeOff,
+  FiFileText,
+  FiGlobe,
+  FiImage,
+  FiLock,
+  FiMail,
+  FiMapPin,
+  FiPhone,
+  FiShoppingBag,
+  FiUser,
+} from "react-icons/fi";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../contexts/AuthContext.tsx";
+import storeService from "../services/storeService";
+import StoreRequestModal from "../components/features/StoreRequestModal";
 
 const Container = styled.div`
   min-height: 100vh;
@@ -206,12 +220,88 @@ const RequirementItem = styled.li<{ met: boolean }>`
   margin: 0.25rem 0;
 `;
 
+const RegistrationTypeSelector = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+`;
+
+const TypeCard = styled.button<{ isSelected: boolean }>`
+  flex: 1;
+  padding: 1.5rem;
+  border: 2px solid
+    ${(props) => (props.isSelected ? "#16a34a" : "#e5e7eb")};
+  border-radius: 12px;
+  background: ${(props) => (props.isSelected ? "#f0fdf4" : "white")};
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: center;
+
+  &:hover {
+    border-color: #16a34a;
+    background: #f0fdf4;
+  }
+`;
+
+const TypeIcon = styled.div`
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+`;
+
+const TypeTitle = styled.h3`
+  margin: 0 0 0.25rem 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #1f2937;
+`;
+
+const TypeDescription = styled.p`
+  margin: 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  padding: 0.875rem 1rem 0.875rem 3rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px;
+
+  &:focus {
+    outline: none;
+    border-color: #16a34a;
+    background: #f0fdf4;
+  }
+
+  &::placeholder {
+    color: #9ca3af;
+  }
+`;
+
+type RegistrationType = "player" | "store";
+
 interface FormData {
+  registrationType: RegistrationType;
   fullName: string;
   nickname: string;
   email: string;
   password: string;
   confirmPassword: string;
+  // Store-specific fields
+  storeName?: string;
+  legalName?: string;
+  cifNif?: string;
+  contactEmail?: string;
+  phoneNumber?: string;
+  websiteUrl?: string;
+  logoUrl?: string;
+  shortDescription?: string;
+  location?: string;
 }
 
 interface FormErrors {
@@ -220,6 +310,15 @@ interface FormErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  storeName?: string;
+  legalName?: string;
+  cifNif?: string;
+  contactEmail?: string;
+  phoneNumber?: string;
+  websiteUrl?: string;
+  logoUrl?: string;
+  shortDescription?: string;
+  location?: string;
 }
 
 const RegisterPage: React.FC = () => {
@@ -228,12 +327,23 @@ const RegisterPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showStoreModal, setShowStoreModal] = useState(false);
   const [formData, setFormData] = useState<FormData>({
+    registrationType: "player",
     fullName: "",
     nickname: "",
     email: "",
     password: "",
     confirmPassword: "",
+    storeName: "",
+    legalName: "",
+    cifNif: "",
+    contactEmail: "",
+    phoneNumber: "",
+    websiteUrl: "",
+    logoUrl: "",
+    shortDescription: "",
+    location: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -254,14 +364,13 @@ const RegisterPage: React.FC = () => {
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
 
-    // Validar nombre completo
+    // Validar campos comunes
     if (!formData.fullName.trim()) {
       newErrors.fullName = "El nombre completo es requerido";
     } else if (formData.fullName.trim().length < 2) {
       newErrors.fullName = "El nombre debe tener al menos 2 caracteres";
     }
 
-    // Validar nickname
     if (!formData.nickname.trim()) {
       newErrors.nickname = "El nickname es requerido";
     } else if (formData.nickname.trim().length < 3) {
@@ -271,32 +380,82 @@ const RegisterPage: React.FC = () => {
         "El nickname solo puede contener letras, números y guiones bajos";
     }
 
-    // Validar email
     if (!formData.email.trim()) {
       newErrors.email = "El email es requerido";
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = "Ingresa un email válido";
     }
 
-    // Validar contraseña
     if (!formData.password) {
       newErrors.password = "La contraseña es requerida";
     } else if (!isPasswordValid) {
       newErrors.password = "La contraseña no cumple con los requisitos";
     }
 
-    // Validar confirmación de contraseña
     if (!formData.confirmPassword) {
       newErrors.confirmPassword = "Confirma tu contraseña";
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = "Las contraseñas no coinciden";
     }
 
+    // Validar campos específicos de tienda
+    if (formData.registrationType === "store") {
+      if (!formData.storeName?.trim()) {
+        newErrors.storeName = "El nombre de la tienda es requerido";
+      }
+
+      if (!formData.legalName?.trim()) {
+        newErrors.legalName = "La razón social es requerida";
+      }
+
+      if (!formData.cifNif?.trim()) {
+        newErrors.cifNif = "El CIF/NIF es requerido";
+      } else if (!/^[A-Z0-9]{9}$/i.test(formData.cifNif.trim())) {
+        newErrors.cifNif = "El CIF/NIF debe tener 9 caracteres alfanuméricos";
+      }
+
+      if (!formData.contactEmail?.trim()) {
+        newErrors.contactEmail = "El email de contacto es requerido";
+      } else if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail.trim())
+      ) {
+        newErrors.contactEmail = "Ingresa un email válido";
+      }
+
+      if (!formData.phoneNumber?.trim()) {
+        newErrors.phoneNumber = "El teléfono es requerido";
+      } else if (!/^[+]?[\d\s-]{9,}$/.test(formData.phoneNumber.trim())) {
+        newErrors.phoneNumber = "Ingresa un teléfono válido";
+      }
+
+      if (!formData.location?.trim()) {
+        newErrors.location = "La ubicación es requerida";
+      }
+
+      if (formData.websiteUrl?.trim()) {
+        try {
+          new URL(formData.websiteUrl.trim());
+        } catch {
+          newErrors.websiteUrl = "Ingresa una URL válida";
+        }
+      }
+
+      if (formData.logoUrl?.trim()) {
+        try {
+          new URL(formData.logoUrl.trim());
+        } catch {
+          newErrors.logoUrl = "Ingresa una URL válida";
+        }
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
@@ -322,7 +481,8 @@ const RegisterPage: React.FC = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await signUp(
+      // Crear cuenta de usuario
+      const { error, token } = await signUp(
         formData.email.trim(),
         formData.password,
         formData.nickname.trim(),
@@ -334,7 +494,57 @@ const RegisterPage: React.FC = () => {
         return;
       }
 
-      if (data) {
+      if (!token) {
+        toast.error("Error al obtener el token de autenticación");
+        console.error("❌ No token returned from signUp");
+        return;
+      }
+
+      console.log("✅ Token received from signUp:", token ? "Present" : "Missing");
+
+      // Si es una tienda, crear también la solicitud de tienda
+      if (formData.registrationType === "store") {
+        try {
+          console.log("🏪 Creating store request...");
+          console.log("Token (first 20 chars):", token ? token.substring(0, 20) + "..." : "Missing");
+          console.log("Store data:", {
+            store_name: formData.storeName,
+            legal_name: formData.legalName,
+            cif_nif: formData.cifNif,
+            contact_email: formData.contactEmail,
+            phone_number: formData.phoneNumber,
+            location: formData.location,
+          });
+
+          await storeService.createStoreRequest(
+            {
+              store_name: formData.storeName!,
+              legal_name: formData.legalName!,
+              cif_nif: formData.cifNif!,
+              contact_email: formData.contactEmail!,
+              phone_number: formData.phoneNumber!,
+              website_url: formData.websiteUrl,
+              logo_url: formData.logoUrl,
+              short_description: formData.shortDescription,
+              location: formData.location!,
+            },
+            token
+          );
+
+          console.log("✅ Store request created successfully");
+          // Mostrar modal de confirmación
+          setShowStoreModal(true);
+        } catch (storeError: any) {
+          console.error("❌ Error creating store:", storeError);
+          console.error("Error message:", storeError.message);
+          console.error("Error stack:", storeError.stack);
+          toast.error(
+            `Cuenta creada pero error al registrar la tienda: ${storeError.message}. Revisa tu email para confirmar tu cuenta.`
+          );
+          // Aunque haya error en la tienda, redirigir al login después de 3 segundos
+          setTimeout(() => navigate("/login"), 3000);
+        }
+      } else {
         toast.success(
           "¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta."
         );
@@ -346,6 +556,11 @@ const RegisterPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleModalClose = () => {
+    setShowStoreModal(false);
+    navigate("/login");
   };
 
   return (
@@ -360,6 +575,103 @@ const RegisterPage: React.FC = () => {
         </Header>
 
         <Form onSubmit={handleSubmit}>
+          <RegistrationTypeSelector>
+            <TypeCard
+              type="button"
+              isSelected={formData.registrationType === "player"}
+              onClick={() =>
+                setFormData((prev) => ({
+                  ...prev,
+                  registrationType: "player",
+                }))
+              }
+            >
+              <TypeIcon>👤</TypeIcon>
+              <TypeTitle>Jugador</TypeTitle>
+              <TypeDescription>
+                Únete como jugador y descubre palas
+              </TypeDescription>
+            </TypeCard>
+            <TypeCard
+              type="button"
+              isSelected={formData.registrationType === "store"}
+              onClick={() =>
+                setFormData((prev) => ({
+                  ...prev,
+                  registrationType: "store",
+                }))
+              }
+            >
+              <TypeIcon>🏪</TypeIcon>
+              <TypeTitle>Tienda</TypeTitle>
+              <TypeDescription>
+                Registra tu tienda de pádel
+              </TypeDescription>
+            </TypeCard>
+          </RegistrationTypeSelector>
+
+          {formData.registrationType === "store" && (
+            <>
+              <InputGroup>
+                <Label htmlFor="storeName">Nombre de la Tienda *</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiShoppingBag size={20} />
+                  </InputIcon>
+                  <Input
+                    id="storeName"
+                    name="storeName"
+                    type="text"
+                    placeholder="Nombre comercial de tu tienda"
+                    value={formData.storeName}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.storeName && (
+                  <ErrorMessage>{errors.storeName}</ErrorMessage>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label htmlFor="legalName">Razón Social *</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiFileText size={20} />
+                  </InputIcon>
+                  <Input
+                    id="legalName"
+                    name="legalName"
+                    type="text"
+                    placeholder="Nombre legal de la empresa"
+                    value={formData.legalName}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.legalName && (
+                  <ErrorMessage>{errors.legalName}</ErrorMessage>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label htmlFor="cifNif">CIF/NIF *</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiFileText size={20} />
+                  </InputIcon>
+                  <Input
+                    id="cifNif"
+                    name="cifNif"
+                    type="text"
+                    placeholder="Ej: B12345678"
+                    value={formData.cifNif}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.cifNif && <ErrorMessage>{errors.cifNif}</ErrorMessage>}
+              </InputGroup>
+            </>
+          )}
+
           <InputGroup>
             <Label htmlFor="fullName">Nombre Completo</Label>
             <InputContainer>
@@ -416,6 +728,131 @@ const RegisterPage: React.FC = () => {
             </InputContainer>
             {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
           </InputGroup>
+
+          {formData.registrationType === "store" && (
+            <>
+              <InputGroup>
+                <Label htmlFor="contactEmail">Email de Contacto *</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiMail size={20} />
+                  </InputIcon>
+                  <Input
+                    id="contactEmail"
+                    name="contactEmail"
+                    type="email"
+                    placeholder="contacto@tutienda.com"
+                    value={formData.contactEmail}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.contactEmail && (
+                  <ErrorMessage>{errors.contactEmail}</ErrorMessage>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label htmlFor="phoneNumber">Teléfono *</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiPhone size={20} />
+                  </InputIcon>
+                  <Input
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    type="tel"
+                    placeholder="+34 XXX XXX XXX"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.phoneNumber && (
+                  <ErrorMessage>{errors.phoneNumber}</ErrorMessage>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label htmlFor="location">Ubicación *</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiMapPin size={20} />
+                  </InputIcon>
+                  <Input
+                    id="location"
+                    name="location"
+                    type="text"
+                    placeholder="Ciudad, País"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.location && (
+                  <ErrorMessage>{errors.location}</ErrorMessage>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label htmlFor="websiteUrl">Sitio Web (opcional)</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiGlobe size={20} />
+                  </InputIcon>
+                  <Input
+                    id="websiteUrl"
+                    name="websiteUrl"
+                    type="url"
+                    placeholder="https://tutienda.com"
+                    value={formData.websiteUrl}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.websiteUrl && (
+                  <ErrorMessage>{errors.websiteUrl}</ErrorMessage>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label htmlFor="logoUrl">URL del Logo (opcional)</Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiImage size={20} />
+                  </InputIcon>
+                  <Input
+                    id="logoUrl"
+                    name="logoUrl"
+                    type="url"
+                    placeholder="https://ejemplo.com/logo.png"
+                    value={formData.logoUrl}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.logoUrl && (
+                  <ErrorMessage>{errors.logoUrl}</ErrorMessage>
+                )}
+              </InputGroup>
+
+              <InputGroup>
+                <Label htmlFor="shortDescription">
+                  Descripción Breve (opcional)
+                </Label>
+                <InputContainer>
+                  <InputIcon>
+                    <FiFileText size={20} />
+                  </InputIcon>
+                  <TextArea
+                    id="shortDescription"
+                    name="shortDescription"
+                    placeholder="Describe tu tienda..."
+                    value={formData.shortDescription}
+                    onChange={handleInputChange}
+                  />
+                </InputContainer>
+                {errors.shortDescription && (
+                  <ErrorMessage>{errors.shortDescription}</ErrorMessage>
+                )}
+              </InputGroup>
+            </>
+          )}
 
           <InputGroup>
             <Label htmlFor="password">Contraseña</Label>
@@ -506,6 +943,13 @@ const RegisterPage: React.FC = () => {
           </LoginText>
         </LoginLink>
       </RegisterCard>
+
+      <StoreRequestModal
+        isOpen={showStoreModal}
+        onClose={handleModalClose}
+        onContinue={handleModalClose}
+        storeName={formData.storeName || "tu tienda"}
+      />
     </Container>
   );
 };
