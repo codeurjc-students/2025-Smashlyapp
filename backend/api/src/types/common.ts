@@ -1,7 +1,7 @@
 import { Request } from "express";
 
 // Tipos generales para la API
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -14,11 +14,11 @@ export interface ErrorResponse {
   error: string;
   message?: string;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   timestamp: string;
 }
 
-export interface SuccessResponse<T = any> {
+export interface SuccessResponse<T = unknown> {
   success: true;
   data: T;
   message?: string;
@@ -50,12 +50,19 @@ export interface QueryParams {
 export interface ValidationError {
   field: string;
   message: string;
-  value?: any;
+  value?: unknown;
 }
 
 export interface ValidationResult {
   isValid: boolean;
   errors: ValidationError[];
+}
+
+// Tipo para manejo de errores
+export interface AppError extends Error {
+  code?: string;
+  statusCode?: number;
+  details?: Record<string, unknown>;
 }
 
 // Tipos para middleware

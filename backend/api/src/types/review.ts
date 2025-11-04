@@ -27,11 +27,11 @@ export interface ReviewWithDetails extends ReviewWithUser {
   racket: {
     id: number;
     nombre: string;
-    marca: string;
+    brand: string;
     modelo: string;
     imagen?: string;
   };
-  user_has_liked?: boolean; // Si el usuario actual ha dado like
+  user_has_liked?: boolean; // If the current user has liked
   comments?: ReviewComment[];
 }
 

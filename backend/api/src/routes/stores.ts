@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticateUser } from "../middleware/auth";
-import { storeController } from "../controllers/storeController";
+import { storeController as StoreController } from "../controllers/storeController";
 
 const router = Router();
 
@@ -9,44 +9,44 @@ router.use(authenticateUser);
 
 /**
  * @route   POST /api/v1/stores
- * @desc    Crear una nueva solicitud de tienda
- * @access  Private (usuarios autenticados)
+ * @desc    Create a new store request
+ * @access  Private (authenticated users)
  */
-router.post("/", storeController.createStoreRequest);
+router.post("/", authenticateUser, StoreController.createStoreRequest);
 
 /**
  * @route   GET /api/v1/stores
- * @desc    Obtener todas las tiendas (query param: verified=true/false)
- * @access  Private
+ * @desc    Get all stores (query param: verified=true/false)
+ * @access  Public
  */
-router.get("/", storeController.getAllStores);
+router.get("/", StoreController.getAllStores);
 
 /**
- * @route   GET /api/v1/stores/my-store
- * @desc    Obtener la tienda del usuario actual
+ * @route   GET /api/v1/stores/me
+ * @desc    Get current user's store
  * @access  Private
  */
-router.get("/my-store", storeController.getMyStore);
+router.get("/me", authenticateUser, StoreController.getMyStore);
 
 /**
  * @route   GET /api/v1/stores/:id
- * @desc    Obtener una tienda por ID
- * @access  Private
+ * @desc    Get a store by ID
+ * @access  Public
  */
-router.get("/:id", storeController.getStoreById);
+router.get("/:id", StoreController.getStoreById);
 
 /**
  * @route   PUT /api/v1/stores/:id
- * @desc    Actualizar una tienda (propietario o admin)
+ * @desc    Update a store (owner or admin)
  * @access  Private
  */
-router.put("/:id", storeController.updateStore);
+router.put("/:id", authenticateUser, StoreController.updateStore);
 
 /**
  * @route   DELETE /api/v1/stores/:id
- * @desc    Eliminar una tienda (propietario o admin)
+ * @desc    Delete a store (owner or admin)
  * @access  Private
  */
-router.delete("/:id", storeController.deleteStore);
+router.delete("/:id", StoreController.deleteStore);
 
 export default router;

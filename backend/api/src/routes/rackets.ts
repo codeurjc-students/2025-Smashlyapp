@@ -10,7 +10,7 @@ import {
 
 const router = Router();
 
-// GET /api/rackets - Obtiene todas las palas o con paginación
+// GET /api/rackets - Gets all rackets or with pagination
 router.get(
   "/",
   optionalAuth,
@@ -18,7 +18,7 @@ router.get(
   RacketController.getAllRackets
 );
 
-// GET /api/rackets/search?q=... - Busca palas por nombre, marca o modelo
+// GET /api/rackets/search?q=... - Searches rackets by name, brand or model
 router.get(
   "/search",
   optionalAuth,
@@ -26,7 +26,7 @@ router.get(
   RacketController.searchRackets
 );
 
-// GET /api/rackets/filter - Obtiene palas con filtros avanzados
+// GET /api/rackets/filter - Gets rackets with advanced filters
 router.get(
   "/filter",
   optionalAuth,
@@ -35,22 +35,22 @@ router.get(
   RacketController.getFilteredRackets
 );
 
-// GET /api/rackets/bestsellers - Obtiene palas bestsellers
+// GET /api/rackets/bestsellers - Gets bestseller rackets
 router.get("/bestsellers", optionalAuth, RacketController.getBestsellerRackets);
 
-// GET /api/rackets/offers - Obtiene palas en oferta
+// GET /api/rackets/offers - Gets rackets on sale
 router.get("/offers", optionalAuth, RacketController.getRacketsOnSale);
 
-// GET /api/rackets/brands - Obtiene todas las marcas disponibles
+// GET /api/rackets/brands - Gets all available brands
 router.get("/brands", optionalAuth, RacketController.getBrands);
 
-// GET /api/rackets/stats - Obtiene estadísticas de palas
+// GET /api/rackets/stats - Gets racket statistics
 router.get("/stats", optionalAuth, RacketController.getStats);
 
-// GET /api/rackets/brands/:brand - Obtiene palas por marca específica
+// GET /api/rackets/brands/:brand - Gets rackets by specific brand
 router.get("/brands/:brand", optionalAuth, RacketController.getRacketsByBrand);
 
-// GET /api/rackets/:id - Obtiene una pala por ID (debe ir al final)
+// GET /api/rackets/:id - Gets a racket by ID (must go at the end)
 router.get(
   "/:id",
   optionalAuth,

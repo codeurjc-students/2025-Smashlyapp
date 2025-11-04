@@ -1,19 +1,18 @@
 import { Router } from "express";
 import { UserController } from "../controllers/userController";
-import { authenticateUser, optionalAuth } from "../middleware/auth";
+import { authenticateUser, authenticateUser as requireAuth } from "../middleware/auth";
 import {
   validateBody,
   schemas,
-  validateIdParam,
 } from "../middleware/validation";
 import { ListController } from "../controllers/listController";
 
 const router = Router();
 
-// GET /api/users/profile - Obtiene el perfil del usuario autenticado
-router.get("/profile", authenticateUser, UserController.getUserProfile);
+// GET /api/users/profile - Gets the authenticated user's profile
+router.get("/profile", requireAuth, UserController.getUserProfile);
 
-// POST /api/users/profile - Crea un nuevo perfil de usuario
+// POST /api/users/profile - Creates a new user profile
 router.post(
   "/profile",
   authenticateUser,
@@ -21,7 +20,7 @@ router.post(
   UserController.createUserProfile
 );
 
-// PUT /api/users/profile - Actualiza el perfil del usuario autenticado
+// PUT /api/users/profile - Updates the authenticated user's profile
 router.put(
   "/profile",
   authenticateUser,
@@ -29,7 +28,7 @@ router.put(
   UserController.updateUserProfile
 );
 
-// DELETE /api/users/profile - Elimina el perfil del usuario autenticado
+// DELETE /api/users/profile - Deletes the authenticated user's profile
 router.delete("/profile", authenticateUser, UserController.deleteUserProfile);
 
 // GET /api/users/nickname/:nickname/available - Verifica si un nickname está disponible
@@ -38,35 +37,35 @@ router.get(
   UserController.checkNicknameAvailability
 );
 
-// GET /api/users/search?q=... - Busca usuarios por nickname
+// GET /api/users/search?q=... - Search users by nickname
 router.get("/search", UserController.searchUsers);
 
-// GET /api/users/stats - Obtiene estadísticas de usuarios (admin)
+// GET /api/users/stats - Get user statistics (admin)
 router.get("/stats", authenticateUser, UserController.getUserStats);
 
-// GET /api/users/lists - Obtener todas las listas del usuario
+// GET /api/users/lists - Get all user lists
 router.get("/lists", authenticateUser, ListController.getUserLists);
 
-// POST /api/users/lists - Crear nueva lista
+// POST /api/users/lists - Create new list
 router.post("/lists", authenticateUser, ListController.createList);
 
-// GET /api/users/lists/:id - Obtener lista específica con sus palas
+// GET /api/users/lists/:id - Get specific list with its rackets
 router.get("/lists/:id", authenticateUser, ListController.getListById);
 
-// PUT /api/users/lists/:id - Actualizar lista
+// PUT /api/users/lists/:id - Update list
 router.put("/lists/:id", authenticateUser, ListController.updateList);
 
-// DELETE /api/users/lists/:id - Eliminar lista
+// DELETE /api/users/lists/:id - Delete list
 router.delete("/lists/:id", authenticateUser, ListController.deleteList);
 
-// POST /api/users/lists/:id/rackets - Añadir pala a lista
+// POST /api/users/lists/:id/rackets - Add racket to list
 router.post(
   "/lists/:id/rackets",
   authenticateUser,
   ListController.addRacketToList
 );
 
-// DELETE /api/users/lists/:id/rackets/:racketId - Quitar pala de lista
+// DELETE /api/users/lists/:id/rackets/:racketId - Remove racket from list
 router.delete(
   "/lists/:id/rackets/:racketId",
   authenticateUser,

@@ -1,13 +1,12 @@
 /**
  * Review Service
- * Maneja toda la lógica de negocio relacionada con reviews de palas
+ * Handles all business logic related to racket reviews
  */
 
 import { supabase } from "../config/supabase";
 import {
   Review,
   ReviewWithDetails,
-  ReviewWithUser,
   CreateReviewDTO,
   UpdateReviewDTO,
   CreateCommentDTO,
@@ -18,19 +17,10 @@ import {
 
 export class ReviewService {
   /**
-   * Obtener reviews de una pala con paginación y filtros
+   * Construye la query base para obtener reviews
    */
-  static async getReviewsByRacket(
-    racketId: number,
-    filters: ReviewFilters = {},
-    userId?: string
-  ): Promise<ReviewsResponse> {
-    const { rating, sort = "recent", page = 1, limit = 5 } = filters;
-
-    const offset = (page - 1) * limit;
-
-    // Construir query base
-    let query = supabase
+  private static buildReviewsQuery(racketId: number) {
+    return supabase
       .from("reviews")
       .select(
         `
@@ -43,7 +33,7 @@ export class ReviewService {
         racket:rackets!reviews_racket_id_fkey (
           id,
           nombre,
-          marca,
+          brand,
           modelo,
           imagen
         )
@@ -51,6 +41,13 @@ export class ReviewService {
         { count: "exact" }
       )
       .eq("racket_id", racketId);
+  }
+
+  /**
+   * Aplica filtros y ordenamiento a la query de reviews
+   */
+  private static applyReviewFilters(query: ReturnType<typeof ReviewService.buildReviewsQuery>, filters: ReviewFilters) {
+    const { rating, sort = "recent" } = filters;
 
     // Aplicar filtro de rating si existe
     if (rating) {
@@ -74,16 +71,19 @@ export class ReviewService {
         break;
     }
 
-    // Aplicar paginación
-    query = query.range(offset, offset + limit - 1);
+    return query;
+  }
 
-    const { data: reviews, error, count } = await query;
+  /**
+   * Adds user like information to reviews
+   */
+  private static async addUserLikesInfo(
+    reviews: any[],
+    userId?: string
+  ): Promise<ReviewWithDetails[]> {
+    if (!reviews) return [];
 
-    if (error) throw error;
-
-    // Para cada review, verificar si el usuario actual ha dado like
-    let reviewsWithDetails: ReviewWithDetails[] = [];
-    if (reviews && userId) {
+    if (userId) {
       const reviewIds = reviews.map((r) => r.id);
       const { data: userLikes } = await supabase
         .from("review_likes")
@@ -93,18 +93,42 @@ export class ReviewService {
 
       const likedReviewIds = new Set(userLikes?.map((l) => l.review_id) || []);
 
-      reviewsWithDetails = reviews.map((review) => ({
+      return reviews.map((review) => ({
         ...review,
         user_has_liked: likedReviewIds.has(review.id),
       }));
-    } else {
-      reviewsWithDetails = (reviews || []).map((review) => ({
-        ...review,
-        user_has_liked: false,
-      }));
     }
 
-    // Obtener estadísticas
+    return reviews.map((review) => ({
+      ...review,
+      user_has_liked: false,
+    }));
+  }
+
+  /**
+   * Get reviews for a racket with pagination and filters
+   */
+  static async getReviewsByRacket(
+    racketId: number,
+    filters: ReviewFilters = {},
+    userId?: string
+  ): Promise<ReviewsResponse> {
+    const { page = 1, limit = 5 } = filters;
+    const offset = (page - 1) * limit;
+
+    // Build and configure query
+    let query = this.buildReviewsQuery(racketId);
+    query = this.applyReviewFilters(query, filters);
+    query = query.range(offset, offset + limit - 1);
+
+    const { data: reviews, error, count } = await query;
+
+    if (error) throw error;
+
+    // Add user like information
+    const reviewsWithDetails = await this.addUserLikesInfo(reviews, userId);
+
+    // Get statistics
     const { data: statsData } = await supabase
       .from("reviews")
       .select("rating")
@@ -125,7 +149,7 @@ export class ReviewService {
   }
 
   /**
-   * Obtener reviews de un usuario
+   * Get reviews from a user
    */
   static async getReviewsByUser(
     userId: string,
@@ -165,7 +189,7 @@ export class ReviewService {
     if (error) throw error;
 
     return {
-      reviews: (reviews || []) as any,
+      reviews: (reviews || []) as ReviewWithDetails[],
       pagination: {
         total: count || 0,
         page,
@@ -176,7 +200,45 @@ export class ReviewService {
   }
 
   /**
-   * Obtener una review específica con todos sus detalles
+   * Obtiene los comentarios de una review
+   */
+  private static async getReviewComments(reviewId: string) {
+    const { data: comments } = await supabase
+      .from("review_comments")
+      .select(
+        `
+        *,
+        user:user_profiles!review_comments_user_id_fkey (
+          id,
+          nickname,
+          avatar_url
+        )
+      `
+      )
+      .eq("review_id", reviewId)
+      .order("created_at", { ascending: true });
+
+    return comments || [];
+  }
+
+  /**
+   * Verifica si un usuario ha dado like a una review
+   */
+  private static async checkUserLike(reviewId: string, userId?: string): Promise<boolean> {
+    if (!userId) return false;
+
+    const { data: like } = await supabase
+      .from("review_likes")
+      .select("id")
+      .eq("review_id", reviewId)
+      .eq("user_id", userId)
+      .single();
+
+    return !!like;
+  }
+
+  /**
+   * Get a specific review with all its details
    */
   static async getReviewById(
     reviewId: string,
@@ -206,38 +268,15 @@ export class ReviewService {
 
     if (error || !review) return null;
 
-    // Obtener comentarios
-    const { data: comments } = await supabase
-      .from("review_comments")
-      .select(
-        `
-        *,
-        user:user_profiles!review_comments_user_id_fkey (
-          id,
-          nickname,
-          avatar_url
-        )
-      `
-      )
-      .eq("review_id", reviewId)
-      .order("created_at", { ascending: true });
-
-    // Verificar si el usuario ha dado like
-    let userHasLiked = false;
-    if (userId) {
-      const { data: like } = await supabase
-        .from("review_likes")
-        .select("id")
-        .eq("review_id", reviewId)
-        .eq("user_id", userId)
-        .single();
-
-      userHasLiked = !!like;
-    }
+    // Obtener comentarios y verificar like del usuario en paralelo
+    const [comments, userHasLiked] = await Promise.all([
+      this.getReviewComments(reviewId),
+      this.checkUserLike(reviewId, userId),
+    ]);
 
     return {
       ...review,
-      comments: comments || [],
+      comments,
       user_has_liked: userHasLiked,
     };
   }

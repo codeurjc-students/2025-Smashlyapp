@@ -1,103 +1,101 @@
-// Interfaces para las características técnicas de las palas
+// Interfaces for racket technical characteristics
 export interface RacketCharacteristics {
-  // Características desde la base de datos
-  marca?: string;
+  // Characteristics from database
+  brand?: string;
   color?: string;
   color_2?: string;
-  producto?: string;
+  product?: string;
   balance?: string;
-  nucleo?: string;
-  cara?: string;
-  formato?: string;
-  dureza?: string;
-  nivel_de_juego?: string;
-  acabado?: string;
-  forma?: string;
-  superficie?: string;
-  tipo_de_juego?: string;
-  coleccion_jugadores?: string;
-  jugador?: string;
+  core?: string;
+  face?: string;
+  format?: string;
+  hardness?: string;
+  game_level?: string;
+  finish?: string;
+  shape?: string;
+  surface?: string;
+  game_type?: string;
+  player_collection?: string;
+  player?: string;
 }
 
-// Interfaz para especificaciones técnicas (JSONB)
+// Interface for technical specifications (JSONB)
 export interface RacketSpecifications {
-  [key: string]: any;
+  [key: string]: string | number | boolean | null | undefined;
 }
 
-// Interfaz para la información de precios por tienda
+// Interface for store price information
 export interface StorePrice {
-  precio_actual?: number | null;
-  precio_original?: number | null;
-  descuento_porcentaje?: number | null;
-  enlace?: string | null;
+  current_price?: number | null;
+  original_price?: number | null;
+  discount_percentage?: number | null;
+  link?: string | null;
 }
 
-// Interfaz principal para las palas que coincide con la estructura de la base de datos
+// Main interface for rackets that matches the database structure
 export interface Racket {
   id?: number;
-  nombre: string;
-  marca?: string | null;
-  modelo?: string | null;
-  imagen?: string | null;
-  es_bestseller: boolean;
-  en_oferta: boolean;
-  scrapeado_en?: string;
-  descripcion?: string | null;
+  name: string;
+  brand?: string | null;
+  model?: string | null;
+  image?: string | null;
+  on_offer: boolean;
+  description?: string | null;
 
-  // Características individuales
-  caracteristicas_marca?: string | null;
-  caracteristicas_color?: string | null;
-  caracteristicas_color_2?: string | null;
-  caracteristicas_producto?: string;
-  caracteristicas_balance?: string | null;
-  caracteristicas_nucleo?: string | null;
-  caracteristicas_cara?: string | null;
-  caracteristicas_formato?: string;
-  caracteristicas_dureza?: string | null;
-  caracteristicas_nivel_de_juego?: string | null;
-  caracteristicas_acabado?: string | null;
-  caracteristicas_forma?: string | null;
-  caracteristicas_superficie?: string | null;
-  caracteristicas_tipo_de_juego?: string | null;
-  caracteristicas_coleccion_jugadores?: string | null;
-  caracteristicas_jugador?: string | null;
+  // Individual characteristics (matching current DB schema)
+  characteristics_brand?: string | null;
+  characteristics_color?: string | null;
+  characteristics_color_2?: string | null;
+  characteristics_product?: string;
+  characteristics_balance?: string | null;
+  characteristics_core?: string | null;
+  characteristics_face?: string | null;
+  characteristics_format?: string;
+  characteristics_hardness?: string | null;
+  characteristics_game_level?: string | null;
+  characteristics_finish?: string | null;
+  characteristics_shape?: string | null;
+  characteristics_surface?: string | null;
+  characteristics_game_type?: string | null;
+  characteristics_player_collection?: string | null;
+  characteristics_player?: string | null;
 
-  // Especificaciones en formato JSONB
-  especificaciones?: RacketSpecifications;
+  // Specifications in JSONB format (matching current DB schema)
+  specs?: RacketSpecifications;
 
-  // Precios por tienda
-  padelnuestro_precio_actual?: number | null;
-  padelnuestro_precio_original?: number | null;
-  padelnuestro_descuento_porcentaje?: number | null;
-  padelnuestro_enlace?: string | null;
+  // Prices by store (matching current DB schema with actual_price, original_price, etc.)
+  padelnuestro_actual_price?: number | null;
+  padelnuestro_original_price?: number | null;
+  padelnuestro_discount_percentage?: number | null;
+  padelnuestro_link?: string | null;
 
-  padelmarket_precio_actual?: number | null;
-  padelmarket_precio_original?: number | null;
-  padelmarket_descuento_porcentaje?: number | null;
-  padelmarket_enlace?: string | null;
+  padelmarket_actual_price?: number | null;
+  padelmarket_original_price?: number | null;
+  padelmarket_discount_percentage?: number | null;
+  padelmarket_link?: string | null;
 
-  padelpoint_precio_actual?: number | null;
-  padelpoint_precio_original?: number | null;
-  padelpoint_descuento_porcentaje?: number | null;
-  padelpoint_enlace?: string | null;
+  padelpoint_actual_price?: number | null;
+  padelpoint_original_price?: number | null;
+  padelpoint_discount_percentage?: number | null;
+  padelpoint_link?: string | null;
 
-  padelproshop_precio_actual?: number | null;
-  padelproshop_precio_original?: number | null;
-  padelproshop_descuento_porcentaje?: number | null;
-  padelproshop_enlace?: string | null;
+  padelproshop_actual_price?: number | null;
+  padelproshop_original_price?: number | null;
+  padelproshop_discount_percentage?: number | null;
+  padelproshop_link?: string | null;
 
   created_at?: string;
   updated_at?: string;
 
-  // Campos computados para compatibilidad con el código existente
-  precio_actual?: number;
-  precio_original?: number | null;
-  descuento_porcentaje?: number;
-  enlace?: string;
-  fuente?: string;
+  // Computed fields for compatibility with existing code
+  current_price?: number;
+  original_price?: number | null;
+  discount_percentage?: number;
+  link?: string;
+  source?: string;
 }
 
-// Tipos para formularios de usuario básicos
+// Types for basic user forms
 export interface UserFormData {
   // Información personal básica
   weight: string;
@@ -109,17 +107,17 @@ export interface UserFormData {
   preferences?: string;
 }
 
-// Tipos específicos para filtros y búsqueda de palas
+// Specific types for racket filters and search
 
 export interface SearchFilters {
-  marca?: string;
-  forma?: string;
+  brand?: string;
+  shape?: string;
   balance?: string;
-  nivel_de_juego?: string;
-  precio_min?: number;
-  precio_max?: number;
-  en_oferta?: boolean;
-  es_bestseller?: boolean;
+  game_level?: string;
+  min_price?: number;
+  max_price?: number;
+  on_offer?: boolean;
+  is_bestseller?: boolean;
 }
 
 export interface SortOptions {

@@ -560,13 +560,17 @@ const CatalogPage: React.FC = () => {
         case "price-high":
           return b.precio_actual - a.precio_actual;
         case "brand":
-          return a.marca.localeCompare(b.marca);
+          const brandA = a.marca || "";
+          const brandB = b.marca || "";
+          return brandA.localeCompare(brandB);
         case "bestseller":
           return b.es_bestseller ? 1 : -1;
         case "offer":
           return b.en_oferta ? 1 : -1;
         default:
-          return a.modelo.localeCompare(b.modelo);
+          const modelA = a.modelo || "";
+          const modelB = b.modelo || "";
+          return modelA.localeCompare(modelB);
       }
     });
 

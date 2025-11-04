@@ -3,7 +3,7 @@ import Joi from "joi";
 import { ApiResponse } from "../types";
 
 /**
- * Schema para validar datos de perfil de usuario
+ * Schema for validating user profile data
  */
 const userProfileSchema = Joi.object({
   email: Joi.string().email().required(),
@@ -23,7 +23,7 @@ const userProfileSchema = Joi.object({
 });
 
 /**
- * Schema para validar actualizaciones de perfil
+ * Schema for validating profile updates
  */
 const updateProfileSchema = Joi.object({
   nickname: Joi.string()
@@ -67,7 +67,7 @@ const refreshTokenSchema = Joi.object({
 });
 
 /**
- * Middleware genérico para validar request body con Joi
+ * Generic middleware to validate request body with Joi
  */
 export function validateBody(schema: Joi.ObjectSchema) {
   return (req: Request, res: Response, next: NextFunction): void => {
@@ -85,22 +85,22 @@ export function validateBody(schema: Joi.ObjectSchema) {
 
       res.status(400).json({
         success: false,
-        error: "Datos de entrada inválidos",
-        message: "Los datos proporcionados no cumplen con el formato requerido",
+        error: "Invalid input data",
+        message: "The provided data does not meet the required format",
         details: errors,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
       return;
     }
 
-    // Reemplazar req.body con los datos validados y limpiados
+    // Replace req.body with validated and cleaned data
     req.body = value;
     next();
   };
 }
 
 /**
- * Middleware para validar parámetros de query de paginación
+ * Middleware to validate pagination query parameters
  */
 export function validatePagination(
   req: Request,
@@ -113,9 +113,9 @@ export function validatePagination(
   if (req.query.page && (isNaN(page) || page < 0)) {
     res.status(400).json({
       success: false,
-      error: "Parámetro de página inválido",
+      error: "Invalid page parameter",
       message:
-        'El parámetro "page" debe ser un número entero mayor o igual a 0',
+        'The "page" parameter must be an integer greater than or equal to 0',
       timestamp: new Date().toISOString(),
     } as ApiResponse);
     return;
@@ -124,8 +124,8 @@ export function validatePagination(
   if (req.query.limit && (isNaN(limit) || limit < 1 || limit > 100)) {
     res.status(400).json({
       success: false,
-      error: "Parámetro de límite inválido",
-      message: 'El parámetro "limit" debe ser un número entero entre 1 y 100',
+      error: "Invalid limit parameter",
+      message: 'The "limit" parameter must be an integer between 1 and 100',
       timestamp: new Date().toISOString(),
     } as ApiResponse);
     return;
@@ -135,28 +135,29 @@ export function validatePagination(
 }
 
 /**
- * Middleware para validar parámetros de ID
+ * Middleware to validate ID parameters
  */
-export function validateIdParam(paramName: string = "id") {
+export function validateIdParam(paramName: string = "id"): (req: Request, res: Response, next: NextFunction) => void {
   return (req: Request, res: Response, next: NextFunction): void => {
     const id = parseInt(req.params[paramName]);
 
     if (isNaN(id) || id <= 0) {
       res.status(400).json({
         success: false,
-        error: "ID inválido",
-        message: `El parámetro "${paramName}" debe ser un número entero positivo`,
+        error: "Invalid ID",
+        message: `The parameter "${paramName}" must be a positive integer`,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
       return;
     }
 
+    req.params[paramName] = id.toString();
     next();
   };
 }
 
 /**
- * Middleware para validar parámetros de búsqueda
+ * Middleware to validate search parameters
  */
 export function validateSearchQuery(
   req: Request,
@@ -168,8 +169,8 @@ export function validateSearchQuery(
   if (!query || typeof query !== "string" || query.trim().length < 2) {
     res.status(400).json({
       success: false,
-      error: "Consulta de búsqueda inválida",
-      message: 'El parámetro "q" debe ser una cadena de al menos 2 caracteres',
+      error: "Invalid search query",
+      message: 'The "q" parameter must be a string of at least 2 characters',
       timestamp: new Date().toISOString(),
     } as ApiResponse);
     return;
@@ -179,90 +180,103 @@ export function validateSearchQuery(
 }
 
 /**
- * Middleware para sanitizar y validar filtros de búsqueda
+ * Middleware to sanitize and validate search filters
  */
+function validatePriceFilter(key: string, value: string, res: Response): boolean {
+  const numValue = parseFloat(value);
+  if (isNaN(numValue) || numValue < 0) {
+    res.status(400).json({
+      success: false,
+      error: "Invalid price filter",
+      message: `The filter "${key}" must be a positive number`,
+      timestamp: new Date().toISOString(),
+    } as ApiResponse);
+    return false;
+  }
+  return true;
+}
+
+function validateBooleanFilter(key: string, value: string, res: Response): boolean {
+  const validValues = ["true", "false", "1", "0"];
+  if (!validValues.includes(value.toLowerCase())) {
+    res.status(400).json({
+      success: false,
+      error: "Invalid boolean filter",
+      message: `El filtro "${key}" debe ser "true" o "false"`,
+      timestamp: new Date().toISOString(),
+    } as ApiResponse);
+    return false;
+  }
+  return true;
+}
+
+function validateSortBy(sortBy: string, allowedFields: string[], res: Response): boolean {
+  if (!allowedFields.includes(sortBy)) {
+    res.status(400).json({
+      success: false,
+      error: "Invalid sort field",
+      message: `Allowed sorting fields are: ${allowedFields.join(", ")}`,
+      timestamp: new Date().toISOString(),
+    } as ApiResponse);
+    return false;
+  }
+  return true;
+}
+
+function validateSortOrder(sortOrder: string, res: Response): boolean {
+  if (!["asc", "desc"].includes(sortOrder)) {
+    res.status(400).json({
+      success: false,
+      error: "Invalid sort order",
+      message: 'Order must be "asc" or "desc"',
+      timestamp: new Date().toISOString(),
+    } as ApiResponse);
+    return false;
+  }
+  return true;
+}
+
+function validateQueryFilters(query: Record<string, unknown>, allowedFilters: string[], res: Response): boolean {
+  for (const [key, value] of Object.entries(query)) {
+    if (allowedFilters.includes(key) && value) {
+      if ((key === "min_price" || key === "max_price")) {
+        if (!validatePriceFilter(key, value as string, res)) return false;
+      }
+
+      if ((key === "on_offer" || key === "is_bestseller")) {
+        if (!validateBooleanFilter(key, value as string, res)) return false;
+      }
+    }
+  }
+  return true;
+}
+
 export function validateSearchFilters(
   req: Request,
   res: Response,
   next: NextFunction
 ): void {
   const allowedFilters = [
-    "marca",
-    "forma",
-    "balance",
-    "nivel_de_juego",
-    "precio_min",
-    "precio_max",
-    "en_oferta",
-    "es_bestseller",
+    "brand", "shape", "balance", "game_level",
+    "min_price", "max_price", "on_offer", "is_bestseller",
   ];
 
   const allowedSortFields = [
-    "nombre",
-    "marca",
-    "precio_actual",
-    "created_at",
-    "caracteristicas_forma",
-    "caracteristicas_balance",
+    "name", "brand", "current_price", "created_at",
+    "characteristics_shape", "characteristics_balance",
   ];
 
   // Validar filtros
-  for (const [key, value] of Object.entries(req.query)) {
-    if (allowedFilters.includes(key)) {
-      // Validaciones específicas
-      if ((key === "precio_min" || key === "precio_max") && value) {
-        const precio = parseFloat(value as string);
-        if (isNaN(precio) || precio < 0) {
-          res.status(400).json({
-            success: false,
-            error: "Filtro de precio inválido",
-            message: `El filtro "${key}" debe ser un número positivo`,
-            timestamp: new Date().toISOString(),
-          } as ApiResponse);
-          return;
-        }
-      }
-
-      if ((key === "en_oferta" || key === "es_bestseller") && value) {
-        if (value !== "true" && value !== "false") {
-          res.status(400).json({
-            success: false,
-            error: "Filtro booleano inválido",
-            message: `El filtro "${key}" debe ser "true" o "false"`,
-            timestamp: new Date().toISOString(),
-          } as ApiResponse);
-          return;
-        }
-      }
-    }
-  }
-
-  // Validar ordenamiento
-  if (
-    req.query.sortBy &&
-    !allowedSortFields.includes(req.query.sortBy as string)
-  ) {
-    res.status(400).json({
-      success: false,
-      error: "Campo de ordenamiento inválido",
-      message: `Los campos de ordenamiento permitidos son: ${allowedSortFields.join(
-        ", "
-      )}`,
-      timestamp: new Date().toISOString(),
-    } as ApiResponse);
+  if (!validateQueryFilters(req.query, allowedFilters, res)) {
     return;
   }
 
-  if (
-    req.query.sortOrder &&
-    !["asc", "desc"].includes(req.query.sortOrder as string)
-  ) {
-    res.status(400).json({
-      success: false,
-      error: "Orden inválido",
-      message: 'El orden debe ser "asc" o "desc"',
-      timestamp: new Date().toISOString(),
-    } as ApiResponse);
+  // Validar ordenamiento
+  if (req.query.sortBy && !validateSortBy(req.query.sortBy as string, allowedSortFields, res)) {
+    return;
+  }
+
+  if (req.query.sortOrder && !validateSortOrder(req.query.sortOrder as string, res)) {
     return;
   }
 

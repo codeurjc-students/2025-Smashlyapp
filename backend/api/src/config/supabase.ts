@@ -1,5 +1,6 @@
+import logger from "../config/logger";
 import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import dotenv from "dotenv";
+import * as dotenv from "dotenv";
 
 // Cargar variables de entorno
 dotenv.config();
@@ -12,7 +13,7 @@ const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 // Allow tests to run without credentials (they will skip if not configured)
 const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
 
-// Validar que las variables de entorno estén disponibles (excepto en tests)
+// Validate that environment variables are available (except in tests)
 if (!isTestEnvironment) {
   if (!supabaseUrl) {
     throw new Error("SUPABASE_URL environment variable is required");
@@ -25,11 +26,11 @@ if (!isTestEnvironment) {
   }
 }
 
-// Usar la service role key si está disponible (para operaciones administrativas)
-// O usar la anon key para operaciones normales
+// Use the service role key if available (for administrative operations)
+// Or use the anon key for normal operations
 const supabaseKey = supabaseServiceKey || supabaseAnonKey || '';
 
-// Crear cliente de Supabase con configuración optimizada para la API
+// Create Supabase client with optimized configuration for the API
 // En entorno de test sin credenciales, crear un cliente dummy
 export const supabase: SupabaseClient = (supabaseUrl && supabaseKey)
   ? createClient(supabaseUrl, supabaseKey, {
@@ -43,7 +44,7 @@ export const supabase: SupabaseClient = (supabaseUrl && supabaseKey)
           "X-Client-Info": "smashly-api@1.0.0",
         },
       },
-      // Configuración optimizada para alto volumen
+      // Optimized configuration for high volume
       realtime: {
         params: {
           eventsPerSecond: 10,
@@ -54,7 +55,7 @@ export const supabase: SupabaseClient = (supabaseUrl && supabaseKey)
       auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
     });
 
-// Cliente administrativo con service role (si está disponible)
+// Administrative client with service role (if available)
 export const supabaseAdmin: SupabaseClient | null = (supabaseUrl && supabaseServiceKey)
   ? createClient(supabaseUrl, supabaseServiceKey, {
       auth: {
@@ -70,29 +71,43 @@ export const supabaseAdmin: SupabaseClient | null = (supabaseUrl && supabaseServ
     })
   : null;
 
-// Función para verificar la conexión con Supabase
-export async function testSupabaseConnection(): Promise<boolean> {
+// Function to verify Supabase connection
+export async function testSupabaseConnection(): Promise<{
+  success: boolean;
+  message: string;
+  details?: unknown;
+}> {
   try {
+    // Try a simple query
     const { data, error } = await supabase
       .from("rackets")
       .select("id")
       .limit(1);
 
     if (error) {
-      console.error("❌ Supabase connection test failed:", error.message);
-      return false;
+      return {
+        success: false,
+        message: "Database connection failed",
+        details: error,
+      };
     }
 
-    console.log("✅ Supabase connection successful");
-    return true;
+    return {
+      success: true,
+      message: "Supabase connection successful",
+      details: { recordsFound: data?.length || 0 },
+    };
   } catch (error) {
-    console.error("❌ Supabase connection test error:", error);
-    return false;
+    return {
+      success: false,
+      message: "Connection test failed",
+      details: error,
+    };
   }
 }
 
-// Log de configuración
-console.log("📊 Supabase config loaded:", {
+// Configuration logging
+logger.info("📊 Supabase config loaded:", {
   url: supabaseUrl,
   hasServiceKey: !!supabaseServiceKey,
   hasAnonKey: !!supabaseAnonKey,

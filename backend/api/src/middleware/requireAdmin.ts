@@ -1,8 +1,9 @@
 import { Response, NextFunction } from "express";
 import { RequestWithUser } from "../types";
+import logger from "../config/logger";
 
 /**
- * Middleware para verificar que el usuario es administrador
+ * Middleware to verify that the user is an administrator
  */
 export const requireAdmin = (
   req: RequestWithUser,
@@ -12,29 +13,29 @@ export const requireAdmin = (
   try {
     const user = req.user;
 
-    console.log(`🔒 Checking admin access for user:`, {
+    logger.info(`🔒 Checking admin access for user:`, {
       id: user?.id,
       email: user?.email,
       role: user?.role,
     });
 
     if (!user) {
-      console.warn("❌ Access denied: No user in request");
+      logger.warn("❌ Access denied: No user in request");
       res.status(401).json({
         success: false,
         error: "No autenticado",
-        message: "Debes iniciar sesión para acceder a este recurso",
+        message: "You must log in to access this resource",
         timestamp: new Date().toISOString(),
       });
       return;
     }
 
-    // Verificar si el usuario es admin (case-insensitive)
+    // Verify if the user is admin (case-insensitive)
     const userRole = user.role?.toLowerCase();
-    console.log(`🔍 User role (lowercase): "${userRole}"`);
+    logger.info(`🔍 User role (lowercase): "${userRole}"`);
 
     if (userRole !== "admin") {
-      console.warn(`❌ Access denied: User role is "${user.role}", not "admin"`);
+      logger.warn(`❌ Access denied: User role is "${user.role}", not "admin"`);
       res.status(403).json({
         success: false,
         error: "Acceso denegado",
@@ -44,10 +45,10 @@ export const requireAdmin = (
       return;
     }
 
-    console.log("✅ Admin access granted");
+    logger.info("✅ Admin access granted");
     next();
-  } catch (error: any) {
-    console.error("Error in requireAdmin middleware:", error);
+  } catch (error: unknown) {
+    logger.error("Error in requireAdmin middleware:", error);
     res.status(500).json({
       success: false,
       error: "Error del servidor",

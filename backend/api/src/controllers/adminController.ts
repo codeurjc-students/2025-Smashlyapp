@@ -1,80 +1,107 @@
 import { Response } from "express";
 import { RequestWithUser, ApiResponse } from "../types";
+import logger from "../config/logger";
 import { supabase } from "../config/supabase";
 import { storeService } from "../services/storeService";
 
 export class AdminController {
+  /**
+   * Helper function to safely extract error message
+   */
+  private static getErrorMessage(error: unknown): string {
+    if (error instanceof Error) {
+      return error.message;
+    }
+    return String(error);
+  }
+
   /**
    * GET /api/v1/admin/metrics
    * Obtiene las métricas del dashboard de administración
    */
   static async getMetrics(req: RequestWithUser, res: Response): Promise<void> {
     try {
-      // Obtener total de usuarios
-      const { count: totalUsers } = await supabase
-        .from("user_profiles")
-        .select("*", { count: "exact", head: true });
-
-      // Obtener total de palas
-      const { count: totalRackets } = await supabase
-        .from("rackets")
-        .select("*", { count: "exact", head: true });
-
-      // Obtener total de reviews
-      const { count: totalReviews } = await supabase
-        .from("reviews")
-        .select("*", { count: "exact", head: true });
-
-      // Obtener usuarios activos (últimos 30 días)
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-      
-      const { count: activeUsers } = await supabase
-        .from("user_profiles")
-        .select("*", { count: "exact", head: true })
-        .gte("updated_at", thirtyDaysAgo.toISOString());
-
-      // Obtener total de tiendas verificadas
-      const { count: totalStores } = await supabase
-        .from("stores")
-        .select("*", { count: "exact", head: true })
-        .eq("verified", true);
-
-      // Obtener solicitudes pendientes (tiendas no verificadas)
-      const { count: pendingRequests } = await supabase
-        .from("stores")
-        .select("*", { count: "exact", head: true })
-        .eq("verified", false);
-
-      // Calcular cambios (simulado por ahora)
-      const usersChange = 12.5;
-      const racketsChange = 8.3;
-
-      const metrics = {
-        totalUsers: totalUsers || 0,
-        totalRackets: totalRackets || 0,
-        totalStores: totalStores || 0,
-        totalReviews: totalReviews || 0,
-        pendingRequests: pendingRequests || 0,
-        activeUsers: activeUsers || 0,
-        usersChange,
-        racketsChange,
-      };
-
+      const metrics = await this.collectMetricsData();
       res.json({
         success: true,
         data: metrics,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in getMetrics:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getMetrics:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
+  }
+
+  private static async collectMetricsData() {
+    const [
+      totalUsers,
+      totalRackets,
+      totalReviews,
+      activeUsers,
+      totalStores,
+      pendingRequests
+    ] = await Promise.all([
+      this.getTableCount("user_profiles"),
+      this.getTableCount("rackets"),
+      this.getTableCount("reviews"),
+      this.getActiveUsersCount(),
+      this.getVerifiedStoresCount(),
+      this.getPendingStoresCount()
+    ]);
+
+    return {
+      totalUsers: totalUsers || 0,
+      totalRackets: totalRackets || 0,
+      totalStores: totalStores || 0,
+      totalReviews: totalReviews || 0,
+      pendingRequests: pendingRequests || 0,
+      activeUsers: activeUsers || 0,
+      usersChange: 12.5,
+      racketsChange: 8.3,
+    };
+  }
+
+  private static async getTableCount(tableName: string): Promise<number> {
+    const { count } = await supabase
+      .from(tableName)
+      .select("*", { count: "exact", head: true });
+    return count || 0;
+  }
+
+  private static async getActiveUsersCount(): Promise<number> {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    
+    const { count } = await supabase
+      .from("user_profiles")
+      .select("*", { count: "exact", head: true })
+      .gte("updated_at", thirtyDaysAgo.toISOString());
+    
+    return count || 0;
+  }
+
+  private static async getVerifiedStoresCount(): Promise<number> {
+    const { count } = await supabase
+      .from("stores")
+      .select("*", { count: "exact", head: true })
+      .eq("verified", true);
+    
+    return count || 0;
+  }
+
+  private static async getPendingStoresCount(): Promise<number> {
+    const { count } = await supabase
+      .from("stores")
+      .select("*", { count: "exact", head: true })
+      .eq("verified", false);
+    
+    return count || 0;
   }
 
   /**
@@ -97,12 +124,12 @@ export class AdminController {
         data: users || [],
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in getAllUsers:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getAllUsers:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -147,12 +174,12 @@ export class AdminController {
         message: "Rol actualizado correctamente",
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in updateUserRole:", error);
+    } catch (error: unknown) {
+      logger.error("Error in updateUserRole:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -191,12 +218,12 @@ export class AdminController {
         message: "Usuario eliminado correctamente",
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in deleteUser:", error);
+    } catch (error: unknown) {
+      logger.error("Error in deleteUser:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -217,12 +244,12 @@ export class AdminController {
         data: [],
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in getRacketRequests:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getRacketRequests:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -245,12 +272,12 @@ export class AdminController {
         data: pendingStores,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in getStoreRequests:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getStoreRequests:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -275,12 +302,12 @@ export class AdminController {
         message: "Tienda verificada exitosamente",
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in verifyStore:", error);
+    } catch (error: unknown) {
+      logger.error("Error in verifyStore:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -304,12 +331,12 @@ export class AdminController {
         message: "Solicitud de tienda rechazada",
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in rejectStore:", error);
+    } catch (error: unknown) {
+      logger.error("Error in rejectStore:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: error.message,
+        message: this.getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
