@@ -4,8 +4,14 @@
  */
 
 // URL base de la API
+// Por defecto, usa el mismo origen que sirve la SPA (evita CSP y mixed content)
+const DEFAULT_ORIGIN =
+  typeof window !== "undefined" && window.location?.origin
+    ? window.location.origin
+    : "http://localhost:3000";
+
 export const API_URL =
-  (import.meta as any).env?.VITE_API_URL || "http://localhost:3000";
+  (import.meta as any).env?.VITE_API_URL || DEFAULT_ORIGIN;
 
 // Endpoints de la API
 export const API_ENDPOINTS = {
