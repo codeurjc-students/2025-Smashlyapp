@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class RestAssuredApiSystemTest {
 
     private static String apiUrl;
-    private static String baseApiPath = "/api";
+    private static String baseApiPath = "/api/v1";
 
     // ID de una pala que se usará en las pruebas (se obtiene dinámicamente)
     private static Integer testRacketId;
