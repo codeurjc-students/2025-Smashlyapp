@@ -376,7 +376,8 @@ export class RacketService {
     }
 
     return data.filter((racket) => {
-      const price = racket.current_price || 0;
+      // Use computed Spanish field if present, fallback to English field
+      const price = (racket as any).precio_actual ?? racket.current_price ?? 0;
       
       if (filters.min_price !== undefined && price < filters.min_price) {
         return false;
