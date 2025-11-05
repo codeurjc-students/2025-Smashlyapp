@@ -343,3 +343,5 @@ Thumbs.db
 .merge_file_*
 
 .scannerwork/
+
+.claude
