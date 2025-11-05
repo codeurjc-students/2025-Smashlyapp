@@ -19,6 +19,7 @@ import storeRoutes from "./routes/stores";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import path from "path";
+import fs from "fs";
 
 // Validar configuración al iniciar
 validateConfig();
@@ -109,6 +110,18 @@ try {
     "Swagger UI no iniciado: no se pudo cargar docs/api-docs.yaml",
     err
   );
+}
+
+// Servir frontend estático (build de Vite) desde ../static si existe
+const staticDir = path.join(__dirname, "../static");
+if (fs.existsSync(staticDir)) {
+  // Archivos estáticos
+  app.use(express.static(staticDir));
+
+  // Fallback SPA: cualquier ruta que no empiece por /api/ devuelve index.html
+  app.get(/^\/(?!api\/).*/, (req, res) => {
+    res.sendFile(path.join(staticDir, "index.html"));
+  });
 }
 
 // Endpoint de documentación básica

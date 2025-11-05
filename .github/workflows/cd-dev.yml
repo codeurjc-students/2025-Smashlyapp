@@ -1,0 +1,28 @@
+name: Continuous Delivery (dev)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  publish-dev:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Publish Docker image and Compose (dev)
+        uses: ./.github/actions/publish-artifacts
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image_name: teijeiro7/smashlyapp
+          compose_repo: teijeiro7/smashlyapp-compose
+          dockerfile_path: docker/Dockerfile
+          compose_path: docker/docker-compose.yml
+          context: .
+          tags: dev

@@ -1,0 +1,78 @@
+name: Continuous Delivery (release)
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      REGISTRY: docker.io
+      IMAGE_NAME: teijeiro7/smashlyapp
+      COMPOSE_REPO: teijeiro7/smashlyapp-compose
+    steps:
+      - name: Checkout repository at release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Derive version tags
+        id: tags
+        shell: bash
+        run: |
+          VERSION_TAG="${{ github.event.release.tag_name }}"  # e.g., 0.1.0
+          MINOR_TAG=$(echo "$VERSION_TAG" | awk -F. '{print $1"."$2}')     # e.g., 0.1
+          echo "version_tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
+          echo "minor_tag=${MINOR_TAG}" >> $GITHUB_OUTPUT
+          echo "all_tags=${VERSION_TAG} latest ${MINOR_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Validate version in frontend/package.json equals release version
+        shell: bash
+        run: |
+          VERSION_TAG="${{ steps.tags.outputs.version_tag }}"
+          PKG_VERSION=$(jq -r .version frontend/package.json)
+          echo "frontend/package.json version=$PKG_VERSION, release=$VERSION_TAG"
+          if [ "$PKG_VERSION" != "$VERSION_TAG" ]; then
+            echo "::error::frontend/package.json version ($PKG_VERSION) does not match release tag ($VERSION_TAG)."
+            exit 1
+          fi
+
+      - name: Validate docker-compose.yml image tag equals minor version
+        shell: bash
+        run: |
+          MINOR_TAG="${{ steps.tags.outputs.minor_tag }}"
+          if ! grep -q "image: \"teijeiro7/smashlyapp:${MINOR_TAG}\"" docker/docker-compose.yml; then
+            echo "::error::docker/docker-compose.yml must reference image tag ${MINOR_TAG}."
+            exit 1
+          fi
+
+      - name: Validate testing/pom.xml (optional)
+        shell: bash
+        run: |
+          VERSION_TAG="${{ steps.tags.outputs.version_tag }}"
+          if [ -f testing/pom.xml ]; then
+            POM_VERSION=$(xmllint --xpath 'string(//project/version)' testing/pom.xml 2>/dev/null || true)
+            echo "testing/pom.xml version=$POM_VERSION, release=$VERSION_TAG"
+            if [ -n "$POM_VERSION" ] && [ "$POM_VERSION" != "$VERSION_TAG" ]; then
+              echo "::error::testing/pom.xml version ($POM_VERSION) does not match release tag ($VERSION_TAG)."
+              exit 1
+            fi
+          else
+            echo "testing/pom.xml not found; skipping."
+          fi
+
+      - name: Publish Docker image and Compose (release + latest + minor)
+        uses: ./.github/actions/publish-artifacts
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image_name: ${{ env.IMAGE_NAME }}
+          compose_repo: ${{ env.COMPOSE_REPO }}
+          dockerfile_path: docker/Dockerfile
+          compose_path: docker/docker-compose.yml
+          context: .
+          tags: ${{ steps.tags.outputs.all_tags }}

@@ -168,7 +168,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
 
       console.log('🔍 result.data:', result.data);
-      const { access_token, user: registeredUser } = result.data;
+      const access_token = result.data.session?.access_token;
+      const registeredUser = result.data.user;
       console.log(
         '🔍 access_token extracted:',
         access_token ? 'Present (length: ' + access_token.length + ')' : 'MISSING'

@@ -1,0 +1,51 @@
+services:
+  app:
+    image: "teijeiro7/smashlyapp:dev"
+    container_name: smashly-app-dev
+    ports:
+      - "443:443"
+    environment:
+      NODE_ENV: "production"
+      USE_HTTPS: "true"
+      PORT: "443"
+      FRONTEND_URL: "https://localhost"
+      # Backend configuration (Supabase)
+      SUPABASE_URL: ${SUPABASE_URL}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY}
+      SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+    healthcheck:
+      test: ["CMD-SHELL", "curl -k -fsS https://localhost:${PORT}/api/v1/docs || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mysql:
+    image: mysql:8.0
+    container_name: smashly-mysql-dev
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-smashly}
+      MYSQL_USER: ${MYSQL_USER:-smashly}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-smashly}
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data_dev:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    restart: unless-stopped
+
+volumes:
+  mysql_data_dev:
+    driver: local

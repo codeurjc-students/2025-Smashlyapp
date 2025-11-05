@@ -1,0 +1,61 @@
+name: Continuous Delivery (manual dispatch)
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: Branch to build from
+        default: main
+        required: true
+        type: string
+      commit:
+        description: Commit SHA to build (optional; defaults to HEAD)
+        required: false
+        type: string
+
+jobs:
+  publish-manual:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    env:
+      REGISTRY: docker.io
+      IMAGE_NAME: teijeiro7/smashlyapp
+      COMPOSE_REPO: teijeiro7/smashlyapp-compose
+    steps:
+      - name: Checkout repository at branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+          fetch-depth: 0
+
+      - name: Checkout specific commit (if provided)
+        if: ${{ inputs.commit != '' }}
+        shell: bash
+        run: |
+          git checkout ${{ inputs.commit }}
+
+      - name: Derive manual tag <branch>-<date>-<shortsha>
+        id: tag
+        shell: bash
+        run: |
+          BRANCH="${{ inputs.branch }}"
+          SAFE_BRANCH=$(echo "$BRANCH" | tr '/' '-')
+          DATE=$(date -u +%Y%m%d-%H%M%S)
+          SHA=$(git rev-parse --short HEAD)
+          TAG="${SAFE_BRANCH}-${DATE}-${SHA}"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          echo "Manual tag: ${TAG}"
+
+      - name: Publish Docker image and Compose (manual)
+        uses: ./.github/actions/publish-artifacts
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image_name: ${{ env.IMAGE_NAME }}
+          compose_repo: ${{ env.COMPOSE_REPO }}
+          dockerfile_path: docker/Dockerfile
+          compose_path: docker/docker-compose.yml
+          context: .
+          tags: ${{ steps.tag.outputs.tag }}
