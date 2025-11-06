@@ -4,28 +4,71 @@ info:
   description: Documentación de la API de Smashly App
   version: 1.0.0
 servers:
-  - url: http://localhost:443/api
+  - url: http://localhost:443/api/v1
+    description: Servidor local de desarrollo
+  - url: https://api.smashlyapp.com/api/v1
     description: Servidor de producción
+
 paths:
+  # ==========================================
+  # HEALTH - Health check endpoints
+  # ==========================================
   /health:
     get:
       summary: Health check
+      tags:
+        - Health
+      description: Verifica el estado del servicio y la conexión a la base de datos
       responses:
         "200":
-          description: Servicio OK
+          description: Servicio operativo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                  message:
+                    type: string
+        "503":
+          description: Servicio no disponible
 
+  /health/deep:
+    get:
+      summary: Health check detallado
+      tags:
+        - Health
+      description: Verifica el estado del servicio con detalles completos de base de datos, variables de entorno y memoria
+      responses:
+        "200":
+          description: Todos los sistemas operativos
+        "503":
+          description: Algunos sistemas no operativos
+
+  # ==========================================
+  # RACKETS - Endpoints de palas
+  # ==========================================
   /rackets:
     get:
       summary: Obtener palas (con paginación opcional)
+      tags:
+        - Rackets
       parameters:
         - in: query
           name: page
           schema:
             type: integer
+            default: 1
+          description: Número de página
         - in: query
           name: limit
           schema:
             type: integer
+            default: 10
+          description: Cantidad de resultados por página
       responses:
         "200":
           description: Lista de palas
@@ -33,11 +76,16 @@ paths:
   /rackets/search:
     get:
       summary: Buscar palas por query
+      tags:
+        - Rackets
+      description: Busca palas por nombre, marca o modelo
       parameters:
         - in: query
           name: q
+          required: true
           schema:
             type: string
+          description: Término de búsqueda
       responses:
         "200":
           description: Resultados de búsqueda
@@ -45,6 +93,8 @@ paths:
   /rackets/filter:
     get:
       summary: Filtrar palas con filtros avanzados
+      tags:
+        - Rackets
       parameters:
         - in: query
           name: page
@@ -61,6 +111,8 @@ paths:
   /rackets/bestsellers:
     get:
       summary: Obtener palas más vendidas
+      tags:
+        - Rackets
       responses:
         "200":
           description: Lista de bestsellers
@@ -68,6 +120,8 @@ paths:
   /rackets/offers:
     get:
       summary: Obtener palas en oferta
+      tags:
+        - Rackets
       responses:
         "200":
           description: Lista de ofertas
@@ -75,6 +129,8 @@ paths:
   /rackets/brands:
     get:
       summary: Obtener marcas disponibles
+      tags:
+        - Rackets
       responses:
         "200":
           description: Lista de marcas
@@ -82,6 +138,8 @@ paths:
   /rackets/stats:
     get:
       summary: Estadísticas de palas
+      tags:
+        - Rackets
       responses:
         "200":
           description: Estadísticas
@@ -89,12 +147,15 @@ paths:
   /rackets/brands/{brand}:
     get:
       summary: Obtener palas por marca
+      tags:
+        - Rackets
       parameters:
         - in: path
           name: brand
           required: true
           schema:
             type: string
+          description: Nombre de la marca
       responses:
         "200":
           description: Palas de la marca
@@ -102,12 +163,15 @@ paths:
   /rackets/{id}:
     get:
       summary: Obtener una pala por ID
+      tags:
+        - Rackets
       parameters:
         - in: path
           name: id
           required: true
           schema:
             type: string
+          description: ID de la pala
       responses:
         "200":
           description: Detalle de la pala
@@ -115,7 +179,7 @@ paths:
           description: Pala no encontrada
 
   # ==========================================
-  # AUTHENTICATION ROUTES
+  # AUTH - Autenticación y autorización
   # ==========================================
   /auth/login:
     post:
@@ -128,11 +192,16 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - email
+                - password
               properties:
                 email:
                   type: string
+                  format: email
                 password:
                   type: string
+                  format: password
       responses:
         "200":
           description: Login exitoso
@@ -156,8 +225,10 @@ paths:
               properties:
                 email:
                   type: string
+                  format: email
                 password:
                   type: string
+                  format: password
       responses:
         "201":
           description: Usuario registrado exitosamente
@@ -188,6 +259,8 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - refreshToken
               properties:
                 refreshToken:
                   type: string
@@ -211,7 +284,7 @@ paths:
           description: No autenticado
 
   # ==========================================
-  # USER ROUTES
+  # USERS - Gestión de usuarios
   # ==========================================
   /users/profile:
     get:
@@ -297,8 +370,10 @@ paths:
       parameters:
         - in: query
           name: q
+          required: true
           schema:
             type: string
+          description: Término de búsqueda
       responses:
         "200":
           description: Resultados de búsqueda
@@ -318,159 +393,8 @@ paths:
         "403":
           description: No autorizado
 
-  /users/lists:
-    get:
-      summary: Obtener todas las listas del usuario
-      tags:
-        - Users
-        - Lists
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: Lista de listas del usuario
-        "401":
-          description: No autenticado
-
-    post:
-      summary: Crear nueva lista
-      tags:
-        - Users
-        - Lists
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        "201":
-          description: Lista creada
-        "401":
-          description: No autenticado
-
-  /users/lists/{id}:
-    get:
-      summary: Obtener lista específica con sus palas
-      tags:
-        - Users
-        - Lists
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Detalle de la lista
-        "404":
-          description: Lista no encontrada
-
-    put:
-      summary: Actualizar lista
-      tags:
-        - Users
-        - Lists
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-      responses:
-        "200":
-          description: Lista actualizada
-        "404":
-          description: Lista no encontrada
-
-    delete:
-      summary: Eliminar lista
-      tags:
-        - Users
-        - Lists
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Lista eliminada
-        "404":
-          description: Lista no encontrada
-
-  /users/lists/{id}/rackets:
-    post:
-      summary: Agregar pala a lista
-      tags:
-        - Users
-        - Lists
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                racketId:
-                  type: string
-      responses:
-        "200":
-          description: Pala agregada a la lista
-        "404":
-          description: Lista no encontrada
-
-  /users/lists/{id}/rackets/{racketId}:
-    delete:
-      summary: Eliminar pala de lista
-      tags:
-        - Users
-        - Lists
-      security:
-        - bearerAuth: []
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: racketId
-          required: true
-          schema:
-            type: string
-      responses:
-        "200":
-          description: Pala eliminada de la lista
-        "404":
-          description: Lista o pala no encontrada
-
   # ==========================================
-  # LISTS ROUTES (Direct access)
+  # LISTS - Gestión de listas de palas
   # ==========================================
   /lists:
     get:
@@ -497,6 +421,13 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
       responses:
         "201":
           description: Lista creada
@@ -534,6 +465,12 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
       responses:
         "200":
           description: Lista actualizada
@@ -567,6 +504,17 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - racketId
+              properties:
+                racketId:
+                  type: string
       responses:
         "200":
           description: Pala agregada
@@ -594,7 +542,7 @@ paths:
           description: Pala eliminada de la lista
 
   # ==========================================
-  # REVIEWS ROUTES
+  # REVIEWS - Sistema de reviews y comentarios
   # ==========================================
   /reviews:
     get:
@@ -656,10 +604,15 @@ paths:
           name: rating
           schema:
             type: integer
+            minimum: 1
+            maximum: 5
+          description: Filtrar por rating
         - in: query
           name: sort
           schema:
             type: string
+            enum: [newest, oldest, rating_high, rating_low]
+          description: Ordenamiento
         - in: query
           name: page
           schema:
@@ -737,6 +690,8 @@ paths:
                   type: string
                 rating:
                   type: number
+                  minimum: 1
+                  maximum: 5
       responses:
         "200":
           description: Review actualizada
@@ -850,13 +805,15 @@ paths:
           description: No autorizado
 
   # ==========================================
-  # STORES ROUTES
+  # STORES - Gestión de tiendas
   # ==========================================
   /stores:
     get:
       summary: Obtener todas las tiendas
       tags:
         - Stores
+      security:
+        - bearerAuth: []
       parameters:
         - in: query
           name: verified
@@ -879,6 +836,14 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - name
+                - description
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
       responses:
         "201":
           description: Solicitud de tienda creada
@@ -905,6 +870,8 @@ paths:
       summary: Obtener tienda por ID
       tags:
         - Stores
+      security:
+        - bearerAuth: []
       parameters:
         - in: path
           name: id
@@ -964,7 +931,7 @@ paths:
           description: No autorizado
 
   # ==========================================
-  # ADMIN ROUTES
+  # ADMIN - Endpoints administrativos
   # ==========================================
   /admin/metrics:
     get:
@@ -1015,9 +982,12 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - role
               properties:
                 role:
                   type: string
+                  enum: [user, admin, store_owner]
       responses:
         "200":
           description: Rol actualizado
@@ -1130,15 +1100,15 @@ tags:
   - name: Health
     description: Health check endpoints
   - name: Rackets
-    description: Endpoints de palas
+    description: Endpoints de palas (búsqueda, filtros, detalles)
   - name: Auth
     description: Autenticación y autorización
   - name: Users
-    description: Gestión de usuarios
+    description: Gestión de perfiles de usuarios
   - name: Lists
-    description: Gestión de listas de palas
+    description: Gestión de listas de palas favoritas
   - name: Reviews
-    description: Sistema de reviews y comentarios
+    description: Sistema de reviews y comentarios de palas
   - name: Stores
     description: Gestión de tiendas
   - name: Admin
