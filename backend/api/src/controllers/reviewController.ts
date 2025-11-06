@@ -120,7 +120,7 @@ export class ReviewController {
         rating: req.body.rating,
       };
 
-      const validationError = this.validateCreateReviewData(reviewData);
+      const validationError = ReviewController.validateCreateReviewData(reviewData);
       if (validationError) {
         res.status(400).json({ error: validationError });
         return;
@@ -129,15 +129,15 @@ export class ReviewController {
       const review = await ReviewService.createReview(userId, reviewData);
       res.status(201).json(review);
     } catch (error: unknown) {
-      this.handleCreateReviewError(error, res);
+      ReviewController.handleCreateReviewError(error, res);
     }
   }
 
   private static validateCreateReviewData(reviewData: CreateReviewDTO): string | null {
-    return this.validateRequiredFields(reviewData) ||
-           this.validateRating(reviewData.rating) ||
-           this.validateTitle(reviewData.title) ||
-           this.validateContent(reviewData.content);
+    return ReviewController.validateRequiredFields(reviewData) ||
+           ReviewController.validateRating(reviewData.rating) ||
+           ReviewController.validateTitle(reviewData.title) ||
+           ReviewController.validateContent(reviewData.content);
   }
 
   private static validateRequiredFields(reviewData: CreateReviewDTO): string | null {
@@ -193,7 +193,7 @@ export class ReviewController {
         return;
       }
 
-      const { updates, validationError } = this.validateUpdateReviewData(req.body);
+      const { updates, validationError } = ReviewController.validateUpdateReviewData(req.body);
       if (validationError) {
         res.status(400).json({ error: validationError });
         return;
@@ -202,7 +202,7 @@ export class ReviewController {
       const review = await ReviewService.updateReview(reviewId, userId, updates);
       res.json(review);
     } catch (error: unknown) {
-      this.handleUpdateReviewError(error, res);
+      ReviewController.handleUpdateReviewError(error, res);
     }
   }
 

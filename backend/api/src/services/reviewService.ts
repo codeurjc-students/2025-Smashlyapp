@@ -17,6 +17,36 @@ import {
 
 export class ReviewService {
   /**
+   * Mapea los campos de racket desde la DB a los nombres esperados por el frontend
+   */
+  private static mapRacketFields(review: any): any {
+    if (!review) return review;
+
+    if (review.racket) {
+      return {
+        ...review,
+        racket: {
+          id: review.racket.id,
+          nombre: review.racket.name,
+          marca: review.racket.brand,
+          modelo: review.racket.model,
+          imagen: review.racket.image,
+        }
+      };
+    }
+
+    return review;
+  }
+
+  /**
+   * Mapea un array de reviews
+   */
+  private static mapReviews(reviews: any[]): any[] {
+    if (!reviews) return [];
+    return reviews.map(review => this.mapRacketFields(review));
+  }
+
+  /**
    * Construye la query base para obtener reviews
    */
   private static buildReviewsQuery(racketId: number) {
@@ -125,8 +155,11 @@ export class ReviewService {
 
     if (error) throw error;
 
+    // Map racket fields to expected frontend format
+    const mappedReviews = this.mapReviews(reviews || []);
+
     // Add user like information
-    const reviewsWithDetails = await this.addUserLikesInfo(reviews, userId);
+    const reviewsWithDetails = await this.addUserLikesInfo(mappedReviews, userId);
 
     // Get statistics
     const { data: statsData } = await supabase
@@ -188,8 +221,11 @@ export class ReviewService {
 
     if (error) throw error;
 
+    // Map racket fields to expected frontend format
+    const mappedReviews = this.mapReviews(reviews || []);
+
     return {
-      reviews: (reviews || []) as ReviewWithDetails[],
+      reviews: mappedReviews as ReviewWithDetails[],
       pagination: {
         total: count || 0,
         page,
@@ -268,6 +304,9 @@ export class ReviewService {
 
     if (error || !review) return null;
 
+    // Map racket fields
+    const mappedReview = this.mapRacketFields(review);
+
     // Obtener comentarios y verificar like del usuario en paralelo
     const [comments, userHasLiked] = await Promise.all([
       this.getReviewComments(reviewId),
@@ -275,7 +314,7 @@ export class ReviewService {
     ]);
 
     return {
-      ...review,
+      ...mappedReview,
       comments,
       user_has_liked: userHasLiked,
     };

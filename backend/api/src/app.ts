@@ -91,7 +91,8 @@ app.use("/api/v1/stores", storeRoutes); // Rutas de tiendas
 
 // Swagger UI - servir OpenAPI spec desde docs/api-docs.yaml
 try {
-  const swaggerPath = path.join(__dirname, "../docs/api-docs.yaml");
+  // Apuntar a la carpeta docs en la raíz del proyecto (para GitHub Pages)
+  const swaggerPath = path.join(__dirname, "../../../docs/api-docs.yaml");
   const swaggerDocument = YAML.load(swaggerPath);
 
   // UI en /api-docs

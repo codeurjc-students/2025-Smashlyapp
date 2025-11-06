@@ -196,14 +196,14 @@ const RacketInfo = styled(Link)`
   gap: 1rem;
   padding: 1rem;
   margin-bottom: 1rem;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 100%);
   border-radius: 8px;
   text-decoration: none;
   transition: all 0.2s;
 
   &:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
   }
 `;
 

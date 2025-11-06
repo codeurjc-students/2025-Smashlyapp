@@ -113,3 +113,1033 @@ paths:
           description: Detalle de la pala
         "404":
           description: Pala no encontrada
+
+  # ==========================================
+  # AUTHENTICATION ROUTES
+  # ==========================================
+  /auth/login:
+    post:
+      summary: Login de usuario
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Login exitoso
+        "401":
+          description: Credenciales inválidas
+
+  /auth/register:
+    post:
+      summary: Registro de nuevo usuario
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "201":
+          description: Usuario registrado exitosamente
+        "400":
+          description: Datos inválidos
+
+  /auth/logout:
+    post:
+      summary: Cerrar sesión
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Logout exitoso
+        "401":
+          description: No autenticado
+
+  /auth/refresh:
+    post:
+      summary: Refrescar token de autenticación
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+      responses:
+        "200":
+          description: Token refrescado
+        "401":
+          description: Token inválido
+
+  /auth/me:
+    get:
+      summary: Obtener usuario actual
+      tags:
+        - Auth
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Datos del usuario actual
+        "401":
+          description: No autenticado
+
+  # ==========================================
+  # USER ROUTES
+  # ==========================================
+  /users/profile:
+    get:
+      summary: Obtener perfil del usuario autenticado
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Perfil del usuario
+        "401":
+          description: No autenticado
+
+    post:
+      summary: Crear perfil de usuario
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Perfil creado
+        "400":
+          description: Datos inválidos
+
+    put:
+      summary: Actualizar perfil del usuario
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Perfil actualizado
+        "401":
+          description: No autenticado
+
+    delete:
+      summary: Eliminar perfil del usuario
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Perfil eliminado
+        "401":
+          description: No autenticado
+
+  /users/nickname/{nickname}/available:
+    get:
+      summary: Verificar disponibilidad de nickname
+      tags:
+        - Users
+      parameters:
+        - in: path
+          name: nickname
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Disponibilidad del nickname
+
+  /users/search:
+    get:
+      summary: Buscar usuarios por nickname
+      tags:
+        - Users
+      parameters:
+        - in: query
+          name: q
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Resultados de búsqueda
+
+  /users/stats:
+    get:
+      summary: Obtener estadísticas de usuarios (admin)
+      tags:
+        - Users
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Estadísticas de usuarios
+        "401":
+          description: No autenticado
+        "403":
+          description: No autorizado
+
+  /users/lists:
+    get:
+      summary: Obtener todas las listas del usuario
+      tags:
+        - Users
+        - Lists
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de listas del usuario
+        "401":
+          description: No autenticado
+
+    post:
+      summary: Crear nueva lista
+      tags:
+        - Users
+        - Lists
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Lista creada
+        "401":
+          description: No autenticado
+
+  /users/lists/{id}:
+    get:
+      summary: Obtener lista específica con sus palas
+      tags:
+        - Users
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle de la lista
+        "404":
+          description: Lista no encontrada
+
+    put:
+      summary: Actualizar lista
+      tags:
+        - Users
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Lista actualizada
+        "404":
+          description: Lista no encontrada
+
+    delete:
+      summary: Eliminar lista
+      tags:
+        - Users
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista eliminada
+        "404":
+          description: Lista no encontrada
+
+  /users/lists/{id}/rackets:
+    post:
+      summary: Agregar pala a lista
+      tags:
+        - Users
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                racketId:
+                  type: string
+      responses:
+        "200":
+          description: Pala agregada a la lista
+        "404":
+          description: Lista no encontrada
+
+  /users/lists/{id}/rackets/{racketId}:
+    delete:
+      summary: Eliminar pala de lista
+      tags:
+        - Users
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: racketId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Pala eliminada de la lista
+        "404":
+          description: Lista o pala no encontrada
+
+  # ==========================================
+  # LISTS ROUTES (Direct access)
+  # ==========================================
+  /lists:
+    get:
+      summary: Obtener todas las listas del usuario autenticado
+      tags:
+        - Lists
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Listas del usuario
+        "401":
+          description: No autenticado
+
+    post:
+      summary: Crear nueva lista
+      tags:
+        - Lists
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Lista creada
+        "401":
+          description: No autenticado
+
+  /lists/{id}:
+    get:
+      summary: Obtener lista por ID
+      tags:
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle de la lista
+        "404":
+          description: Lista no encontrada
+
+    put:
+      summary: Actualizar lista
+      tags:
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista actualizada
+
+    delete:
+      summary: Eliminar lista
+      tags:
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Lista eliminada
+
+  /lists/{id}/rackets:
+    post:
+      summary: Agregar pala a lista
+      tags:
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Pala agregada
+
+  /lists/{id}/rackets/{racketId}:
+    delete:
+      summary: Eliminar pala de lista
+      tags:
+        - Lists
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: racketId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Pala eliminada de la lista
+
+  # ==========================================
+  # REVIEWS ROUTES
+  # ==========================================
+  /reviews:
+    get:
+      summary: Información sobre rutas de reviews disponibles
+      tags:
+        - Reviews
+      responses:
+        "200":
+          description: Información de la API de reviews
+
+    post:
+      summary: Crear nueva review
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - racket_id
+                - title
+                - content
+                - rating
+              properties:
+                racket_id:
+                  type: string
+                title:
+                  type: string
+                content:
+                  type: string
+                rating:
+                  type: number
+                  minimum: 1
+                  maximum: 5
+      responses:
+        "201":
+          description: Review creada
+        "400":
+          description: Datos inválidos
+        "401":
+          description: No autenticado
+
+  /reviews/rackets/{racketId}:
+    get:
+      summary: Obtener reviews de una pala
+      tags:
+        - Reviews
+      parameters:
+        - in: path
+          name: racketId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: rating
+          schema:
+            type: integer
+        - in: query
+          name: sort
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reviews de la pala
+
+  /reviews/users/{userId}:
+    get:
+      summary: Obtener reviews de un usuario
+      tags:
+        - Reviews
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: page
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Reviews del usuario
+
+  /reviews/{reviewId}:
+    get:
+      summary: Obtener review específica
+      tags:
+        - Reviews
+      parameters:
+        - in: path
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle de la review
+        "404":
+          description: Review no encontrada
+
+    put:
+      summary: Actualizar review
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                content:
+                  type: string
+                rating:
+                  type: number
+      responses:
+        "200":
+          description: Review actualizada
+        "401":
+          description: No autenticado
+        "403":
+          description: No autorizado
+
+    delete:
+      summary: Eliminar review
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Review eliminada
+        "401":
+          description: No autenticado
+        "403":
+          description: No autorizado
+
+  /reviews/{reviewId}/comments:
+    get:
+      summary: Obtener comentarios de una review
+      tags:
+        - Reviews
+      parameters:
+        - in: path
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comentarios de la review
+
+    post:
+      summary: Agregar comentario a una review
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+      responses:
+        "201":
+          description: Comentario agregado
+        "401":
+          description: No autenticado
+
+  /reviews/{reviewId}/like:
+    post:
+      summary: Dar/quitar like a una review (toggle)
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reviewId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Like actualizado
+        "401":
+          description: No autenticado
+
+  /reviews/comments/{commentId}:
+    delete:
+      summary: Eliminar un comentario
+      tags:
+        - Reviews
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comentario eliminado
+        "401":
+          description: No autenticado
+        "403":
+          description: No autorizado
+
+  # ==========================================
+  # STORES ROUTES
+  # ==========================================
+  /stores:
+    get:
+      summary: Obtener todas las tiendas
+      tags:
+        - Stores
+      parameters:
+        - in: query
+          name: verified
+          schema:
+            type: boolean
+          description: Filtrar por tiendas verificadas
+      responses:
+        "200":
+          description: Lista de tiendas
+
+    post:
+      summary: Crear nueva solicitud de tienda
+      tags:
+        - Stores
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "201":
+          description: Solicitud de tienda creada
+        "401":
+          description: No autenticado
+
+  /stores/me:
+    get:
+      summary: Obtener tienda del usuario actual
+      tags:
+        - Stores
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Tienda del usuario
+        "401":
+          description: No autenticado
+        "404":
+          description: Tienda no encontrada
+
+  /stores/{id}:
+    get:
+      summary: Obtener tienda por ID
+      tags:
+        - Stores
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalle de la tienda
+        "404":
+          description: Tienda no encontrada
+
+    put:
+      summary: Actualizar tienda (propietario o admin)
+      tags:
+        - Stores
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: Tienda actualizada
+        "401":
+          description: No autenticado
+        "403":
+          description: No autorizado
+
+    delete:
+      summary: Eliminar tienda (propietario o admin)
+      tags:
+        - Stores
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tienda eliminada
+        "401":
+          description: No autenticado
+        "403":
+          description: No autorizado
+
+  # ==========================================
+  # ADMIN ROUTES
+  # ==========================================
+  /admin/metrics:
+    get:
+      summary: Obtener métricas del dashboard
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Métricas del sistema
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+  /admin/users:
+    get:
+      summary: Obtener todos los usuarios
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de usuarios
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+  /admin/users/{userId}/role:
+    patch:
+      summary: Actualizar rol de un usuario
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                role:
+                  type: string
+      responses:
+        "200":
+          description: Rol actualizado
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+  /admin/users/{userId}:
+    delete:
+      summary: Eliminar un usuario
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Usuario eliminado
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+  /admin/racket-requests:
+    get:
+      summary: Obtener todas las solicitudes de palas
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de solicitudes de palas
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+  /admin/store-requests:
+    get:
+      summary: Obtener todas las solicitudes de tiendas
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Lista de solicitudes de tiendas
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+  /admin/stores/{id}/verify:
+    post:
+      summary: Aprobar/verificar una tienda
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Tienda verificada
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+  /admin/stores/{id}/reject:
+    delete:
+      summary: Rechazar una solicitud de tienda
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Solicitud rechazada
+        "401":
+          description: No autenticado
+        "403":
+          description: Requiere rol de administrador
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+tags:
+  - name: Health
+    description: Health check endpoints
+  - name: Rackets
+    description: Endpoints de palas
+  - name: Auth
+    description: Autenticación y autorización
+  - name: Users
+    description: Gestión de usuarios
+  - name: Lists
+    description: Gestión de listas de palas
+  - name: Reviews
+    description: Sistema de reviews y comentarios
+  - name: Stores
+    description: Gestión de tiendas
+  - name: Admin
+    description: Endpoints administrativos (requiere rol admin)
