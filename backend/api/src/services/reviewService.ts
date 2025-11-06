@@ -32,10 +32,10 @@ export class ReviewService {
         ),
         racket:rackets!reviews_racket_id_fkey (
           id,
-          nombre,
+          name,
           brand,
-          modelo,
-          imagen
+          model,
+          image
         )
       `,
         { count: "exact" }
@@ -174,10 +174,10 @@ export class ReviewService {
         ),
         racket:rackets!reviews_racket_id_fkey (
           id,
-          nombre,
-          marca,
-          modelo,
-          imagen
+          name,
+          brand,
+          model,
+          image
         )
       `,
         { count: "exact" }
@@ -256,10 +256,10 @@ export class ReviewService {
         ),
         racket:rackets!reviews_racket_id_fkey (
           id,
-          nombre,
-          marca,
-          modelo,
-          imagen
+          name,
+          brand,
+          model,
+          image
         )
       `
       )

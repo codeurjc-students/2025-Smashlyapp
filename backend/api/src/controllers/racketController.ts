@@ -9,16 +9,15 @@ import {
   Racket,
 } from "../types";
 
-export class RacketController {
-  /**
-   * Helper function to safely extract error message
-   */
-  private static getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
+// Helper function outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
   }
+  return String(error);
+}
+
+export class RacketController {
 
   /**
    * GET /api/rackets
@@ -54,7 +53,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -100,7 +99,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -137,7 +136,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -173,7 +172,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -236,7 +235,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -264,7 +263,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -289,7 +288,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -314,7 +313,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -339,7 +338,7 @@ export class RacketController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }

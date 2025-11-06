@@ -3,16 +3,15 @@ import { supabase } from "../config/supabase";
 import logger from "../config/logger";
 import { ApiResponse } from "../types/common";
 
-export class AuthController {
-  /**
-   * Helper function to safely extract error message
-   */
-  private static getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
+// Helper function outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
   }
+  return String(error);
+}
+
+export class AuthController {
 
   /**
    * POST /api/auth/login
@@ -41,7 +40,7 @@ export class AuthController {
         res.status(401).json({
           success: false,
           error: "Invalid credentials",
-          message: this.getErrorMessage(error),
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -63,7 +62,7 @@ export class AuthController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -104,7 +103,7 @@ export class AuthController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -141,7 +140,7 @@ export class AuthController {
         error: {
           success: false,
           error: "Error registering user",
-          message: this.getErrorMessage(error),
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
         } as ApiResponse
       };
@@ -252,7 +251,7 @@ export class AuthController {
         res.status(400).json({
           success: false,
           error: "Error al cerrar sesión",
-          message: this.getErrorMessage(error),
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -270,7 +269,7 @@ export class AuthController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -302,7 +301,7 @@ export class AuthController {
         res.status(401).json({
           success: false,
           error: "Token inválido",
-          message: this.getErrorMessage(error),
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -323,7 +322,7 @@ export class AuthController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -373,7 +372,7 @@ export class AuthController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }

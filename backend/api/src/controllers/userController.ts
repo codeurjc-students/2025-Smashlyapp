@@ -9,16 +9,15 @@ import {
   RequestWithUser,
 } from "../types";
 
-export class UserController {
-  /**
-   * Helper function to safely extract error messages from unknown error types
-   */
-  private static getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
+// Helper function outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
   }
+  return String(error);
+}
+
+export class UserController {
 
   /**
    * GET /api/users/profile
@@ -63,7 +62,7 @@ export class UserController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -116,7 +115,7 @@ export class UserController {
       logger.error("Error in createUserProfile:", error);
 
       // Handle specific errors
-      if (this.getErrorMessage(error).includes("duplicate")) {
+      if (getErrorMessage(error).includes("duplicate")) {
         res.status(409).json({
           error: "Conflict",
           message: "A profile already exists for this user",
@@ -240,7 +239,7 @@ export class UserController {
       res.status(500).json({
         success: false,
         error: "Internal server error",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -284,7 +283,7 @@ export class UserController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -325,7 +324,7 @@ export class UserController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -352,7 +351,7 @@ export class UserController {
       res.status(500).json({
         success: false,
         error: "Internal server error",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }

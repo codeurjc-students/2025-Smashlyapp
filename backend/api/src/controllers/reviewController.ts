@@ -13,16 +13,15 @@ import {
 } from "../types/review";
 import { RequestWithUser } from "../types";
 
-export class ReviewController {
-  /**
-   * Helper function to safely extract error message
-   */
-  private static getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
+// Helper function outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
   }
+  return String(error);
+}
+
+export class ReviewController {
 
   /**
    * GET /api/v1/rackets/:racketId/reviews
@@ -55,7 +54,7 @@ export class ReviewController {
       res.json(result);
     } catch (error: unknown) {
       logger.error("Error getting reviews:", error);
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 
@@ -74,7 +73,7 @@ export class ReviewController {
       res.json(result);
     } catch (error: unknown) {
       logger.error("Error getting user reviews:", error);
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 
@@ -97,7 +96,7 @@ export class ReviewController {
       res.json(review);
     } catch (error: unknown) {
       logger.error("Error getting review:", error);
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 
@@ -172,12 +171,12 @@ export class ReviewController {
   private static handleCreateReviewError(error: unknown, res: Response): void {
     logger.error("Error creating review:", error);
 
-    if (this.getErrorMessage(error).includes("Ya has publicado")) {
-      res.status(409).json({ error: this.getErrorMessage(error) });
+    if (getErrorMessage(error).includes("Ya has publicado")) {
+      res.status(409).json({ error: getErrorMessage(error) });
       return;
     }
 
-    res.status(500).json({ error: this.getErrorMessage(error) });
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 
   /**
@@ -237,12 +236,12 @@ export class ReviewController {
   private static handleUpdateReviewError(error: unknown, res: Response): void {
     logger.error("Error updating review:", error);
 
-    if (this.getErrorMessage(error).includes("permiso")) {
-      res.status(403).json({ error: this.getErrorMessage(error) });
+    if (getErrorMessage(error).includes("permiso")) {
+      res.status(403).json({ error: getErrorMessage(error) });
       return;
     }
 
-    res.status(500).json({ error: this.getErrorMessage(error) });
+    res.status(500).json({ error: getErrorMessage(error) });
   }
 
   /**
@@ -265,12 +264,12 @@ export class ReviewController {
     } catch (error: unknown) {
       logger.error("Error deleting review:", error);
 
-      if (this.getErrorMessage(error).includes("permiso")) {
-        res.status(403).json({ error: this.getErrorMessage(error) });
+      if (getErrorMessage(error).includes("permiso")) {
+        res.status(403).json({ error: getErrorMessage(error) });
         return;
       }
 
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 
@@ -293,7 +292,7 @@ export class ReviewController {
       res.json({ liked });
     } catch (error: unknown) {
       logger.error("Error toggling like:", error);
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 
@@ -327,7 +326,7 @@ export class ReviewController {
       res.status(201).json(comment);
     } catch (error: unknown) {
       logger.error("Error adding comment:", error);
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 
@@ -344,7 +343,7 @@ export class ReviewController {
       res.json(comments);
     } catch (error: unknown) {
       logger.error("Error getting comments:", error);
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 
@@ -368,12 +367,12 @@ export class ReviewController {
     } catch (error: unknown) {
       logger.error("Error deleting comment:", error);
 
-      if (this.getErrorMessage(error).includes("permiso")) {
-        res.status(403).json({ error: this.getErrorMessage(error) });
+      if (getErrorMessage(error).includes("permiso")) {
+        res.status(403).json({ error: getErrorMessage(error) });
         return;
       }
 
-      res.status(500).json({ error: this.getErrorMessage(error) });
+      res.status(500).json({ error: getErrorMessage(error) });
     }
   }
 }

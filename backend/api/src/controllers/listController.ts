@@ -8,16 +8,15 @@ import {
   AddRacketToListRequest,
 } from "../types/list";
 
-export class ListController {
-  /**
-   * Helper function to safely extract error message
-   */
-  private static getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
+// Helper function outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
   }
+  return String(error);
+}
+
+export class ListController {
 
   /**
    * GET /api/users/lists
@@ -51,7 +50,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -96,7 +95,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -142,7 +141,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -180,7 +179,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -216,7 +215,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -264,7 +263,7 @@ export class ListController {
       logger.error("Error in addRacketToList:", error);
 
       // Check if it's a duplicate entry error
-      const errorMessage = this.getErrorMessage(error);
+      const errorMessage = getErrorMessage(error);
       if (errorMessage.includes("ya está en la lista")) {
         res.status(400).json({
           success: false,
@@ -278,7 +277,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -327,7 +326,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
