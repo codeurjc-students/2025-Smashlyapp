@@ -4,24 +4,88 @@ import logger from "../config/logger";
 import { supabase } from "../config/supabase";
 import { storeService } from "../services/storeService";
 
-export class AdminController {
-  /**
-   * Helper function to safely extract error message
-   */
-  private static getErrorMessage(error: unknown): string {
-    if (error instanceof Error) {
-      return error.message;
-    }
-    return String(error);
+// Helper functions outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
   }
+  return String(error);
+}
 
+async function getTableCount(tableName: string): Promise<number> {
+  const { count } = await supabase
+    .from(tableName)
+    .select("*", { count: "exact", head: true });
+  return count || 0;
+}
+
+async function getActiveUsersCount(): Promise<number> {
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+  const { count } = await supabase
+    .from("user_profiles")
+    .select("*", { count: "exact", head: true })
+    .gte("updated_at", thirtyDaysAgo.toISOString());
+
+  return count || 0;
+}
+
+async function getVerifiedStoresCount(): Promise<number> {
+  const { count } = await supabase
+    .from("stores")
+    .select("*", { count: "exact", head: true })
+    .eq("verified", true);
+
+  return count || 0;
+}
+
+async function getPendingStoresCount(): Promise<number> {
+  const { count } = await supabase
+    .from("stores")
+    .select("*", { count: "exact", head: true })
+    .eq("verified", false);
+
+  return count || 0;
+}
+
+async function collectMetricsData() {
+  const [
+    totalUsers,
+    totalRackets,
+    totalReviews,
+    activeUsers,
+    totalStores,
+    pendingRequests
+  ] = await Promise.all([
+    getTableCount("user_profiles"),
+    getTableCount("rackets"),
+    getTableCount("reviews"),
+    getActiveUsersCount(),
+    getVerifiedStoresCount(),
+    getPendingStoresCount()
+  ]);
+
+  return {
+    totalUsers: totalUsers || 0,
+    totalRackets: totalRackets || 0,
+    totalStores: totalStores || 0,
+    totalReviews: totalReviews || 0,
+    pendingRequests: pendingRequests || 0,
+    activeUsers: activeUsers || 0,
+    usersChange: 12.5,
+    racketsChange: 8.3,
+  };
+}
+
+export class AdminController {
   /**
    * GET /api/v1/admin/metrics
    * Obtiene las métricas del dashboard de administración
    */
   static async getMetrics(req: RequestWithUser, res: Response): Promise<void> {
     try {
-      const metrics = await this.collectMetricsData();
+      const metrics = await collectMetricsData();
       res.json({
         success: true,
         data: metrics,
@@ -32,76 +96,10 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
-  }
-
-  private static async collectMetricsData() {
-    const [
-      totalUsers,
-      totalRackets,
-      totalReviews,
-      activeUsers,
-      totalStores,
-      pendingRequests
-    ] = await Promise.all([
-      this.getTableCount("user_profiles"),
-      this.getTableCount("rackets"),
-      this.getTableCount("reviews"),
-      this.getActiveUsersCount(),
-      this.getVerifiedStoresCount(),
-      this.getPendingStoresCount()
-    ]);
-
-    return {
-      totalUsers: totalUsers || 0,
-      totalRackets: totalRackets || 0,
-      totalStores: totalStores || 0,
-      totalReviews: totalReviews || 0,
-      pendingRequests: pendingRequests || 0,
-      activeUsers: activeUsers || 0,
-      usersChange: 12.5,
-      racketsChange: 8.3,
-    };
-  }
-
-  private static async getTableCount(tableName: string): Promise<number> {
-    const { count } = await supabase
-      .from(tableName)
-      .select("*", { count: "exact", head: true });
-    return count || 0;
-  }
-
-  private static async getActiveUsersCount(): Promise<number> {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const { count } = await supabase
-      .from("user_profiles")
-      .select("*", { count: "exact", head: true })
-      .gte("updated_at", thirtyDaysAgo.toISOString());
-    
-    return count || 0;
-  }
-
-  private static async getVerifiedStoresCount(): Promise<number> {
-    const { count } = await supabase
-      .from("stores")
-      .select("*", { count: "exact", head: true })
-      .eq("verified", true);
-    
-    return count || 0;
-  }
-
-  private static async getPendingStoresCount(): Promise<number> {
-    const { count } = await supabase
-      .from("stores")
-      .select("*", { count: "exact", head: true })
-      .eq("verified", false);
-    
-    return count || 0;
   }
 
   /**
@@ -129,7 +127,7 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -179,7 +177,7 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -223,7 +221,7 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -249,7 +247,7 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -277,7 +275,7 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -307,7 +305,7 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -336,7 +334,7 @@ export class AdminController {
       res.status(500).json({
         success: false,
         error: "Error del servidor",
-        message: this.getErrorMessage(error),
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
