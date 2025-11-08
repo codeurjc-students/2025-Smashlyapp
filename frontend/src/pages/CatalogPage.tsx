@@ -170,26 +170,38 @@ const FilterButton = styled.button<{ active?: boolean }>`
   }
 `;
 
-const BrandFilters = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-top: 1rem;
-`;
-
-const BrandFilter = styled.button<{ active: boolean }>`
-  padding: 0.5rem 1rem;
-  border: 1px solid ${(props) => (props.active ? "#16a34a" : "#e5e7eb")};
-  border-radius: 8px;
-  background: ${(props) => (props.active ? "#16a34a" : "white")};
-  color: ${(props) => (props.active ? "white" : "#6b7280")};
+const FilterSelect = styled.select`
+  padding: 0.875rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: white;
+  color: #6b7280;
   font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 
+  /* Custom arrow to control its position */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center; /* move arrow a bit left */
+  background-size: 20px;
+  padding-right: 2.5rem; /* ensure text doesn't overlap the arrow */
+
   &:hover {
     border-color: #16a34a;
-    color: ${(props) => (props.active ? "white" : "#16a34a")};
+    color: #16a34a;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+
+  &:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
   }
 `;
 
@@ -712,23 +724,23 @@ const CatalogPage: React.FC = () => {
               Ofertas
             </FilterButton>
 
+            {/* Filtro de marca como desplegable con estilo de FilterButton */}
+            <FilterSelect
+              value={selectedBrand}
+              onChange={(e) => setSelectedBrand(e.target.value)}
+            >
+              {uniqueBrands.map((brand) => (
+                <option key={brand} value={brand}>
+                  {brand === "Todas" ? "Todas las marcas" : brand}
+                </option>
+              ))}
+            </FilterSelect>
+
             <FilterButton onClick={clearFilters}>
               <FiX />
               Limpiar
             </FilterButton>
           </FiltersRow>
-
-          <BrandFilters>
-            {uniqueBrands.map((brand) => (
-              <BrandFilter
-                key={brand}
-                active={selectedBrand === brand}
-                onClick={() => setSelectedBrand(brand)}
-              >
-                {brand}
-              </BrandFilter>
-            ))}
-          </BrandFilters>
         </FiltersSection>
 
         {/* Results Header */}

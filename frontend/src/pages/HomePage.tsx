@@ -1,5 +1,5 @@
-import { motion } from "framer-motion";
-import React from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import React, { useEffect, useState } from "react";
 import {
   FiDatabase,
   FiDollarSign,
@@ -24,7 +24,7 @@ const HeroSection = styled.section`
 `;
 
 const HeroContent = styled.div`
-  max-width: 800px;
+  max-width: 1100px;
   margin: 0 auto;
 `;
 
@@ -45,6 +45,36 @@ const Title = styled(motion.h1)`
   font-weight: 800;
   margin-bottom: 24px;
   line-height: 1.1;
+  display: inline-flex;
+  flex-wrap: wrap; /* allow wrapping between static and group */
+  align-items: baseline;
+  gap: 0.5rem;
+`;
+
+const TitleStaticBefore = styled.span`
+  white-space: normal;
+  display: inline-block;
+  overflow-wrap: anywhere;
+  flex: 0 1 auto;
+  /* Limit the first part so the group can wrap to next line */
+  @media (min-width: 900px) {
+    max-inline-size: 22ch;
+  }
+`;
+
+const TitleGroup = styled.span`
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  white-space: nowrap; /* keep 'permite' + dynamic together */
+  flex: 0 0 auto; /* keep group from shrinking and break as a whole */
+`;
+
+const RotatingText = styled.span`
+  color: #fbbf24;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: baseline;
 `;
 
 const Subtitle = styled(motion.p)`
@@ -206,6 +236,22 @@ const StatItem = styled.div`
 `;
 
 const HomePage: React.FC = () => {
+  const phrases = [
+    "conocer y mejorar mas sobre pádel",
+    "encontrar la mejor pala para ti",
+    "encontrar entrenadores cerca de ti",
+    "comparar precios",
+    "mejorar tu rendimiento en pista",
+  ];
+
+  const [phraseIndex, setPhraseIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setPhraseIndex((prev) => (prev + 1) % phrases.length);
+    }, 2500);
+    return () => clearInterval(id);
+  }, [phrases.length]);
   return (
     <Container>
       <HeroSection>
@@ -224,10 +270,25 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            La aplicacion que te permite{" "}
-            <span style={{ color: "#fbbf24" }}>
-              conocer y mejorar mas sobre pádel
-            </span>
+            <TitleStaticBefore>La aplicacion que te </TitleStaticBefore>
+            <wbr />
+            <TitleGroup>
+              <span>permite</span>
+              <RotatingText aria-live="polite">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={phrases[phraseIndex]}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.35 }}
+                    style={{ display: "inline-block" }}
+                  >
+                    {phrases[phraseIndex]}
+                  </motion.span>
+                </AnimatePresence>
+              </RotatingText>
+            </TitleGroup>
           </Title>
 
           <Subtitle
