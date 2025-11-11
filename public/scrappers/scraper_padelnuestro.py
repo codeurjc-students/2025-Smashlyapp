@@ -238,9 +238,43 @@ class PadelNuestroScraper:
                 logger.warning(f"No se pudo extraer el nombre de {url}")
                 return None
 
-            # Extraer imagen principal
-            image_elem = soup.find('img', class_='fotorama__img')
-            image = image_elem.get('src') if image_elem else None
+            # Extraer imagen principal - intentar múltiples métodos
+            image = None
+
+            # Método 1: Buscar en JSON-LD Schema.org
+            try:
+                json_ld_scripts = soup.find_all('script', type='application/ld+json')
+                for script in json_ld_scripts:
+                    if script.string:
+                        try:
+                            data = json.loads(script.string)
+                            if isinstance(data, dict) and 'image' in data:
+                                image = data['image']
+                                break
+                        except json.JSONDecodeError:
+                            continue
+            except Exception as e:
+                logger.debug(f"Error extrayendo imagen de JSON-LD: {e}")
+
+            # Método 2: Buscar img con class product-image-photo
+            if not image:
+                image_elem = soup.find('img', class_='product-image-photo')
+                if image_elem:
+                    image = image_elem.get('src') or image_elem.get('data-src')
+
+            # Método 3: Buscar en fotorama (galería de imágenes)
+            if not image:
+                image_elem = soup.find('img', class_='fotorama__img')
+                if image_elem:
+                    image = image_elem.get('src') or image_elem.get('data-src')
+
+            # Método 4: Buscar cualquier img en product media
+            if not image:
+                media_wrapper = soup.find('div', class_='product media')
+                if media_wrapper:
+                    image_elem = media_wrapper.find('img')
+                    if image_elem:
+                        image = image_elem.get('src') or image_elem.get('data-src')
 
             # Extraer precios
             price_info = self.extract_price_info(soup)

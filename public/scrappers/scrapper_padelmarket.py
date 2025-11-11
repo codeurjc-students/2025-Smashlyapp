@@ -74,24 +74,237 @@ def save_json(data: List[Dict[str, Any]]) -> None:
 
 
 def normalize_name(name: Optional[str]) -> Optional[str]:
+    """
+    Normaliza un nombre de pala para comparación.
+    Elimina sufijos, espacios extra, y convierte a minúsculas.
+    """
     if not name:
         return None
     n = name.strip()
-    # El nombre puede tener sufijo (Pala). Lo quitamos para comparar
+    # Quitar sufijo (Pala)
     n = re.sub(r"\s*\(Pala\)\s*$", "", n, flags=re.IGNORECASE)
-    # Normalizamos espacios múltiples
+    # Normalizar espacios múltiples
     n = re.sub(r"\s+", " ", n)
     return n.lower()
 
 
-def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str]) -> Optional[int]:
+def create_comparison_key(name: Optional[str], brand: Optional[str] = None) -> Optional[str]:
+    """
+    Crea una clave de comparación más robusta para matching.
+    Normaliza el nombre eliminando caracteres especiales, acentos, espacios y mayúsculas.
+    """
     if not name:
         return None
-    target = normalize_name(name)
+
+    # Normalizar nombre
+    key = normalize_name(name)
+    if not key:
+        return None
+
+    # Eliminar acentos y caracteres especiales
+    import unicodedata
+    key = unicodedata.normalize('NFKD', key).encode('ASCII', 'ignore').decode('ASCII')
+
+    # Eliminar todos los caracteres que no sean letras o números
+    key = re.sub(r'[^a-z0-9]', '', key)
+
+    return key
+
+
+def calculate_similarity(str1: str, str2: str) -> float:
+    """
+    Calcula la similitud entre dos strings usando distancia de Levenshtein simplificada.
+    Retorna un valor entre 0 (totalmente diferente) y 1 (idéntico).
+    """
+    if str1 == str2:
+        return 1.0
+
+    # Algoritmo de distancia de Levenshtein simplificado
+    len1, len2 = len(str1), len(str2)
+    if len1 == 0 or len2 == 0:
+        return 0.0
+
+    # Crear matriz de distancias
+    distances = [[0] * (len2 + 1) for _ in range(len1 + 1)]
+
+    for i in range(len1 + 1):
+        distances[i][0] = i
+    for j in range(len2 + 1):
+        distances[0][j] = j
+
+    for i in range(1, len1 + 1):
+        for j in range(1, len2 + 1):
+            cost = 0 if str1[i-1] == str2[j-1] else 1
+            distances[i][j] = min(
+                distances[i-1][j] + 1,      # deletion
+                distances[i][j-1] + 1,      # insertion
+                distances[i-1][j-1] + cost  # substitution
+            )
+
+    max_len = max(len1, len2)
+    similarity = 1 - (distances[len1][len2] / max_len)
+    return similarity
+
+
+def extract_version_numbers(text: str) -> List[str]:
+    """
+    Extrae números de versión del texto (ej: "3.3", "2024", "V2", etc.)
+    Returns:
+        Lista de números de versión encontrados
+    """
+    # Patrones comunes de versión: 3.3, V2, 2024, etc.
+    patterns = [
+        r'\d+\.\d+',  # 3.3, 2.1, etc.
+        r'v\d+',      # v2, V3, etc.
+        r'\b20\d{2}\b',  # 2024, 2025, etc. (años)
+        r'\b\d{2}\b$',   # 03, 23, etc. al final
+    ]
+
+    versions = []
+    for pattern in patterns:
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        versions.extend(matches)
+
+    return versions
+
+
+def tokenize_name(name: str) -> set:
+    """
+    Tokeniza un nombre en palabras/números significativos.
+    Aplica normalización antes de tokenizar.
+    """
+    # Normalizar primero (sin quitar espacios todavía)
+    normalized = normalize_name(name) or ""
+
+    # Extraer tokens: palabras de 2+ caracteres o números
+    tokens = set()
+
+    # Patrones de tokens
+    # 1. Palabras de 2+ letras
+    for word in re.findall(r'[a-z]{2,}', normalized):
+        tokens.add(word)
+
+    # 2. Números (años, versiones, etc.)
+    for num in re.findall(r'\d+', normalized):
+        if len(num) >= 2:  # Al menos 2 dígitos
+            tokens.add(num)
+
+    return tokens
+
+
+def calculate_token_similarity(name1: str, name2: str) -> float:
+    """
+    Calcula similitud basada en tokens (palabras) comunes.
+    Útil cuando el orden de las palabras puede variar.
+    """
+    tokens1 = tokenize_name(name1)
+    tokens2 = tokenize_name(name2)
+
+    if not tokens1 or not tokens2:
+        return 0.0
+
+    # Calcular similitud de Jaccard (intersección / unión)
+    intersection = len(tokens1 & tokens2)
+    union = len(tokens1 | tokens2)
+
+    return intersection / union if union > 0 else 0.0
+
+
+def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str], brand: Optional[str] = None) -> Optional[int]:
+    """
+    Busca una pala existente en el JSON usando múltiples estrategias de matching.
+
+    Estrategia de matching:
+    1. Comparación exacta de claves normalizadas
+    2. Comparación por similitud de tokens (palabras comunes) con umbral del 85%
+    3. Comparación por similitud de secuencia (Levenshtein) con umbral del 90%
+    4. Verificación de números de versión (deben coincidir)
+    5. Comparación adicional por marca + modelo si está disponible
+
+    Returns:
+        Índice de la pala si existe, None si no existe
+    """
+    if not name:
+        return None
+
+    # Crear clave de comparación del nombre a buscar
+    target_key = create_comparison_key(name, brand)
+    if not target_key:
+        return None
+
+    # Extraer versiones del nombre objetivo
+    target_versions = extract_version_numbers(normalize_name(name) or "")
+
+    # Variables para tracking del mejor match
+    best_match_idx = None
+    best_similarity = 0.0
+    best_method = None
+
+    # Recorrer todas las palas existentes
     for idx, item in enumerate(data):
-        existing = normalize_name(item.get("name"))
-        if existing == target:
+        existing_name = item.get("name")
+        existing_brand = item.get("brand") or item.get("characteristics_brand")
+
+        # Crear clave de comparación de la pala existente
+        existing_key = create_comparison_key(existing_name, existing_brand)
+
+        if not existing_key:
+            continue
+
+        # 1. Comparación exacta de claves
+        if existing_key == target_key:
+            logging.info(f"Match exacto encontrado: '{name}' == '{existing_name}'")
             return idx
+
+        # 2. Calcular similitud de tokens (independiente del orden)
+        # Usar nombres originales, no las claves
+        token_similarity = calculate_token_similarity(name, existing_name)
+
+        # 3. Calcular similitud de secuencia (Levenshtein)
+        sequence_similarity = calculate_similarity(target_key, existing_key)
+
+        # Usar la mayor de las dos similitudes
+        similarity = max(token_similarity, sequence_similarity)
+        method = "tokens" if token_similarity > sequence_similarity else "secuencia"
+
+        # 4. Verificar versiones - si hay versiones diferentes, penalizar
+        existing_versions = extract_version_numbers(normalize_name(existing_name) or "")
+
+        # Si ambos tienen versiones y no coinciden, penalizar mucho la similitud
+        if target_versions and existing_versions:
+            # Normalizar versiones para comparación
+            target_v_set = set(v.lower() for v in target_versions)
+            existing_v_set = set(v.lower() for v in existing_versions)
+
+            # Si las versiones son completamente diferentes, reducir similitud
+            if target_v_set.isdisjoint(existing_v_set):
+                similarity *= 0.5  # Penalizar al 50%
+
+        # 5. Si la marca coincide, dar un boost a la similitud
+        if brand and existing_brand:
+            brand_key1 = create_comparison_key(brand)
+            brand_key2 = create_comparison_key(existing_brand)
+            if brand_key1 == brand_key2:
+                similarity = min(1.0, similarity + 0.1)  # Boost del 10%
+
+        # Tracking del mejor match
+        if similarity > best_similarity:
+            best_similarity = similarity
+            best_match_idx = idx
+            best_method = method
+
+    # Umbral de similitud: 85% (reducido porque ahora usamos tokens)
+    SIMILARITY_THRESHOLD = 0.85
+
+    if best_similarity >= SIMILARITY_THRESHOLD and best_match_idx is not None:
+        existing_name = data[best_match_idx].get("name")
+        logging.info(f"Match por similitud {best_method} ({best_similarity*100:.1f}%): '{name}' ~= '{existing_name}'")
+        return best_match_idx
+
+    # No se encontró match
+    if best_similarity > 0.5:  # Log solo si hubo alguna similitud considerable
+        logging.info(f"No match para '{name}' (mejor similitud: {best_similarity*100:.1f}%)")
+
     return None
 
 
@@ -393,17 +606,52 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
     current_price = None
     original_price = None
 
-    # Intento: clases típicas de Shopify
-    price_wrappers = soup.select(".price, .product__price")
-    if price_wrappers:
-        # Buscar spans con clases de precio
-        sale_el = soup.select_one(".price-item--sale")
-        reg_el = soup.select_one(".price-item--regular")
-        compare_el = soup.select_one(".price__compare, .compare-at")
-        current_price = parse_price(extract_text(sale_el) or extract_text(reg_el))
-        original_price = parse_price(extract_text(compare_el) or extract_text(reg_el))
+    # Método 1: Extraer de datos JSON embebidos (Shopify Analytics, Klaviyo, etc.)
+    try:
+        # Buscar scripts con datos JSON
+        for script in soup.find_all('script'):
+            if not script.string:
+                continue
 
-    # Fallback: buscar cualquier número con euro cerca de 'Precio'
+            script_content = script.string
+
+            # Buscar patrones de precio en JSON
+            # Patrón 1: "price":{"amount":259.95,"currencyCode":"EUR"}
+            price_match = re.search(r'"price"\s*:\s*\{\s*"amount"\s*:\s*([\d.]+)', script_content)
+            if price_match and current_price is None:
+                current_price = float(price_match.group(1))
+
+            # Patrón 2: "price":25995 (en centavos)
+            if current_price is None:
+                price_cents_match = re.search(r'"price"\s*:\s*(\d+)\s*,\s*["\']?currencyCode["\']?\s*:\s*["\']EUR["\']', script_content)
+                if price_cents_match:
+                    current_price = float(price_cents_match.group(1)) / 100
+
+            # Buscar precio original/comparación
+            # Patrón: CompareAtPrice: "389,95€" o "compare_at_price"
+            compare_match = re.search(r'[Cc]ompare[Aa]t[Pp]rice["\']?\s*:\s*["\']?([\d,]+)', script_content)
+            if compare_match and original_price is None:
+                compare_str = compare_match.group(1).replace(',', '.')
+                try:
+                    original_price = float(compare_str)
+                except ValueError:
+                    pass
+    except Exception as e:
+        logging.debug(f"Error extrayendo precios de JSON: {e}")
+
+    # Método 2: Buscar en elementos HTML (clases típicas de Shopify)
+    if current_price is None:
+        price_wrappers = soup.select(".price, .product__price")
+        if price_wrappers:
+            # Buscar spans con clases de precio
+            sale_el = soup.select_one(".price-item--sale")
+            reg_el = soup.select_one(".price-item--regular")
+            compare_el = soup.select_one(".price__compare, .compare-at")
+            current_price = parse_price(extract_text(sale_el) or extract_text(reg_el))
+            if not original_price:
+                original_price = parse_price(extract_text(compare_el) or extract_text(reg_el))
+
+    # Método 3: Fallback - buscar cualquier número con euro
     if current_price is None:
         for el in soup.select("span, div"):
             txt = extract_text(el)
@@ -509,7 +757,10 @@ def apply_update_or_create(
     data: List[Dict[str, Any]], scraped: Dict[str, Any], product_url: str
 ) -> None:
     name = scraped.get("name")
-    idx = find_existing_index_by_name(data, name)
+    brand = scraped.get("brand")
+
+    # Buscar pala existente usando el algoritmo mejorado
+    idx = find_existing_index_by_name(data, name, brand)
 
     # Construir valores de PadelMarket
     pm_actual = scraped.get("current_price")
@@ -518,21 +769,23 @@ def apply_update_or_create(
     pm_link = product_url
 
     if idx is not None:
-        # Sólo actualizar campos de PadelMarket y nombre con sufijo
+        # Actualizar SOLO campos de PadelMarket, NO modificar nombre ni otros campos
         entry = data[idx]
         entry["padelmarket_actual_price"] = pm_actual
         entry["padelmarket_original_price"] = pm_original
         entry["padelmarket_discount_percentage"] = pm_discount
         entry["padelmarket_link"] = pm_link
-        # nombre con sufijo
-        current_name = entry.get("name") or name
-        if current_name and not current_name.endswith("(Pala)"):
-            entry["name"] = f"{current_name} (Pala)"
-        else:
-            entry["name"] = current_name
-        # on_offer derivado
-        entry["on_offer"] = bool(pm_discount and pm_discount > 0)
-        logging.info(f"Actualizado (PadelMarket): {entry['name']}")
+
+        # Actualizar imagen solo si no existe
+        if not entry.get("image") and scraped.get("image"):
+            entry["image"] = scraped.get("image")
+
+        # Actualizar on_offer basado en ambas tiendas
+        pn_discount = entry.get("padelnuestro_discount_percentage")
+        has_offer = (pm_discount and pm_discount > 0) or (pn_discount and pn_discount > 0)
+        entry["on_offer"] = bool(has_offer)
+
+        logging.info(f"✓ Actualizado (PadelMarket): {entry['name']}")
         return
 
     # Crear nueva entrada con todos los campos
@@ -596,9 +849,11 @@ def apply_update_or_create(
     logging.info(f"Creada nueva entrada: {new_entry['name']}")
 
 
-def main():
+def main(max_products: int = None):
     setup_logging()
     logging.info("Inicio de scrapper PadelMarket")
+    if max_products:
+        logging.info(f"Modo prueba: limitado a {max_products} productos")
 
     session = requests.Session()
     session.headers.update(HEADERS)
@@ -609,8 +864,14 @@ def main():
     # Recorremos páginas hasta que no haya más productos
     page = 1
     empty_pages = 0
+    products_processed = 0
 
     while True:
+        # Si alcanzamos el límite, terminar
+        if max_products and products_processed >= max_products:
+            logging.info(f"Límite de {max_products} productos alcanzado")
+            break
+
         links = scrape_catalog_page(session, page)
         if not links:
             empty_pages += 1
@@ -623,6 +884,10 @@ def main():
 
         empty_pages = 0
         for product_url in links:
+            # Si alcanzamos el límite, terminar
+            if max_products and products_processed >= max_products:
+                break
+
             if product_url in visited:
                 continue
             visited.add(product_url)
@@ -632,6 +897,7 @@ def main():
                 if not detail:
                     continue
                 apply_update_or_create(data, detail, product_url)
+                products_processed += 1
                 # Guardado incremental para no perder progreso
                 save_json(data)
             except Exception as e:
@@ -644,8 +910,16 @@ def main():
 
     # Guardado final
     save_json(data)
-    logging.info("Scrapeo completado")
+    logging.info(f"Scrapeo completado: {products_processed} productos procesados")
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    # Si se pasa un argumento numérico, usarlo como límite de productos
+    max_products = None
+    if len(sys.argv) > 1:
+        try:
+            max_products = int(sys.argv[1])
+        except ValueError:
+            pass
+    main(max_products)

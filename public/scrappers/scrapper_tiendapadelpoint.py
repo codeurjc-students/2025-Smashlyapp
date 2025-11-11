@@ -26,6 +26,7 @@ import time
 from typing import Any, Dict, List, Optional, Tuple
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from urllib.parse import urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -247,6 +248,29 @@ def catalog_page_url(page_number: int) -> str:
     return f"{CATALOG_URL}?page={page_number}"
 
 
+def _is_catalog_product_link(href: str) -> bool:
+    """Heurística estricta para enlaces de detalle de producto en el catálogo.
+    
+    - Excluye categorías y secciones promocionales (p.ej. 'palas-de-padel', 'flash-point', 'outlet').
+    - Incluye únicamente detalles cuya ruta empiece o contenga claramente '/pala-'.
+    """
+    if not href:
+        return False
+    h = href.strip()
+    # Excluir enlaces de categoría/paginación y otras secciones
+    if "/palas-de-padel" in h:
+        return False
+    if "flash-point" in h:
+        return False
+    if "/outlet/" in h:
+        return False
+
+    # Aceptar solo rutas de detalle de producto tipo "pala-..."
+    # Si es absoluta, usamos urlparse para analizar la path
+    path = urlparse(h).path if h.startswith("http") else h
+    return path.startswith("/pala-") or "/pala-" in path or path.startswith("/pala/")
+
+
 def scrape_catalog_page(session: requests.Session, page_number: int) -> List[str]:
     url = catalog_page_url(page_number)
     logging.info(f"Scrape catálogo página {page_number}: {url}")
@@ -256,15 +280,14 @@ def scrape_catalog_page(session: requests.Session, page_number: int) -> List[str
 
     product_links: List[str] = []
 
-    # Intento 1: tarjetas de producto comunes
+    # Intento 1: tarjetas de producto comunes (filtro amplio para máxima cobertura)
     for a in soup.select("a[href]"):
         href = a.get("href", "").strip()
         if not href:
             continue
-        # Filtrar enlaces que parecen productos de palas
-        # Heurísticas: contienen '/pala' o '/palas-' o slug con REF/EAN
+        # Heurísticas amplias: enlaces que parecen detalle de palas/productos
         if "/pala" in href or "/palas" in href or "/producto" in href:
-            # Normalizar absoluta
+            # Normalizar a absoluta
             if href.startswith("http"):
                 product_links.append(href)
             else:
