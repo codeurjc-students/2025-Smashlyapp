@@ -24,6 +24,14 @@ export interface RacketSpecifications {
   [key: string]: any;
 }
 
+// Interfaz para specs adicionales
+export interface RacketSpecs {
+  tecnologias?: string[];
+  peso?: string;
+  marco?: string;
+  [key: string]: any;
+}
+
 // Interfaz para la información de precios por tienda
 export interface StorePrice {
   precio_actual?: number | null;
@@ -64,7 +72,10 @@ export interface Racket {
   
   // Especificaciones en formato JSONB
   especificaciones?: RacketSpecifications;
-  
+
+  // Specs adicionales (tecnologías, etc.)
+  specs?: RacketSpecs;
+
   // Precios por tienda
   padelnuestro_precio_actual?: number | null;
   padelnuestro_precio_original?: number | null;

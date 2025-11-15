@@ -182,6 +182,18 @@ def normalize_name(name: Optional[str]) -> Optional[str]:
     n = re.sub(r'\s+', ' ', n)
     return n.lower()
 
+def clean_name_and_model(name: Optional[str]) -> Optional[str]:
+    """
+    Limpia el nombre/modelo eliminando el prefijo 'Pala' del principio.
+    """
+    if not name:
+        return None
+    # Eliminar "Pala " del principio del string
+    cleaned = re.sub(r'^\s*Pala\s+', '', name.strip(), flags=re.IGNORECASE)
+    # Normalizar espacios
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    return cleaned.strip()
+
 
 def create_comparison_key(name: Optional[str], brand: Optional[str] = None) -> Optional[str]:
     """
@@ -520,10 +532,13 @@ def scrape_product_detail(url: str) -> Dict[str, Any]:
 
     # Características y especificaciones
     characteristics: Dict[str, Any] = {}
-    specs: Dict[str, Any] = {}
+    specs: Dict[str, Any] = {"tecnologias": []}
 
-    # Buscar pares tipo tabla/definición (dt/dd) o filas de tabla
-    for dl in soup.find_all('dl'):
+    # Buscar sección principal del producto
+    product_section = soup.select_one("main, .product, .product-single, #product-content") or soup
+
+    # 1. Buscar pares tipo tabla/definición (dt/dd) o filas de tabla
+    for dl in product_section.find_all('dl'):
         dts = dl.find_all('dt')
         dds = dl.find_all('dd')
         for dt, dd in zip(dts, dds):
@@ -531,7 +546,7 @@ def scrape_product_detail(url: str) -> Dict[str, Any]:
             value = dd.get_text(" ", strip=True)
             _assign_characteristic_or_spec(key, value, characteristics, specs)
 
-    for table in soup.find_all('table'):
+    for table in product_section.find_all('table'):
         for tr in table.find_all('tr'):
             tds = tr.find_all(['td', 'th'])
             if len(tds) >= 2:
@@ -539,30 +554,96 @@ def scrape_product_detail(url: str) -> Dict[str, Any]:
                 value = tds[1].get_text(" ", strip=True)
                 _assign_characteristic_or_spec(key, value, characteristics, specs)
 
-    # También listas con posibles características
-    for ul in soup.find_all('ul'):
+    # 2. Listas con posibles características (solo en secciones del producto)
+    specs_sections = product_section.select(
+        ".product__description ul, .product-specs ul, .specifications ul, "
+        ".product-details ul, .product-info ul, [class*='characteristic'] ul, "
+        "[class*='specification'] ul, [class*='feature'] ul"
+    )
+
+    for ul in specs_sections:
         for li in ul.find_all('li'):
             text = li.get_text(" ", strip=True)
+
+            # Filtrar elementos de navegación
+            if any(nav_keyword in text.lower() for nav_keyword in
+                   ["ver todo", "todas las", "marcas", "género", "juega como",
+                    "black friday", "€", "precio", "pack", "cookies", "política",
+                    "palas", "zapatillas", "ropa", "bolsas", "bestseller"]):
+                continue
+
             # Intentar patrones como "Forma: Diamante"
             m = re.match(r"^([A-Za-zÁÉÍÓÚÑáéíóúñ ]{3,}):\s*(.+)$", text)
             if m:
                 key, value = m.group(1).strip(), m.group(2).strip()
                 _assign_characteristic_or_spec(key, value, characteristics, specs)
             else:
-                # Si no, acumular como posibles tecnologías en specs
-                if 'tecnologias' not in specs:
-                    specs['tecnologias'] = []
-                if text and text not in specs['tecnologias']:
-                    specs['tecnologias'].append(text)
+                # Tecnologías: verificar que sean razonables
+                if text and len(text) < 100 and len(text) > 3:
+                    if any(keyword in text.lower() for keyword in
+                           ["eva", "carbon", "fibra", "spin", "structure", "system",
+                            "grip", "reinforce", "smart", "rugos", "alum", "vibra",
+                            "shock", "power", "control", "air", "foam", "frame", "tech",
+                            "composite", "hybrid", "dynamic", "pulse"]):
+                        if text not in specs['tecnologias']:
+                            specs['tecnologias'].append(text)
 
-    # Normalizar el nombre (mantener capitalización original, solo limpiar)
-    normalized_name = name.strip() if name else None
+    # 3. Extraer características desde la descripción usando patrones
+    try:
+        if description:
+            desc_text = description
+
+            # Patrones para extraer características comunes
+            patterns = {
+                "forma": r"forma\s+(?:de\s+)?([a-záéíóúñ]+)",
+                "balance": r"balance\s+([a-záéíóúñ]+)",
+                "núcleo": r"n[uú]cleo\s+(?:de\s+)?([a-z\s]+?)(?:\.|,|que|con|y)",
+                "peso": r"peso\s+(?:de\s+)?(\d+[-–]\d+\s*g(?:r)?|\d+\s*g(?:r)?)",
+                "dureza": r"dureza\s+([a-záéíóúñ\s]+?)(?:\.|,|que|con|y)",
+                "nivel": r"nivel\s+([a-záéíóúñ\s/]+?)(?:\.|,|para|que|con)",
+            }
+
+            for key, pattern in patterns.items():
+                match = re.search(pattern, desc_text.lower())
+                if match:
+                    value = match.group(1).strip()
+                    if len(value) < 50:  # Evitar extracciones demasiado largas
+                        _assign_characteristic_or_spec(key, value.title(), characteristics, specs)
+    except Exception:
+        pass
+
+    # 4. Buscar tecnologías en texto usando mayúsculas y patrones
+    try:
+        full_text = product_section.get_text()
+        # Buscar palabras en mayúsculas que parezcan nombres de tecnologías
+        tech_pattern = r'\b([A-Z][a-z]*\s*[A-Z][A-Za-z]*(?:\s+[A-Z0-9][A-Za-z0-9]*)*)\b'
+        potential_techs = re.findall(tech_pattern, full_text)
+
+        for tech in potential_techs:
+            if 5 < len(tech) < 60:  # Longitud razonable
+                if any(keyword in tech.lower() for keyword in
+                       ["system", "tech", "frame", "eva", "carbon", "grip",
+                        "structure", "composite", "core", "smart", "power"]):
+                    if tech not in specs['tecnologias']:
+                        specs['tecnologias'].append(tech.strip())
+    except Exception:
+        pass
+
+    # Limitar tecnologías a las 20 más relevantes
+    if specs.get('tecnologias'):
+        specs['tecnologias'] = specs['tecnologias'][:20]
+
+    # Limpiar el nombre eliminando el prefijo "Pala" si existe
+    cleaned_name = clean_name_and_model(name) if name else None
+
+    # Limpiar también el modelo
+    cleaned_model = clean_name_and_model(model) if model else None
 
     # Completar los campos del resultado
     result: Dict[str, Any] = {
-        'name': normalized_name,
+        'name': cleaned_name,
         'brand': brand,
-        'model': model,
+        'model': cleaned_model,
         'image': image_url,
         'on_offer': on_offer,
         'description': description,
@@ -580,17 +661,144 @@ def scrape_product_detail(url: str) -> Dict[str, Any]:
 
 
 def _assign_characteristic_or_spec(key: str, value: str, characteristics: Dict[str, Any], specs: Dict[str, Any]) -> None:
-    key_clean = key.strip()
-    mapped = CHARACTERISTICS_MAPPING.get(key_clean)
-    if mapped:
-        characteristics[mapped] = value
+    """
+    Mapea una característica extraída a su campo correspondiente.
+    Versión mejorada con mapeo ampliado en español e inglés.
+    """
+    h = key.strip().lower()
+    v = value.strip() if value else None
+
+    if not v:
+        return
+
+    # Mapeo ampliado de etiquetas comunes en español e inglés
+    mapping = {
+        # Marca
+        "marca": "characteristics_brand",
+        "brand": "characteristics_brand",
+
+        # Color
+        "color": "characteristics_color",
+        "colores": "characteristics_color_2",
+        "color 2": "characteristics_color_2",
+        "colors": "characteristics_color_2",
+
+        # Producto
+        "producto": "characteristics_product",
+        "product": "characteristics_product",
+
+        # Balance
+        "balance": "characteristics_balance",
+        "punto de balance": "characteristics_balance",
+
+        # Núcleo
+        "núcleo": "characteristics_core",
+        "nucleo": "characteristics_core",
+        "core": "characteristics_core",
+        "goma": "characteristics_core",
+        "espuma": "characteristics_core",
+        "foam": "characteristics_core",
+
+        # Cara/Plano
+        "cara": "characteristics_face",
+        "caras": "characteristics_face",
+        "plano": "characteristics_face",
+        "planos": "characteristics_face",
+        "material": "characteristics_face",
+        "material cara": "characteristics_face",
+        "material de cara": "characteristics_face",
+        "surface material": "characteristics_face",
+        "fibra": "characteristics_face",
+
+        # Formato
+        "formato": "characteristics_format",
+        "format": "characteristics_format",
+
+        # Dureza
+        "dureza": "characteristics_hardness",
+        "hardness": "characteristics_hardness",
+
+        # Nivel de juego
+        "nivel": "characteristics_game_level",
+        "nivel de juego": "characteristics_game_level",
+        "nivel del jugador": "characteristics_game_level",
+        "player level": "characteristics_game_level",
+
+        # Acabado
+        "acabado": "characteristics_finish",
+        "finish": "characteristics_finish",
+        "textura": "characteristics_finish",
+
+        # Forma
+        "forma": "characteristics_shape",
+        "shape": "characteristics_shape",
+        "molde": "characteristics_shape",
+
+        # Superficie
+        "superficie": "characteristics_surface",
+        "surface": "characteristics_surface",
+        "rugosidad": "characteristics_surface",
+
+        # Tipo de juego
+        "tipo de juego": "characteristics_game_type",
+        "game type": "characteristics_game_type",
+        "estilo": "characteristics_game_type",
+
+        # Colección/Jugador
+        "colección": "characteristics_player_collection",
+        "colección jugadores": "characteristics_player_collection",
+        "collection": "characteristics_player_collection",
+        "jugador": "characteristics_player",
+        "player": "characteristics_player",
+        "género": "characteristics_player",
+
+        # Especificaciones (specs)
+        "peso": ("specs", "peso"),
+        "weight": ("specs", "peso"),
+        "marco": ("specs", "marco"),
+        "frame": ("specs", "marco"),
+        "perfil": ("specs", "marco"),
+        "tecnologías": ("specs", "tecnologias"),
+        "tecnologias": ("specs", "tecnologias"),
+        "technologies": ("specs", "tecnologias"),
+        "technology": ("specs", "tecnologias"),
+    }
+
+    mapped_field = None
+    # Encontrar mejor coincidencia por prefix o match exacto
+    for k in mapping.keys():
+        if h == k or h.startswith(k):
+            mapped_field = mapping[k]
+            break
+
+    if mapped_field:
+        if isinstance(mapped_field, tuple):
+            # Es una spec
+            spec_key = mapped_field[1]
+            if spec_key == "tecnologias":
+                # Separar por coma, punto y coma o slash
+                vals = [x.strip() for x in re.split(r",|;|/|\|", v) if x.strip()]
+                if "tecnologias" not in specs:
+                    specs["tecnologias"] = []
+                specs["tecnologias"].extend(vals)
+            else:
+                specs[spec_key] = v
+        else:
+            # Es una característica
+            characteristics[mapped_field] = v
     else:
-        # Guardar en specs si no está mapeado
-        specs[key_clean] = value
+        # No mapeado: guardar en specs con la clave original
+        if h not in ["tecnologías", "tecnologias", "technology", "technologies"]:
+            specs[key.strip()] = v
 
 
 def scroll_and_collect_links(driver: webdriver.Chrome) -> List[str]:
+    """
+    Hace scroll infinito en la página de colección para cargar todos los productos.
+    Termina cuando no se cargan más productos después de varios intentos.
+    """
     logging.info("Iniciando scroll infinito para recolectar URLs de producto")
+    print(f"Cargando página: {COLLECTION_URL}")
     driver.get(COLLECTION_URL)
 
     # Esperar que cargue el grid de productos
@@ -598,37 +806,72 @@ def scroll_and_collect_links(driver: webdriver.Chrome) -> List[str]:
         WebDriverWait(driver, 20).until(
             EC.presence_of_element_located((By.CSS_SELECTOR, 'a[href*="/products/"]'))
         )
+        logging.info("Grid de productos cargado correctamente")
     except TimeoutException:
         logging.error("Timeout esperando el grid de productos")
+        print("❌ Error: No se pudieron cargar los productos")
         return []
 
     last_height = driver.execute_script("return document.body.scrollHeight")
+    last_product_count = 0
     stable_iterations = 0
-    max_stable = 5  # parar tras varias iteraciones sin aumentar
+    max_stable = 5  # parar tras 5 iteraciones sin aumentar
+    scroll_count = 0
+
+    print("Haciendo scroll para cargar todos los productos...")
 
     while True:
+        # Hacer scroll hasta el final
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(SCROLL_DELAY_SECONDS)
+
+        scroll_count += 1
         new_height = driver.execute_script("return document.body.scrollHeight")
-        if new_height == last_height:
-            stable_iterations += 1
-            logging.debug(f"Scroll estable {stable_iterations}/{max_stable}")
-            if stable_iterations >= max_stable:
-                break
-        else:
+
+        # Contar productos actuales
+        current_products = driver.find_elements(By.CSS_SELECTOR, 'a[href*="/products/"]')
+        current_product_count = len(current_products)
+
+        # Verificar si hay cambios en altura o en número de productos
+        height_changed = new_height != last_height
+        products_changed = current_product_count != last_product_count
+
+        if height_changed or products_changed:
+            # Hubo cambios, resetear contador
             stable_iterations = 0
             last_height = new_height
+            last_product_count = current_product_count
+            logging.debug(f"Scroll #{scroll_count}: {current_product_count} productos encontrados")
+            print(f"  Productos encontrados: {current_product_count}", end='\r')
+        else:
+            # No hubo cambios
+            stable_iterations += 1
+            logging.debug(f"Scroll estable {stable_iterations}/{max_stable} (productos: {current_product_count})")
 
-    # Recoger enlaces de producto
+            if stable_iterations >= max_stable:
+                logging.info(f"Scroll finalizado tras {stable_iterations} iteraciones estables")
+                print(f"\n✓ Scroll completado: {current_product_count} productos encontrados")
+                break
+
+    # Recoger enlaces de producto únicos
     anchors = driver.find_elements(By.CSS_SELECTOR, 'a[href*="/products/"]')
     urls = set()
     for a in anchors:
         href = a.get_attribute('href')
         if href and href.startswith(BASE_URL) and "/products/" in href:
-            urls.add(href.split('?')[0])  # normalizar sin queries
+            # Normalizar URL: eliminar query params y fragmentos
+            clean_url = href.split('?')[0].split('#')[0]
+            urls.add(clean_url)
 
     urls_list = sorted(urls)
-    logging.info(f"Recolectadas {len(urls_list)} URLs de producto")
+    logging.info(f"Recolectadas {len(urls_list)} URLs únicas de producto")
+
+    if len(urls_list) == 0:
+        logging.warning("⚠️ No se encontraron URLs de productos")
+        print("⚠️ Advertencia: No se encontraron productos para scrapear")
+    else:
+        print(f"✓ Total de URLs únicas recolectadas: {len(urls_list)}")
+
     return urls_list
 
 
@@ -763,9 +1006,10 @@ def main():
     logging.info("Inicio del scrapper PadelProShop")
 
     data = load_json(OUTPUT_FILE)
-    print(f"Cargadas {len(data)} palas existentes del JSON")
+    print(f"✓ Cargadas {len(data)} palas existentes del JSON\n")
 
     # Configurar Selenium (Chrome)
+    print("Configurando navegador headless...")
     chrome_options = ChromeOptions()
     chrome_options.add_argument('--headless=new')
     chrome_options.add_argument('--disable-gpu')
@@ -775,68 +1019,112 @@ def main():
     driver = webdriver.Chrome(options=chrome_options)
 
     try:
+        # Recolectar URLs de productos
         product_urls = scroll_and_collect_links(driver)
+
+        # Verificar si se encontraron URLs
+        if not product_urls or len(product_urls) == 0:
+            print("\n" + "="*60)
+            print("⚠️ No se encontraron productos para procesar")
+            print("="*60)
+            logging.warning("No se encontraron URLs de productos. Finalizando.")
+            return
+
         logging.info(f"Total de URLs a procesar: {len(product_urls)}")
+        print(f"\nIniciando scraping de {len(product_urls)} productos...\n")
+
+        productos_actualizados = 0
+        productos_nuevos = 0
+        productos_fallidos = 0
 
         for idx, url in enumerate(product_urls, start=1):
             logging.debug(f"Procesando {idx}/{len(product_urls)}: {url}")
-            print(f"Scrape detalle: {url}")
+            print(f"\n[{idx}/{len(product_urls)}] Procesando: {url}")
 
-            scraped = scrape_product_detail(url)
-            if not scraped or not scraped.get('name'):
-                logging.warning(f"No se pudo extraer información de {url}")
+            try:
+                scraped = scrape_product_detail(url)
+                if not scraped or not scraped.get('name'):
+                    logging.warning(f"No se pudo extraer información de {url}")
+                    print("  ❌ Error: No se pudo extraer información del producto")
+                    productos_fallidos += 1
+                    continue
+
+                name = scraped.get('name')
+                brand = scraped.get('brand')
+                print(f"  📦 Producto: {name}")
+
+                # Buscar pala existente usando el algoritmo mejorado
+                match_idx = find_existing_index_by_name(data, name, brand)
+
+                if match_idx is not None:
+                    # Actualizar solo campos de PadelProShop
+                    entry = data[match_idx]
+                    entry['padelproshop_actual_price'] = scraped.get('padelproshop_actual_price')
+                    entry['padelproshop_original_price'] = scraped.get('padelproshop_original_price')
+                    entry['padelproshop_discount_percentage'] = scraped.get('padelproshop_discount_percentage')
+                    entry['padelproshop_link'] = scraped.get('padelproshop_link')
+
+                    # Actualizar imagen solo si no existe
+                    if not entry.get('image') and scraped.get('image'):
+                        entry['image'] = scraped.get('image')
+
+                    # Actualizar on_offer basado en todas las tiendas
+                    pn_discount = entry.get('padelnuestro_discount_percentage')
+                    pm_discount = entry.get('padelmarket_discount_percentage')
+                    pp_discount = entry.get('padelproshop_discount_percentage')
+                    has_offer = (pn_discount and pn_discount > 0) or (pm_discount and pm_discount > 0) or (pp_discount and pp_discount > 0)
+                    entry['on_offer'] = bool(has_offer)
+
+                    print(f"  ✓ Actualizado (precio: {scraped.get('padelproshop_actual_price')}€)")
+                    logging.info(f"[OK] Actualizado (PadelProShop): {entry['name']}")
+                    productos_actualizados += 1
+                else:
+                    # Crear nueva entrada completa
+                    logging.info(f"Creada nueva entrada: {name}")
+                    print(f"  ➕ Nueva pala agregada")
+                    new_entry = _create_new_entry_from_scraped(scraped)
+                    data.append(new_entry)
+                    productos_nuevos += 1
+
+                # Guardado incremental para no perder progreso
+                save_json(OUTPUT_FILE, data)
+
+                # Pequeño delay entre peticiones para cortesía
+                time.sleep(0.2)
+
+            except Exception as e:
+                logging.error(f"Error procesando {url}: {e}")
+                print(f"  ❌ Error inesperado: {e}")
+                productos_fallidos += 1
                 continue
-
-            name = scraped.get('name')
-            brand = scraped.get('brand')
-
-            # Buscar pala existente usando el algoritmo mejorado
-            match_idx = find_existing_index_by_name(data, name, brand)
-
-            if match_idx is not None:
-                # Actualizar solo campos de PadelProShop
-                entry = data[match_idx]
-                entry['padelproshop_actual_price'] = scraped.get('padelproshop_actual_price')
-                entry['padelproshop_original_price'] = scraped.get('padelproshop_original_price')
-                entry['padelproshop_discount_percentage'] = scraped.get('padelproshop_discount_percentage')
-                entry['padelproshop_link'] = scraped.get('padelproshop_link')
-
-                # Actualizar imagen solo si no existe
-                if not entry.get('image') and scraped.get('image'):
-                    entry['image'] = scraped.get('image')
-
-                # Actualizar on_offer basado en todas las tiendas
-                pn_discount = entry.get('padelnuestro_discount_percentage')
-                pm_discount = entry.get('padelmarket_discount_percentage')
-                pp_discount = entry.get('padelproshop_discount_percentage')
-                has_offer = (pn_discount and pn_discount > 0) or (pm_discount and pm_discount > 0) or (pp_discount and pp_discount > 0)
-                entry['on_offer'] = bool(has_offer)
-
-                print(f"[OK] Actualizado (PadelProShop): {entry['name']}")
-                logging.info(f"[OK] Actualizado (PadelProShop): {entry['name']}")
-            else:
-                # Crear nueva entrada completa
-                logging.info(f"Creada nueva entrada: {name}")
-                print(f"Creada nueva entrada: {name}")
-                new_entry = _create_new_entry_from_scraped(scraped)
-                data.append(new_entry)
-
-            # Guardado incremental para no perder progreso
-            save_json(OUTPUT_FILE, data)
-            print(f"Guardado {len(data)} palas en {OUTPUT_FILE}")
-
-            # Pequeño delay entre peticiones para cortesía
-            time.sleep(0.2)
 
         # Guardar JSON final
         save_json(OUTPUT_FILE, data)
-        logging.info("Scrapper PadelProShop finalizado")
+
+        # Resumen final
+        print("\n" + "="*60)
+        print("🎉 Scrapping PadelProShop FINALIZADO")
+        print("="*60)
+        print(f"Total productos procesados:  {len(product_urls)}")
+        print(f"  ✓ Actualizados:            {productos_actualizados}")
+        print(f"  ➕ Nuevos:                 {productos_nuevos}")
+        print(f"  ❌ Fallidos:               {productos_fallidos}")
+        print(f"Total palas en JSON:         {len(data)}")
+        print(f"Archivo guardado:            {OUTPUT_FILE}")
+        print("="*60)
+        logging.info("Scrapper PadelProShop finalizado exitosamente")
+
+    except Exception as e:
+        print(f"\n❌ Error fatal durante el scraping: {e}")
+        logging.error(f"Error fatal durante el scraping: {e}")
+        raise
 
     finally:
         try:
             driver.quit()
-        except Exception:
-            pass
+            logging.info("Navegador cerrado")
+        except Exception as e:
+            logging.debug(f"Error cerrando navegador: {e}")
 
 
 if __name__ == "__main__":

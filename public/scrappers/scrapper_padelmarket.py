@@ -81,11 +81,23 @@ def normalize_name(name: Optional[str]) -> Optional[str]:
     if not name:
         return None
     n = name.strip()
-    # Quitar sufijo (Pala)
-    n = re.sub(r"\s*\(Pala\)\s*$", "", n, flags=re.IGNORECASE)
+    # Quitar sufijo (Pala) - mejorado para capturar más variantes
+    n = re.sub(r"\s*[\(\[]Pala[\)\]]\s*$", "", n, flags=re.IGNORECASE)
     # Normalizar espacios múltiples
     n = re.sub(r"\s+", " ", n)
     return n.lower()
+
+def clean_name_and_model(name: Optional[str]) -> Optional[str]:
+    """
+    Limpia el nombre/modelo eliminando el sufijo '(Pala)' con paréntesis.
+    """
+    if not name:
+        return None
+    # Eliminar " (Pala)" del final del string
+    cleaned = re.sub(r"\s*[\(\[]Pala[\)\]]\s*$", "", name.strip(), flags=re.IGNORECASE)
+    # Normalizar espacios
+    cleaned = re.sub(r"\s+", " ", cleaned)
+    return cleaned.strip()
 
 
 def create_comparison_key(name: Optional[str], brand: Optional[str] = None) -> Optional[str]:
@@ -473,9 +485,15 @@ def extract_features(soup: BeautifulSoup) -> Dict[str, Any]:
         },
     }
 
-    # Buscar tablas de características (th/td o dt/dd)
+    # Buscar sección de características del producto (no menús de navegación)
+    # Primero intentar encontrar el contenedor principal del producto
+    product_section = soup.select_one("main, .product, .product-single, #product-content")
+    if not product_section:
+        product_section = soup
+
+    # 1. Buscar tablas de características (th/td o dt/dd)
     try:
-        tables = soup.select("table, .product__specs table, .product-specs table")
+        tables = product_section.select("table.product__specs, table.product-specs, .product-details table, .specifications table")
         for table in tables:
             for row in table.select("tr"):
                 header = extract_text(row.find("th")) or extract_text(row.find("td"))
@@ -491,36 +509,131 @@ def extract_features(soup: BeautifulSoup) -> Dict[str, Any]:
     except Exception:
         pass
 
-    # Listas con pares "Clave: Valor" en bullet points
+    # 2. Buscar listas de definición (dl/dt/dd)
     try:
-        for li in soup.select("ul li"):
-            txt = extract_text(li)
-            if txt and ":" in txt:
-                parts = [p.strip() for p in txt.split(":", 1)]
-                if len(parts) == 2:
-                    map_feature(features, parts[0], parts[1])
+        definition_lists = product_section.select("dl.product-specs, dl.specifications, dl[class*='characteristic']")
+        for dl in definition_lists:
+            terms = dl.select("dt")
+            descriptions = dl.select("dd")
+            for dt, dd in zip(terms, descriptions):
+                header = extract_text(dt)
+                value = extract_text(dd)
+                if header and value:
+                    map_feature(features, header, value)
     except Exception:
         pass
 
-    # Tecnologías: buscar palabras tipo tecnologías en listas
+    # 3. Listas con pares "Clave: Valor" en bullet points
+    try:
+        specs_sections = product_section.select(
+            ".product__description ul, .product-specs ul, .specifications ul, "
+            ".product-details ul, .product-info ul, [class*='characteristic'] ul, "
+            "[class*='specification'] ul, [class*='feature'] ul"
+        )
+
+        for ul in specs_sections:
+            for li in ul.select("li"):
+                txt = extract_text(li)
+                if txt and ":" in txt:
+                    # Filtrar elementos de navegación
+                    if any(nav_keyword in txt.lower() for nav_keyword in
+                           ["ver todo", "todas las", "marcas", "género", "juega como",
+                            "black friday", "€", "precio", "pack", "cookies", "política"]):
+                        continue
+
+                    parts = [p.strip() for p in txt.split(":", 1)]
+                    if len(parts) == 2:
+                        map_feature(features, parts[0], parts[1])
+    except Exception:
+        pass
+
+    # 4. Extraer características desde la descripción usando patrones
+    try:
+        description = product_section.select_one(".product__description, .product-description, [class*='description']")
+        if description:
+            desc_text = description.get_text()
+
+            # Patrones para extraer características comunes
+            patterns = {
+                "forma": r"forma\s+(?:de\s+)?([a-záéíóúñ]+)",
+                "balance": r"balance\s+([a-záéíóúñ]+)",
+                "núcleo": r"n[uú]cleo\s+(?:de\s+)?([a-z\s]+?)(?:\.|,|que|con|y)",
+                "peso": r"peso\s+(?:de\s+)?(\d+[-–]\d+\s*g(?:r)?|\d+\s*g(?:r)?)",
+                "dureza": r"dureza\s+([a-záéíóúñ\s]+?)(?:\.|,|que|con|y)",
+                "nivel": r"nivel\s+([a-záéíóúñ\s/]+?)(?:\.|,|para|que|con)",
+            }
+
+            for key, pattern in patterns.items():
+                match = re.search(pattern, desc_text.lower())
+                if match:
+                    value = match.group(1).strip()
+                    if len(value) < 50:  # Evitar extracciones demasiado largas
+                        map_feature(features, key, value.title())
+    except Exception:
+        pass
+
+    # 5. Tecnologías: buscar en secciones específicas y descripción
     try:
         tecnologias = []
-        for li in soup.select("ul li"):
-            t = extract_text(li)
-            if not t:
-                continue
-            # Heurística básica: entradas que parecen tecnología
-            if any(keyword in t.lower() for keyword in ["eva", "carbon", "spin", "structure", "system", "grip", "reinforce", "smart", "rugos", "alum", "k"]):
-                tecnologias.append(t)
+
+        # Buscar secciones específicas de tecnología
+        tech_sections = product_section.select(
+            ".product-tech ul, .technologies ul, .tecnologias ul, "
+            "[class*='technology'] ul, [class*='tecnologia'] ul, "
+            "[class*='features'] ul"
+        )
+
+        for ul in tech_sections:
+            for li in ul.select("li"):
+                t = extract_text(li)
+                if not t:
+                    continue
+
+                # Filtrar elementos de navegación y menús
+                if len(t) > 200:  # Demasiado largo para ser una tecnología
+                    continue
+                if any(nav_keyword in t.lower() for nav_keyword in
+                       ["ver todo", "todas las", "marcas", "género", "juega como",
+                        "palas", "zapatillas", "ropa", "bolsas", "packs", "pelota",
+                        "black friday", "precio", "cookies", "política", "facebook",
+                        "tiktok", "linkedin", "bestseller"]):
+                    continue
+
+                # Heurística mejorada: entradas que parecen tecnología
+                if any(keyword in t.lower() for keyword in
+                       ["eva", "carbon", "fibra", "spin", "structure", "system",
+                        "grip", "reinforce", "smart", "rugos", "alum", "vibra",
+                        "shock", "power", "control", "air", "foam", "frame", "tech",
+                        "composite", "hybrid", "dynamic", "pulse"]):
+                    if len(t) < 100:  # Longitud razonable para una tecnología
+                        tecnologias.append(t)
+
+        # Buscar tecnologías en texto usando mayúsculas y patrones
+        try:
+            full_text = product_section.get_text()
+            # Buscar palabras en mayúsculas que parezcan nombres de tecnologías
+            tech_pattern = r'\b([A-Z][a-z]*\s*[A-Z][A-Za-z]*(?:\s+[A-Z0-9][A-Za-z0-9]*)*)\b'
+            potential_techs = re.findall(tech_pattern, full_text)
+
+            for tech in potential_techs:
+                if len(tech) > 5 and len(tech) < 60:  # Longitud razonable
+                    if any(keyword in tech.lower() for keyword in
+                           ["system", "tech", "frame", "eva", "carbon", "grip",
+                            "structure", "composite", "core", "smart", "power"]):
+                        tecnologias.append(tech.strip())
+        except Exception:
+            pass
+
         if tecnologias:
-            # mantener únicas y con orden
+            # Mantener únicas y con orden
             seen_t = set()
             uniq_t = []
             for t in tecnologias:
-                if t not in seen_t:
-                    uniq_t.append(t)
-                    seen_t.add(t)
-            features["specs"]["tecnologias"] = uniq_t
+                normalized = t.strip()
+                if normalized and normalized.lower() not in seen_t and len(normalized) > 3:
+                    uniq_t.append(normalized)
+                    seen_t.add(normalized.lower())
+            features["specs"]["tecnologias"] = uniq_t[:20]  # Limitar a 20 tecnologías
     except Exception:
         pass
 
@@ -528,40 +641,108 @@ def extract_features(soup: BeautifulSoup) -> Dict[str, Any]:
 
 
 def map_feature(features: Dict[str, Any], header: str, value: str) -> None:
+    """
+    Mapea una característica extraída a su campo correspondiente en el diccionario de features.
+    """
     h = header.strip().lower()
     v = value.strip() if value is not None else None
-    # Mapeo básico de etiquetas comunes en español
+
+    if not v:
+        return
+
+    # Mapeo ampliado de etiquetas comunes en español e inglés
     mapping = {
+        # Marca
         "marca": "characteristics_brand",
+        "brand": "characteristics_brand",
+
+        # Color
         "color": "characteristics_color",
         "colores": "characteristics_color_2",
+        "colors": "characteristics_color_2",
+
+        # Balance
         "balance": "characteristics_balance",
+        "punto de balance": "characteristics_balance",
+
+        # Núcleo
         "núcleo": "characteristics_core",
         "nucleo": "characteristics_core",
+        "core": "characteristics_core",
+        "goma": "characteristics_core",
+        "espuma": "characteristics_core",
+        "foam": "characteristics_core",
+
+        # Cara/Plano
         "cara": "characteristics_face",
+        "caras": "characteristics_face",
         "plano": "characteristics_face",
+        "planos": "characteristics_face",
         "material cara": "characteristics_face",
+        "material de cara": "characteristics_face",
+        "surface material": "characteristics_face",
+        "fibra": "characteristics_face",
+
+        # Formato
         "formato": "characteristics_format",
+        "format": "characteristics_format",
+
+        # Dureza
         "dureza": "characteristics_hardness",
+        "hardness": "characteristics_hardness",
+
+        # Nivel de juego
+        "nivel": "characteristics_game_level",
         "nivel de juego": "characteristics_game_level",
+        "nivel del jugador": "characteristics_game_level",
+        "player level": "characteristics_game_level",
+
+        # Acabado
         "acabado": "characteristics_finish",
+        "finish": "characteristics_finish",
+        "textura": "characteristics_finish",
+
+        # Forma
         "forma": "characteristics_shape",
+        "shape": "characteristics_shape",
+        "molde": "characteristics_shape",
+
+        # Superficie
         "superficie": "characteristics_surface",
+        "surface": "characteristics_surface",
+        "rugosidad": "characteristics_surface",
+
+        # Tipo de juego
         "tipo de juego": "characteristics_game_type",
+        "game type": "characteristics_game_type",
+        "estilo": "characteristics_game_type",
+
+        # Colección/Jugador
         "colección": "characteristics_player_collection",
+        "collection": "characteristics_player_collection",
         "jugador": "characteristics_player",
+        "player": "characteristics_player",
+        "género": "characteristics_player",
+
+        # Especificaciones (specs)
         "peso": ("specs", "peso"),
+        "weight": ("specs", "peso"),
         "marco": ("specs", "marco"),
+        "frame": ("specs", "marco"),
+        "perfil": ("specs", "marco"),
         "tecnologías": ("specs", "tecnologias"),
         "tecnologias": ("specs", "tecnologias"),
+        "technologies": ("specs", "tecnologias"),
+        "technology": ("specs", "tecnologias"),
     }
 
     key = None
-    # Encontrar mejor coincidencia por prefix
+    # Encontrar mejor coincidencia por prefix o match exacto
     for k in mapping.keys():
-        if h.startswith(k):
+        if h == k or h.startswith(k):
             key = mapping[k]
             break
+
     if not key:
         return
 
@@ -569,8 +750,8 @@ def map_feature(features: Dict[str, Any], header: str, value: str) -> None:
         # specs
         spec_key = key[1]
         if spec_key == "tecnologias":
-            # separar por coma si aplica
-            vals = [x.strip() for x in re.split(r",|;|/", v) if x.strip()]
+            # separar por coma, punto y coma o slash
+            vals = [x.strip() for x in re.split(r",|;|/|\|", v) if x.strip()]
             features["specs"][spec_key] = vals
         else:
             features["specs"][spec_key] = v
@@ -601,6 +782,9 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
     if not name:
         logging.error(f"Nombre no encontrado en {url}; se omite el producto")
         return None
+
+    # Limpiar el nombre eliminando el sufijo "(Pala)" si existe
+    name = clean_name_and_model(name) or name
 
     # Precios
     current_price = None
@@ -675,19 +859,84 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
 
     # Imagen principal
     image_url = None
-    for sel in [
-        "img.product__media",  # tema moderno
-        "img.product-featured-media",
-        "img#FeaturedImage-product-template",
-        "img[src*='cdn.shopify.com']",
-        "img",
-    ]:
-        img = soup.select_one(sel)
-        if img and (img.get("src") or img.get("data-src") or img.get("data-image")):
-            image_url = img.get("src") or img.get("data-src") or img.get("data-image")
-            break
+
+    # Lista de imágenes placeholder/genéricas a evitar
+    placeholder_patterns = [
+        "Palas2.jpg",
+        "placeholder",
+        "default",
+        "no-image",
+        "coming-soon",
+    ]
+
+    def is_placeholder_image(url: Optional[str]) -> bool:
+        """Verifica si una URL es una imagen placeholder/genérica"""
+        if not url:
+            return True
+        url_lower = url.lower()
+        return any(pattern.lower() in url_lower for pattern in placeholder_patterns)
+
+    # Método 1: Buscar en la galería de medios del producto
+    media_images = soup.select("div.product__media img, div.product-media img, div.product__media-item img")
+    for img in media_images:
+        potential_url = img.get("src") or img.get("data-src") or img.get("data-image") or img.get("srcset")
+        if potential_url:
+            # Si es srcset, tomar la primera URL
+            if "srcset" in str(img.get("srcset", "")):
+                srcset = img.get("srcset", "")
+                urls = [u.strip().split()[0] for u in srcset.split(",") if u.strip()]
+                if urls:
+                    potential_url = urls[0]
+
+            if not is_placeholder_image(potential_url):
+                image_url = potential_url
+                break
+
+    # Método 2: Buscar imagen destacada del producto
+    if not image_url or is_placeholder_image(image_url):
+        for sel in [
+            "img.product__media",
+            "img.product-featured-media",
+            "img#FeaturedImage-product-template",
+            "img.product__image",
+            "div.product-single__photo img",
+        ]:
+            img = soup.select_one(sel)
+            if img:
+                potential_url = img.get("src") or img.get("data-src") or img.get("data-image")
+                if potential_url and not is_placeholder_image(potential_url):
+                    image_url = potential_url
+                    break
+
+    # Método 3: Buscar en metadatos Open Graph
+    if not image_url or is_placeholder_image(image_url):
+        og_image = soup.select_one("meta[property='og:image']")
+        if og_image:
+            potential_url = og_image.get("content")
+            if potential_url and not is_placeholder_image(potential_url):
+                image_url = potential_url
+
+    # Método 4: Buscar cualquier imagen del producto en CDN de Shopify (evitando placeholders)
+    if not image_url or is_placeholder_image(image_url):
+        cdn_images = soup.select("img[src*='cdn.shopify.com']")
+        for img in cdn_images:
+            potential_url = img.get("src")
+            if potential_url and not is_placeholder_image(potential_url):
+                # Evitar imágenes muy pequeñas (iconos, thumbnails de navegación)
+                if "_small" not in potential_url.lower() and "_icon" not in potential_url.lower():
+                    image_url = potential_url
+                    break
+
+    # Normalizar URL
     if image_url and image_url.startswith("//"):
         image_url = "https:" + image_url
+
+    # Log si encontramos un placeholder
+    if image_url and is_placeholder_image(image_url):
+        logging.warning(f"⚠️ Imagen placeholder detectada para {url}: {image_url}")
+        # Dejamos la URL como está para que se pueda identificar en el JSON
+    elif not image_url:
+        logging.warning(f"⚠️ No se encontró imagen para {url}")
 
     # Descripción
     description = None
@@ -737,6 +986,9 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
     if not model:
         model = name
 
+    # Limpiar el modelo también
+    model = clean_name_and_model(model) or model
+
     # Características técnicas
     features = extract_features(soup)
 
@@ -776,9 +1028,24 @@ def apply_update_or_create(
         entry["padelmarket_discount_percentage"] = pm_discount
         entry["padelmarket_link"] = pm_link
 
-        # Actualizar imagen solo si no existe
-        if not entry.get("image") and scraped.get("image"):
-            entry["image"] = scraped.get("image")
+        # Actualizar imagen si no existe o si es un placeholder
+        current_image = entry.get("image")
+        new_image = scraped.get("image")
+
+        # Patrones de placeholder
+        placeholder_patterns = ["Palas2.jpg", "placeholder", "default", "no-image", "coming-soon"]
+
+        def is_placeholder_image_check(url: Optional[str]) -> bool:
+            if not url:
+                return True
+            url_lower = url.lower()
+            return any(pattern.lower() in url_lower for pattern in placeholder_patterns)
+
+        # Actualizar si no hay imagen o si la actual es placeholder y la nueva no lo es
+        if not current_image or (is_placeholder_image_check(current_image) and new_image and not is_placeholder_image_check(new_image)):
+            entry["image"] = new_image
+            if is_placeholder_image_check(current_image) and new_image and not is_placeholder_image_check(new_image):
+                logging.info(f"  → Imagen placeholder reemplazada por imagen real")
 
         # Actualizar on_offer basado en ambas tiendas
         pn_discount = entry.get("padelnuestro_discount_percentage")
@@ -791,14 +1058,8 @@ def apply_update_or_create(
     # Crear nueva entrada con todos los campos
     new_entry = default_racket_structure()
     # Campos generales
-    # Añadir sufijo (Pala) sólo si no existe ya
-    if name:
-        if re.search(r"\(Pala\)\s*$", name, flags=re.IGNORECASE):
-            new_entry["name"] = name
-        else:
-            new_entry["name"] = f"{name} (Pala)"
-    else:
-        new_entry["name"] = None
+    # Ya no añadimos el sufijo (Pala) - usamos el nombre limpio
+    new_entry["name"] = name
     new_entry["brand"] = scraped.get("brand")
     new_entry["model"] = scraped.get("model")
     new_entry["image"] = scraped.get("image")

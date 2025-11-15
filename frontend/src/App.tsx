@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Layout from "./components/layout/Layout";
+import { ScrollToTop } from "./components/common/ScrollToTop";
 import { ComparisonProvider } from "./contexts/ComparisonContext";
 import { RacketsProvider } from "./contexts/RacketsContext";
 import { ListsProvider } from "./contexts/ListsContext";
@@ -20,6 +21,7 @@ function App() {
       <RacketsProvider>
         <ComparisonProvider>
           <ListsProvider>
+            <ScrollToTop />
             <Layout>
               <Routes>
                 {/* Página principal */}

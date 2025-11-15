@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiEye, FiEyeOff, FiLock, FiMail, FiUser } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext.tsx';
 
@@ -212,6 +212,7 @@ interface FormErrors {
 const LoginPage: React.FC = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -220,6 +221,9 @@ const LoginPage: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Get redirect path from URL params or default to home
+  const redirectTo = searchParams.get('redirect') || '/';
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -278,8 +282,8 @@ const LoginPage: React.FC = () => {
       // Login exitoso
       toast.success('¡Bienvenido a Smashly!');
 
-      // Redirigir a la página principal
-      navigate('/');
+      // Redirigir a la página anterior o a la página principal
+      navigate(redirectTo);
     } catch (error: any) {
       console.error('Error during login:', error);
       const errorMessage = error?.message || 'Error inesperado durante el inicio de sesión';
@@ -356,7 +360,7 @@ const LoginPage: React.FC = () => {
 
         <RegisterLink>
           <RegisterText>
-            ¿No tienes cuenta? <Link to='/register'>Regístrate gratis</Link>
+            ¿No tienes cuenta? <Link to={`/register?redirect=${encodeURIComponent(redirectTo)}`}>Regístrate gratis</Link>
           </RegisterText>
         </RegisterLink>
       </LoginCard>

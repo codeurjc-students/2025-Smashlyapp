@@ -1,21 +1,14 @@
-import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
-import {
-  FiGrid,
-  FiList,
-  FiSearch,
-  FiStar,
-  FiTag,
-  FiX,
-  FiHeart,
-} from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { useComparison } from "../contexts/ComparisonContext";
-import { useRackets } from "../contexts/RacketsContext";
-import { useAuth } from "../contexts/AuthContext";
-import { Racket } from "../types/racket";
-import { AddToListModal } from "../components/features/AddToListModal";
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { FiGrid, FiList, FiSearch, FiStar, FiTag, FiX, FiHeart } from 'react-icons/fi';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { useComparison } from '../contexts/ComparisonContext';
+import { useRackets } from '../contexts/RacketsContext';
+import { useAuth } from '../contexts/AuthContext';
+import { Racket } from '../types/racket';
+import { AddToListModal } from '../components/features/AddToListModal';
+import { getLowestPrice } from '../utils/priceUtils';
 
 // Styled Components
 const Container = styled.div`
@@ -155,10 +148,10 @@ const FilterButton = styled.button<{ active?: boolean }>`
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1rem;
-  border: 2px solid ${(props) => (props.active ? "#16a34a" : "#e5e7eb")};
+  border: 2px solid ${props => (props.active ? '#16a34a' : '#e5e7eb')};
   border-radius: 12px;
-  background: ${(props) => (props.active ? "#f0f9ff" : "white")};
-  color: ${(props) => (props.active ? "#16a34a" : "#6b7280")};
+  background: ${props => (props.active ? '#f0f9ff' : 'white')};
+  color: ${props => (props.active ? '#16a34a' : '#6b7280')};
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -232,13 +225,13 @@ const ViewButton = styled.button<{ active: boolean }>`
   padding: 0.5rem;
   border: none;
   border-radius: 6px;
-  background: ${(props) => (props.active ? "#16a34a" : "transparent")};
-  color: ${(props) => (props.active ? "white" : "#6b7280")};
+  background: ${props => (props.active ? '#16a34a' : 'transparent')};
+  color: ${props => (props.active ? 'white' : '#6b7280')};
   cursor: pointer;
   transition: all 0.2s ease;
 
   &:hover {
-    color: ${(props) => (props.active ? "white" : "#16a34a")};
+    color: ${props => (props.active ? 'white' : '#16a34a')};
   }
 `;
 
@@ -256,17 +249,17 @@ const SortSelect = styled.select`
   }
 `;
 
-const RacketsGrid = styled.ul<{ view: "grid" | "list" }>`
+const RacketsGrid = styled.ul<{ view: 'grid' | 'list' }>`
   display: grid;
-  grid-template-columns: ${(props) =>
-    props.view === "grid" ? "repeat(auto-fill, minmax(280px, 1fr))" : "1fr"};
-  gap: ${(props) => (props.view === "grid" ? "1.5rem" : "1rem")};
+  grid-template-columns: ${props =>
+    props.view === 'grid' ? 'repeat(auto-fill, minmax(280px, 1fr))' : '1fr'};
+  gap: ${props => (props.view === 'grid' ? '1.5rem' : '1rem')};
   list-style: none;
   padding: 0;
   margin: 0;
 `;
 
-const RacketCard = styled(motion.li)<{ view: "grid" | "list" }>`
+const RacketCard = styled(motion.li)<{ view: 'grid' | 'list' }>`
   background: white;
   border-radius: 16px;
   overflow: hidden;
@@ -275,7 +268,7 @@ const RacketCard = styled(motion.li)<{ view: "grid" | "list" }>`
   transition: all 0.3s ease;
   border: 1px solid rgba(22, 163, 74, 0.1);
 
-  display: ${(props) => (props.view === "list" ? "flex" : "block")};
+  display: ${props => (props.view === 'list' ? 'flex' : 'block')};
 
   &:hover {
     transform: translateY(-4px);
@@ -284,10 +277,10 @@ const RacketCard = styled(motion.li)<{ view: "grid" | "list" }>`
   }
 `;
 
-const RacketImageContainer = styled.div<{ view: "grid" | "list" }>`
+const RacketImageContainer = styled.div<{ view: 'grid' | 'list' }>`
   position: relative;
-  height: ${(props) => (props.view === "grid" ? "220px" : "120px")};
-  width: ${(props) => (props.view === "list" ? "120px" : "100%")};
+  height: ${props => (props.view === 'grid' ? '220px' : '120px')};
+  width: ${props => (props.view === 'list' ? '120px' : '100%')};
   background: white;
   display: flex;
   align-items: center;
@@ -302,13 +295,11 @@ const RacketImage = styled.img`
   object-fit: contain;
 `;
 
-const RacketBadge = styled.div<{ variant: "bestseller" | "offer" }>`
+const RacketBadge = styled.div<{ variant: 'bestseller' | 'offer' }>`
   position: absolute;
   top: 0.75rem;
-  ${(props) =>
-    props.variant === "bestseller" ? "right: 0.75rem;" : "left: 0.75rem;"}
-  background: ${(props) =>
-    props.variant === "bestseller" ? "#f59e0b" : "#ef4444"};
+  ${props => (props.variant === 'bestseller' ? 'right: 0.75rem;' : 'left: 0.75rem;')}
+  background: ${props => (props.variant === 'bestseller' ? '#f59e0b' : '#ef4444')};
   color: white;
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
@@ -320,8 +311,8 @@ const RacketBadge = styled.div<{ variant: "bestseller" | "offer" }>`
   z-index: 2;
 `;
 
-const RacketInfo = styled.div<{ view: "grid" | "list" }>`
-  padding: ${(props) => (props.view === "grid" ? "1.5rem" : "1rem")};
+const RacketInfo = styled.div<{ view: 'grid' | 'list' }>`
+  padding: ${props => (props.view === 'grid' ? '1.5rem' : '1rem')};
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -335,8 +326,8 @@ const RacketBrand = styled.div`
   margin-bottom: 0.25rem;
 `;
 
-const RacketName = styled.h3<{ view: "grid" | "list" }>`
-  font-size: ${(props) => (props.view === "grid" ? "1.125rem" : "1rem")};
+const RacketName = styled.h3<{ view: 'grid' | 'list' }>`
+  font-size: ${props => (props.view === 'grid' ? '1.125rem' : '1rem')};
   font-weight: 600;
   color: #1f2937;
   margin-bottom: 0.75rem;
@@ -347,11 +338,11 @@ const RacketName = styled.h3<{ view: "grid" | "list" }>`
   overflow: hidden;
 `;
 
-const PriceContainer = styled.div<{ view: "grid" | "list" }>`
+const PriceContainer = styled.div<{ view: 'grid' | 'list' }>`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: ${(props) => (props.view === "grid" ? "1rem" : "0.75rem")};
+  margin-bottom: ${props => (props.view === 'grid' ? '1rem' : '0.75rem')};
   flex-wrap: wrap;
 `;
 
@@ -376,10 +367,22 @@ const DiscountBadge = styled.div`
   font-weight: 600;
 `;
 
-const ActionButtons = styled.div<{ view: "grid" | "list" }>`
+const BestPriceBadge = styled.div`
+  background: #16a34a;
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
+const ActionButtons = styled.div<{ view: 'grid' | 'list' }>`
   display: flex;
   gap: 0.5rem;
-  flex-direction: ${(props) => (props.view === "list" ? "row" : "column")};
+  flex-direction: ${props => (props.view === 'list' ? 'row' : 'column')};
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -514,9 +517,19 @@ const CompareButton = styled.button`
   }
 `;
 
+// Helper function to capitalize first letter of each word
+const toTitleCase = (str: string): string => {
+  return str
+    .toLowerCase()
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
 // Component
 const CatalogPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { rackets, loading } = useRackets();
   const { count } = useComparison();
   const { isAuthenticated } = useAuth();
@@ -524,77 +537,95 @@ const CatalogPage: React.FC = () => {
   // State
   const [filteredRackets, setFilteredRackets] = useState<Racket[]>([]);
   const [displayedRackets, setDisplayedRackets] = useState<Racket[]>([]);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState("Todas");
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedBrand, setSelectedBrand] = useState('Todas');
   const [showBestsellers, setShowBestsellers] = useState(false);
   const [showOffers, setShowOffers] = useState(false);
-  const [sortBy, setSortBy] = useState("name");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortBy, setSortBy] = useState('bestseller');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [displayCount, setDisplayCount] = useState(12);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [selectedRacket, setSelectedRacket] = useState<Racket | null>(null);
+
+  // Initialize search from URL params
+  useEffect(() => {
+    const queryParam = searchParams.get('search');
+    if (queryParam) {
+      setSearchQuery(queryParam);
+    }
+  }, [searchParams]);
 
   // Filter and search effect
   useEffect(() => {
     let filtered = [...rackets];
 
-    // Apply search filter
+    // Apply search filter - flexible word-based search
     if (searchQuery.trim()) {
-      const query = searchQuery.toLowerCase();
-      filtered = filtered.filter(
-        (racket) =>
-          racket.nombre.toLowerCase().includes(query) ||
-          racket.marca.toLowerCase().includes(query) ||
-          racket.modelo.toLowerCase().includes(query)
-      );
+      const searchWords = searchQuery.toLowerCase().trim().split(/\s+/);
+      filtered = filtered.filter(racket => {
+        const nombre = (racket.nombre || '').toLowerCase();
+        const marca = (racket.marca || '').toLowerCase();
+        const modelo = (racket.modelo || '').toLowerCase();
+        const combinedText = `${nombre} ${marca} ${modelo}`;
+
+        // Check if ALL search words are present in the racket's text
+        return searchWords.every(word => combinedText.includes(word));
+      });
     }
 
     // Apply brand filter
-    if (selectedBrand !== "Todas") {
-      filtered = filtered.filter((racket) => racket.marca === selectedBrand);
+    if (selectedBrand !== 'Todas') {
+      filtered = filtered.filter(racket => racket.marca === selectedBrand);
     }
 
     // Apply bestsellers filter
     if (showBestsellers) {
-      filtered = filtered.filter((racket) => racket.es_bestseller);
+      filtered = filtered.filter(racket => racket.es_bestseller);
     }
 
     // Apply offers filter
     if (showOffers) {
-      filtered = filtered.filter((racket) => racket.en_oferta);
+      filtered = filtered.filter(racket => racket.en_oferta);
     }
 
     // Apply sorting
-    filtered.sort((a, b) => {
-      switch (sortBy) {
-        case "price-low":
-          return a.precio_actual - b.precio_actual;
-        case "price-high":
-          return b.precio_actual - a.precio_actual;
-        case "brand":
-          const brandA = a.marca || "";
-          const brandB = b.marca || "";
-          return brandA.localeCompare(brandB);
-        case "bestseller":
-          return b.es_bestseller ? 1 : -1;
-        case "offer":
-          return b.en_oferta ? 1 : -1;
-        default:
-          const modelA = a.modelo || "";
-          const modelB = b.modelo || "";
-          return modelA.localeCompare(modelB);
-      }
-    });
+    try {
+      filtered.sort((a, b) => {
+        switch (sortBy) {
+          case 'price-low':
+            const priceA = getLowestPrice(a)?.price || a.precio_actual || 0;
+            const priceB = getLowestPrice(b)?.price || b.precio_actual || 0;
+            return priceA - priceB;
+          case 'price-high':
+            const priceHighA = getLowestPrice(a)?.price || a.precio_actual || 0;
+            const priceHighB = getLowestPrice(b)?.price || b.precio_actual || 0;
+            return priceHighB - priceHighA;
+          case 'brand':
+            const brandA = a.marca || '';
+            const brandB = b.marca || '';
+            return brandA.localeCompare(brandB);
+          case 'bestseller':
+            // Bestsellers primero (true > false)
+            if (a.es_bestseller && !b.es_bestseller) return -1;
+            if (!a.es_bestseller && b.es_bestseller) return 1;
+            return 0;
+          case 'offer':
+            // Ofertas primero (true > false)
+            if (a.en_oferta && !b.en_oferta) return -1;
+            if (!a.en_oferta && b.en_oferta) return 1;
+            return 0;
+          default:
+            const modelA = a.modelo || '';
+            const modelB = b.modelo || '';
+            return modelA.localeCompare(modelB);
+        }
+      });
+    } catch (error) {
+      console.error('Error sorting rackets:', error);
+    }
 
     setFilteredRackets(filtered);
-  }, [
-    rackets,
-    searchQuery,
-    selectedBrand,
-    showBestsellers,
-    showOffers,
-    sortBy,
-  ]);
+  }, [rackets, searchQuery, selectedBrand, showBestsellers, showOffers, sortBy]);
 
   // Update displayed rackets when filters change
   useEffect(() => {
@@ -603,14 +634,14 @@ const CatalogPage: React.FC = () => {
 
   // Get unique brands
   const uniqueBrands: string[] = [
-    "Todas",
-    ...Array.from(new Set(rackets.map((racket) => racket.marca))).sort(),
+    'Todas',
+    ...Array.from(new Set(rackets.map(racket => racket.marca))).sort(),
   ];
 
   // Get stats
   const totalRackets = rackets.length;
-  const bestsellersCount = rackets.filter((r) => r.es_bestseller).length;
-  const offersCount = rackets.filter((r) => r.en_oferta).length;
+  const bestsellersCount = rackets.filter(r => r.es_bestseller).length;
+  const offersCount = rackets.filter(r => r.en_oferta).length;
 
   // Handlers
   const handleRacketClick = (racket: Racket) => {
@@ -618,19 +649,19 @@ const CatalogPage: React.FC = () => {
   };
 
   const handleLoadMore = () => {
-    setDisplayCount((prev) => prev + 12);
+    setDisplayCount(prev => prev + 12);
   };
 
   const clearFilters = () => {
-    setSearchQuery("");
-    setSelectedBrand("Todas");
+    setSearchQuery('');
+    setSelectedBrand('Todas');
     setShowBestsellers(false);
     setShowOffers(false);
-    setSortBy("name");
+    setSortBy('bestseller');
   };
 
   const goToComparison = () => {
-    navigate("/compare-rackets");
+    navigate('/compare-rackets');
   };
 
   if (loading) {
@@ -638,24 +669,22 @@ const CatalogPage: React.FC = () => {
       <Container>
         <div
           style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            minHeight: "80vh",
-            flexDirection: "column",
-            gap: "1rem",
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: '80vh',
+            flexDirection: 'column',
+            gap: '1rem',
           }}
         >
           <motion.div
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-            style={{ color: "#16a34a" }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            style={{ color: '#16a34a' }}
           >
             <FiGrid size={48} />
           </motion.div>
-          <div style={{ color: "#6b7280", fontSize: "1.125rem" }}>
-            Cargando catálogo...
-          </div>
+          <div style={{ color: '#6b7280', fontSize: '1.125rem' }}>Cargando catálogo...</div>
         </div>
       </Container>
     );
@@ -667,11 +696,10 @@ const CatalogPage: React.FC = () => {
       <Header>
         <HeaderContent>
           <Title>
-            Catálogo de <span className="highlight">Palas</span>
+            Catálogo de <span className='highlight'>Palas</span>
           </Title>
           <Subtitle>
-            Descubre nuestra colección completa de palas de pádel con las
-            mejores marcas y precios
+            Descubre nuestra colección completa de palas de pádel con las mejores marcas y precios
           </Subtitle>
           <StatsContainer>
             <StatItem>
@@ -701,10 +729,10 @@ const CatalogPage: React.FC = () => {
             <SearchContainer>
               <SearchIcon />
               <SearchInput
-                type="text"
-                placeholder="Buscar por nombre, marca o modelo..."
+                type='text'
+                placeholder='Buscar por nombre, marca o modelo...'
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={e => setSearchQuery(e.target.value)}
               />
             </SearchContainer>
 
@@ -716,22 +744,16 @@ const CatalogPage: React.FC = () => {
               Bestsellers
             </FilterButton>
 
-            <FilterButton
-              active={showOffers}
-              onClick={() => setShowOffers(!showOffers)}
-            >
+            <FilterButton active={showOffers} onClick={() => setShowOffers(!showOffers)}>
               <FiTag />
               Ofertas
             </FilterButton>
 
             {/* Filtro de marca como desplegable con estilo de FilterButton */}
-            <FilterSelect
-              value={selectedBrand}
-              onChange={(e) => setSelectedBrand(e.target.value)}
-            >
-              {uniqueBrands.map((brand) => (
+            <FilterSelect value={selectedBrand} onChange={e => setSelectedBrand(e.target.value)}>
+              {uniqueBrands.map(brand => (
                 <option key={brand} value={brand}>
-                  {brand === "Todas" ? "Todas las marcas" : brand}
+                  {brand === 'Todas' ? 'Todas las marcas' : brand}
                 </option>
               ))}
             </FilterSelect>
@@ -745,34 +767,23 @@ const CatalogPage: React.FC = () => {
 
         {/* Results Header */}
         <ResultsHeader>
-          <ResultsCount>
-            {filteredRackets.length} palas encontradas
-          </ResultsCount>
+          <ResultsCount>{filteredRackets.length} palas encontradas</ResultsCount>
 
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            <SortSelect
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              <option value="name">Ordenar por nombre</option>
-              <option value="brand">Ordenar por marca</option>
-              <option value="price-low">Precio: menor a mayor</option>
-              <option value="price-high">Precio: mayor a menor</option>
-              <option value="bestseller">Bestsellers primero</option>
-              <option value="offer">Ofertas primero</option>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <SortSelect value={sortBy} onChange={e => setSortBy(e.target.value)}>
+              <option value='bestseller'>Bestsellers primero</option>
+              <option value='name'>Ordenar por nombre</option>
+              <option value='brand'>Ordenar por marca</option>
+              <option value='price-low'>Precio: menor a mayor</option>
+              <option value='price-high'>Precio: mayor a menor</option>
+              <option value='offer'>Ofertas primero</option>
             </SortSelect>
 
             <ViewToggle>
-              <ViewButton
-                active={viewMode === "grid"}
-                onClick={() => setViewMode("grid")}
-              >
+              <ViewButton active={viewMode === 'grid'} onClick={() => setViewMode('grid')}>
                 <FiGrid />
               </ViewButton>
-              <ViewButton
-                active={viewMode === "list"}
-                onClick={() => setViewMode("list")}
-              >
+              <ViewButton active={viewMode === 'list'} onClick={() => setViewMode('list')}>
                 <FiList />
               </ViewButton>
             </ViewToggle>
@@ -784,90 +795,101 @@ const CatalogPage: React.FC = () => {
           <EmptyState>
             <EmptyIcon>🎾</EmptyIcon>
             <EmptyTitle>No se encontraron palas</EmptyTitle>
-            <EmptyDescription>
-              Prueba ajustando los filtros o términos de búsqueda
-            </EmptyDescription>
-            <ClearFiltersButton onClick={clearFilters}>
-              Limpiar filtros
-            </ClearFiltersButton>
+            <EmptyDescription>Prueba ajustando los filtros o términos de búsqueda</EmptyDescription>
+            <ClearFiltersButton onClick={clearFilters}>Limpiar filtros</ClearFiltersButton>
           </EmptyState>
         ) : (
           <>
             <RacketsGrid view={viewMode}>
-              {displayedRackets.map((racket, index) => (
-                <RacketCard
-                  key={racket.nombre}
-                  view={viewMode}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.3, delay: index * 0.05 }}
-                  onClick={() => handleRacketClick(racket)}
-                >
-                  <RacketImageContainer view={viewMode}>
-                    <RacketImage
-                      src={racket.imagen}
-                      alt={racket.modelo}
-                      onError={(e) => {
-                        const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder-racket.svg";
-                      }}
-                    />
-                    {racket.es_bestseller && (
-                      <RacketBadge variant="bestseller">
-                        <FiStar size={12} />
-                        Top
-                      </RacketBadge>
-                    )}
-                    {racket.en_oferta && (
-                      <RacketBadge variant="offer">
-                        <FiTag size={12} />
-                        Oferta
-                      </RacketBadge>
-                    )}
-                  </RacketImageContainer>
-
-                  <RacketInfo view={viewMode}>
-                    <div>
-                      <RacketBrand>{racket.marca}</RacketBrand>
-                      <RacketName view={viewMode}>{racket.modelo}</RacketName>
-
-                      <PriceContainer view={viewMode}>
-                        <CurrentPrice>€{racket.precio_actual}</CurrentPrice>
-                        {racket.en_oferta &&
-                          racket.precio_original &&
-                          racket.precio_original > 0 && (
-                            <>
-                              <OriginalPrice>
-                                €{racket.precio_original}
-                              </OriginalPrice>
-                              <DiscountBadge>
-                                -{racket.descuento_porcentaje}%
-                              </DiscountBadge>
-                            </>
-                          )}
-                      </PriceContainer>
-                    </div>
-
-                    <ActionButtons view={viewMode}>
-                      <ViewDetailsButton
-                        onClick={() => handleRacketClick(racket)}
-                      >
-                        Ver detalles
-                      </ViewDetailsButton>
-                      {isAuthenticated && (
-                        <ViewDetailsButton
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedRacket(racket);
-                            setShowAddToListModal(true);
-                          }}
-                          style={{ background: "#15803d" }}
-                        >
-                          <FiHeart size={14} />
-                          Mis listas
-                        </ViewDetailsButton>
+              {displayedRackets.map((racket, index) => {
+                if (!racket || !racket.nombre) {
+                  console.error('Invalid racket data:', racket);
+                  return null;
+                }
+                return (
+                  <RacketCard
+                    key={`${racket.id}-${racket.nombre}-${index}`}
+                    view={viewMode}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    onClick={() => handleRacketClick(racket)}
+                  >
+                    <RacketImageContainer view={viewMode}>
+                      <RacketImage
+                        src={racket.imagen}
+                        alt={racket.modelo}
+                        onError={e => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = '/placeholder-racket.svg';
+                        }}
+                      />
+                      {racket.es_bestseller && (
+                        <RacketBadge variant='bestseller'>
+                          <FiStar size={12} />
+                          Top
+                        </RacketBadge>
                       )}
-                      {/* <AddToCompareButton
+                      {racket.en_oferta && (
+                        <RacketBadge variant='offer'>
+                          <FiTag size={12} />
+                          Oferta
+                        </RacketBadge>
+                      )}
+                    </RacketImageContainer>
+
+                    <RacketInfo view={viewMode}>
+                      <div>
+                        <RacketBrand>{racket.marca}</RacketBrand>
+                        <RacketName view={viewMode}>{toTitleCase(racket.modelo)}</RacketName>
+
+                        <PriceContainer view={viewMode}>
+                          {(() => {
+                            const lowestPrice = getLowestPrice(racket);
+                            if (lowestPrice) {
+                              return (
+                                <>
+                                  <CurrentPrice>€{lowestPrice.price.toFixed(2)}</CurrentPrice>
+                                  {lowestPrice.originalPrice > lowestPrice.price && (
+                                    <>
+                                      <OriginalPrice>
+                                        €{lowestPrice.originalPrice.toFixed(2)}
+                                      </OriginalPrice>
+                                      {lowestPrice.discount > 0 && (
+                                        <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
+                                      )}
+                                    </>
+                                  )}
+                                  <BestPriceBadge>
+                                    <FiTag size={10} />
+                                    Mejor precio
+                                  </BestPriceBadge>
+                                </>
+                              );
+                            }
+                            return <CurrentPrice>€{racket.precio_actual}</CurrentPrice>;
+                          })()}
+                        </PriceContainer>
+                      </div>
+
+                      <ActionButtons view={viewMode}>
+                        <ViewDetailsButton onClick={() => handleRacketClick(racket)}>
+                          Ver detalles
+                        </ViewDetailsButton>
+                        {isAuthenticated && (
+                          <ViewDetailsButton
+                            onClick={e => {
+                              e.stopPropagation();
+                              setSelectedRacket(racket);
+                              setShowAddToListModal(true);
+                            }}
+                            style={{ background: '#15803d' }}
+                          >
+                            <FiHeart size={14} />
+                            Mis listas
+                          </ViewDetailsButton>
+                        )}
+                        {/* <AddToCompareButton
                         disabled={isRacketInComparison(racket.nombre)}
                         onClick={(e) => handleAddToComparison(racket, e)}
                       >
@@ -883,23 +905,24 @@ const CatalogPage: React.FC = () => {
                           </>
                         )}
                       </AddToCompareButton> */}
-                    </ActionButtons>
-                  </RacketInfo>
-                </RacketCard>
-              ))}
+                      </ActionButtons>
+                    </RacketInfo>
+                  </RacketCard>
+                );
+              })}
             </RacketsGrid>
 
             {/* Counter for E2E tests - visually hidden but accessible to screen readers and Selenium */}
             <p
-              data-testid="rackets-count"
+              data-testid='rackets-count'
               style={{
-                clip: "rect(0 0 0 0)",
-                clipPath: "inset(50%)",
-                height: "1px",
-                overflow: "hidden",
-                position: "absolute",
-                whiteSpace: "nowrap",
-                width: "1px",
+                clip: 'rect(0 0 0 0)',
+                clipPath: 'inset(50%)',
+                height: '1px',
+                overflow: 'hidden',
+                position: 'absolute',
+                whiteSpace: 'nowrap',
+                width: '1px',
               }}
             >
               Total de palas mostradas: {displayedRackets.length}
@@ -911,8 +934,7 @@ const CatalogPage: React.FC = () => {
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Cargar más palas (
-                {filteredRackets.length - displayedRackets.length} restantes)
+                Cargar más palas ({filteredRackets.length - displayedRackets.length} restantes)
               </LoadMoreButton>
             )}
           </>
@@ -927,12 +949,10 @@ const CatalogPage: React.FC = () => {
           >
             <PanelContent>
               <PanelText>
-                {count} pala{count > 1 ? "s" : ""} seleccionada
-                {count > 1 ? "s" : ""} para comparar
+                {count} pala{count > 1 ? 's' : ''} seleccionada
+                {count > 1 ? 's' : ''} para comparar
               </PanelText>
-              <CompareButton onClick={goToComparison}>
-                Comparar ahora
-              </CompareButton>
+              <CompareButton onClick={goToComparison}>Comparar ahora</CompareButton>
             </PanelContent>
           </FloatingPanel>
         )}

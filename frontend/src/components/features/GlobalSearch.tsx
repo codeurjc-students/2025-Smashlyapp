@@ -1,10 +1,11 @@
-import { AnimatePresence, motion } from "framer-motion";
-import React, { useEffect, useRef, useState } from "react";
-import { FiSearch, FiX } from "react-icons/fi";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { useRackets } from "../../contexts/RacketsContext";
-import { Racket } from "../../types/racket";
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useRef, useState } from 'react';
+import { FiSearch, FiX } from 'react-icons/fi';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { useRackets } from '../../contexts/RacketsContext';
+import { Racket } from '../../types/racket';
+import { toTitleCase } from '../../utils/textUtils';
 
 // Styled components
 const SearchContainer = styled.div`
@@ -21,69 +22,55 @@ const SearchWrapper = styled.div`
 
 const SearchInputContainer = styled(motion.div)<{ isInHeader?: boolean }>`
   position: relative;
-  background: ${(props) =>
-    props.isInHeader ? "rgba(255, 255, 255, 0.15)" : "white"};
-  border-radius: ${(props) => (props.isInHeader ? "25px" : "12px")};
-  box-shadow: ${(props) =>
-    props.isInHeader
-      ? "0 2px 10px rgba(0, 0, 0, 0.1)"
-      : "0 4px 20px rgba(0, 0, 0, 0.1)"};
+  background: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.15)' : 'white')};
+  border-radius: ${props => (props.isInHeader ? '25px' : '12px')};
+  box-shadow: ${props =>
+    props.isInHeader ? '0 2px 10px rgba(0, 0, 0, 0.1)' : '0 4px 20px rgba(0, 0, 0, 0.1)'};
   overflow: hidden;
   width: 100%;
-  backdrop-filter: ${(props) => (props.isInHeader ? "blur(10px)" : "none")};
-  border: ${(props) =>
-    props.isInHeader
-      ? "1px solid rgba(255, 255, 255, 0.25)"
-      : "1px solid #e5e7eb"};
+  backdrop-filter: ${props => (props.isInHeader ? 'blur(10px)' : 'none')};
+  border: ${props =>
+    props.isInHeader ? '1px solid rgba(255, 255, 255, 0.25)' : '1px solid #e5e7eb'};
   transition: all 0.3s ease;
 
   &:hover {
-    background: ${(props) =>
-      props.isInHeader ? "rgba(255, 255, 255, 0.2)" : "white"};
-    box-shadow: ${(props) =>
-      props.isInHeader
-        ? "0 4px 15px rgba(0, 0, 0, 0.15)"
-        : "0 4px 20px rgba(0, 0, 0, 0.15)"};
+    background: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.2)' : 'white')};
+    box-shadow: ${props =>
+      props.isInHeader ? '0 4px 15px rgba(0, 0, 0, 0.15)' : '0 4px 20px rgba(0, 0, 0, 0.15)'};
   }
 
   &:focus-within {
-    background: ${(props) =>
-      props.isInHeader ? "rgba(255, 255, 255, 0.25)" : "white"};
-    box-shadow: ${(props) =>
-      props.isInHeader
-        ? "0 6px 20px rgba(0, 0, 0, 0.2)"
-        : "0 4px 20px rgba(22, 163, 74, 0.15)"};
-    border-color: ${(props) =>
-      props.isInHeader ? "rgba(255, 255, 255, 0.4)" : "#16a34a"};
+    background: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.25)' : 'white')};
+    box-shadow: ${props =>
+      props.isInHeader ? '0 6px 20px rgba(0, 0, 0, 0.2)' : '0 4px 20px rgba(22, 163, 74, 0.15)'};
+    border-color: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.4)' : '#16a34a')};
   }
 `;
 
 const SearchInput = styled.input<{ isInHeader?: boolean }>`
   width: 100%;
-  padding: ${(props) => (props.isInHeader ? "12px 50px 12px 20px" : "12px 45px 12px 16px")};
+  padding: ${props => (props.isInHeader ? '12px 50px 12px 20px' : '12px 45px 12px 16px')};
   border: none;
   outline: none;
   font-size: 16px;
-  color: ${(props) => (props.isInHeader ? "white" : "#333")};
+  color: ${props => (props.isInHeader ? 'white' : '#333')};
   background: transparent;
   font-weight: 400;
 
   &::placeholder {
-    color: ${(props) => (props.isInHeader ? "rgba(255, 255, 255, 0.7)" : "#999")};
+    color: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.7)' : '#999')};
     font-weight: 400;
   }
 
   &:focus::placeholder {
-    color: ${(props) => (props.isInHeader ? "rgba(255, 255, 255, 0.5)" : "#ccc")};
+    color: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.5)' : '#ccc')};
   }
 `;
 
 const SearchButton = styled.button<{ isInHeader?: boolean }>`
   position: relative;
-  background: ${(props) =>
-    props.isInHeader
-      ? "rgba(255, 255, 255, 0.2)"
-      : "linear-gradient(135deg, #16a34a, #15803d)"};
+  background: ${props =>
+    props.isInHeader ? 'rgba(255, 255, 255, 0.2)' : 'linear-gradient(135deg, #16a34a, #15803d)'};
   border: none;
   border-radius: 50%;
   width: 36px;
@@ -94,21 +81,14 @@ const SearchButton = styled.button<{ isInHeader?: boolean }>`
   color: white;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: ${(props) =>
-    props.isInHeader
-      ? "none"
-      : "0 4px 12px rgba(22, 163, 74, 0.3)"};
+  box-shadow: ${props => (props.isInHeader ? 'none' : '0 4px 12px rgba(22, 163, 74, 0.3)')};
 
   &:hover {
     transform: translateY(-1px);
-    background: ${(props) =>
-      props.isInHeader
-        ? "rgba(255, 255, 255, 0.3)"
-        : "linear-gradient(135deg, #15803d, #166534)"};
-    box-shadow: ${(props) =>
-      props.isInHeader
-        ? "0 2px 8px rgba(0, 0, 0, 0.1)"
-        : "0 6px 16px rgba(22, 163, 74, 0.4)"};
+    background: ${props =>
+      props.isInHeader ? 'rgba(255, 255, 255, 0.3)' : 'linear-gradient(135deg, #15803d, #166534)'};
+    box-shadow: ${props =>
+      props.isInHeader ? '0 2px 8px rgba(0, 0, 0, 0.1)' : '0 6px 16px rgba(22, 163, 74, 0.4)'};
   }
 
   &:active {
@@ -118,12 +98,12 @@ const SearchButton = styled.button<{ isInHeader?: boolean }>`
 
 const ClearButton = styled.button<{ isInHeader?: boolean }>`
   position: absolute;
-  right: ${(props) => (props.isInHeader ? "16px" : "12px")};
+  right: ${props => (props.isInHeader ? '16px' : '12px')};
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: ${(props) => (props.isInHeader ? "rgba(255, 255, 255, 0.8)" : "#666")};
+  color: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.8)' : '#666')};
   cursor: pointer;
   padding: 6px;
   border-radius: 50%;
@@ -131,12 +111,11 @@ const ClearButton = styled.button<{ isInHeader?: boolean }>`
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
-  font-size: ${(props) => (props.isInHeader ? "16px" : "14px")};
+  font-size: ${props => (props.isInHeader ? '16px' : '14px')};
 
   &:hover {
-    background: ${(props) =>
-      props.isInHeader ? "rgba(255, 255, 255, 0.2)" : "#f0f0f0"};
-    color: ${(props) => (props.isInHeader ? "white" : "#333")};
+    background: ${props => (props.isInHeader ? 'rgba(255, 255, 255, 0.2)' : '#f0f0f0')};
+    color: ${props => (props.isInHeader ? 'white' : '#333')};
   }
 `;
 
@@ -251,14 +230,13 @@ const ResultBadges = styled.div`
   gap: 4px;
 `;
 
-const ResultBadge = styled.div<{ variant: "bestseller" | "offer" }>`
+const ResultBadge = styled.div<{ variant: 'bestseller' | 'offer' }>`
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 10px;
   font-weight: 500;
   color: white;
-  background: ${(props) =>
-    props.variant === "bestseller" ? "#f39c12" : "#27ae60"};
+  background: ${props => (props.variant === 'bestseller' ? '#f39c12' : '#27ae60')};
 `;
 
 const NoResults = styled.div`
@@ -281,7 +259,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 }) => {
   // State management
   const [isSearchOpen, setIsSearchOpen] = useState(isInHeader);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Racket[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -290,7 +268,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 
   // Navigation
   const navigate = useNavigate();
-  
+
   // Usar el contexto de RacketsContext para obtener las palas
   const { rackets } = useRackets();
 
@@ -305,7 +283,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 
   // Handle search functionality
   useEffect(() => {
-    if (searchQuery.trim() === "") {
+    if (searchQuery.trim() === '') {
       setSearchResults([]);
       return;
     }
@@ -314,13 +292,17 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 
     // Debounce search
     const timeoutId = setTimeout(() => {
+      // Split search query into individual words for flexible matching
+      const searchWords = searchQuery.toLowerCase().trim().split(/\s+/);
+
       const filteredRackets = rackets.filter((racket: Racket) => {
-        const searchLower = searchQuery.toLowerCase();
-        return (
-          racket.nombre.toLowerCase().includes(searchLower) ||
-          (racket.marca && racket.marca.toLowerCase().includes(searchLower)) ||
-          (racket.modelo && racket.modelo.toLowerCase().includes(searchLower))
-        );
+        const nombre = racket.nombre.toLowerCase();
+        const marca = (racket.marca || '').toLowerCase();
+        const modelo = (racket.modelo || '').toLowerCase();
+        const combinedText = `${nombre} ${marca} ${modelo}`;
+
+        // Check if ALL search words are present in the racket's text
+        return searchWords.every(word => combinedText.includes(word));
       });
 
       setSearchResults(filteredRackets.slice(0, 10)); // Limit to 10 results
@@ -334,7 +316,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   const toggleSearch = () => {
     if (isInHeader) {
       // In header mode, close search and notify parent
-      setSearchQuery("");
+      setSearchQuery('');
       setSearchResults([]);
       onSearchToggle?.(false);
       return;
@@ -350,7 +332,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       }, 100);
     } else {
       // Clear search when closing
-      setSearchQuery("");
+      setSearchQuery('');
       setSearchResults([]);
     }
 
@@ -361,7 +343,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   const handleRacketSelect = (racket: Racket) => {
     // Close search
     if (isInHeader) {
-      setSearchQuery("");
+      setSearchQuery('');
       setSearchResults([]);
       onSearchToggle?.(false);
     } else {
@@ -379,18 +361,28 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 
   // Handle key press
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Escape") {
+    if (e.key === 'Escape') {
       if (isInHeader) {
         onSearchToggle?.(false);
       } else {
         toggleSearch();
       }
+    } else if (e.key === 'Enter' && searchQuery.trim()) {
+      // Navigate to catalog with search query
+      if (isInHeader) {
+        onSearchToggle?.(false);
+      } else {
+        toggleSearch();
+      }
+      navigate(`/catalog?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+      setSearchResults([]);
     }
   };
 
   // Clear search
   const clearSearch = () => {
-    setSearchQuery("");
+    setSearchQuery('');
     setSearchResults([]);
     searchInputRef.current?.focus();
   };
@@ -403,22 +395,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
           {(isSearchOpen || isInHeader) && (
             <SearchInputContainer
               isInHeader={isInHeader}
-              initial={
-                isInHeader
-                  ? { width: "100%", opacity: 1 }
-                  : { width: 0, opacity: 0 }
-              }
-              animate={
-                isInHeader
-                  ? { width: "100%", opacity: 1 }
-                  : { width: 300, opacity: 1 }
-              }
+              initial={isInHeader ? { width: '100%', opacity: 1 } : { width: 0, opacity: 0 }}
+              animate={isInHeader ? { width: '100%', opacity: 1 } : { width: 300, opacity: 1 }}
               exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
             >
               <SearchInput
                 ref={searchInputRef}
-                placeholder={isInHeader ? "Buscar palas, marcas, modelos..." : "Buscar palas..."}
+                placeholder={isInHeader ? 'Buscar palas, marcas, modelos...' : 'Buscar palas...'}
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyPress}
@@ -452,9 +436,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
           >
             <SearchResultsHeader>
               <SearchResultsTitle>
-                {isLoading
-                  ? "Buscando..."
-                  : `Resultados (${searchResults.length})`}
+                {isLoading ? 'Buscando...' : `Resultados (${searchResults.length})`}
               </SearchResultsTitle>
             </SearchResultsHeader>
 
@@ -471,40 +453,48 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                     onClick={() => handleRacketSelect(racket)}
                   >
                     <ResultImage
-                      src={racket.imagen || ""}
+                      src={racket.imagen || ''}
                       alt={racket.modelo || racket.nombre}
-                      onError={(e) => {
+                      onError={e => {
                         const target = e.target as HTMLImageElement;
-                        target.src = "/placeholder-racket.svg";
+                        target.src = '/placeholder-racket.svg';
                       }}
                     />
                     <ResultInfo>
-                      <ResultBrand>{racket.marca}</ResultBrand>
-                      <ResultName>{racket.modelo}</ResultName>
+                      <ResultBrand>{toTitleCase(racket.marca)}</ResultBrand>
+                      <ResultName>{toTitleCase(racket.modelo)}</ResultName>
                       <ResultPriceContainer>
                         <ResultPrice>€{racket.precio_actual}</ResultPrice>
                         {racket.en_oferta &&
                           racket.precio_original &&
                           racket.precio_original > 0 && (
-                            <ResultOriginalPrice>
-                              €{racket.precio_original}
-                            </ResultOriginalPrice>
+                            <ResultOriginalPrice>€{racket.precio_original}</ResultOriginalPrice>
                           )}
                       </ResultPriceContainer>
                       <ResultBadges>
                         {racket.es_bestseller && (
-                          <ResultBadge variant="bestseller">Top</ResultBadge>
+                          <ResultBadge variant='bestseller'>Top</ResultBadge>
                         )}
-                        {racket.en_oferta && (
-                          <ResultBadge variant="offer">Oferta</ResultBadge>
-                        )}
+                        {racket.en_oferta && <ResultBadge variant='offer'>Oferta</ResultBadge>}
                       </ResultBadges>
                     </ResultInfo>
                   </SearchResultItem>
                 ))
               ) : (
                 <NoResults>
-                  No se encontraron palas que coincidan con "{searchQuery}"
+                  No se encontraron palas en la previsualización.
+                  <br />
+                  <span
+                    style={{
+                      fontSize: '0.875rem',
+                      color: '#6b7280',
+                      marginTop: '0.5rem',
+                      display: 'block',
+                    }}
+                  >
+                    Presiona <strong>ENTER</strong> para buscar "{searchQuery}" en el catálogo
+                    completo
+                  </span>
                 </NoResults>
               )}
             </SearchResultsList>

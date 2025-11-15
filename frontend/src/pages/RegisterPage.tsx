@@ -13,7 +13,7 @@ import {
   FiShoppingBag,
   FiUser,
 } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../contexts/AuthContext.tsx";
 import storeService from "../services/storeService";
@@ -323,11 +323,15 @@ interface FormErrors {
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { signUp } = useAuth();
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showStoreModal, setShowStoreModal] = useState(false);
+
+  // Get redirect path from URL params or default to home
+  const redirectTo = searchParams.get('redirect') || '/';
   const [formData, setFormData] = useState<FormData>({
     registrationType: "player",
     fullName: "",
@@ -548,7 +552,7 @@ const RegisterPage: React.FC = () => {
         toast.success(
           "¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta."
         );
-        navigate("/");
+        navigate(redirectTo);
       }
     } catch (error) {
       toast.error("Error inesperado. Inténtalo de nuevo.");
@@ -560,7 +564,7 @@ const RegisterPage: React.FC = () => {
 
   const handleModalClose = () => {
     setShowStoreModal(false);
-    navigate("/");
+    navigate(redirectTo);
   };
 
   return (
@@ -939,7 +943,7 @@ const RegisterPage: React.FC = () => {
 
         <LoginLink>
           <LoginText>
-            ¿Ya tienes cuenta? <Link to="/login">Inicia sesión</Link>
+            ¿Ya tienes cuenta? <Link to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>Inicia sesión</Link>
           </LoginText>
         </LoginLink>
       </RegisterCard>

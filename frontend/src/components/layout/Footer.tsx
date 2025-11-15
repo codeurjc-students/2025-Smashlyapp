@@ -1,5 +1,6 @@
 import React from "react";
-import { FiGithub, FiHeart, FiMail, FiTwitter } from "react-icons/fi";
+import { FiHeart, FiMail } from "react-icons/fi";
+import { FaInstagram, FaTiktok } from "react-icons/fa";
 import styled from "styled-components";
 
 const FooterContainer = styled.footer`
@@ -65,18 +66,18 @@ const Footer: React.FC = () => {
 
           <SocialLinks>
             <a
-              href="https://github.com/smashly"
+              href="https://www.instagram.com/smashly.app/"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <FiGithub />
+              <FaInstagram />
             </a>
             <a
-              href="https://twitter.com/smashly"
+              href="https://www.tiktok.com/@smashlyapp"
               target="_blank"
               rel="noopener noreferrer"
             >
-              <FiTwitter />
+              <FaTiktok />
             </a>
             <a href="mailto:hello@smashly.app">
               <FiMail />

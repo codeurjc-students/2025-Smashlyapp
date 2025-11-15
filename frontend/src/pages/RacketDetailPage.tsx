@@ -1,8 +1,8 @@
-import { useRackets } from "@/contexts/RacketsContext";
-import { useAuth } from "@/contexts/AuthContext";
-import { Racket } from "@/types/racket";
-import { motion } from "framer-motion";
-import React, { useEffect, useState } from "react";
+import { useRackets } from '@/contexts/RacketsContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { Racket } from '@/types/racket';
+import { motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
 import {
   FiArrowLeft,
   FiExternalLink,
@@ -11,11 +11,16 @@ import {
   FiStar,
   FiTag,
   FiHeart,
-} from "react-icons/fi";
-import { Link, useSearchParams } from "react-router-dom";
-import styled from "styled-components";
-import { AddToListModal } from "../components/features/AddToListModal";
-import { RacketReviews } from "../components/features/RacketReviews";
+} from 'react-icons/fi';
+import { Link, useSearchParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { AddToListModal } from '../components/features/AddToListModal';
+import { RacketFeatures } from '../components/features/RacketFeatures';
+import { RacketReviews } from '../components/features/RacketReviews';
+import { StorePriceComparison } from '../components/features/StorePriceComparison';
+import { RacketService } from '../services/racketService';
+import { getLowestPrice } from '../utils/priceUtils';
+import { toTitleCase } from '../utils/textUtils';
 
 // Styled Components
 const Container = styled.div`
@@ -31,12 +36,16 @@ const Header = styled.div`
 `;
 
 const HeaderContent = styled.div`
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 3rem;
   display: flex;
   align-items: center;
   gap: 1rem;
+
+  @media (max-width: 1024px) {
+    padding: 0 2rem;
+  }
 `;
 
 const BackButton = styled(Link)`
@@ -64,11 +73,26 @@ const HeaderTitle = styled.h1`
 `;
 
 const Content = styled.div`
-  max-width: 1200px;
+  max-width: 1600px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 2rem 3rem;
   display: grid;
   gap: 2rem;
+
+  @media (max-width: 1024px) {
+    padding: 2rem;
+  }
+`;
+
+const TopSection = styled.div`
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 1200px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const MainCard = styled(motion.div)`
@@ -76,10 +100,30 @@ const MainCard = styled(motion.div)`
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  height: 100%;
 
-  @media (min-width: 768px) {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const CompactPriceCard = styled(motion.div)`
+  background: white;
+  border-radius: 16px;
+  overflow: visible;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  height: 100%;
+  position: sticky;
+  top: 2rem;
+  display: flex;
+  flex-direction: column;
+
+  @media (max-width: 1200px) {
+    position: relative;
+    top: 0;
+    height: auto;
   }
 `;
 
@@ -89,25 +133,25 @@ const ImageSection = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   background: white;
+  min-height: 100%;
 `;
 
 const RacketImage = styled.img`
-  width: 100%;
-  max-width: 300px;
-  height: 350px;
+  width: 90%;
+  height: 90%;
+  max-width: 320px;
+  max-height: 420px;
   object-fit: contain;
-  border-radius: 12px;
-  margin-bottom: 1rem;
+  object-position: center;
 `;
 
-const Badge = styled.div<{ variant: "bestseller" | "offer" }>`
+const Badge = styled.div<{ variant: 'bestseller' | 'offer' }>`
   position: absolute;
   top: 1rem;
-  ${(props) =>
-    props.variant === "bestseller" ? "right: 1rem;" : "left: 1rem;"}
-  background: ${(props) =>
-    props.variant === "bestseller" ? "#f59e0b" : "#ef4444"};
+  ${props => (props.variant === 'bestseller' ? 'right: 1rem;' : 'left: 1rem;')}
+  background: ${props => (props.variant === 'bestseller' ? '#f59e0b' : '#ef4444')};
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 8px;
@@ -169,6 +213,28 @@ const DiscountBadge = styled.div`
   font-weight: 600;
 `;
 
+const BestPriceBadge = styled.div`
+  background: #16a34a;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
+const StoreBadge = styled.div`
+  background: #f0f9ff;
+  color: #16a34a;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1px solid #16a34a;
+`;
+
 const ActionButtons = styled.div`
   display: flex;
   flex-direction: column;
@@ -198,7 +264,7 @@ const PrimaryButton = styled.a`
 `;
 
 const SecondaryButton = styled.button<{ disabled?: boolean }>`
-  background: ${(props) => (props.disabled ? "#f0f9ff" : "white")};
+  background: ${props => (props.disabled ? '#f0f9ff' : 'white')};
   color: #16a34a;
   border: 2px solid #16a34a;
   padding: 1rem 1.5rem;
@@ -208,21 +274,14 @@ const SecondaryButton = styled.button<{ disabled?: boolean }>`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
-  opacity: ${(props) => (props.disabled ? "0.7" : "1")};
+  opacity: ${props => (props.disabled ? '0.7' : '1')};
 
   &:hover:not(:disabled) {
     background: #f0f9ff;
     transform: translateY(-2px);
   }
-`;
-
-const FeaturesCard = styled(motion.div)`
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
 `;
 
 const SectionTitle = styled.h3`
@@ -233,45 +292,6 @@ const SectionTitle = styled.h3`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-`;
-
-const FeatureGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-`;
-
-const FeatureItem = styled.div`
-  background: #f9fafb;
-  padding: 1.5rem;
-  border-radius: 12px;
-  text-align: center;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #f3f4f6;
-    transform: translateY(-2px);
-  }
-`;
-
-const FeatureIcon = styled.div<{ color?: string }>`
-  font-size: 1.5rem;
-  color: ${(props) => props.color || "#16a34a"};
-  margin-bottom: 0.5rem;
-  display: flex;
-  justify-content: center;
-`;
-
-const FeatureLabel = styled.div`
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.25rem;
-`;
-
-const FeatureValue = styled.div<{ color?: string }>`
-  font-size: 1rem;
-  font-weight: 600;
-  color: ${(props) => props.color || "#1f2937"};
 `;
 
 const RecommendationCard = styled(motion.div)`
@@ -306,77 +326,6 @@ const RecommendationButton = styled(Link)`
     transform: translateY(-2px);
   }
 `;
-
-// Specifications styled components
-const SpecificationsCard = styled(motion.div)`
-  background: white;
-  padding: 2rem;
-  border-radius: 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-`;
-
-const SpecificationsGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-`;
-
-const SpecificationItem = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem;
-  background: #f8fafc;
-  border-radius: 8px;
-  border-left: 3px solid #16a34a;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #f1f5f9;
-    transform: translateX(4px);
-  }
-`;
-
-const SpecificationLabel = styled.span`
-  font-weight: 500;
-  color: #374151;
-  font-size: 0.875rem;
-`;
-
-const SpecificationValue = styled.span`
-  font-weight: 600;
-  color: #16a34a;
-  font-size: 0.875rem;
-`;
-
-const getCharacteristicLabel = (key: string): string => {
-  const labels: Record<string, string> = {
-    marca: "Marca",
-    color: "Color Principal",
-    color_2: "Color Secundario",
-    balance: "Balance",
-    nucleo: "Núcleo",
-    cara: "Material de las Caras",
-    dureza: "Dureza",
-    nivel_de_juego: "Nivel de Juego",
-    acabado: "Acabado",
-    forma: "Forma",
-    superficie: "Superficie",
-    tipo_de_juego: "Tipo de Juego",
-    coleccion_jugadores: "Colección",
-    jugador: "Jugador",
-    nivel_jugador: "Nivel Jugador",
-    peso: "Peso",
-    grosor: "Grosor",
-    material: "Material",
-    material_cara: "Material Cara",
-    material_marco: "Material Marco",
-  };
-  return (
-    labels[key] ||
-    key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
-  );
-};
 
 const LoadingContainer = styled.div`
   min-height: 80vh;
@@ -427,34 +376,69 @@ const ErrorDescription = styled.p`
 const RacketDetailPage: React.FC = () => {
   // Hooks
   const [searchParams] = useSearchParams();
-  const { rackets, loading } = useRackets();
+  const { rackets } = useRackets();
   const { isAuthenticated } = useAuth();
 
   // State
   const [racket, setRacket] = useState<Racket | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
 
   // Get racket ID from URL params
-  const racketId = searchParams.get("id");
+  const racketId = searchParams.get('id');
 
   // Load racket data
   useEffect(() => {
-    if (!racketId) {
-      setError("No se especificó el ID de la pala");
-      return;
-    }
+    const loadRacket = async () => {
+      if (!racketId) {
+        setError('No se especificó el ID de la pala');
+        setLoading(false);
+        return;
+      }
 
-    // Find racket by name (for backward compatibility with existing URLs)
-    const decodedRacketId = decodeURIComponent(racketId);
-    const foundRacket = rackets.find((pala) => pala.nombre === decodedRacketId);
+      try {
+        setLoading(true);
+        setError(null);
 
-    if (!foundRacket) {
-      setError("No se encontró la pala solicitada");
-      return;
-    }
+        // Try to parse as numeric ID first
+        const numericId = parseInt(racketId);
+        let foundRacket: Racket | null = null;
 
-    setRacket(foundRacket);
+        if (!isNaN(numericId)) {
+          // Load by ID from API
+          foundRacket = await RacketService.getRacketById(numericId);
+        }
+
+        // If not found by numeric ID, try by name (backward compatibility)
+        if (!foundRacket) {
+          const decodedRacketId = decodeURIComponent(racketId);
+          // First check in context (already loaded rackets)
+          foundRacket = rackets.find(pala => pala.nombre === decodedRacketId) || null;
+
+          // If still not found, try searching by name via API
+          if (!foundRacket) {
+            foundRacket = await RacketService.getRacketByName(decodedRacketId);
+          }
+        }
+
+        if (!foundRacket) {
+          setError('No se encontró la pala solicitada');
+          setRacket(null);
+        } else {
+          setRacket(foundRacket);
+          setError(null);
+        }
+      } catch (err: any) {
+        console.error('Error loading racket:', err);
+        setError(err.message || 'Error al cargar la información de la pala');
+        setRacket(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRacket();
   }, [racketId, rackets]);
 
   // Loading state (check if rackets are still loading from context)
@@ -464,7 +448,7 @@ const RacketDetailPage: React.FC = () => {
         <LoadingContainer>
           <LoadingSpinner
             animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
           >
             <FiLoader size={48} />
           </LoadingSpinner>
@@ -482,9 +466,9 @@ const RacketDetailPage: React.FC = () => {
           <ErrorIcon>⚠️</ErrorIcon>
           <ErrorText>Pala no encontrada</ErrorText>
           <ErrorDescription>
-            {error || "No se pudo encontrar la información de esta pala."}
+            {error || 'No se pudo encontrar la información de esta pala.'}
           </ErrorDescription>
-          <BackButton to="/catalog">
+          <BackButton to='/catalog'>
             <FiArrowLeft />
           </BackButton>
         </ErrorContainer>
@@ -497,7 +481,7 @@ const RacketDetailPage: React.FC = () => {
       {/* Header */}
       <Header>
         <HeaderContent>
-          <BackButton to="/catalog">
+          <BackButton to='/catalog'>
             <FiArrowLeft />
           </BackButton>
           <HeaderTitle>Detalles de la Pala</HeaderTitle>
@@ -506,177 +490,124 @@ const RacketDetailPage: React.FC = () => {
 
       {/* Content */}
       <Content>
-        {/* Main Card */}
-        <MainCard
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <ImageSection>
-            <RacketImage
-              src={racket.imagen || "/placeholder-racket.svg"}
-              alt={racket.modelo || "Pala de padel"}
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = "/placeholder-racket.svg";
-              }}
-            />
-            {racket.es_bestseller && (
-              <Badge variant="bestseller">
-                <FiStar size={16} />
-                Top
-              </Badge>
-            )}
-            {racket.en_oferta && (
-              <Badge variant="offer">
-                <FiTag size={16} />
-                Oferta
-              </Badge>
-            )}
-          </ImageSection>
-
-          <InfoSection>
-            <div>
-              <BrandText>{racket.marca}</BrandText>
-              <ModelText>{racket.modelo}</ModelText>
-
-              <PriceContainer>
-                <CurrentPrice>€{racket.precio_actual}</CurrentPrice>
-                {racket.en_oferta &&
-                  racket.precio_original &&
-                  racket.precio_original > 0 && (
-                    <>
-                      <OriginalPrice>€{racket.precio_original}</OriginalPrice>
-                      <DiscountBadge>
-                        -{racket.descuento_porcentaje}%
-                      </DiscountBadge>
-                    </>
-                  )}
-              </PriceContainer>
-            </div>
-
-            <ActionButtons>
-              <PrimaryButton
-                href={racket.enlace}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <FiExternalLink />
-                Ver en Padel Nuestro
-              </PrimaryButton>
-
-              {isAuthenticated && (
-                <SecondaryButton onClick={() => setShowAddToListModal(true)}>
-                  <FiHeart />
-                  Añadir a mis listas
-                </SecondaryButton>
+        {/* Top Section: Main Info (left) + Price Comparison (right) */}
+        <TopSection>
+          {/* Left Column: Main Card */}
+          <MainCard
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+          >
+            <ImageSection>
+              <RacketImage
+                src={racket.imagen || '/placeholder-racket.svg'}
+                alt={racket.modelo || 'Pala de padel'}
+                onError={e => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder-racket.svg';
+                }}
+              />
+              {racket.es_bestseller && (
+                <Badge variant='bestseller'>
+                  <FiStar size={16} />
+                  Top
+                </Badge>
               )}
-              {/* <SecondaryButton
-                onClick={handleAddToComparison}
-                disabled={isRacketInComparison(racket.nombre)}
-              >
-                {isRacketInComparison(racket.nombre) ? (
-                  <>
-                    <FiTrendingUp />
-                    En el Comparador
-                  </>
-                ) : (
-                  <>
-                    <FiTrendingUp />
-                    Añadir al Comparador ({count}/3)
-                  </>
+              {racket.en_oferta && (
+                <Badge variant='offer'>
+                  <FiTag size={16} />
+                  Oferta
+                </Badge>
+              )}
+            </ImageSection>
+
+            <InfoSection>
+              <div>
+                <BrandText>{toTitleCase(racket.marca)}</BrandText>
+                <ModelText>{toTitleCase(racket.modelo)}</ModelText>
+
+                <PriceContainer>
+                  {(() => {
+                    const lowestPrice = getLowestPrice(racket);
+                    if (lowestPrice) {
+                      return (
+                        <>
+                          <CurrentPrice>€{lowestPrice.price.toFixed(2)}</CurrentPrice>
+                          {lowestPrice.originalPrice > lowestPrice.price && (
+                            <>
+                              <OriginalPrice>€{lowestPrice.originalPrice.toFixed(2)}</OriginalPrice>
+                              {lowestPrice.discount > 0 && (
+                                <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
+                              )}
+                            </>
+                          )}
+                          <BestPriceBadge>
+                            <FiTag size={14} />
+                            Mejor precio
+                          </BestPriceBadge>
+                          <StoreBadge>en {lowestPrice.store}</StoreBadge>
+                        </>
+                      );
+                    }
+                    return <CurrentPrice>€{racket.precio_actual}</CurrentPrice>;
+                  })()}
+                </PriceContainer>
+              </div>
+
+              <ActionButtons>
+                <PrimaryButton
+                  href={getLowestPrice(racket)?.link || racket.enlace}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  <FiExternalLink />
+                  {getLowestPrice(racket)?.store
+                    ? `Ver en ${getLowestPrice(racket)?.store}`
+                    : 'Ver en tienda'}
+                </PrimaryButton>
+
+                {isAuthenticated && (
+                  <SecondaryButton onClick={() => setShowAddToListModal(true)}>
+                    <FiHeart />
+                    Añadir a mis listas
+                  </SecondaryButton>
                 )}
-              </SecondaryButton>
+              </ActionButtons>
+            </InfoSection>
+          </MainCard>
 
-              {count > 0 && (
-                <SecondaryButton onClick={handleGoToComparison}>
-                  Ir al Comparador ({count})
-                </SecondaryButton>
-              )} */}
-            </ActionButtons>
-          </InfoSection>
-        </MainCard>
+          {/* Right Column: Compact Price Comparison */}
+          <CompactPriceCard
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
+          >
+            <StorePriceComparison racket={racket} isAuthenticated={isAuthenticated} compact />
+          </CompactPriceCard>
+        </TopSection>
 
-        {/* Features Card - Now focusing on status and metadata */}
-        <FeaturesCard
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <SectionTitle>
-            <FiTag />
-            Estado y Disponibilidad
-          </SectionTitle>
-
-          <FeatureGrid>
-            <FeatureItem>
-              <FeatureIcon color={racket.es_bestseller ? "#f59e0b" : "#9ca3af"}>
-                🏆
-              </FeatureIcon>
-              <FeatureLabel>Bestseller</FeatureLabel>
-              <FeatureValue
-                color={racket.es_bestseller ? "#16a34a" : "#9ca3af"}
-              >
-                {racket.es_bestseller ? "Sí" : "No"}
-              </FeatureValue>
-            </FeatureItem>
-
-            <FeatureItem>
-              <FeatureIcon color={racket.en_oferta ? "#ef4444" : "#9ca3af"}>
-                🏷️
-              </FeatureIcon>
-              <FeatureLabel>En Oferta</FeatureLabel>
-              <FeatureValue color={racket.en_oferta ? "#ef4444" : "#9ca3af"}>
-                {racket.en_oferta ? "Sí" : "No"}
-              </FeatureValue>
-            </FeatureItem>
-
-            <FeatureItem>
-              <FeatureIcon>🏪</FeatureIcon>
-              <FeatureLabel>Tienda</FeatureLabel>
-              <FeatureValue>Padel Nuestro</FeatureValue>
-            </FeatureItem>
-
-            <FeatureItem>
-              <FeatureIcon color="#9ca3af">⏰</FeatureIcon>
-              <FeatureLabel>Actualizado</FeatureLabel>
-              <FeatureValue>
-                {racket.scrapeado_en
-                  ? new Date(racket.scrapeado_en).toLocaleDateString("es-ES")
-                  : "N/A"}
-              </FeatureValue>
-            </FeatureItem>
-          </FeatureGrid>
-        </FeaturesCard>
-
-        {/* Racket Specifications (if available) */}
-        {racket.especificaciones &&
-          Object.keys(racket.especificaciones).length > 0 && (
-            <SpecificationsCard
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.35 }}
-            >
-              <SectionTitle>
-                <FiInfo />
-                Especificaciones Técnicas
-              </SectionTitle>
-              <SpecificationsGrid>
-                {Object.entries(racket.especificaciones).map(([key, value]) => {
-                  if (!value) return null;
-
-                  return (
-                    <SpecificationItem key={key}>
-                      <SpecificationLabel>
-                        {getCharacteristicLabel(key)}
-                      </SpecificationLabel>
-                      <SpecificationValue>{String(value)}</SpecificationValue>
-                    </SpecificationItem>
-                  );
-                })}
-              </SpecificationsGrid>
-            </SpecificationsCard>
-          )}
+        {/* Características Principales */}
+        <RacketFeatures
+          characteristics={{
+            balance:
+              racket.especificaciones?.balance || racket.caracteristicas_balance || undefined,
+            core: racket.especificaciones?.nucleo || racket.caracteristicas_nucleo || undefined,
+            face: racket.especificaciones?.cara || racket.caracteristicas_cara || undefined,
+            hardness: racket.especificaciones?.dureza || racket.caracteristicas_dureza || undefined,
+            shape: racket.especificaciones?.forma || racket.caracteristicas_forma || undefined,
+            surface:
+              racket.especificaciones?.superficie || racket.caracteristicas_superficie || undefined,
+            game_type:
+              racket.especificaciones?.tipo_de_juego ||
+              racket.caracteristicas_tipo_de_juego ||
+              undefined,
+            game_level:
+              racket.especificaciones?.nivel_de_juego ||
+              racket.caracteristicas_nivel_de_juego ||
+              undefined,
+          }}
+          specs={racket.specs}
+        />
 
         {/* Sección de Reviews */}
         {racket.id && <RacketReviews racketId={racket.id} />}
@@ -690,22 +621,19 @@ const RacketDetailPage: React.FC = () => {
           <SectionTitle>💡 ¿Necesitas más opciones?</SectionTitle>
 
           <RecommendationText>
-            Si esta pala no es exactamente lo que buscas, puedes explorar
-            nuestra colección completa de palas de pádel o usar nuestro sistema
-            de recomendaciones con IA para encontrar la pala perfecta según tu
-            perfil de jugador y estilo de juego.
+            Si esta pala no es exactamente lo que buscas, puedes explorar nuestra colección completa
+            de palas de pádel o usar nuestro sistema de recomendaciones con IA para encontrar la
+            pala perfecta según tu perfil de jugador y estilo de juego.
           </RecommendationText>
 
-          <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
-            <RecommendationButton to="/catalog">
-              🎾 Ver todas las palas
-            </RecommendationButton>
+          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+            <RecommendationButton to='/catalog'>🎾 Ver todas las palas</RecommendationButton>
             <RecommendationButton
-              to="/best-racket"
+              to='/best-racket'
               style={{
-                background: "#16a34a",
-                color: "white",
-                borderColor: "#16a34a",
+                background: '#16a34a',
+                color: 'white',
+                borderColor: '#16a34a',
               }}
             >
               ✨ Buscar mi pala ideal

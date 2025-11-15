@@ -139,6 +139,10 @@ def default_racket_structure() -> Dict[str, Any]:
 
 
 def normalize_name(name: Optional[str]) -> Optional[str]:
+    """
+    Normaliza un nombre de pala para comparación.
+    Elimina prefijos, espacios extra, y convierte a minúsculas.
+    """
     if not name:
         return None
     n = name.strip()
@@ -147,6 +151,18 @@ def normalize_name(name: Optional[str]) -> Optional[str]:
     # Normalizar espacios
     n = re.sub(r"\s+", " ", n)
     return n.lower()
+
+def clean_name_and_model(name: Optional[str]) -> Optional[str]:
+    """
+    Limpia el nombre/modelo eliminando el prefijo 'Pala' del principio.
+    """
+    if not name:
+        return None
+    # Eliminar "Pala " del principio del string
+    cleaned = re.sub(r'^\s*Pala\s+', '', name.strip(), flags=re.IGNORECASE)
+    # Normalizar espacios
+    cleaned = re.sub(r'\s+', ' ', cleaned)
+    return cleaned.strip()
 
 
 def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str]) -> Optional[int]:
@@ -305,28 +321,89 @@ def scrape_catalog_page(session: requests.Session, page_number: int) -> List[str
     return unique_links
 
 
-# Mapeo de etiquetas en español a claves characteristics_*
+# Mapeo ampliado de etiquetas en español e inglés a claves characteristics_*
 CHARACTERISTICS_MAPPING = {
+    # Marca
     'Marca': 'characteristics_brand',
+    'Brand': 'characteristics_brand',
+
+    # Color
     'Color': 'characteristics_color',
     'Color 2': 'characteristics_color_2',
+    'Colores': 'characteristics_color_2',
+    'Colors': 'characteristics_color_2',
+
+    # Producto
     'Producto': 'characteristics_product',
+    'Product': 'characteristics_product',
+
+    # Balance
     'Balance': 'characteristics_balance',
+    'Punto de balance': 'characteristics_balance',
+
+    # Núcleo
     'Núcleo': 'characteristics_core',
+    'Nucleo': 'characteristics_core',
     'Core': 'characteristics_core',
+    'Goma': 'characteristics_core',
+    'Espuma': 'characteristics_core',
+    'Foam': 'characteristics_core',
+
+    # Cara/Plano
     'Cara': 'characteristics_face',
+    'Caras': 'characteristics_face',
+    'Plano': 'characteristics_face',
+    'Planos': 'characteristics_face',
     'Material': 'characteristics_face',
+    'Material cara': 'characteristics_face',
+    'Material de cara': 'characteristics_face',
+    'Surface material': 'characteristics_face',
+    'Fibra': 'characteristics_face',
+
+    # Formato
     'Formato': 'characteristics_format',
+    'Format': 'characteristics_format',
+
+    # Dureza
     'Dureza': 'characteristics_hardness',
+    'Hardness': 'characteristics_hardness',
+
+    # Nivel de juego
+    'Nivel': 'characteristics_game_level',
     'Nivel de Juego': 'characteristics_game_level',
     'Nivel de juego': 'characteristics_game_level',
+    'Nivel del jugador': 'characteristics_game_level',
+    'Player level': 'characteristics_game_level',
+
+    # Acabado
     'Acabado': 'characteristics_finish',
+    'Finish': 'characteristics_finish',
+    'Textura': 'characteristics_finish',
+
+    # Forma
     'Forma': 'characteristics_shape',
+    'Shape': 'characteristics_shape',
+    'Molde': 'characteristics_shape',
+
+    # Superficie
     'Superficie': 'characteristics_surface',
+    'Surface': 'characteristics_surface',
+    'Rugosidad': 'characteristics_surface',
+
+    # Tipo de juego
     'Tipo de Juego': 'characteristics_game_type',
+    'Tipo de juego': 'characteristics_game_type',
+    'Game type': 'characteristics_game_type',
+    'Estilo': 'characteristics_game_type',
+
+    # Colección/Jugador
+    'Colección': 'characteristics_player_collection',
     'Colección Jugadores': 'characteristics_player_collection',
     'Colección jugadores': 'characteristics_player_collection',
+    'Collection': 'characteristics_player_collection',
     'Jugador': 'characteristics_player',
+    'Player': 'characteristics_player',
+    'Género': 'characteristics_player',
 }
 
 
@@ -404,33 +481,83 @@ def _extract_prices_from_soup(soup: BeautifulSoup) -> Tuple[Optional[float], Opt
 
 
 def _extract_specs(description_text: str) -> Dict[str, Any]:
+    """
+    Extrae especificaciones técnicas (tecnologías, peso, marco) desde texto de descripción.
+    Utiliza múltiples métodos: mayúsculas, palabras clave, patrones, y filtrado de navegación.
+    """
     specs: Dict[str, Any] = {"tecnologias": []}
     if not description_text:
         return specs
 
     txt = description_text
 
-    # Tecnologías: heurística simple, palabras en mayúsculas y términos comunes
+    # Blacklist para filtrar elementos de navegación que no son tecnologías reales
+    NAV_BLACKLIST = {
+        'PALAS', 'PADEL', 'OUTLET', 'OFERTAS', 'NOVEDADES', 'MARCAS', 'HOMBRE', 'MUJER',
+        'JUNIOR', 'ACCESORIOS', 'TEXTIL', 'CALZADO', 'BOLSAS', 'MOCHILAS', 'ROPA',
+        'ZAPATILLAS', 'INICIO', 'TIENDA', 'CONTACTO', 'AYUDA', 'CARRITO', 'ENVIO',
+        'PAGO', 'POLITICA', 'TERMINOS', 'CONDICIONES', 'PRIVACIDAD', 'COOKIES',
+    }
+
+    # Método 1: palabras en mayúsculas (tecnologías suelen estar en mayúsculas)
     tech_candidates = set()
     for token in re.findall(r"\b[A-Z][A-Z0-9]{2,}\b", txt):
-        tech_candidates.add(token)
-    # Palabras clave conocidas
-    for kw in ["EVA", "CARBON", "SPIN", "STRUCTURE", "REINFORCEMENT", "ALUMINIZED", "XR", "3K", "12K", "18K"]:
+        # Filtrar palabras demasiado comunes o de navegación
+        if token not in NAV_BLACKLIST and len(token) >= 3 and len(token) <= 25:
+            tech_candidates.add(token)
+
+    # Método 2: palabras clave conocidas de tecnologías de palas
+    tech_keywords = [
+        "EVA", "CARBON", "CARBONO", "SPIN", "STRUCTURE", "REINFORCEMENT",
+        "ALUMINIZED", "XR", "3K", "12K", "18K", "FIBERGLASS", "FIBRA",
+        "GRAPHENE", "POWER", "CONTROL", "ROUGH", "FOAM", "CORE",
+        "AIR", "REACT", "HOLES", "FRAME", "SMARTSTRAP", "PROTECTOR",
+        "VIBRADRIVE", "DIFUSOR", "NERVE", "CUSTOM", "GRIP", "HEART",
+        "MULTIEVA", "BLACK EVA", "HYPERSOFT", "METALSHIELD"
+    ]
+
+    for kw in tech_keywords:
         if kw in txt.upper():
             tech_candidates.add(kw)
-    if tech_candidates:
-        specs["tecnologias"] = sorted(list(tech_candidates))
 
-    # Peso y marco
+    # Método 3: buscar palabras entre comillas o después de "tecnología:"
+    tech_pattern_matches = re.findall(
+        r'(?:tecnolog[íi]a[s]?|technology)[:\s]*([A-Z][A-Za-z0-9\s]{2,30})',
+        txt,
+        flags=re.IGNORECASE
+    )
+    for match in tech_pattern_matches:
+        cleaned = match.strip()
+        if cleaned and len(cleaned) >= 3:
+            tech_candidates.add(cleaned.upper())
+
+    # Filtrar y limpiar tecnologías
+    final_techs = []
+    for tech in tech_candidates:
+        tech_upper = tech.upper().strip()
+        # Filtrar blacklist y tecnologías muy cortas/largas
+        if (tech_upper not in NAV_BLACKLIST and
+            len(tech_upper) >= 3 and
+            len(tech_upper) <= 30 and
+            not tech_upper.isdigit()):
+            final_techs.append(tech)
+
+    if final_techs:
+        specs["tecnologias"] = sorted(list(set(final_techs)))
+
+    # Peso: buscar patrones como "365g", "365 gramos", "365 gr"
     m_peso = re.search(r"(\d+)\s*g(?:r|ramos)?", txt, flags=re.IGNORECASE)
     if m_peso:
         specs["peso"] = f"{m_peso.group(1)}g"
 
+    # Marco: detectar materiales
     if "carbono" in txt.lower():
-        if "100%" in txt:
+        if "100%" in txt or "full carbon" in txt.lower():
             specs["marco"] = "100% Carbono"
         else:
             specs["marco"] = "Carbono"
+    elif "fibra de vidrio" in txt.lower() or "fiberglass" in txt.lower():
+        specs["marco"] = "Fibra de vidrio"
 
     return specs
 
@@ -451,6 +578,9 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
     if not name:
         logging.warning(f"No se pudo extraer nombre en {url}")
         return None
+
+    # Limpiar el nombre eliminando "Pala" del principio
+    name = clean_name_and_model(name)
 
     # Imagen principal
     image = None
@@ -508,7 +638,7 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
 
     specs = {"tecnologias": []}
 
-    # Tablas comunes: <table> con filas <tr><th>/<td> o <tr><td> label : value
+    # Método 1: Tablas HTML <table> con filas <tr><th>/<td> o <tr><td> label : value
     for table in soup.find_all("table"):
         for tr in table.find_all("tr"):
             th = tr.find("th")
@@ -524,7 +654,7 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
                 if label:
                     _assign_characteristic(label, value)
 
-    # Listas de características tipo <dl><dt><dd>
+    # Método 2: Listas de características tipo <dl><dt><dd>
     for dl in soup.find_all("dl"):
         dts = dl.find_all("dt")
         dds = dl.find_all("dd")
@@ -532,6 +662,32 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
             label = _extract_text(dt) or ""
             value = _extract_text(dd) or ""
             if label:
+                _assign_characteristic(label, value)
+
+    # Método 3: Listas <ul><li> con formato "Etiqueta: Valor"
+    for ul in soup.find_all("ul"):
+        for li in ul.find_all("li"):
+            li_text = _extract_text(li) or ""
+            if ":" in li_text:
+                parts = li_text.split(":", 1)
+                if len(parts) == 2:
+                    label = parts[0].strip()
+                    value = parts[1].strip()
+                    if label:
+                        _assign_characteristic(label, value)
+
+    # Método 4: Extracción desde descripción con regex para patrones tipo "Etiqueta: Valor"
+    if description:
+        # Buscar líneas con formato "Campo: Valor" en la descripción
+        pattern_lines = re.findall(
+            r'([A-Za-zÁ-ÿ\s]+):\s*([^\n\r]+)',
+            description,
+            flags=re.MULTILINE
+        )
+        for label, value in pattern_lines:
+            label = label.strip()
+            value = value.strip()
+            if label and value and len(label) < 50 and len(value) < 200:
                 _assign_characteristic(label, value)
 
     # Specs desde descripción
@@ -552,6 +708,10 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
             model = name[len(brand):].strip()
         else:
             model = None
+
+    # Limpiar el modelo si existe
+    if model:
+        model = clean_name_and_model(model)
 
     scraped: Dict[str, Any] = {
         "name": name,
@@ -598,21 +758,38 @@ def apply_update_or_create(data: List[Dict[str, Any]], scraped: Dict[str, Any]) 
 
 def main():
     setup_logging()
+    print("\n" + "="*60)
+    print("🚀 Iniciando scrapper TiendaPadelPoint")
+    print("="*60)
     logging.info("Inicio scrapper TiendaPadelPoint")
 
     data = load_json()
 
     session = requests.Session()
 
+    # Obtener total de páginas
+    print("\n📄 Detectando total de páginas del catálogo...")
     total_pages = get_total_pages(session)
+    print(f"✓ Total de páginas detectadas: {total_pages}")
+
+    # Recolectar enlaces de todas las páginas
+    print(f"\n🔍 Recolectando enlaces de productos...")
     all_links: List[str] = []
     for page in range(1, total_pages + 1):
         try:
             links = scrape_catalog_page(session, page)
+            print(f"  Página {page}/{total_pages}: {len(links)} enlaces encontrados")
             logging.info(f"Página {page}: {len(links)} enlaces")
             all_links.extend(links)
+
+            # Terminar si no se encuentran productos en una página
+            if len(links) == 0:
+                print(f"\n⚠️  Página {page} sin productos - finalizando recolección")
+                logging.info(f"Página {page} sin productos - terminando")
+                break
         except Exception as e:
             logging.error(f"Error obteniendo enlaces en página {page}: {e}")
+            print(f"  ❌ Error en página {page}: {e}")
 
     # Deduplicar manteniendo orden
     seen = set()
@@ -622,26 +799,70 @@ def main():
             all_unique_links.append(l)
             seen.add(l)
 
+    print(f"\n✓ Total enlaces únicos recolectados: {len(all_unique_links)}")
     logging.info(f"Total enlaces únicos de producto: {len(all_unique_links)}")
 
+    # Verificar que hay productos para procesar
+    if not all_unique_links or len(all_unique_links) == 0:
+        print("\n" + "="*60)
+        print("⚠️  No se encontraron productos para procesar")
+        print("="*60)
+        logging.warning("No se encontraron URLs de productos. Finalizando.")
+        return
+
     # Scrape concurrente de detalle
+    print(f"\n🔄 Procesando {len(all_unique_links)} productos...")
+    print("="*60)
+
+    productos_actualizados = 0
+    productos_nuevos = 0
+    productos_fallidos = 0
+
     futures = []
     with ThreadPoolExecutor(max_workers=MAX_WORKERS) as executor:
         for url in all_unique_links:
             futures.append(executor.submit(scrape_product_detail, session, url))
 
-        for future in as_completed(futures):
+        for idx, future in enumerate(as_completed(futures), 1):
             try:
                 scraped = future.result()
                 if scraped:
-                    apply_update_or_create(data, scraped)
-            except Exception as e:
-                logging.error(f"Error procesando detalle de producto: {e}")
+                    # Verificar si es actualización o nuevo
+                    name = scraped.get("name")
+                    existing_idx = find_existing_index_by_name(data, name)
 
+                    apply_update_or_create(data, scraped)
+
+                    if existing_idx is not None:
+                        productos_actualizados += 1
+                        print(f"  [{idx}/{len(all_unique_links)}] ✓ Actualizado: {name}")
+                    else:
+                        productos_nuevos += 1
+                        print(f"  [{idx}/{len(all_unique_links)}] ➕ Nuevo: {name}")
+                else:
+                    productos_fallidos += 1
+                    print(f"  [{idx}/{len(all_unique_links)}] ❌ Fallo al procesar producto")
+            except Exception as e:
+                productos_fallidos += 1
+                logging.error(f"Error procesando detalle de producto: {e}")
+                print(f"  [{idx}/{len(all_unique_links)}] ❌ Error: {e}")
+
+    # Guardar resultados
+    print("\n💾 Guardando datos en rackets.json...")
     save_json(data)
-    logging.info("Fin scrapper TiendaPadelPoint")
+
+    # Resumen final
+    print("\n" + "="*60)
+    print("🎉 Scrapping TiendaPadelPoint FINALIZADO")
+    print("="*60)
+    print(f"Total productos procesados:  {len(all_unique_links)}")
+    print(f"  ✓ Actualizados:            {productos_actualizados}")
+    print(f"  ➕ Nuevos:                 {productos_nuevos}")
+    print(f"  ❌ Fallidos:               {productos_fallidos}")
+    print("="*60)
+
+    logging.info(f"Fin scrapper TiendaPadelPoint - Actualizados: {productos_actualizados}, Nuevos: {productos_nuevos}, Fallidos: {productos_fallidos}")
 
 
 if __name__ == "__main__":
-    # No ejecutar automáticamente
-    pass
+    main()
