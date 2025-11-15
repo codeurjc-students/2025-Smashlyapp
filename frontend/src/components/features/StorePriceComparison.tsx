@@ -173,6 +173,17 @@ const StoreName = styled.div<{ $compact?: boolean }>`
   color: #1f2937;
   font-size: ${props => (props.$compact ? '0.9375rem' : '1rem')};
   letter-spacing: 0.2px;
+  display: inline-flex;
+  align-items: center;
+  gap: ${props => (props.$compact ? '0.4rem' : '0.5rem')};
+`;
+
+const Medal = styled.span<{ $compact?: boolean; $rank?: number }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: ${props => (props.$compact ? '1rem' : '1.125rem')};
+  line-height: 1;
 `;
 
 const PriceInfo = styled.div<{ $compact?: boolean }>`
@@ -470,6 +481,42 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
   // Generate redirect URL for login with current page
   const loginRedirect = `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`;
 
+  // Ordenar por precio ascendente y preparar ranking para medallas
+  const displayedStores = compact
+    ? storePrices.filter(s => s.available)
+    : storePrices;
+
+  const rankedStores = displayedStores
+    .filter(s => s.available && typeof s.price === 'number')
+    .sort((a, b) => (a.price || Infinity) - (b.price || Infinity));
+
+  const storeRankMap = new Map(rankedStores.map((s, idx) => [s.store, idx]));
+
+  const sortedDisplayedStores = [...displayedStores].sort((a, b) => {
+    const rankA = storeRankMap.get(a.store);
+    const rankB = storeRankMap.get(b.store);
+    if (rankA !== undefined && rankB !== undefined) return rankA - rankB;
+    if (rankA !== undefined) return -1;
+    if (rankB !== undefined) return 1;
+    // Ambos sin ranking (no disponibles), mantener orden alfabético estable
+    return a.store.localeCompare(b.store);
+  });
+
+  const getMedalEmoji = (rank: number) => {
+    switch (rank) {
+      case 0:
+        return '🥇';
+      case 1:
+        return '🥈';
+      case 2:
+        return '🥉';
+      case 3:
+        return '🏅';
+      default:
+        return null;
+    }
+  };
+
   return (
     <Card
       $compact={compact}
@@ -496,17 +543,20 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
         </GuestMessage>
       ) : (
         <ChartContainer $compact={compact}>
-          {storePrices
-            .filter(store => !compact || store.available)
-            .map((store, index) => {
+          {sortedDisplayedStores.map((store, index) => {
               const isLowest = store.price === lowestPrice && store.available;
               const hasDiscount =
                 store.originalPrice && store.price && store.originalPrice > store.price;
+              const rank = storeRankMap.get(store.store);
+              const medal = rank !== undefined && rank < 4 ? getMedalEmoji(rank) : null;
 
               return (
                 <StoreRow key={store.store} $compact={compact} $isLowest={isLowest}>
                   <StoreHeader $compact={compact}>
-                    <StoreName $compact={compact}>{store.store}</StoreName>
+                    <StoreName $compact={compact}>
+                      {medal && <Medal $compact={compact} $rank={rank}>{medal}</Medal>}
+                      {store.store}
+                    </StoreName>
                     {store.available && store.price ? (
                       <PriceInfo $compact={compact}>
                         <Price isLowest={isLowest} $compact={compact}>
