@@ -225,16 +225,6 @@ const Price = styled.div<{ isLowest?: boolean; $compact?: boolean }>`
   `}
 `;
 
-const DiscountBadge = styled.div`
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: white;
-  padding: 0.25rem 0.625rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.3);
-  letter-spacing: 0.3px;
-`;
 
 const LowestBadge = styled.div`
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -398,13 +388,6 @@ const UnavailableText = styled.div`
   font-style: italic;
 `;
 
-const OriginalPrice = styled.span`
-  text-decoration: line-through;
-  color: #9ca3af;
-  font-size: 0.875rem;
-  margin-left: 0.5rem;
-`;
-
 const GuestMessage = styled.div`
   padding: 3rem 2rem;
   background: linear-gradient(135deg, #16a34a 0%, #107a37 100%);
@@ -545,8 +528,6 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
         <ChartContainer $compact={compact}>
           {sortedDisplayedStores.map((store, index) => {
               const isLowest = store.price === lowestPrice && store.available;
-              const hasDiscount =
-                store.originalPrice && store.price && store.originalPrice > store.price;
               const rank = storeRankMap.get(store.store);
               const medal = rank !== undefined && rank < 4 ? getMedalEmoji(rank) : null;
 
@@ -562,12 +543,6 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
                         <Price isLowest={isLowest} $compact={compact}>
                           €{store.price.toFixed(2)}
                         </Price>
-                        {!compact && hasDiscount && store.originalPrice && (
-                          <OriginalPrice>€{store.originalPrice.toFixed(2)}</OriginalPrice>
-                        )}
-                        {hasDiscount && store.discount && (
-                          <DiscountBadge>-{store.discount}%</DiscountBadge>
-                        )}
                         {isLowest && (
                           <LowestBadge>
                             <FiStar size={14} />
