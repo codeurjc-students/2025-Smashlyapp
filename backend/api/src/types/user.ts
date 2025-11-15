@@ -1,4 +1,4 @@
-// Interfaz para el perfil de usuario
+// Interface for user profile
 export interface UserProfile {
   id: string;
   email: string;
@@ -14,7 +14,7 @@ export interface UserProfile {
   updated_at?: string;
 }
 
-// Interfaz para crear un nuevo perfil de usuario
+// Interface for creating a new user profile
 export interface CreateUserProfileRequest {
   email: string;
   nickname: string;
@@ -26,7 +26,7 @@ export interface CreateUserProfileRequest {
   limitations?: string[];
 }
 
-// Interfaz para actualizar un perfil de usuario
+// Interface for updating a user profile
 export interface UpdateUserProfileRequest {
   nickname?: string;
   full_name?: string;

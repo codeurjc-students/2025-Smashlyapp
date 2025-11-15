@@ -1,13 +1,23 @@
 import { Response } from "express";
 import { ListService } from "../services/listService";
-import { RequestWithUser, ApiResponse } from "../types";
+import logger from "../config/logger";
+import { RequestWithUser } from "../types";
 import {
   CreateListRequest,
   UpdateListRequest,
   AddRacketToListRequest,
 } from "../types/list";
 
+// Helper function outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
+
 export class ListController {
+
   /**
    * GET /api/users/lists
    * Obtiene todas las listas del usuario autenticado
@@ -35,12 +45,12 @@ export class ListController {
         data: lists,
         timestamp: new Date().toISOString(),
       });
-    } catch (error: any) {
-      console.error("Error in getUserLists:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getUserLists:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -80,12 +90,12 @@ export class ListController {
         data: list,
         timestamp: new Date().toISOString(),
       });
-    } catch (error: any) {
-      console.error("Error in getListById:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getListById:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -126,12 +136,12 @@ export class ListController {
         message: "Lista creada exitosamente",
         timestamp: new Date().toISOString(),
       });
-    } catch (error: any) {
-      console.error("Error in createList:", error);
+    } catch (error: unknown) {
+      logger.error("Error in createList:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -164,12 +174,12 @@ export class ListController {
         message: "Lista actualizada exitosamente",
         timestamp: new Date().toISOString(),
       });
-    } catch (error: any) {
-      console.error("Error in updateList:", error);
+    } catch (error: unknown) {
+      logger.error("Error in updateList:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -200,12 +210,12 @@ export class ListController {
         message: "Lista eliminada exitosamente",
         timestamp: new Date().toISOString(),
       });
-    } catch (error: any) {
-      console.error("Error in deleteList:", error);
+    } catch (error: unknown) {
+      logger.error("Error in deleteList:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -246,17 +256,19 @@ export class ListController {
 
       res.status(201).json({
         success: true,
-        message: "Pala añadida a la lista exitosamente",
+        message: "Racket added to list successfully",
         timestamp: new Date().toISOString(),
       });
-    } catch (error: any) {
-      console.error("Error in addRacketToList:", error);
+    } catch (error: unknown) {
+      logger.error("Error in addRacketToList:", error);
 
-      if (error.message.includes("ya está en la lista")) {
-        res.status(409).json({
+      // Check if it's a duplicate entry error
+      const errorMessage = getErrorMessage(error);
+      if (errorMessage.includes("ya está en la lista")) {
+        res.status(400).json({
           success: false,
-          error: "Conflicto",
-          message: error.message,
+          error: "Raqueta ya existe en la lista",
+          message: errorMessage,
           timestamp: new Date().toISOString(),
         });
         return;
@@ -265,7 +277,7 @@ export class ListController {
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }
@@ -273,7 +285,7 @@ export class ListController {
 
   /**
    * DELETE /api/users/lists/:id/rackets/:racketId
-   * Elimina una pala de la lista
+   * Removes a racket from the list
    */
   static async removeRacketFromList(
     req: RequestWithUser,
@@ -287,7 +299,7 @@ export class ListController {
       if (!userId) {
         res.status(401).json({
           success: false,
-          error: "Usuario no autenticado",
+          error: "Unauthorized user",
           timestamp: new Date().toISOString(),
         });
         return;
@@ -296,7 +308,7 @@ export class ListController {
       if (isNaN(racketId)) {
         res.status(400).json({
           success: false,
-          error: "ID de pala inválido",
+          error: "Invalid racket ID",
           timestamp: new Date().toISOString(),
         });
         return;
@@ -306,15 +318,15 @@ export class ListController {
 
       res.json({
         success: true,
-        message: "Pala eliminada de la lista exitosamente",
+        message: "Racket removed from list successfully",
         timestamp: new Date().toISOString(),
       });
-    } catch (error: any) {
-      console.error("Error in removeRacketFromList:", error);
+    } catch (error: unknown) {
+      logger.error("Error in removeRacketFromList:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       });
     }

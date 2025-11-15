@@ -47,49 +47,10 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
       setLoading(true);
       setError(null);
 
-      // Intentar cargar desde Supabase primero
-      try {
-        const data = await RacketService.getAllRackets();
-        setRackets(data);
-      } catch (supabaseError) {
-        console.warn(
-          "Error loading from Supabase, falling back to JSON:",
-          supabaseError
-        );
-
-        // Fallback a JSON si Supabase falla
-        const response = await fetch("/palas_padel.json");
-        if (!response.ok) {
-          throw new Error("No se pudo cargar ni desde Supabase ni desde JSON");
-        }
-
-        const jsonData = await response.json();
-        const palas = jsonData.palas || jsonData;
-
-        // Mapear datos del JSON al formato de la interfaz Racket
-        const mappedRackets: Racket[] = palas.map((pala: any) => ({
-          id: undefined, // JSON no tiene ID
-          nombre: pala.nombre,
-          marca: pala.marca,
-          modelo: pala.modelo,
-          precio_actual: pala.precio_actual,
-          precio_original: pala.precio_original || null,
-          descuento_porcentaje: pala.descuento_porcentaje || 0,
-          enlace: pala.enlace,
-          imagen: pala.imagen,
-          es_bestseller: pala.es_bestseller || false,
-          en_oferta: pala.en_oferta || false,
-          scrapeado_en: pala.scrapeado_en,
-          fuente: pala.fuente,
-          created_at: undefined,
-          updated_at: undefined,
-        }));
-
-        setRackets(mappedRackets);
-        console.log(
-          `Loaded ${mappedRackets.length} rackets from JSON fallback`
-        );
-      }
+      // Cargar directamente desde la API REST
+      const data = await RacketService.getAllRackets();
+      setRackets(data);
+      console.log(`Loaded ${data.length} rackets from API`);
     } catch (error: any) {
       setError(error.message || "Error al cargar las palas");
       console.error("Error fetching rackets:", error);

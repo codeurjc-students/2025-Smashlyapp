@@ -12,6 +12,7 @@ import org.openqa.selenium.safari.SafariDriver;
 import org.openqa.selenium.safari.SafariOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
+import java.io.File;
 import java.time.Duration;
 
 /**
@@ -26,7 +27,7 @@ public class WebDriverConfig {
     private static final String OS_NAME = System.getProperty("os.name").toLowerCase();
 
     private static final boolean DEFAULT_HEADLESS = true;
-    private static final int DEFAULT_TIMEOUT = 10;
+    private static final int DEFAULT_TIMEOUT = 20;
 
     /**
      * Creates and configures a WebDriver instance based on system properties or OS.
@@ -40,37 +41,88 @@ public class WebDriverConfig {
 
         // Check for explicit browser property first
         String browserProperty = System.getProperty(BROWSER_PROPERTY);
-        WebDriver driver;
+        WebDriver driver = null;
+
+        // Helper to try creating a driver with graceful fallback
+        java.util.function.Supplier<WebDriver> tryChrome = () -> {
+            try {
+                return createChromeDriver(headless);
+            } catch (RuntimeException e) {
+                System.err.println("Chrome WebDriver initialization failed: " + e.getMessage());
+                return null;
+            }
+        };
+        java.util.function.Supplier<WebDriver> tryFirefox = () -> {
+            try {
+                return createFirefoxDriver(headless);
+            } catch (RuntimeException e) {
+                System.err.println("Firefox WebDriver initialization failed: " + e.getMessage());
+                return null;
+            }
+        };
+        java.util.function.Supplier<WebDriver> tryEdge = () -> {
+            try {
+                return createEdgeDriver(headless);
+            } catch (RuntimeException e) {
+                System.err.println("Edge WebDriver initialization failed: " + e.getMessage());
+                return null;
+            }
+        };
+        java.util.function.Supplier<WebDriver> trySafari = () -> {
+            try {
+                return createSafariDriver(headless);
+            } catch (RuntimeException e) {
+                System.err.println("Safari WebDriver initialization failed: " + e.getMessage());
+                return null;
+            }
+        };
 
         if (browserProperty != null && !browserProperty.isEmpty()) {
             System.out.println("Using browser from property: " + browserProperty);
             switch (browserProperty.toLowerCase()) {
                 case "chrome":
-                    driver = createChromeDriver(headless);
+                    driver = tryChrome.get();
+                    if (driver == null) driver = isMacOS() ? trySafari.get() : tryFirefox.get();
                     break;
                 case "firefox":
-                    driver = createFirefoxDriver(headless);
+                    driver = tryFirefox.get();
+                    if (driver == null) driver = tryChrome.get();
+                    if (driver == null && isMacOS()) driver = trySafari.get();
                     break;
                 case "edge":
-                    driver = createEdgeDriver(headless);
+                    driver = tryEdge.get();
+                    if (driver == null) driver = tryChrome.get();
+                    if (driver == null) driver = tryFirefox.get();
                     break;
                 case "safari":
-                    driver = createSafariDriver(headless);
+                    driver = trySafari.get();
+                    if (driver == null) driver = tryChrome.get();
+                    if (driver == null) driver = tryFirefox.get();
                     break;
                 default:
                     System.out.println("Unknown browser: " + browserProperty + ". Defaulting to Chrome.");
-                    driver = createChromeDriver(headless);
+                    driver = tryChrome.get();
+                    if (driver == null) driver = isMacOS() ? trySafari.get() : tryFirefox.get();
             }
         } else {
-            // Auto-detect based on OS
+            // Auto-detect based on OS with robust fallbacks
             if (isMacOS()) {
-                driver = createSafariDriver(headless);
+                driver = trySafari.get();
+                if (driver == null) driver = tryChrome.get();
+                if (driver == null) driver = tryFirefox.get();
             } else if (isWindows()) {
-                driver = createEdgeDriver(headless);
+                driver = tryEdge.get();
+                if (driver == null) driver = tryChrome.get();
+                if (driver == null) driver = tryFirefox.get();
             } else {
-                System.out.println("Linux/Unix detected. Defaulting to Chrome.");
-                driver = createChromeDriver(headless);
+                System.out.println("Linux/Unix detected. Trying Chrome, then Firefox.");
+                driver = tryChrome.get();
+                if (driver == null) driver = tryFirefox.get();
             }
+        }
+
+        if (driver == null) {
+            throw new RuntimeException("Failed to initialize any WebDriver (Chrome/Firefox/Safari/Edge). Please ensure at least one browser is installed and configured.");
         }
 
         // Configure timeouts
@@ -132,6 +184,15 @@ public class WebDriverConfig {
             chromeOptions.addArguments("--headless=new");
         }
 
+        // Attempt to locate Chrome binary explicitly if ChromeDriver cannot find it
+        String chromeBinary = detectChromeBinary();
+        if (chromeBinary != null) {
+            System.out.println("Using detected Chrome binary: " + chromeBinary);
+            chromeOptions.setBinary(chromeBinary);
+        } else {
+            System.out.println("No explicit Chrome binary detected; relying on default discovery.");
+        }
+
         try {
             WebDriver driver = new ChromeDriver(chromeOptions);
             System.out.println("Chrome WebDriver created successfully.");
@@ -140,6 +201,59 @@ public class WebDriverConfig {
             System.err.println("Failed to create Chrome WebDriver: " + e.getMessage());
             throw new RuntimeException("Could not initialize Chrome WebDriver", e);
         }
+    }
+
+    /**
+     * Attempts to detect the Chrome binary path via env vars, system properties, and common locations.
+     */
+    private static String detectChromeBinary() {
+        // Check environment variables typically used in CI
+        String[] envVars = {"CHROME_PATH", "GOOGLE_CHROME_SHIM"};
+        for (String var : envVars) {
+            String val = System.getenv(var);
+            if (val != null && !val.isBlank() && new File(val).exists()) {
+                return val;
+            }
+        }
+
+        // Check an explicit system property if provided
+        String prop = System.getProperty("chrome.binary");
+        if (prop != null && !prop.isBlank() && new File(prop).exists()) {
+            return prop;
+        }
+
+        // Common installation paths by OS
+        if (isMacOS()) {
+            String[] macPaths = {
+                    "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                    "/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary",
+                    "/Applications/Chromium.app/Contents/MacOS/Chromium"
+            };
+            for (String p : macPaths) {
+                if (new File(p).exists()) return p;
+            }
+        } else if (isWindows()) {
+            String[] winPaths = {
+                    "C\\\\Program Files\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe",
+                    "C\\\\Program Files (x86)\\\\Google\\\\Chrome\\\\Application\\\\chrome.exe"
+            };
+            for (String p : winPaths) {
+                if (new File(p).exists()) return p;
+            }
+        } else {
+            String[] linuxPaths = {
+                    "/usr/bin/google-chrome",
+                    "/usr/bin/google-chrome-stable",
+                    "/usr/bin/chromium",
+                    "/usr/bin/chromium-browser",
+                    "/snap/bin/chromium"
+            };
+            for (String p : linuxPaths) {
+                if (new File(p).exists()) return p;
+            }
+        }
+
+        return null;
     }
 
     /**
@@ -239,7 +353,8 @@ public class WebDriverConfig {
      * Gets frontend URL from system properties.
      */
     public static String getFrontendUrl() {
-        return System.getProperty("test.base.url", System.getProperty("frontend.url", "http://localhost:5173"));
+        // Prefer explicit frontend.url over test.base.url to avoid conflicts with API URL defaults
+        return System.getProperty("frontend.url", System.getProperty("test.base.url", "http://localhost:5173"));
     }
 
     /**

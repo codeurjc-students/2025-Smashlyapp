@@ -1,0 +1,169 @@
+name: Continuous Delivery (release)
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  backend-release-tests:
+    runs-on: ubuntu-latest
+    name: Backend Release Tests
+    defaults:
+      run:
+        working-directory: ./backend/api
+    steps:
+      - name: Checkout repository at release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./backend/api/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build backend
+        run: npm run build
+
+      - name: Run backend unit tests
+        run: npm run test:unit
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Generate backend coverage
+        run: npm run test:coverage
+        env:
+          NODE_ENV: test
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Upload backend coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-release-coverage
+          path: ./backend/api/coverage-backend/
+          retention-days: 30
+
+  frontend-release-tests:
+    runs-on: ubuntu-latest
+    name: Frontend Release Tests
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - name: Checkout repository at release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: "./frontend/package-lock.json"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+      - name: Run frontend unit tests
+        run: npm run test:unit
+
+      - name: Generate frontend coverage
+        run: npm run test:coverage
+
+      - name: Upload frontend coverage
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-release-coverage
+          path: ./frontend/coverage/
+          retention-days: 30
+  publish-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    needs: [backend-release-tests, frontend-release-tests]
+    env:
+      REGISTRY: docker.io
+      IMAGE_NAME: teijeiro7/smashlyapp
+      COMPOSE_REPO: teijeiro7/smashlyapp-compose
+    steps:
+      - name: Checkout repository at release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+
+      - name: Derive version tags
+        id: tags
+        shell: bash
+        run: |
+          VERSION_TAG="${{ github.event.release.tag_name }}"  # e.g., 0.1.0
+          MINOR_TAG=$(echo "$VERSION_TAG" | awk -F. '{print $1"."$2}')     # e.g., 0.1
+          echo "version_tag=${VERSION_TAG}" >> $GITHUB_OUTPUT
+          echo "minor_tag=${MINOR_TAG}" >> $GITHUB_OUTPUT
+          echo "all_tags=${VERSION_TAG} latest ${MINOR_TAG}" >> $GITHUB_OUTPUT
+
+      - name: Validate version in frontend/package.json equals release version
+        shell: bash
+        run: |
+          VERSION_TAG="${{ steps.tags.outputs.version_tag }}"
+          PKG_VERSION=$(jq -r .version frontend/package.json)
+          echo "frontend/package.json version=$PKG_VERSION, release=$VERSION_TAG"
+          if [ "$PKG_VERSION" != "$VERSION_TAG" ]; then
+            echo "::error::frontend/package.json version ($PKG_VERSION) does not match release tag ($VERSION_TAG)."
+            exit 1
+          fi
+
+      - name: Validate docker-compose.yml image tag equals minor version
+        shell: bash
+        run: |
+          MINOR_TAG="${{ steps.tags.outputs.minor_tag }}"
+          if ! grep -q "image: \"teijeiro7/smashlyapp:${MINOR_TAG}\"" docker/docker-compose.yml; then
+            echo "::error::docker/docker-compose.yml must reference image tag ${MINOR_TAG}."
+            exit 1
+          fi
+
+      - name: Validate testing/pom.xml (optional)
+        shell: bash
+        run: |
+          VERSION_TAG="${{ steps.tags.outputs.version_tag }}"
+          if [ -f testing/pom.xml ]; then
+            POM_VERSION=$(xmllint --xpath 'string(//project/version)' testing/pom.xml 2>/dev/null || true)
+            echo "testing/pom.xml version=$POM_VERSION, release=$VERSION_TAG"
+            if [ -n "$POM_VERSION" ] && [ "$POM_VERSION" != "$VERSION_TAG" ]; then
+              echo "::error::testing/pom.xml version ($POM_VERSION) does not match release tag ($VERSION_TAG)."
+              exit 1
+            fi
+          else
+            echo "testing/pom.xml not found; skipping."
+          fi
+
+      - name: Publish Docker image and Compose (release + latest + minor)
+        uses: ./.github/actions/publish-artifacts
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          token: ${{ secrets.DOCKERHUB_TOKEN }}
+          image_name: ${{ env.IMAGE_NAME }}
+          compose_repo: ${{ env.COMPOSE_REPO }}
+          dockerfile_path: docker/Dockerfile
+          compose_path: docker/docker-compose.yml
+          context: .
+          tags: ${{ steps.tags.outputs.all_tags }}

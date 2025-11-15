@@ -1,4 +1,5 @@
 import { ApiConfig } from "../types";
+import logger from "../config/logger";
 
 // Configuración principal de la API
 export const config: ApiConfig = {
@@ -44,7 +45,7 @@ export function validateConfig(): void {
     );
   }
 
-  console.log("✅ Configuration validated successfully");
+  logger.info("✅ Configuration validated successfully");
 }
 
 export default config;

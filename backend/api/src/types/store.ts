@@ -11,20 +11,20 @@ export interface Store {
   website_url?: string;
   verified: boolean;
   
-  // Datos de perfil público
+  // Public profile data
   logo_url?: string;
   short_description?: string;
   location?: string;
   
-  // Relación con usuario
-  admin_user_id: string;
+  // User relationship
+  admin_user_id: string; // UUID of the owner user
   
-  // Auditoría
+  // Audit
   created_at?: string;
   updated_at?: string;
 }
 
-// Interfaz para crear una tienda
+// Interface for creating a store
 export interface CreateStoreRequest {
   store_name: string;
   legal_name: string;
@@ -37,7 +37,7 @@ export interface CreateStoreRequest {
   location?: string;
 }
 
-// Interfaz para actualizar una tienda
+// Interface for updating a store
 export interface UpdateStoreRequest {
   store_name?: string;
   legal_name?: string;
@@ -50,9 +50,9 @@ export interface UpdateStoreRequest {
   location?: string;
 }
 
-// Interfaz para el registro de tienda
+// Interface for store registration
 export interface StoreRegistrationRequest extends CreateStoreRequest {
-  // Datos del usuario admin de la tienda
+  // Store admin user data
   email: string;
   password: string;
   nickname: string;

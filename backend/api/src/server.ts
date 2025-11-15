@@ -3,6 +3,7 @@ import https from "https";
 import fs from "fs";
 import path from "path";
 import app from "./app";
+import logger from "./config/logger";
 
 // Cargar variables de entorno
 dotenv.config();
@@ -20,10 +21,10 @@ if (USE_HTTPS) {
 
   // Verificar que existen los certificados
   if (!fs.existsSync(certPath) || !fs.existsSync(keyPath)) {
-    console.error("❌ Error: No se encontraron los certificados SSL");
-    console.error(`   Cert path: ${certPath}`);
-    console.error(`   Key path: ${keyPath}`);
-    console.error("   Por favor, genera los certificados SSL primero.");
+    logger.error("❌ Error: No se encontraron los certificados SSL");
+    logger.error(`   Cert path: ${certPath}`);
+    logger.error(`   Key path: ${keyPath}`);
+    logger.error("   Por favor, genera los certificados SSL primero.");
     process.exit(1);
   }
 
@@ -33,34 +34,34 @@ if (USE_HTTPS) {
   };
 
   server = https.createServer(httpsOptions, app).listen(PORT, () => {
-    console.log(`🚀 Smashly API server running on port ${PORT} (HTTPS)`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-    console.log(`🔗 Health check: https://localhost:${PORT}/api/v1/health`);
-    console.log(`📚 API Documentation: https://localhost:${PORT}/api/v1/docs`);
+    logger.info(`🚀 Smashly API server running on port ${PORT} (HTTPS)`);
+    logger.info(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
+    logger.info(`🔗 Health check: https://localhost:${PORT}/api/v1/health`);
+    logger.info(`📚 API Documentation: https://localhost:${PORT}/api/v1/docs`);
   });
 } else {
   // Configuración HTTP
   server = app.listen(PORT, () => {
-    console.log(`🚀 Smashly API server running on port ${PORT} (HTTP)`);
-    console.log(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/api/v1/health`);
-    console.log(`📚 API Documentation: http://localhost:${PORT}/api/v1/docs`);
+    logger.info(`🚀 Smashly API server running on port ${PORT} (HTTP)`);
+    logger.info(`📊 Environment: ${process.env.NODE_ENV || "development"}`);
+    logger.info(`🔗 Health check: http://localhost:${PORT}/api/v1/health`);
+    logger.info(`📚 API Documentation: http://localhost:${PORT}/api/v1/docs`);
   });
 }
 
 // Graceful shutdown
 process.on("SIGTERM", () => {
-  console.log("🛑 SIGTERM signal received: closing HTTP server");
+  logger.info("🛑 SIGTERM signal received: closing HTTP server");
   server.close(() => {
-    console.log("✅ HTTP server closed");
+    logger.info("✅ HTTP server closed");
     process.exit(0);
   });
 });
 
 process.on("SIGINT", () => {
-  console.log("🛑 SIGINT signal received: closing HTTP server");
+  logger.info("🛑 SIGINT signal received: closing HTTP server");
   server.close(() => {
-    console.log("✅ HTTP server closed");
+    logger.info("✅ HTTP server closed");
     process.exit(0);
   });
 });

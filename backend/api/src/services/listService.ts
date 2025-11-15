@@ -8,7 +8,7 @@ import {
 
 export class ListService {
   /**
-   * Obtiene todas las listas de un usuario
+   * Gets all lists for a user
    */
   static async getUserLists(userId: string): Promise<ListWithRackets[]> {
     const { data, error } = await supabase
@@ -25,10 +25,10 @@ export class ListService {
       .order("created_at", { ascending: false });
 
     if (error) {
-      throw new Error(`Error al obtener listas: ${error.message}`);
+      throw new Error(`Error getting lists: ${error.message}`);
     }
 
-    // Contar palas por lista
+    // Count rackets per list
     return data.map((list) => ({
       ...list,
       racket_count: list.list_rackets?.length || 0,
@@ -36,7 +36,7 @@ export class ListService {
   }
 
   /**
-   * Obtiene una lista específica con sus palas
+   * Gets a specific list with its rackets
    */
   static async getListById(
     listId: string,
@@ -60,19 +60,19 @@ export class ListService {
 
     if (error) {
       if (error.code === "PGRST116") return null;
-      throw new Error(`Error al obtener lista: ${error.message}`);
+      throw new Error(`Error getting list: ${error.message}`);
     }
 
     return {
       ...data,
       rackets:
-        data.list_rackets?.map((lr: { rackets: any }) => lr.rackets) || [],
+        data.list_rackets?.map((lr: { rackets: unknown }) => lr.rackets) || [],
       racket_count: data.list_rackets?.length || 0,
     };
   }
 
   /**
-   * Crea una nueva lista
+   * Creates a new list
    */
   static async createList(
     userId: string,
@@ -89,14 +89,14 @@ export class ListService {
       .single();
 
     if (error) {
-      throw new Error(`Error al crear lista: ${error.message}`);
+      throw new Error(`Error creating list: ${error.message}`);
     }
 
     return data;
   }
 
   /**
-   * Actualiza una lista
+   * Updates a list
    */
   static async updateList(
     listId: string,
@@ -115,17 +115,17 @@ export class ListService {
       .single();
 
     if (error) {
-      throw new Error(`Error al actualizar lista: ${error.message}`);
+      throw new Error(`Error updating list: ${error.message}`);
     }
 
     return data;
   }
 
   /**
-   * Elimina una lista
+   * Deletes a list
    */
   static async deleteList(listId: string, userId: string): Promise<void> {
-    // Primero eliminar las relaciones en list_rackets (cascade debería hacerlo automáticamente)
+    // First delete relationships in list_rackets (cascade should do this automatically)
     const { error } = await supabase
       .from("lists")
       .delete()
@@ -133,25 +133,25 @@ export class ListService {
       .eq("user_id", userId);
 
     if (error) {
-      throw new Error(`Error al eliminar lista: ${error.message}`);
+      throw new Error(`Error deleting list: ${error.message}`);
     }
   }
 
   /**
-   * Añade una pala a una lista
+   * Adds a racket to a list
    */
   static async addRacketToList(
     listId: string,
     userId: string,
     racketId: number
   ): Promise<void> {
-    // Verificar que la lista pertenece al usuario
+    // Verify that the list belongs to the user
     const list = await this.getListById(listId, userId);
     if (!list) {
-      throw new Error("Lista no encontrada o no pertenece al usuario");
+      throw new Error("List not found or does not belong to user");
     }
 
-    // Verificar si la pala ya está en la lista
+    // Check if the racket is already in the list
     const { data: existing } = await supabase
       .from("list_rackets")
       .select("*")
@@ -160,7 +160,7 @@ export class ListService {
       .single();
 
     if (existing) {
-      throw new Error("La pala ya está en la lista");
+      throw new Error("The racket is already in the list");
     }
 
     const { error } = await supabase.from("list_rackets").insert({
@@ -169,22 +169,22 @@ export class ListService {
     });
 
     if (error) {
-      throw new Error(`Error al añadir pala a la lista: ${error.message}`);
+      throw new Error(`Error adding racket to list: ${error.message}`);
     }
   }
 
   /**
-   * Elimina una pala de una lista
+   * Removes a racket from a list
    */
   static async removeRacketFromList(
     listId: string,
     userId: string,
     racketId: number
   ): Promise<void> {
-    // Verificar que la lista pertenece al usuario
+    // Verify that the list belongs to the user
     const list = await this.getListById(listId, userId);
     if (!list) {
-      throw new Error("Lista no encontrada o no pertenece al usuario");
+      throw new Error("List not found or does not belong to user");
     }
 
     const { error } = await supabase
@@ -194,7 +194,7 @@ export class ListService {
       .eq("racket_id", racketId);
 
     if (error) {
-      throw new Error(`Error al eliminar pala de la lista: ${error.message}`);
+      throw new Error(`Error removing racket from list: ${error.message}`);
     }
   }
 }

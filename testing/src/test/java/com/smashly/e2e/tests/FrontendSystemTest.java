@@ -111,11 +111,11 @@ public class FrontendSystemTest {
                                 .as("Should display at least 1 racket and at most 20")
                                 .isBetween(1, 20);
 
-                // Verify total count is displayed and matches
-                int totalCountDisplayed = mainPage.getTotalCountNumber();
-                assertThat(totalCountDisplayed)
-                                .as("Total count should match displayed rackets count")
-                                .isEqualTo(racketsCount);
+                // Verify header stats show total available palas (should be >= displayed count)
+                int palasStat = mainPage.getPalasStatNumber();
+                assertThat(palasStat)
+                                .as("Header 'Palas' stat should be >= displayed rackets")
+                                .isGreaterThanOrEqualTo(racketsCount);
 
                 System.out.println("✅ Found " + racketsCount + " rackets displayed correctly");
         }
@@ -232,10 +232,11 @@ public class FrontendSystemTest {
                                         .as("Rackets list should be visible when data is present")
                                         .isTrue();
 
-                        assertThat(mainPage.getTotalCountText())
-                                        .as("Total count should be displayed")
-                                        .isNotEmpty()
-                                        .contains("Total de palas mostradas");
+                        // New UI shows header stats instead of a 'Total de palas mostradas' paragraph
+                        int palasStat = mainPage.getPalasStatNumber();
+                        assertThat(palasStat)
+                                        .as("Header 'Palas' stat should be present and > 0")
+                                        .isGreaterThan(0);
                 }
 
                 System.out.println("✅ All page elements are responsive and visible");

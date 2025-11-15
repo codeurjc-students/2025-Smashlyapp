@@ -1,12 +1,12 @@
-import React, { useState } from "react";
-import toast from "react-hot-toast";
-import { FiEye, FiEyeOff, FiLock, FiMail, FiUser } from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { useAuth } from "../contexts/AuthContext.tsx";
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
+import { FiEye, FiEyeOff, FiLock, FiMail, FiUser } from 'react-icons/fi';
+import { Link, useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext.tsx';
 
 const Container = styled.div`
-  min-height: 100vh;
+  min-height: 80vh;
   background: linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
   display: flex;
   align-items: center;
@@ -84,7 +84,7 @@ const InputContainer = styled.div`
 const Input = styled.input<{ hasError?: boolean }>`
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
-  border: 2px solid ${(props) => (props.hasError ? "#ef4444" : "#e5e7eb")};
+  border: 2px solid ${props => (props.hasError ? '#ef4444' : '#e5e7eb')};
   border-radius: 12px;
   font-size: 1rem;
   transition: all 0.2s ease;
@@ -158,17 +158,15 @@ const LoginButton = styled.button<{ loading?: boolean }>`
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
-  cursor: ${(props) => (props.loading ? "not-allowed" : "pointer")};
+  cursor: ${props => (props.loading ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
   box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
-  opacity: ${(props) => (props.loading ? 0.7 : 1)};
+  opacity: ${props => (props.loading ? 0.7 : 1)};
 
   &:hover {
-    transform: ${(props) => (props.loading ? "none" : "translateY(-2px)")};
-    box-shadow: ${(props) =>
-      props.loading
-        ? "0 4px 14px rgba(22, 163, 74, 0.3)"
-        : "0 8px 25px rgba(22, 163, 74, 0.4)"};
+    transform: ${props => (props.loading ? 'none' : 'translateY(-2px)')};
+    box-shadow: ${props =>
+      props.loading ? '0 4px 14px rgba(22, 163, 74, 0.3)' : '0 8px 25px rgba(22, 163, 74, 0.4)'};
   }
 
   &:active {
@@ -216,8 +214,8 @@ const LoginPage: React.FC = () => {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState<FormData>({
-    email: "",
-    password: "",
+    email: '',
+    password: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
@@ -228,16 +226,16 @@ const LoginPage: React.FC = () => {
 
     // Validate email
     if (!formData.email) {
-      newErrors.email = "El email es requerido";
+      newErrors.email = 'El email es requerido';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "El email no es válido";
+      newErrors.email = 'El email no es válido';
     }
 
     // Validate password
     if (!formData.password) {
-      newErrors.password = "La contraseña es requerida";
+      newErrors.password = 'La contraseña es requerida';
     } else if (formData.password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
+      newErrors.password = 'La contraseña debe tener al menos 6 caracteres';
     }
 
     setErrors(newErrors);
@@ -246,13 +244,13 @@ const LoginPage: React.FC = () => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
     // Clear error when user starts typing
     if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [name]: undefined,
       }));
@@ -278,14 +276,13 @@ const LoginPage: React.FC = () => {
       }
 
       // Login exitoso
-      toast.success("¡Bienvenido a Smashly!");
+      toast.success('¡Bienvenido a Smashly!');
 
       // Redirigir a la página principal
-      navigate("/");
+      navigate('/');
     } catch (error: any) {
-      console.error("Error during login:", error);
-      const errorMessage =
-        error?.message || "Error inesperado durante el inicio de sesión";
+      console.error('Error during login:', error);
+      const errorMessage = error?.message || 'Error inesperado durante el inicio de sesión';
       toast.error(errorMessage);
     } finally {
       setLoading(false);
@@ -297,74 +294,69 @@ const LoginPage: React.FC = () => {
       <LoginCard>
         <Header>
           <Logo>
-            <FiUser size={32} color="white" />
+            <FiUser size={32} color='white' />
           </Logo>
           <Title>Iniciar Sesión</Title>
           <Subtitle>
-            Accede a tu cuenta para guardar tus preferencias y recibir
-            recomendaciones personalizadas
+            Accede a tu cuenta para guardar tus preferencias y recibir recomendaciones
+            personalizadas
           </Subtitle>
         </Header>
 
         <Form onSubmit={handleSubmit}>
           <InputGroup>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor='email'>Email</Label>
             <InputContainer>
               <InputIcon>
                 <FiMail size={20} />
               </InputIcon>
               <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="tu@email.com"
+                id='email'
+                name='email'
+                type='email'
+                placeholder='tu@email.com'
                 value={formData.email}
                 onChange={handleChange}
                 hasError={!!errors.email}
-                autoComplete="email"
+                autoComplete='email'
               />
             </InputContainer>
             {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
           </InputGroup>
 
           <InputGroup>
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor='password'>Contraseña</Label>
             <InputContainer>
               <InputIcon>
                 <FiLock size={20} />
               </InputIcon>
               <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Tu contraseña"
+                id='password'
+                name='password'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='Tu contraseña'
                 value={formData.password}
                 onChange={handleChange}
                 hasError={!!errors.password}
-                autoComplete="current-password"
+                autoComplete='current-password'
               />
-              <PasswordToggle
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
+              <PasswordToggle type='button' onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </PasswordToggle>
             </InputContainer>
             {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
           </InputGroup>
 
-          <ForgotPassword to="/forgot-password">
-            ¿Olvidaste tu contraseña?
-          </ForgotPassword>
+          <ForgotPassword to='/forgot-password'>¿Olvidaste tu contraseña?</ForgotPassword>
 
-          <LoginButton type="submit" loading={loading} disabled={loading}>
-            {loading ? "Iniciando sesión..." : "Iniciar Sesión"}
+          <LoginButton type='submit' loading={loading} disabled={loading}>
+            {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </LoginButton>
         </Form>
 
         <RegisterLink>
           <RegisterText>
-            ¿No tienes cuenta? <Link to="/register">Regístrate gratis</Link>
+            ¿No tienes cuenta? <Link to='/register'>Regístrate gratis</Link>
           </RegisterText>
         </RegisterLink>
       </LoginCard>

@@ -5,6 +5,7 @@ import morgan from "morgan";
 import compression from "compression";
 import rateLimit from "express-rate-limit";
 import { validateConfig } from "./config";
+import logger from "./config/logger";
 
 // Importar rutas
 import racketRoutes from "./routes/rackets";
@@ -18,6 +19,7 @@ import storeRoutes from "./routes/stores";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
 import path from "path";
+import fs from "fs";
 
 // Validar configuración al iniciar
 validateConfig();
@@ -89,7 +91,8 @@ app.use("/api/v1/stores", storeRoutes); // Rutas de tiendas
 
 // Swagger UI - servir OpenAPI spec desde docs/api-docs.yaml
 try {
-  const swaggerPath = path.join(__dirname, "../docs/api-docs.yaml");
+  // Apuntar a la carpeta docs en la raíz del proyecto (para GitHub Pages)
+  const swaggerPath = path.join(__dirname, "../../../docs/api-docs.yaml");
   const swaggerDocument = YAML.load(swaggerPath);
 
   // UI en /api-docs
@@ -104,10 +107,22 @@ try {
     res.json(swaggerDocument);
   });
 } catch (err) {
-  console.warn(
+  logger.warn(
     "Swagger UI no iniciado: no se pudo cargar docs/api-docs.yaml",
     err
   );
+}
+
+// Servir frontend estático (build de Vite) desde ../static si existe
+const staticDir = path.join(__dirname, "../static");
+if (fs.existsSync(staticDir)) {
+  // Archivos estáticos
+  app.use(express.static(staticDir));
+
+  // Fallback SPA: cualquier ruta que no empiece por /api/ devuelve index.html
+  app.get(/^\/(?!api\/).*/, (req, res) => {
+    res.sendFile(path.join(staticDir, "index.html"));
+  });
 }
 
 // Endpoint de documentación básica
@@ -115,29 +130,29 @@ app.get("/api/v1/docs", (req, res) => {
   res.json({
     title: "Smashly API Documentation",
     version: "1.0.0",
-    description: "API REST para sistema de gestión de palas de pádel",
+    description: "REST API for padel racket management system",
     endpoints: {
       health: "GET /api/health - Health check",
       auth: {
-        "POST /api/auth/login": "Iniciar sesión",
-        "POST /api/auth/register": "Registrar usuario",
-        "POST /api/auth/logout": "Cerrar sesión",
-        "POST /api/auth/refresh": "Refrescar token",
-        "GET /api/auth/me": "Obtener usuario actual",
+        "POST /api/auth/login": "Login",
+        "POST /api/auth/register": "Register user",
+        "POST /api/auth/logout": "Logout",
+        "POST /api/auth/refresh": "Refresh token",
+        "GET /api/auth/me": "Get current user",
       },
       rackets: {
-        "GET /api/rackets": "Obtener todas las palas",
-        "GET /api/rackets/:id": "Obtener pala por ID",
-        "GET /api/rackets/search": "Buscar palas",
-        "GET /api/rackets/brands/:brand": "Palas por marca",
-        "GET /api/rackets/bestsellers": "Palas bestsellers",
-        "GET /api/rackets/offers": "Palas en oferta",
+        "GET /api/rackets": "Get all rackets",
+        "GET /api/rackets/:id": "Get racket by ID",
+        "GET /api/rackets/search": "Search rackets",
+        "GET /api/rackets/brands/:brand": "Rackets by brand",
+        "GET /api/rackets/bestsellers": "Bestseller rackets",
+        "GET /api/rackets/offers": "Rackets on sale",
       },
       users: {
-        "GET /api/users/profile": "Obtener perfil del usuario",
-        "POST /api/users/profile": "Crear perfil de usuario",
-        "PUT /api/users/profile": "Actualizar perfil de usuario",
-        "DELETE /api/users/profile": "Eliminar perfil de usuario",
+        "GET /api/users/profile": "Get user profile",
+        "POST /api/users/profile": "Create user profile",
+        "PUT /api/users/profile": "Update user profile",
+        "DELETE /api/users/profile": "Delete user profile",
       },
     },
   });
@@ -146,7 +161,7 @@ app.get("/api/v1/docs", (req, res) => {
 // Ruta raíz
 app.get("/", (req, res) => {
   res.json({
-    message: "🏓 Smashly API - Sistema de Gestión de Palas de Pádel",
+    message: "🏓 Smashly API - Padel Racket Management System",
     version: "1.0.0",
     status: "running",
     documentation: "/api/docs",
@@ -173,18 +188,17 @@ app.use("*", (req, res) => {
 // Middleware global de manejo de errores
 app.use(
   (
-    err: any,
+    err: Error & { isJoi?: boolean; details?: Array<{ message: string }>; code?: string },
     req: express.Request,
-    res: express.Response,
-    next: express.NextFunction
+    res: express.Response
   ) => {
-    console.error("❌ Error:", err);
+    logger.error("❌ Error:", err);
 
     // Error de validación de Joi
-    if (err.isJoi) {
+    if (err.isJoi && err.details) {
       return res.status(400).json({
         error: "Validation error",
-        details: err.details.map((detail: any) => detail.message),
+        details: err.details.map((detail) => detail.message),
       });
     }
 
@@ -198,7 +212,7 @@ app.use(
     }
 
     // Error genérico
-    return res.status(err.status || 500).json({
+    return res.status((err as any).status || 500).json({
       error: err.message || "Internal server error",
       ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
     });

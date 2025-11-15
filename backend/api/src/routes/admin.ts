@@ -5,55 +5,55 @@ import { requireAdmin } from "../middleware/requireAdmin";
 
 const router = Router();
 
-// Todas las rutas de admin requieren autenticación y rol de admin
+// All admin routes require authentication and admin role
 router.use(authenticateUser);
 router.use(requireAdmin);
 
 /**
  * GET /api/v1/admin/metrics
- * Obtiene las métricas del dashboard
+ * Gets dashboard metrics
  */
 router.get("/metrics", AdminController.getMetrics);
 
 /**
  * GET /api/v1/admin/users
- * Obtiene todos los usuarios
+ * Gets all users
  */
 router.get("/users", AdminController.getAllUsers);
 
 /**
  * PATCH /api/v1/admin/users/:userId/role
- * Actualiza el rol de un usuario
+ * Updates a user's role
  */
 router.patch("/users/:userId/role", AdminController.updateUserRole);
 
 /**
  * DELETE /api/v1/admin/users/:userId
- * Elimina un usuario
+ * Deletes a user
  */
 router.delete("/users/:userId", AdminController.deleteUser);
 
 /**
  * GET /api/v1/admin/racket-requests
- * Obtiene todas las solicitudes de palas
+ * Gets all racket requests
  */
 router.get("/racket-requests", AdminController.getRacketRequests);
 
 /**
  * GET /api/v1/admin/store-requests
- * Obtiene todas las solicitudes de tiendas
+ * Gets all store requests
  */
 router.get("/store-requests", AdminController.getStoreRequests);
 
 /**
  * POST /api/v1/admin/stores/:id/verify
- * Aprobar/verificar una tienda
+ * Approve/verify a store
  */
 router.post("/stores/:id/verify", AdminController.verifyStore);
 
 /**
  * DELETE /api/v1/admin/stores/:id/reject
- * Rechazar una solicitud de tienda
+ * Reject a store request
  */
 router.delete("/stores/:id/reject", AdminController.rejectStore);
 

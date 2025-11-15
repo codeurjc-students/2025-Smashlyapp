@@ -1,11 +1,21 @@
 import { Request, Response } from "express";
 import { supabase } from "../config/supabase";
+import logger from "../config/logger";
 import { ApiResponse } from "../types/common";
 
+// Helper function outside the class to avoid 'this' context issues
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
+
 export class AuthController {
+
   /**
    * POST /api/auth/login
-   * Autentica un usuario con email y contraseña
+   * Authenticates a user and returns a JWT token
    */
   static async login(req: Request, res: Response): Promise<void> {
     try {
@@ -14,8 +24,8 @@ export class AuthController {
       if (!email || !password) {
         res.status(400).json({
           success: false,
-          error: "Credenciales requeridas",
-          message: "Email y contraseña son requeridos",
+          error: "Credentials required",
+          message: "Email and password are required",
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -29,8 +39,8 @@ export class AuthController {
       if (error) {
         res.status(401).json({
           success: false,
-          error: "Credenciales inválidas",
-          message: error.message,
+          error: "Invalid credentials",
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -47,12 +57,12 @@ export class AuthController {
         },
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in login:", error);
+    } catch (error: unknown) {
+      logger.error("Error in login:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -60,133 +70,173 @@ export class AuthController {
 
   /**
    * POST /api/auth/register
-   * Registra un nuevo usuario
+   * Registers a new user
    */
   static async register(req: Request, res: Response): Promise<void> {
     try {
       const { email, password, nickname, full_name, metadata } = req.body;
 
-      if (!email || !password) {
-        res.status(400).json({
-          success: false,
-          error: "Datos requeridos",
-          message: "Email y contraseña son requeridos",
-          timestamp: new Date().toISOString(),
-        } as ApiResponse);
+      const validationError = this.validateRegisterData(email, password);
+      if (validationError) {
+        res.status(400).json(validationError);
         return;
       }
 
-      console.log("Registering user with:", { email, nickname, full_name });
+      logger.info("Registering user with:", { email, nickname, full_name });
 
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            nickname: nickname,
-            full_name: full_name,
-            ...(metadata || {}),
-          },
+      const signUpResult = await this.performSignUp(
+      { email, password },
+      { nickname, full_name, metadata }
+    );
+      if (signUpResult.error) {
+        res.status(400).json(signUpResult.error);
+        return;
+      }
+
+      await this.createUserProfile(signUpResult.user, email, nickname, full_name);
+      const finalSession = await this.ensureUserSession(email, password, signUpResult.session);
+      const responseData = this.buildRegisterResponse(signUpResult.user, finalSession);
+
+      res.status(201).json(responseData);
+    } catch (error: unknown) {
+      logger.error("Error in register:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error interno del servidor",
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  private static validateRegisterData(email: string, password: string): ApiResponse | null {
+    if (!email || !password) {
+      return {
+        success: false,
+        error: "Required data",
+        message: "Email and password are required",
+        timestamp: new Date().toISOString(),
+      } as ApiResponse;
+    }
+    return null;
+  }
+
+  private static async performSignUp(credentials: { email: string; password: string }, userData: { nickname: string; full_name: string; metadata?: Record<string, unknown> }) {
+    const { data, error } = await supabase.auth.signUp({
+      email: credentials.email,
+      password: credentials.password,
+      options: {
+        data: {
+          nickname: userData.nickname,
+          full_name: userData.full_name,
+          ...(userData.metadata || {}),
         },
-      });
+      },
+    });
 
-      if (error) {
-        console.error("Supabase signUp error:", error);
-        res.status(400).json({
+    if (error) {
+      logger.error("Supabase signUp error:", error);
+      return {
+        error: {
           success: false,
-          error: "Error al registrar usuario",
-          message: error.message,
+          error: "Error registering user",
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
-        } as ApiResponse);
-        return;
-      }
+        } as ApiResponse
+      };
+    }
 
-      if (!data.user) {
-        res.status(400).json({
+    if (!data.user) {
+      return {
+        error: {
           success: false,
           error: "Error al crear usuario",
           message: "No se pudo crear el usuario",
           timestamp: new Date().toISOString(),
-        } as ApiResponse);
-        return;
-      }
-
-      // Crear perfil de usuario
-      try {
-        const { data: profileData, error: profileError } = await supabase
-          .from("user_profiles")
-          .insert({
-            id: data.user.id,
-            email: email,
-            nickname: nickname || email.split("@")[0],
-            full_name: full_name || null,
-            role: "Player",
-          })
-          .select()
-          .single();
-
-        if (profileError) {
-          console.error("Error creating user profile:", profileError);
-          // No retornar error, el usuario ya fue creado
-        } else {
-          console.log("User profile created:", profileData);
-        }
-      } catch (profileErr) {
-        console.error("Exception creating user profile:", profileErr);
-      }
-
-      // Si no hay sesión (email no confirmado), intentar hacer login automático
-      let finalSession = data.session;
-      let finalAccessToken = data.session?.access_token;
-
-      if (!finalAccessToken) {
-        console.log("⚠️ No access token from signUp, attempting auto-login...");
-        try {
-          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-            email,
-            password,
-          });
-
-          if (!loginError && loginData.session) {
-            console.log("✅ Auto-login successful, got access token");
-            finalSession = loginData.session;
-            finalAccessToken = loginData.session.access_token;
-          } else {
-            console.log("⚠️ Auto-login failed:", loginError?.message);
-          }
-        } catch (loginErr) {
-          console.error("Exception during auto-login:", loginErr);
-        }
-      }
-
-      const responseData = {
-        success: true,
-        data: {
-          user: data.user,
-          session: finalSession,
-          access_token: finalAccessToken,
-          refresh_token: finalSession?.refresh_token,
-          expires_at: finalSession?.expires_at,
-          message: data.user?.email_confirmed_at
-            ? "Usuario registrado exitosamente"
-            : "Usuario registrado. Revisa tu email para confirmar la cuenta.",
-        },
-        timestamp: new Date().toISOString(),
-      } as ApiResponse;
-
-      console.log("📤 Sending response with access_token:", responseData.data.access_token ? "Present (length: " + responseData.data.access_token.length + ")" : "MISSING");
-      console.log("📤 Full response data keys:", Object.keys(responseData.data));
-
-      res.status(201).json(responseData);
-    } catch (error: any) {
-      console.error("Error in register:", error);
-      res.status(500).json({
-        success: false,
-        error: "Error interno del servidor",
-        message: error.message,
-        timestamp: new Date().toISOString(),
-      } as ApiResponse);
+        } as ApiResponse
+      };
     }
+
+    return { user: data.user, session: data.session };
+  }
+
+  private static async createUserProfile(user: { id: string }, email: string, nickname: string, full_name: string): Promise<void> {
+    try {
+      const { data: profileData, error: profileError } = await supabase
+        .from("user_profiles")
+        .insert({
+          id: user.id,
+          email,
+          nickname: nickname || email.split("@")[0],
+          full_name: full_name || null,
+          role: "player",
+        })
+        .select()
+        .single();
+
+      if (profileError) {
+        logger.error("Error creating user profile:", profileError);
+      } else {
+        logger.info("User profile created:", profileData);
+      }
+    } catch (profileErr) {
+      logger.error("Exception creating user profile:", profileErr);
+    }
+  }
+
+  private static async ensureUserSession(email: string, password: string, initialSession: { access_token?: string } | null) {
+    let finalSession = initialSession;
+
+    if (!initialSession?.access_token) {
+      logger.info("⚠️ No access token from signUp, attempting auto-login...");
+      try {
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+
+        if (!loginError && loginData.session) {
+          logger.info("✅ Auto-login successful, got access token");
+          finalSession = loginData.session;
+        } else {
+          logger.info("⚠️ Auto-login failed:", loginError?.message);
+        }
+      } catch (loginErr) {
+        logger.error("Exception during auto-login:", loginErr);
+      }
+    }
+
+    return finalSession;
+  }
+
+  private static buildRegisterResponse(user: any, session: any): ApiResponse {
+    const responseData = {
+      success: true,
+      data: {
+        user: {
+          id: user?.id,
+          email: user?.email,
+          nickname: user?.user_metadata?.nickname,
+          full_name: user?.user_metadata?.full_name,
+          avatar_url: user?.user_metadata?.avatar_url,
+          created_at: user?.created_at,
+        },
+        session: {
+          access_token: session?.access_token,
+          refresh_token: session?.refresh_token,
+          expires_at: session?.expires_at,
+        },
+      },
+      message: user?.email_confirmed_at
+        ? "Usuario registrado y verificado exitosamente"
+        : "Usuario registrado. Por favor, verifica tu email.",
+      timestamp: new Date().toISOString(),
+    } as ApiResponse;
+
+    logger.info("📤 Sending response with access_token:", (responseData.data as any).session.access_token ? `Present (length: ${(responseData.data as any).session.access_token.length})` : "MISSING");
+    logger.info("📤 Full response data keys:", responseData.data && typeof responseData.data === 'object' ? Object.keys(responseData.data) : 'No data object');
+
+    return responseData;
   }
 
   /**
@@ -201,7 +251,7 @@ export class AuthController {
         res.status(400).json({
           success: false,
           error: "Error al cerrar sesión",
-          message: error.message,
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -214,12 +264,12 @@ export class AuthController {
         },
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in logout:", error);
+    } catch (error: unknown) {
+      logger.error("Error in logout:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -251,7 +301,7 @@ export class AuthController {
         res.status(401).json({
           success: false,
           error: "Token inválido",
-          message: error.message,
+          message: getErrorMessage(error),
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -267,12 +317,12 @@ export class AuthController {
         },
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in refreshToken:", error);
+    } catch (error: unknown) {
+      logger.error("Error in refreshToken:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
@@ -317,12 +367,12 @@ export class AuthController {
         },
         timestamp: new Date().toISOString(),
       } as ApiResponse);
-    } catch (error: any) {
-      console.error("Error in getCurrentUser:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getCurrentUser:", error);
       res.status(500).json({
         success: false,
         error: "Error interno del servidor",
-        message: error.message,
+        message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }

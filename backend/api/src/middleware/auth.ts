@@ -1,6 +1,14 @@
 import { Request, Response, NextFunction } from "express";
 import { supabase } from "../config/supabase";
+import logger from "../config/logger";
 import { RequestWithUser, ApiResponse } from "../types";
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message;
+  }
+  return String(error);
+}
 
 /**
  * export function logAuthenticatedRequest(
@@ -9,95 +17,110 @@ import { RequestWithUser, ApiResponse } from "../types";
   next: NextFunction
 ): void {
   if (req.user) {
-    console.log(
+    logger.info(
       `🔐 Authenticated request: ${req.method} ${req.url} - User: ${req.user.email} (${req.user.id})`
     );
   }
   next();
 }ara autenticar requests usando Supabase JWT
  */
+function validateAuthHeader(authHeader: string | undefined, res: Response): string | null {
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    res.status(401).json({
+      success: false,
+      error: "Authentication token required",
+      message: "You must provide a valid authentication token",
+      timestamp: new Date().toISOString(),
+    } as ApiResponse);
+    return null;
+  }
+  return authHeader.substring(7);
+}
+
+async function verifyToken(token: string, res: Response) {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser(token);
+
+  if (error || !user) {
+    logger.error("Authentication error:", error);
+    res.status(401).json({
+      success: false,
+      error: "Invalid token",
+      message: "The authentication token is invalid or has expired",
+      timestamp: new Date().toISOString(),
+    } as ApiResponse);
+    return null;
+  }
+  return user;
+}
+
+async function fetchUserRole(userId: string) {
+  logger.info(`🔍 Fetching role for user ID: ${userId}`);
+  
+  const { data: userData, error: dbError } = await supabase
+    .from("user_profiles")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+  logger.info(`📊 Database query result:`, {
+    userData,
+    error: dbError ? getErrorMessage(dbError) : undefined,
+    roleFromDB: userData?.role,
+  });
+
+  if (dbError) {
+    logger.warn("⚠️ Warning: Could not fetch user role from database:", getErrorMessage(dbError));
+  }
+
+  return userData;
+}
+
+function handleAuthError(error: unknown, res: Response): void {
+  logger.error("Authentication middleware error:", error);
+  res.status(500).json({
+    success: false,
+    error: "Authentication error",
+    message: "Internal error in authentication process",
+    timestamp: new Date().toISOString(),
+  } as ApiResponse);
+}
+
 export async function authenticateUser(
-  req: Request,
+  req: RequestWithUser,
   res: Response,
   next: NextFunction
 ): Promise<void> {
   try {
     const authHeader = req.headers.authorization as string;
+    const token = validateAuthHeader(authHeader, res);
+    if (!token) return;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      res.status(401).json({
-        success: false,
-        error: "Token de autenticación requerido",
-        message: "Debe proporcionar un token de autenticación válido",
-        timestamp: new Date().toISOString(),
-      } as ApiResponse);
-      return;
-    }
+    const user = await verifyToken(token, res);
+    if (!user) return;
 
-    const token = authHeader.substring(7); // Remove 'Bearer ' prefix
+    const userData = await fetchUserRole(user.id);
 
-    // Verificar el token con Supabase
-    const {
-      data: { user },
-      error,
-    } = await supabase.auth.getUser(token);
-
-    if (error || !user) {
-      console.error("Authentication error:", error);
-      res.status(401).json({
-        success: false,
-        error: "Token inválido",
-        message: "El token de autenticación no es válido o ha expirado",
-        timestamp: new Date().toISOString(),
-      } as ApiResponse);
-      return;
-    }
-
-    // Obtener el rol del usuario desde la base de datos
-    console.log(`🔍 Fetching role for user ID: ${user.id}`);
-    
-    const { data: userData, error: dbError } = await supabase
-      .from("user_profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-
-    console.log(`📊 Database query result:`, {
-      userData,
-      error: dbError?.message,
-      roleFromDB: userData?.role,
-    });
-
-    if (dbError) {
-      console.warn("⚠️ Warning: Could not fetch user role from database:", dbError.message);
-    }
-
-    // Agregar información del usuario al request
     req.user = {
       id: user.id,
       email: user.email || "",
       role: userData?.role || user.user_metadata?.role || "player",
     };
 
-    console.log(`✅ User authenticated: ${user.email} (${req.user.role})`);
-
+    logger.info(`✅ User authenticated: ${user.email} (${req.user.role})`);
     next();
-  } catch (error: any) {
-    console.error("Authentication middleware error:", error);
-    res.status(500).json({
-      success: false,
-      error: "Error de autenticación",
-      message: "Error interno en el proceso de autenticación",
-      timestamp: new Date().toISOString(),
-    } as ApiResponse);
+  } catch (error: unknown) {
+    handleAuthError(error, res);
   }
 }
 
 /**
- * Middleware opcional para autenticación (no falla si no hay token)
+ * Optional middleware for authentication (doesn't fail if no token)
  */
 export async function optionalAuth(
-  req: Request,
+  req: RequestWithUser,
   res: Response,
   next: NextFunction
 ): Promise<void> {
@@ -105,21 +128,21 @@ export async function optionalAuth(
     const authHeader = req.headers.authorization as string;
 
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      // No hay token, continuar sin usuario
+      // No token, continue without user
       next();
       return;
     }
 
     const token = authHeader.substring(7);
 
-    // Intentar verificar el token
+    // Try to verify the token
     const {
       data: { user },
       error,
     } = await supabase.auth.getUser(token);
 
     if (!error && user) {
-      // Token válido, agregar usuario al request
+      // Valid token, add user to request
       req.user = {
         id: user.id,
         email: user.email || "",
@@ -127,11 +150,11 @@ export async function optionalAuth(
       };
     }
 
-    // Continuar sin importar si el token es válido o no
+    // Continue regardless of whether the token is valid or not
     next();
-  } catch (error: any) {
-    console.error("Optional auth middleware error:", error);
-    // En caso de error, continuar sin usuario
+  } catch (error: unknown) {
+    logger.error("Optional auth middleware error:", error);
+    // In case of error, continue without user
     next();
   }
 }
@@ -188,8 +211,8 @@ export function validateApiKey(
   if (!apiKey || apiKey !== validApiKey) {
     res.status(401).json({
       success: false,
-      error: "API key inválida",
-      message: "Se requiere una API key válida",
+      error: "Invalid API key",
+      message: "A valid API key is required",
       timestamp: new Date().toISOString(),
     } as ApiResponse);
     return;
@@ -207,7 +230,7 @@ export function logAuthenticatedRequests(
   next: NextFunction
 ): void {
   if (req.user) {
-    console.log(
+    logger.info(
       `🔐 Authenticated request: ${req.method} ${req.path} - User: ${req.user.email} (${req.user.id})`
     );
   }

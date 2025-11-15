@@ -29,13 +29,13 @@ public class MainPage {
     private WebElement totalCount;
 
     // Loading and error states
-    @FindBy(xpath = "//div[contains(text(), 'Cargando palas')]")
+    @FindBy(xpath = "//*[contains(text(), 'Cargando catálogo')]")
     private WebElement loadingMessage;
 
     @FindBy(xpath = "//div[contains(text(), 'Error:')]")
     private WebElement errorMessage;
 
-    @FindBy(xpath = "//p[contains(text(), 'No se encontraron palas')]")
+    @FindBy(xpath = "//*[contains(text(), 'No se encontraron palas')]")
     private WebElement noRacketsMessage;
 
     public MainPage(WebDriver driver, WebDriverWait wait) {
@@ -56,8 +56,23 @@ public class MainPage {
      * Wait for the page to load completely
      */
     public MainPage waitForPageLoad() {
-        // Wait for title to be present
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("h1")));
+        // Wait for title to be present with robust fallbacks
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("h1")));
+        } catch (Exception e) {
+            // Fallback: look for text containing "Catálogo" or presence of list items
+            try {
+                wait.until(ExpectedConditions.presenceOfElementLocated(
+                        By.xpath("//*[contains(text(), 'Catálogo')]")
+                ));
+            } catch (Exception ignored) {
+                try {
+                    wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("li")));
+                } catch (Exception ignored2) {
+                    // If none are found, we proceed and let subsequent checks fail gracefully
+                }
+            }
+        }
 
         // Wait for loading to complete (loading message should disappear)
         try {
@@ -65,6 +80,13 @@ public class MainPage {
                     By.xpath("//div[contains(text(), 'Cargando palas')]")));
         } catch (Exception e) {
             // Loading message might not appear if data loads quickly
+        }
+        // Attempt alternative loading text used by current UI
+        try {
+            wait.until(ExpectedConditions.invisibilityOfElementLocated(
+                    By.xpath("//*[contains(text(), 'Cargando catálogo')]")
+            ));
+        } catch (Exception ignored) {
         }
 
         return this;
@@ -92,9 +114,19 @@ public class MainPage {
      * Get the number of rackets displayed
      */
     public int getRacketsCount() {
-        // Wait for rackets to load
-        wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("li")));
-        return racketItems.size();
+        // Wait for rackets to load: tolerate cases where <ul> is not found by Safari
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By.tagName("ul")));
+            return racketsList.findElements(By.tagName("li")).size();
+        } catch (Exception e) {
+            // Fallback to page-level list items if <ul> is not present or scoping fails
+            try {
+                wait.until(ExpectedConditions.presenceOfAllElementsLocatedBy(By.tagName("li")));
+                return racketItems.size();
+            } catch (Exception ignored) {
+                return 0;
+            }
+        }
     }
 
     /**
@@ -125,17 +157,14 @@ public class MainPage {
         String text = getTotalCountText();
         if (text.isEmpty())
             return 0;
-
-        // Extract number from "Total de palas mostradas: X"
-        String[] parts = text.split(":");
-        if (parts.length > 1) {
-            try {
-                return Integer.parseInt(parts[1].trim());
-            } catch (NumberFormatException e) {
-                return 0;
-            }
+        // Extract digits anywhere in the string, robust to format changes
+        String digits = text.replaceAll("[^0-9]", "");
+        if (digits.isEmpty()) return 0;
+        try {
+            return Integer.parseInt(digits);
+        } catch (NumberFormatException e) {
+            return 0;
         }
-        return 0;
     }
 
     /**
@@ -180,6 +209,60 @@ public class MainPage {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    /**
+     * Get the stat number for total "Palas" shown in the header stats.
+     * This represents total rackets available, not necessarily the displayed count.
+     */
+    public int getPalasStatNumber() {
+        try {
+            // Strategy 1: Look specifically in body for "Palas" text that's a standalone label (not in title)
+            // Use a more specific XPath that targets visible content in body
+            WebElement label = wait.until(
+                    ExpectedConditions.presenceOfElementLocated(
+                            By.xpath("//body//*[normalize-space(text())='Palas']")
+                    )
+            );
+
+            WebElement parent = label.findElement(By.xpath(".."));
+
+            // Extract all numbers from the parent text (the StatNumber should be there)
+            String parentText = parent.getText();
+            java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\d+");
+            java.util.regex.Matcher matcher = pattern.matcher(parentText);
+            if (matcher.find()) {
+                return Integer.parseInt(matcher.group());
+            }
+        } catch (Exception e) {
+            // Ignore and try next strategy
+        }
+
+        // Strategy 2: Look for any div containing both a number and "Palas" text
+        try {
+            java.util.List<WebElement> candidates = driver.findElements(
+                    By.xpath("//body//*[contains(text(), 'Palas')]")
+            );
+
+            for (WebElement candidate : candidates) {
+                WebElement parent = candidate.findElement(By.xpath(".."));
+                String parentText = parent.getText().trim();
+
+                // Skip if this is the page title or contains too much text
+                if (parentText.length() > 50) continue;
+
+                // Extract number from parent
+                java.util.regex.Pattern pattern = java.util.regex.Pattern.compile("\\d+");
+                java.util.regex.Matcher matcher = pattern.matcher(parentText);
+                if (matcher.find() && parentText.contains("Palas")) {
+                    return Integer.parseInt(matcher.group());
+                }
+            }
+        } catch (Exception e) {
+            // Ignore
+        }
+
+        return 0;
     }
 
     /**

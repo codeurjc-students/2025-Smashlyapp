@@ -13,8 +13,10 @@ export interface ListRacket {
   added_at: string;
 }
 
+import { Racket } from './racket';
+
 export interface ListWithRackets extends List {
-  rackets?: any[]; // O usar el tipo Racket que ya tienes
+  rackets?: Racket[];
   racket_count?: number;
 }
 

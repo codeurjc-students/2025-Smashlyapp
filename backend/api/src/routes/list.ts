@@ -14,7 +14,7 @@ router.get("/:id", ListController.getListById);
 router.put("/:id", ListController.updateList);
 router.delete("/:id", ListController.deleteList);
 
-// Rutas de palas en listas
+// Routes for rackets in lists
 router.post("/:id/rackets", ListController.addRacketToList);
 router.delete("/:id/rackets/:racketId", ListController.removeRacketFromList);
 

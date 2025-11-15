@@ -1,4 +1,5 @@
 import { supabase, supabaseAdmin } from "../config/supabase";
+import logger from "../config/logger";
 import {
   UserProfile,
   CreateUserProfileRequest,
@@ -21,15 +22,15 @@ export class UserService {
         if (error.code === "PGRST116") {
           return null; // Usuario no encontrado
         }
-        console.error("Error fetching user profile:", error);
+        logger.error("Error fetching user profile:", error);
         throw new Error(
           `Error al obtener el perfil del usuario: ${error.message}`
         );
       }
 
       return data;
-    } catch (error: any) {
-      console.error("Error in getUserProfile:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getUserProfile:", error);
       throw error;
     }
   }
@@ -45,7 +46,7 @@ export class UserService {
       // Verificar si ya existe un perfil
       const existingProfile = await this.getUserProfile(userId);
       if (existingProfile) {
-        console.log("Profile already exists for user:", userId);
+        logger.info("Profile already exists for user:", userId);
         return existingProfile;
       }
 
@@ -74,16 +75,16 @@ export class UserService {
         .single();
 
       if (error) {
-        console.error("Error creating user profile:", error);
+        logger.error("Error creating user profile:", error);
         throw new Error(
           `Error al crear el perfil del usuario: ${error.message}`
         );
       }
 
-      console.log("✅ User profile created successfully for:", userId);
+      logger.info("✅ User profile created successfully for:", userId);
       return data;
-    } catch (error: any) {
-      console.error("Error in createUserProfile:", error);
+    } catch (error: unknown) {
+      logger.error("Error in createUserProfile:", error);
       throw error;
     }
   }
@@ -118,15 +119,15 @@ export class UserService {
         .single();
 
       if (error) {
-        console.error("Error updating user profile:", error);
+        logger.error("Error updating user profile:", error);
         throw new Error(
           `Error al actualizar el perfil del usuario: ${error.message}`
         );
       }
 
       return data;
-    } catch (error: any) {
-      console.error("Error in updateUserProfile:", error);
+    } catch (error: unknown) {
+      logger.error("Error in updateUserProfile:", error);
       throw error;
     }
   }
@@ -142,15 +143,15 @@ export class UserService {
         .eq("id", userId);
 
       if (error) {
-        console.error("Error deleting user profile:", error);
+        logger.error("Error deleting user profile:", error);
         throw new Error(
           `Error al eliminar el perfil del usuario: ${error.message}`
         );
       }
 
-      console.log("✅ User profile deleted successfully for:", userId);
-    } catch (error: any) {
-      console.error("Error in deleteUserProfile:", error);
+      logger.info("✅ User profile deleted successfully for:", userId);
+    } catch (error: unknown) {
+      logger.error("Error in deleteUserProfile:", error);
       throw error;
     }
   }
@@ -175,15 +176,15 @@ export class UserService {
       const { data, error } = await query;
 
       if (error) {
-        console.error("Error checking nickname availability:", error);
+        logger.error("Error checking nickname availability:", error);
         throw new Error(
           `Error al verificar disponibilidad del nickname: ${error.message}`
         );
       }
 
       return !data || data.length === 0;
-    } catch (error: any) {
-      console.error("Error in isNicknameAvailable:", error);
+    } catch (error: unknown) {
+      logger.error("Error in isNicknameAvailable:", error);
       throw error;
     }
   }
@@ -203,13 +204,13 @@ export class UserService {
         .limit(limit);
 
       if (error) {
-        console.error("Error searching users:", error);
+        logger.error("Error searching users:", error);
         throw new Error(`Error al buscar usuarios: ${error.message}`);
       }
 
       return data || [];
-    } catch (error: any) {
-      console.error("Error in searchUsersByNickname:", error);
+    } catch (error: unknown) {
+      logger.error("Error in searchUsersByNickname:", error);
       throw error;
     }
   }
@@ -251,8 +252,8 @@ export class UserService {
         activeThisMonth: recentResult.count || 0,
         byLevel,
       };
-    } catch (error: any) {
-      console.error("Error in getUserStats:", error);
+    } catch (error: unknown) {
+      logger.error("Error in getUserStats:", error);
       throw error;
     }
   }
@@ -260,41 +261,55 @@ export class UserService {
   /**
    * Valida los datos de perfil antes de crear/actualizar
    */
-  static validateProfileData(data: any): {
+  static validateProfileData(data: Partial<CreateUserProfileRequest | UpdateUserProfileRequest>): {
     isValid: boolean;
     errors: string[];
   } {
     const errors: string[] = [];
 
-    if (data.nickname && data.nickname.length < 3) {
-      errors.push("El nickname debe tener al menos 3 caracteres");
+    this.validateNickname(data.nickname, errors);
+    // Only validate email if it's present (required for CreateUserProfileRequest, optional for UpdateUserProfileRequest)
+    if ('email' in data) {
+      this.validateEmail((data as CreateUserProfileRequest).email, errors);
     }
-
-    if (data.nickname && data.nickname.length > 50) {
-      errors.push("El nickname no puede tener más de 50 caracteres");
-    }
-
-    if (data.nickname && !/^[a-zA-Z0-9_]+$/.test(data.nickname)) {
-      errors.push(
-        "El nickname solo puede contener letras, números y guiones bajos"
-      );
-    }
-
-    if (data.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
-      errors.push("Email inválido");
-    }
-
-    if (data.weight && (data.weight < 30 || data.weight > 200)) {
-      errors.push("El peso debe estar entre 30 y 200 kg");
-    }
-
-    if (data.height && (data.height < 100 || data.height > 250)) {
-      errors.push("La altura debe estar entre 100 y 250 cm");
-    }
+    this.validateWeight(data.weight, errors);
+    this.validateHeight(data.height, errors);
 
     return {
       isValid: errors.length === 0,
       errors,
     };
+  }
+
+  private static validateNickname(nickname: string | undefined, errors: string[]): void {
+    if (!nickname) return;
+    
+    if (nickname.length < 3) {
+      errors.push("El nickname debe tener al menos 3 caracteres");
+    }
+    if (nickname.length > 50) {
+      errors.push("El nickname no puede tener más de 50 caracteres");
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(nickname)) {
+      errors.push("El nickname solo puede contener letras, números y guiones bajos");
+    }
+  }
+
+  private static validateEmail(email: string | undefined, errors: string[]): void {
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.push("Email inválido");
+    }
+  }
+
+  private static validateWeight(weight: number | undefined, errors: string[]): void {
+    if (weight && (weight < 30 || weight > 200)) {
+      errors.push("El peso debe estar entre 30 y 200 kg");
+    }
+  }
+
+  private static validateHeight(height: number | undefined, errors: string[]): void {
+    if (height && (height < 100 || height > 250)) {
+      errors.push("La altura debe estar entre 100 y 250 cm");
+    }
   }
 }

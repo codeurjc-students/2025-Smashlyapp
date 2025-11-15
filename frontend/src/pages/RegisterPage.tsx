@@ -548,7 +548,7 @@ const RegisterPage: React.FC = () => {
         toast.success(
           "¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta."
         );
-        navigate("/login");
+        navigate("/");
       }
     } catch (error) {
       toast.error("Error inesperado. Inténtalo de nuevo.");
@@ -560,7 +560,7 @@ const RegisterPage: React.FC = () => {
 
   const handleModalClose = () => {
     setShowStoreModal(false);
-    navigate("/login");
+    navigate("/");
   };
 
   return (

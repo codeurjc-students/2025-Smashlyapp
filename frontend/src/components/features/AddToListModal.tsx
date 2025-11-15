@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { FiX, FiPlus, FiList, FiCheck } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { useList } from "../../contexts/ListsContext";
+import { CreateListModal } from "./CreateListModal";
 
 interface AddToListModalProps {
   isOpen: boolean;
@@ -221,7 +222,7 @@ export const AddToListModal: React.FC<AddToListModalProps> = ({
   racketId,
   racketName,
 }) => {
-  const { lists, loading, fetchLists, addRacketToList } = useList();
+  const { lists, loading, fetchLists, addRacketToList, createList } = useList();
   const [addingToListId, setAddingToListId] = React.useState<string | null>(
     null
   );
@@ -249,6 +250,20 @@ export const AddToListModal: React.FC<AddToListModalProps> = ({
 
   const handleCreateNewList = () => {
     setShowCreateModal(true);
+  };
+
+  const handleCreateList = async (name: string, description?: string) => {
+    try {
+      const newList = await createList({ name, description });
+      setShowCreateModal(false);
+      await fetchLists();
+      // Automatically add the racket to the newly created list
+      if (newList?.id) {
+        await addRacketToList(newList.id, racketId);
+      }
+    } catch (error) {
+      // Error handled by context
+    }
   };
 
   return (
@@ -327,6 +342,12 @@ export const AddToListModal: React.FC<AddToListModalProps> = ({
           </Overlay>
         )}
       </AnimatePresence>
+
+      <CreateListModal
+        isOpen={showCreateModal}
+        onClose={() => setShowCreateModal(false)}
+        onCreateList={handleCreateList}
+      />
     </>
   );
 };

@@ -1,6 +1,6 @@
 /**
  * Review Routes
- * Rutas para el sistema de reviews
+ * Routes for the review system
  */
 
 import { Router } from "express";
@@ -10,12 +10,12 @@ import { authenticateUser } from "../middleware/auth";
 const router = Router();
 
 // ==========================================
-// RUTAS PÚBLICAS (sin autenticación)
+// PUBLIC ROUTES (no authentication)
 // ==========================================
 
 /**
  * GET /api/v1/reviews
- * Información sobre las rutas de reviews disponibles
+ * Information about available review routes
  */
 router.get("/", (req, res) => {
   res.json({

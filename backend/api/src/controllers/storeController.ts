@@ -1,6 +1,49 @@
 import { Response } from "express";
 import { RequestWithUser } from "../types";
+import logger from "../config/logger";
 import { storeService } from "../services/storeService";
+
+// Helper functions to reduce complexity
+const validateStoreData = (storeData: unknown) => {
+  const {
+    store_name,
+    legal_name,
+    cif_nif,
+    contact_email,
+    phone_number,
+    location,
+  } = storeData as Record<string, unknown>;
+
+  return !!(
+    store_name &&
+    legal_name &&
+    cif_nif &&
+    contact_email &&
+    phone_number &&
+    location
+  );
+};
+
+const checkUserAuthentication = (userId: string | undefined, res: Response) => {
+  if (!userId) {
+    logger.info("❌ No user ID found");
+    res.status(401).json({ error: "Usuario no autenticado" });
+    return false;
+  }
+  return true;
+};
+
+const checkExistingStore = async (userId: string, res: Response) => {
+  const existingStore = await storeService.getStoreByOwnerId(userId);
+  logger.info("🏪 Existing store:", existingStore ? "Found" : "None");
+  
+  if (existingStore) {
+    logger.info("❌ User already has a store");
+    res.status(400).json({ error: "Ya tienes una tienda registrada" });
+    return false;
+  }
+  return true;
+};
 
 export const storeController = {
   /**
@@ -8,89 +51,41 @@ export const storeController = {
    */
   async createStoreRequest(req: RequestWithUser, res: Response) {
     try {
-      console.log("📝 Store request received");
+      logger.info("📝 Store request received");
       const userId = req.user?.id;
-      console.log("👤 User ID:", userId);
+      logger.info("👤 User ID:", userId);
 
-      if (!userId) {
-        console.log("❌ No user ID found");
-        return res.status(401).json({ error: "Usuario no autenticado" });
-      }
+      if (!checkUserAuthentication(userId, res)) return;
+      if (!(await checkExistingStore(userId!, res))) return;
 
-      // Verificar si el usuario ya tiene una tienda
-      const existingStore = await storeService.getStoreByOwnerId(userId);
-      console.log("🏪 Existing store:", existingStore ? "Found" : "None");
-      
-      if (existingStore) {
-        console.log("❌ User already has a store");
-        return res
-          .status(400)
-          .json({ error: "Ya tienes una tienda registrada" });
-      }
+      const storeData = req.body;
+      logger.info("📋 Store data received:", storeData);
 
-      const {
-        store_name,
-        legal_name,
-        cif_nif,
-        contact_email,
-        phone_number,
-        website_url,
-        logo_url,
-        short_description,
-        location,
-      } = req.body;
-
-      console.log("📋 Store data received:", {
-        store_name,
-        legal_name,
-        cif_nif,
-        contact_email,
-        phone_number,
-        location,
-      });
-
-      // Validar campos requeridos
-      if (
-        !store_name ||
-        !legal_name ||
-        !cif_nif ||
-        !contact_email ||
-        !phone_number ||
-        !location
-      ) {
-        console.log("❌ Missing required fields");
+      if (!validateStoreData(storeData)) {
+        logger.info("❌ Missing required fields");
         return res.status(400).json({
           error: "Faltan campos requeridos",
         });
       }
 
-      console.log("✅ Creating store...");
+      logger.info("✅ Creating store...");
       const store = await storeService.createStore({
-        store_name,
-        legal_name,
-        cif_nif,
-        contact_email,
-        phone_number,
-        website_url,
-        logo_url,
-        short_description,
-        location,
+        ...storeData,
         admin_user_id: userId,
       });
 
-      console.log("✅ Store created successfully:", store.id);
+      logger.info("✅ Store created successfully:", store.id);
       return res.status(201).json({
         success: true,
         message:
-          "Solicitud de tienda creada. Pendiente de verificación por un administrador",
+        "Store request created. Pending verification by an administrator",
         store,
       });
-    } catch (error: any) {
-      console.error("❌ Error creating store request:", error);
-      console.error("Error details:", error.message);
+    } catch (error: unknown) {
+      logger.error("❌ Error creating store request:", error);
       return res.status(500).json({ 
         error: "Error al crear la tienda",
-        details: error.message 
+        details: (error as Error).message 
       });
     }
   },
@@ -108,7 +103,7 @@ export const storeController = {
 
       return res.status(200).json(stores);
     } catch (error) {
-      console.error("Error fetching stores:", error);
+      logger.error("Error fetching stores:", error);
       return res.status(500).json({ error: "Error al obtener las tiendas" });
     }
   },
@@ -128,7 +123,7 @@ export const storeController = {
 
       return res.status(200).json(store);
     } catch (error) {
-      console.error("Error fetching store:", error);
+      logger.error("Error fetching store:", error);
       return res.status(500).json({ error: "Error al obtener la tienda" });
     }
   },
@@ -152,7 +147,7 @@ export const storeController = {
 
       return res.status(200).json(store);
     } catch (error) {
-      console.error("Error fetching my store:", error);
+      logger.error("Error fetching my store:", error);
       return res.status(500).json({ error: "Error al obtener tu tienda" });
     }
   },
@@ -191,7 +186,7 @@ export const storeController = {
 
       return res.status(200).json(updatedStore);
     } catch (error) {
-      console.error("Error updating store:", error);
+      logger.error("Error updating store:", error);
       return res.status(500).json({ error: "Error al actualizar la tienda" });
     }
   },
@@ -229,7 +224,7 @@ export const storeController = {
 
       return res.status(200).json({ message: "Tienda eliminada exitosamente" });
     } catch (error) {
-      console.error("Error deleting store:", error);
+      logger.error("Error deleting store:", error);
       return res.status(500).json({ error: "Error al eliminar la tienda" });
     }
   },

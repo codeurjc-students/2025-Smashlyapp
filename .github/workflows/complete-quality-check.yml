@@ -67,7 +67,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: backend-coverage
-          path: ./backend/api/coverage/
+          path: ./backend/api/coverage-backend/
           retention-days: 30
 
   # ===========================
