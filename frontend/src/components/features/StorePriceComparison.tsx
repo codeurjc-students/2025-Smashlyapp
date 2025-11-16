@@ -275,46 +275,6 @@ const LowestBadge = styled.div`
   }
 `;
 
-const BarContainer = styled.div<{ $compact?: boolean }>`
-  position: relative;
-  height: ${props => (props.$compact ? '28px' : '32px')};
-  background: ${props =>
-    props.$compact
-      ? 'linear-gradient(90deg, #f3f4f6 0%, #e5e7eb 100%)'
-      : '#e5e7eb'
-  };
-  border-radius: ${props => (props.$compact ? '8px' : '8px')};
-  overflow: hidden;
-  margin-bottom: ${props => (props.$compact ? '0.375rem' : '0.5rem')};
-  box-shadow: ${props =>
-    props.$compact
-      ? 'inset 0 1px 3px rgba(0, 0, 0, 0.08)'
-      : 'none'
-  };
-`;
-
-const Bar = styled(motion.div)<{ isLowest?: boolean; $compact?: boolean }>`
-  height: 100%;
-  background: ${props =>
-    props.isLowest
-      ? 'linear-gradient(90deg, #16a34a 0%, #22c55e 50%, #10b981 100%)'
-      : 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 50%, #38bdf8 100%)'};
-  display: flex;
-  align-items: center;
-  padding: 0 ${props => (props.$compact ? '0.625rem' : '0.75rem')};
-  color: white;
-  font-weight: 700;
-  font-size: ${props => (props.$compact ? '0.8125rem' : '0.875rem')};
-  border-radius: ${props => (props.$compact ? '7px' : '8px')};
-  box-shadow: ${props =>
-    props.$compact
-      ? props.isLowest
-        ? '0 2px 6px rgba(22, 163, 74, 0.3)'
-        : '0 2px 6px rgba(59, 130, 246, 0.25)'
-      : 'none'
-  };
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-`;
 
 const StoreLink = styled.a<{ $compact?: boolean; $isLowest?: boolean }>`
   display: inline-flex;
@@ -388,6 +348,16 @@ const UnavailableText = styled.div`
   font-style: italic;
 `;
 
+const PriceDiff = styled.div<{ $compact?: boolean; $isLowest?: boolean }>`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: ${props => (props.$compact ? '0.75rem' : '0.8125rem')};
+  color: ${props => (props.$isLowest ? '#16a34a' : '#374151')};
+  font-weight: 700;
+  margin-top: ${props => (props.$compact ? '0.25rem' : '0.375rem')};
+`;
+
 const GuestMessage = styled.div`
   padding: 3rem 2rem;
   background: linear-gradient(135deg, #16a34a 0%, #107a37 100%);
@@ -432,6 +402,7 @@ const GuestLink = styled.a`
   }
 `;
 
+
 interface StorePriceComparisonProps {
   racket: Racket;
   isAuthenticated: boolean;
@@ -455,11 +426,7 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
   const lowestPrice = Math.min(...availablePrices.map(store => store.price || Infinity));
   const highestPrice = Math.max(...availablePrices.map(store => store.price || 0));
 
-  // Calcular el porcentaje para las barras
-  const getBarWidth = (price: number | null | undefined) => {
-    if (!price || highestPrice === 0) return 0;
-    return (price / highestPrice) * 100;
-  };
+  // UI simplificada: sin barra de precio
 
   // Generate redirect URL for login with current page
   const loginRedirect = `/login?redirect=${encodeURIComponent(location.pathname + location.search)}`;
@@ -557,17 +524,11 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
 
                   {store.available && store.price && (
                     <>
-                      <BarContainer $compact={compact}>
-                        <Bar
-                          isLowest={isLowest}
-                          $compact={compact}
-                          initial={{ width: 0 }}
-                          animate={{ width: `${getBarWidth(store.price)}%` }}
-                          transition={{ duration: 0.8, delay: index * 0.1 }}
-                        >
-                          €{store.price.toFixed(2)}
-                        </Bar>
-                      </BarContainer>
+                      <PriceDiff $compact={compact} $isLowest={isLowest}>
+                        {isLowest
+                          ? 'Más barato'
+                          : `+€${(store.price - lowestPrice).toFixed(2)} sobre el más barato`}
+                      </PriceDiff>
                       {store.link && (
                         <StoreLink
                           $compact={compact}
