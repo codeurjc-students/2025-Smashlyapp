@@ -296,6 +296,7 @@ export class UserController {
   static async searchUsers(req: Request, res: Response): Promise<void> {
     try {
       const query = req.query.q as string;
+      const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 10;
 
       if (!query || query.trim().length < 2) {
@@ -308,15 +309,29 @@ export class UserController {
         return;
       }
 
-      const users = await UserService.searchUsersByNickname(
+      const { data, total } = await UserService.searchUsersByNickname(
         query.trim(),
+        page,
         limit
       );
 
+      const totalPages = Math.ceil(total / limit) || 1;
+      const paginated = {
+        data,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages,
+          hasNext: page < totalPages,
+          hasPrev: page > 1,
+        },
+      };
+
       res.json({
         success: true,
-        data: users,
-        message: `${users.length} users found`,
+        data: paginated,
+        message: `${data.length} users found`,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {

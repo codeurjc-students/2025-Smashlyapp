@@ -4,6 +4,8 @@ import { authenticateUser, authenticateUser as requireAuth } from "../middleware
 import {
   validateBody,
   schemas,
+  validatePagination,
+  validateSearchQuery,
 } from "../middleware/validation";
 import { ListController } from "../controllers/listController";
 
@@ -38,7 +40,12 @@ router.get(
 );
 
 // GET /api/users/search?q=... - Search users by nickname
-router.get("/search", UserController.searchUsers);
+router.get(
+  "/search",
+  validateSearchQuery,
+  validatePagination,
+  UserController.searchUsers
+);
 
 // GET /api/users/stats - Get user statistics (admin)
 router.get("/stats", authenticateUser, UserController.getUserStats);

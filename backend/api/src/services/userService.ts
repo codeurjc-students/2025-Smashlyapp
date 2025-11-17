@@ -194,21 +194,31 @@ export class UserService {
    */
   static async searchUsersByNickname(
     query: string,
+    page: number = 1,
     limit: number = 10
-  ): Promise<Partial<UserProfile>[]> {
+  ): Promise<{
+    data: Partial<UserProfile>[];
+    total: number;
+  }> {
     try {
-      const { data, error } = await supabase
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      const { data, count, error } = await supabase
         .from("user_profiles")
-        .select("id, nickname, full_name, avatar_url")
+        .select("id, nickname, full_name, avatar_url", { count: "exact" })
         .ilike("nickname", `%${query}%`)
-        .limit(limit);
+        .range(from, to);
 
       if (error) {
         logger.error("Error searching users:", error);
         throw new Error(`Error al buscar usuarios: ${error.message}`);
       }
 
-      return data || [];
+      return {
+        data: data || [],
+        total: count || 0,
+      };
     } catch (error: unknown) {
       logger.error("Error in searchUsersByNickname:", error);
       throw error;

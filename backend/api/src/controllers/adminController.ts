@@ -108,18 +108,36 @@ export class AdminController {
    */
   static async getAllUsers(req: RequestWithUser, res: Response): Promise<void> {
     try {
-      const { data: users, error } = await supabase
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const from = (page - 1) * limit;
+      const to = from + limit - 1;
+
+      const { data: users, count, error } = await supabase
         .from("user_profiles")
-        .select("id, email, nickname, full_name, role, created_at")
-        .order("created_at", { ascending: false });
+        .select("id, email, nickname, full_name, role, created_at", { count: "exact" })
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
       if (error) {
         throw error;
       }
 
+      const total = count || 0;
+      const totalPages = Math.ceil(total / limit) || 1;
       res.json({
         success: true,
-        data: users || [],
+        data: {
+          data: users || [],
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages,
+            hasNext: page < totalPages,
+            hasPrev: page > 1,
+          },
+        },
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {

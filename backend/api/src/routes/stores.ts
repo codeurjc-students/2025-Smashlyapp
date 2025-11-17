@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authenticateUser } from "../middleware/auth";
+import { validatePagination } from "../middleware/validation";
 import { storeController as StoreController } from "../controllers/storeController";
 
 const router = Router();
@@ -19,7 +20,7 @@ router.post("/", authenticateUser, StoreController.createStoreRequest);
  * @desc    Get all stores (query param: verified=true/false)
  * @access  Public
  */
-router.get("/", StoreController.getAllStores);
+router.get("/", validatePagination, StoreController.getAllStores);
 
 /**
  * @route   GET /api/v1/stores/me

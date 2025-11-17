@@ -2,6 +2,7 @@ import { Router } from "express";
 import { AdminController } from "../controllers/adminController";
 import { authenticateUser } from "../middleware/auth";
 import { requireAdmin } from "../middleware/requireAdmin";
+import { validatePagination } from "../middleware/validation";
 
 const router = Router();
 
@@ -19,7 +20,7 @@ router.get("/metrics", AdminController.getMetrics);
  * GET /api/v1/admin/users
  * Gets all users
  */
-router.get("/users", AdminController.getAllUsers);
+router.get("/users", validatePagination, AdminController.getAllUsers);
 
 /**
  * PATCH /api/v1/admin/users/:userId/role
