@@ -486,7 +486,8 @@ const RegisterPage: React.FC = () => {
         formData.email.trim(),
         formData.password,
         formData.nickname.trim(),
-        formData.fullName.trim() || undefined
+        formData.fullName.trim() || undefined,
+        formData.registrationType === 'store' ? 'store_owner' : 'player'
       );
 
       if (error) {
