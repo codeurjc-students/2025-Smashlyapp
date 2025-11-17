@@ -1,0 +1,199 @@
+@startuml
+title Smashly Arquitectura (Servidor + Frontend)
+
+left to right direction
+
+skinparam Shadowing false
+skinparam linetype ortho
+skinparam ArrowColor #444
+skinparam ArrowThickness 2
+skinparam package {
+  BorderColor #333
+  BackgroundColor #EEE
+  FontColor #000
+  RoundCorner 8
+}
+skinparam component {
+  BorderColor #333
+  BackgroundColor #FFF
+}
+
+' --- Frontend ---
+package "Views (Frontend)" as V {
+  [HomePage] as VHome
+  [CatalogPage] as VCatalog
+  [RacketDetailPage] as VRacketDetail
+  [LoginPage.tsx] as VLogin
+  [RegisterPage.tsx] as VRegister
+  [UserPage] as VUser
+  [AdminPanelPage] as VAdminPanel
+  [FAQPage / ComingSoon] as VOther
+}
+
+package "Contexts (React)" as VC {
+  [AuthContext.tsx] as CtxAuth
+  [RacketsContext.tsx] as CtxRackets
+  [ListsContext.tsx] as CtxLists
+  [ComparisonContext.tsx] as CtxCompare
+}
+
+package "Components" as VComp {
+  [Layout] as CompLayout
+  [ProtectedRoute] as CompProtected
+  [ErrorBoundary] as CompErrorBoundary
+}
+
+' --- Backend ---
+package "Server (app.ts)" as SRV {
+  [helmet + cors + rateLimit + compression + morgan] as SrvMiddlewares
+  [Swagger UI /api/v1/api-docs] as SrvSwagger
+  [Static SPA fallback] as SrvStatic
+}
+
+package "Routes (Express)" as R {
+  [auth.ts\nPOST /api/v1/auth/*] as RAuth
+  [users.ts\nGET/POST/PUT/DELETE /api/v1/users/profile\nGET /search\nGET /lists/*] as RUsers
+  [rackets.ts\nGET /api/v1/rackets/*] as RRackets
+  [reviewRoutes.ts\n/reviews/*] as RReviews
+  [list.ts\n/lists/*] as RLists
+  [admin.ts\n/admin/*] as RAdmin
+  [stores.ts\n/stores/*] as RStores
+  [health.ts\n/health] as RHealth
+}
+
+package "Middleware" as M {
+  [auth.ts\nauthenticateUser\noptionalAuth] as MAuth
+  [validation.ts\nJoi schemas + helpers] as MValidation
+  [requireAdmin.ts] as MRequireAdmin
+  [Global error handler] as MError
+}
+
+package "Controllers" as C {
+  [AuthController] as CAuth
+  [UserController] as CUsers
+  [RacketController] as CRackets
+  [ReviewController] as CReviews
+  [ListController] as CLists
+  [AdminController] as CAdmin
+  [StoreController] as CStores
+}
+
+package "Services" as S {
+  [userService] as SUsers
+  [racketService] as SRackets
+  [reviewService] as SReviews
+  [listService] as SLists
+  [storeService] as SStores
+  [adminService] as SAdmin
+}
+
+package "Data Access" as D {
+  [config/supabase.ts\nSupabase client] as DSupabase
+  [config/index.ts\nAPI config] as DConfig
+  [config/logger.ts] as DLogger
+}
+
+package "Database / Tables" as DB {
+  database "(user_profiles)" as TProfiles
+  database "(stores)" as TStores
+  database "(store_requests)" as TStoreReq
+  database "(rackets)" as TRackets
+  database "(lists)" as TLists
+  database "(list_rackets)" as TListRackets
+  database "(reviews)" as TReviews
+  database "(review_likes)" as TReviewLikes
+  database "(review_comments)" as TReviewComments
+}
+
+' --- Conexiones Frontend ---
+VHome --> CtxRackets
+VCatalog --> CtxRackets
+VRacketDetail --> CtxRackets
+VLogin --> CtxAuth
+VRegister --> CtxAuth
+VUser --> CtxAuth
+VUser --> CtxLists
+VAdminPanel --> CtxAuth
+VAdminPanel --> CtxRackets
+VAdminPanel --> CtxLists
+
+CompProtected --> CtxAuth
+CompLayout --> VHome
+CompErrorBoundary --> VHome
+
+CtxAuth --> RAuth
+CtxRackets --> RRackets
+CtxLists --> RUsers
+CtxCompare --> RRackets
+
+' --- Conexiones Backend ---
+SRV --> SrvMiddlewares
+SRV --> SrvSwagger
+SRV --> SrvStatic
+
+SRV --> RAuth
+SRV --> RUsers
+SRV --> RRackets
+SRV --> RReviews
+SRV --> RLists
+SRV --> RAdmin
+SRV --> RStores
+SRV --> RHealth
+
+RAuth --> MValidation
+RAuth --> CAuth
+RUsers --> MAuth
+RUsers --> CUsers
+RRackets --> MAuth
+RRackets --> CRackets
+RReviews --> MAuth
+RReviews --> CReviews
+RLists --> MAuth
+RLists --> CLists
+RAdmin --> MAuth
+RAdmin --> MRequireAdmin
+RAdmin --> CAdmin
+RStores --> MAuth
+RStores --> CStores
+RHealth --> MValidation
+
+MError <- SRV
+
+CAuth --> SUsers
+CUsers --> SUsers
+CRackets --> SRackets
+CReviews --> SReviews
+CLists --> SLists
+CStores --> SStores
+CAdmin --> SAdmin
+
+SUsers --> DSupabase
+SRackets --> DSupabase
+SReviews --> DSupabase
+SLists --> DSupabase
+SStores --> DSupabase
+SAdmin --> DSupabase
+
+DSupabase --> TProfiles
+DSupabase --> TStores
+DSupabase --> TStoreReq
+DSupabase --> TRackets
+DSupabase --> TLists
+DSupabase --> TListRackets
+DSupabase --> TReviews
+DSupabase --> TReviewLikes
+DSupabase --> TReviewComments
+
+DConfig --> DSupabase
+DLogger --> SRV
+
+SrvSwagger --> RAuth
+SrvSwagger --> RRackets
+SrvSwagger --> RUsers
+SrvSwagger --> RReviews
+SrvSwagger --> RLists
+SrvSwagger --> RAdmin
+SrvSwagger --> RStores
+SrvSwagger --> RHealth
+
+@enduml
