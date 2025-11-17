@@ -105,6 +105,7 @@ En las **versiones futuras** se espera implementar:
 ### 📄 Documentación Principal
 
 1. **🚀 [Ejecución](#ejecución)** - Instrucciones para ejecutar la aplicación
+2. **🏗️ Arquitectura** - Consulta el diagrama detallado en `docs/development-guide.md` (sección "Diagrama detallado")
 2. **⚙️ [Funcionalidades v0.1](docs/functionalities-v0.1.md)** - Funcionalidades implementadas con capturas
 3. **📋 [Funcionalidades Detalladas](docs/functionalities.md)** - Lista completa de funcionalidades (implementadas y pendientes)
 4. **🧑‍💻 [Guía de Desarrollo](docs/development-guide.md)** - Documentación técnica completa
