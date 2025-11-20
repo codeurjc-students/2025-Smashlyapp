@@ -77,9 +77,9 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
     const lowerQuery = query.toLowerCase();
     return rackets.filter(
       (racket) =>
-        racket.nombre.toLowerCase().includes(lowerQuery) ||
-        racket.marca.toLowerCase().includes(lowerQuery) ||
-        racket.modelo.toLowerCase().includes(lowerQuery)
+        (racket.nombre || '').toLowerCase().includes(lowerQuery) ||
+        (racket.marca || '').toLowerCase().includes(lowerQuery) ||
+        (racket.modelo || '').toLowerCase().includes(lowerQuery)
     );
   };
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiEye, FiEyeOff, FiLock, FiMail, FiUser } from 'react-icons/fi';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext.tsx';
 
@@ -81,10 +81,10 @@ const InputContainer = styled.div`
   position: relative;
 `;
 
-const Input = styled.input<{ hasError?: boolean }>`
+const Input = styled.input<{ $hasError?: boolean }>`
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
-  border: 2px solid ${props => (props.hasError ? '#ef4444' : '#e5e7eb')};
+  border: 2px solid ${props => (props.$hasError ? '#ef4444' : '#e5e7eb')};
   border-radius: 12px;
   font-size: 1rem;
   transition: all 0.2s ease;
@@ -150,7 +150,7 @@ const ForgotPassword = styled(Link)`
   }
 `;
 
-const LoginButton = styled.button<{ loading?: boolean }>`
+const LoginButton = styled.button<{ $loading?: boolean }>`
   background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
   color: white;
   border: none;
@@ -158,15 +158,15 @@ const LoginButton = styled.button<{ loading?: boolean }>`
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
-  cursor: ${props => (props.loading ? 'not-allowed' : 'pointer')};
+  cursor: ${props => (props.$loading ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
   box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
-  opacity: ${props => (props.loading ? 0.7 : 1)};
+  opacity: ${props => (props.$loading ? 0.7 : 1)};
 
   &:hover {
-    transform: ${props => (props.loading ? 'none' : 'translateY(-2px)')};
+    transform: ${props => (props.$loading ? 'none' : 'translateY(-2px)')};
     box-shadow: ${props =>
-      props.loading ? '0 4px 14px rgba(22, 163, 74, 0.3)' : '0 8px 25px rgba(22, 163, 74, 0.4)'};
+      props.$loading ? '0 4px 14px rgba(22, 163, 74, 0.3)' : '0 8px 25px rgba(22, 163, 74, 0.4)'};
   }
 
   &:active {
@@ -212,6 +212,7 @@ interface FormErrors {
 const LoginPage: React.FC = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [formData, setFormData] = useState<FormData>({
     email: '',
@@ -220,6 +221,9 @@ const LoginPage: React.FC = () => {
   const [errors, setErrors] = useState<FormErrors>({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+
+  // Get redirect path from URL params or default to home
+  const redirectTo = searchParams.get('redirect') || '/';
 
   const validateForm = (): boolean => {
     const newErrors: FormErrors = {};
@@ -278,8 +282,8 @@ const LoginPage: React.FC = () => {
       // Login exitoso
       toast.success('¡Bienvenido a Smashly!');
 
-      // Redirigir a la página principal
-      navigate('/');
+      // Redirigir a la página anterior o a la página principal
+      navigate(redirectTo);
     } catch (error: any) {
       console.error('Error during login:', error);
       const errorMessage = error?.message || 'Error inesperado durante el inicio de sesión';
@@ -317,7 +321,7 @@ const LoginPage: React.FC = () => {
                 placeholder='tu@email.com'
                 value={formData.email}
                 onChange={handleChange}
-                hasError={!!errors.email}
+                $hasError={!!errors.email}
                 autoComplete='email'
               />
             </InputContainer>
@@ -337,7 +341,7 @@ const LoginPage: React.FC = () => {
                 placeholder='Tu contraseña'
                 value={formData.password}
                 onChange={handleChange}
-                hasError={!!errors.password}
+                $hasError={!!errors.password}
                 autoComplete='current-password'
               />
               <PasswordToggle type='button' onClick={() => setShowPassword(!showPassword)}>
@@ -349,14 +353,14 @@ const LoginPage: React.FC = () => {
 
           <ForgotPassword to='/forgot-password'>¿Olvidaste tu contraseña?</ForgotPassword>
 
-          <LoginButton type='submit' loading={loading} disabled={loading}>
+          <LoginButton type='submit' $loading={loading} disabled={loading}>
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </LoginButton>
         </Form>
 
         <RegisterLink>
           <RegisterText>
-            ¿No tienes cuenta? <Link to='/register'>Regístrate gratis</Link>
+            ¿No tienes cuenta? <Link to={`/register?redirect=${encodeURIComponent(redirectTo)}`}>Regístrate gratis</Link>
           </RegisterText>
         </RegisterLink>
       </LoginCard>

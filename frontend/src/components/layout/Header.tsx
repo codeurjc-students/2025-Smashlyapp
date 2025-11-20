@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FiMenu, FiSearch, FiX, FiUser } from "react-icons/fi";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../../contexts/AuthContext";
 import GlobalSearch from "../features/GlobalSearch";
@@ -309,6 +309,7 @@ const Header: React.FC = () => {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const location = useLocation();
   const { userProfile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -357,6 +358,7 @@ const Header: React.FC = () => {
                 onClick={async () => {
                   await signOut();
                   closeAllMenus();
+                  navigate("/login");
                 }}
               >
                 Cerrar sesión
@@ -365,14 +367,14 @@ const Header: React.FC = () => {
           ) : (
             <>
               <AuthButton
-                to="/login"
+                to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
                 variant="secondary"
                 onClick={closeAllMenus}
               >
                 Iniciar sesión
               </AuthButton>
               <AuthButton
-                to="/register"
+                to={`/register?redirect=${encodeURIComponent(location.pathname + location.search)}`}
                 variant="primary"
                 onClick={closeAllMenus}
               >
@@ -461,6 +463,7 @@ const Header: React.FC = () => {
                       onClick={async () => {
                         await signOut();
                         closeAllMenus();
+                        navigate("/login");
                       }}
                       style={{ cursor: "pointer", marginTop: "0.5rem" }}
                     >
@@ -470,7 +473,7 @@ const Header: React.FC = () => {
                 ) : (
                   <>
                     <AuthButton
-                      to="/login"
+                      to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
                       variant="secondary"
                       isMobile
                       onClick={closeAllMenus}
@@ -478,7 +481,7 @@ const Header: React.FC = () => {
                       Iniciar sesión
                     </AuthButton>
                     <AuthButton
-                      to="/register"
+                      to={`/register?redirect=${encodeURIComponent(location.pathname + location.search)}`}
                       variant="primary"
                       isMobile
                       onClick={closeAllMenus}

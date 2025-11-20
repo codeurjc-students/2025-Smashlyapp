@@ -1,15 +1,9 @@
-import { motion } from "framer-motion";
-import React from "react";
-import {
-  FiDatabase,
-  FiDollarSign,
-  FiSearch,
-  FiTarget,
-  FiZap,
-} from "react-icons/fi";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-import AiBanner from "../components/features/AiBanner";
+import { AnimatePresence, motion } from 'framer-motion';
+import React, { useEffect, useState } from 'react';
+import { FiDatabase, FiDollarSign, FiSearch, FiTarget, FiZap } from 'react-icons/fi';
+import { Link } from 'react-router-dom';
+import styled from 'styled-components';
+import AiBanner from '../components/features/AiBanner';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -24,7 +18,7 @@ const HeroSection = styled.section`
 `;
 
 const HeroContent = styled.div`
-  max-width: 800px;
+  max-width: 1100px;
   margin: 0 auto;
 `;
 
@@ -44,7 +38,35 @@ const Title = styled(motion.h1)`
   font-size: clamp(2.5rem, 5vw, 4rem);
   font-weight: 800;
   margin-bottom: 24px;
-  line-height: 1.1;
+  line-height: 1.3;
+  text-align: center;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+`;
+
+const TitleStaticBefore = styled.span`
+  display: block;
+  white-space: nowrap;
+`;
+
+const RotatingText = styled.span`
+  color: #fbbf24;
+  display: block;
+  text-align: center;
+  white-space: nowrap;
+  min-height: 1.2em;
+
+  @media (max-width: 640px) {
+    font-size: 0.85em;
+    white-space: normal;
+    max-width: 90vw;
+  }
 `;
 
 const Subtitle = styled(motion.p)`
@@ -206,6 +228,22 @@ const StatItem = styled.div`
 `;
 
 const HomePage: React.FC = () => {
+  const phrases = [
+    'conocer y mejorar mas sobre pádel',
+    'encontrar la mejor pala para ti',
+    'encontrar entrenadores cerca de ti',
+    'comparar precios',
+    'mejorar tu rendimiento en pista',
+  ];
+
+  const [phraseIndex, setPhraseIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      setPhraseIndex(prev => (prev + 1) % phrases.length);
+    }, 2500);
+    return () => clearInterval(id);
+  }, [phrases.length]);
   return (
     <Container>
       <HeroSection>
@@ -224,10 +262,21 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
           >
-            La aplicacion que te permite{" "}
-            <span style={{ color: "#fbbf24" }}>
-              conocer y mejorar mas sobre pádel
-            </span>
+            <TitleStaticBefore>La aplicacion que te permite</TitleStaticBefore>
+            <RotatingText aria-live='polite'>
+              <AnimatePresence mode='wait'>
+                <motion.span
+                  key={phrases[phraseIndex]}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.35 }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {phrases[phraseIndex]}
+                </motion.span>
+              </AnimatePresence>
+            </RotatingText>
           </Title>
 
           <Subtitle
@@ -235,8 +284,8 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            En Smashly, tenemos como objetivo ayudarte a mejorar tu juego de
-            forma sencilla y efectiva.
+            En Smashly, tenemos como objetivo ayudarte a mejorar tu juego de forma sencilla y
+            efectiva.
           </Subtitle>
 
           <CTAButtons
@@ -244,11 +293,11 @@ const HomePage: React.FC = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            <PrimaryButton to="/catalog">
+            <PrimaryButton to='/catalog'>
               <FiSearch size={20} />
               Explorar catálogo
             </PrimaryButton>
-            <SecondaryButton to="/rackets">
+            <SecondaryButton to='/rackets'>
               <FiTarget size={20} />
               Encontrar mi pala ideal
             </SecondaryButton>
@@ -259,9 +308,7 @@ const HomePage: React.FC = () => {
       <FeaturesSection>
         <FeaturesContent>
           <SectionTitle>¿Por qué elegir Smashly?</SectionTitle>
-          <SectionSubtitle>
-            La tecnología más avanzada para encontrar tu pala ideal
-          </SectionSubtitle>
+          <SectionSubtitle>La tecnología más avanzada para encontrar tu pala ideal</SectionSubtitle>
 
           <FeaturesGrid>
             <FeatureCard
@@ -275,8 +322,8 @@ const HomePage: React.FC = () => {
               </FeatureIcon>
               <FeatureTitle>Comparador Inteligente</FeatureTitle>
               <FeatureDescription>
-                Compara hasta 3 palas lado a lado con análisis detallado de pros
-                y contras para cada modelo.
+                Compara hasta 3 palas lado a lado con análisis detallado de pros y contras para cada
+                modelo.
               </FeatureDescription>
             </FeatureCard>
 
@@ -291,8 +338,7 @@ const HomePage: React.FC = () => {
               </FeatureIcon>
               <FeatureTitle>Base de Datos Completa</FeatureTitle>
               <FeatureDescription>
-                Más de 800 modelos de las mejores marcas con precios
-                actualizados en tiempo real.
+                Más de 800 modelos de las mejores marcas con precios actualizados en tiempo real.
               </FeatureDescription>
             </FeatureCard>
 
@@ -307,8 +353,8 @@ const HomePage: React.FC = () => {
               </FeatureIcon>
               <FeatureTitle>Búsqueda Inteligente</FeatureTitle>
               <FeatureDescription>
-                Encuentra cualquier pala al instante con nuestro buscador global
-                avanzado y filtros inteligentes.
+                Encuentra cualquier pala al instante con nuestro buscador global avanzado y filtros
+                inteligentes.
               </FeatureDescription>
             </FeatureCard>
 
@@ -323,8 +369,7 @@ const HomePage: React.FC = () => {
               </FeatureIcon>
               <FeatureTitle>Comparador de precios</FeatureTitle>
               <FeatureDescription>
-                Encuentra tu pala favorita y obtén el mejor precio entre todas
-                las tiendas
+                Encuentra tu pala favorita y obtén el mejor precio entre todas las tiendas
               </FeatureDescription>
             </FeatureCard>
           </FeaturesGrid>

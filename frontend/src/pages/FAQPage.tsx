@@ -360,7 +360,7 @@ const FAQPage: React.FC = () => {
       id: 7,
       question: "¿Con qué frecuencia se actualizan los precios?",
       answer:
-        "Actualizamos nuestros precios diariamente para asegurar que tengas la información más reciente. También monitoreamos ofertas especiales y descuentos para mantenerte informado de las mejores oportunidades de compra.",
+        "Actualizamos nuestros precios semanalmente para asegurar que tengas la información más reciente. También monitoreamos ofertas especiales y descuentos para mantenerte informado de las mejores oportunidades de compra.",
       category: "Precios",
     },
     {

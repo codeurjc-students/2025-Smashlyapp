@@ -1,9 +1,19 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import userEvent from '@testing-library/user-event';
 import { AuthContext } from '@/contexts/AuthContext';
 import LoginPage from '@/pages/LoginPage';
 import { MemoryRouter } from 'react-router-dom';
+
+// Avoid real navigation updates during tests to prevent act warnings
+vi.mock('react-router-dom', async () => {
+  const actual: any = await vi.importActual('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => vi.fn(),
+  };
+});
 
 // Mock toast to assert user feedback
 vi.mock('react-hot-toast', () => {
@@ -46,7 +56,9 @@ test('shows validation errors for empty fields and prevents submit', async () =>
 
   renderWithAuth(mockCtx);
 
-  await userEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }));
+  await act(async () => {
+    await userEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }));
+  });
 
   expect(await screen.findByText('El email es requerido')).toBeInTheDocument();
   expect(await screen.findByText('La contraseña es requerida')).toBeInTheDocument();
@@ -71,10 +83,11 @@ test('successful login triggers success toast and calls signIn', async () => {
   const emailInput = screen.getByLabelText('Email');
   const passwordInput = screen.getByLabelText('Contraseña');
 
-  await userEvent.type(emailInput, 'USER@Test.com');
-  await userEvent.type(passwordInput, 'secret123');
-
-  await userEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }));
+  await act(async () => {
+    await userEvent.type(emailInput, 'USER@Test.com');
+    await userEvent.type(passwordInput, 'secret123');
+    await userEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }));
+  });
 
   const toast = await getToast();
 
@@ -99,9 +112,11 @@ test('failed login shows error toast with message from signIn', async () => {
 
   renderWithAuth(mockCtx);
 
-  await userEvent.type(screen.getByLabelText('Email'), 'user@test.com');
-  await userEvent.type(screen.getByLabelText('Contraseña'), 'secret');
-  await userEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }));
+  await act(async () => {
+    await userEvent.type(screen.getByLabelText('Email'), 'user@test.com');
+    await userEvent.type(screen.getByLabelText('Contraseña'), 'secret');
+    await userEvent.click(screen.getByRole('button', { name: /Iniciar Sesión/i }));
+  });
 
   const toast = await getToast();
 
