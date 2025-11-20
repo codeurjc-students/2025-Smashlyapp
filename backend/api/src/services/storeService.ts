@@ -1,4 +1,6 @@
 import { supabase } from "../config/supabase";
+import { PaginatedResponse } from "../types";
+import type { Store } from "../types/store";
 
 export interface CreateStoreRequest {
   store_name: string;
@@ -64,6 +66,49 @@ export const storeService = {
     }
 
     return data;
+  },
+
+  /**
+   * Obtener tiendas con paginación
+   */
+  async getStoresWithPagination(
+    verified: boolean | undefined,
+    page: number = 0,
+    limit: number = 20
+  ): Promise<PaginatedResponse<Store>> {
+    const from = page * limit;
+    const to = from + limit - 1;
+
+    let query = supabase
+      .from("stores")
+      .select("*", { count: "exact" })
+      .order("created_at", { ascending: false })
+      .range(from, to);
+
+    if (verified !== undefined) {
+      query = query.eq("verified", verified);
+    }
+
+    const { data, error, count } = await query;
+
+    if (error) {
+      throw new Error(error.message);
+    }
+
+    const total = count || 0;
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      data: (data || []) as Store[],
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages,
+        hasNext: page < totalPages - 1,
+        hasPrev: page > 0,
+      },
+    };
   },
 
   /**

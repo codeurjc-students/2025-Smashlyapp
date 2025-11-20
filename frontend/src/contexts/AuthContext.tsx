@@ -18,7 +18,8 @@ interface AuthContextType {
     email: string,
     password: string,
     nickname: string,
-    fullName?: string
+    fullName?: string,
+    role?: 'player' | 'store_owner'
   ) => Promise<{ data: UserProfile | null; error: string | null; token?: string }>;
   signIn: (
     email: string,
@@ -137,7 +138,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     email: string,
     password: string,
     nickname: string,
-    fullName?: string
+    fullName?: string,
+    role?: 'player' | 'store_owner'
   ): Promise<{ data: UserProfile | null; error: string | null; token?: string }> => {
     try {
       console.log('Attempting to sign up with email:', email);
@@ -151,6 +153,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           password,
           nickname,
           full_name: fullName,
+          role,
         }),
       });
 

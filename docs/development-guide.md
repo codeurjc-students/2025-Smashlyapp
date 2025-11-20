@@ -119,6 +119,10 @@ flowchart LR
   CI -->|build/test| Frontend
 ```
 
+#### 🗺️ Diagrama De Arquitectura del Servidor
+
+## ![Arquitectura Servidor](../public/images/readme-images/arquitecturaServidor.svg)
+
 ---
 
 ### 📜 **API REST (OpenAPI)**

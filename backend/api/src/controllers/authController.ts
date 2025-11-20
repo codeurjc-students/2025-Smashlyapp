@@ -74,28 +74,28 @@ export class AuthController {
    */
   static async register(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password, nickname, full_name, metadata } = req.body;
+      const { email, password, nickname, full_name, role, metadata } = req.body;
 
-      const validationError = this.validateRegisterData(email, password);
+      const validationError = AuthController.validateRegisterData(email, password);
       if (validationError) {
         res.status(400).json(validationError);
         return;
       }
 
-      logger.info("Registering user with:", { email, nickname, full_name });
+      logger.info("Registering user with:", { email, nickname, full_name, role });
 
-      const signUpResult = await this.performSignUp(
+      const signUpResult = await AuthController.performSignUp(
       { email, password },
-      { nickname, full_name, metadata }
+      { nickname, full_name, role, metadata }
     );
       if (signUpResult.error) {
         res.status(400).json(signUpResult.error);
         return;
       }
 
-      await this.createUserProfile(signUpResult.user, email, nickname, full_name);
-      const finalSession = await this.ensureUserSession(email, password, signUpResult.session);
-      const responseData = this.buildRegisterResponse(signUpResult.user, finalSession);
+      await AuthController.createUserProfile(signUpResult.user, email, nickname, full_name, role);
+      const finalSession = await AuthController.ensureUserSession(email, password, signUpResult.session);
+      const responseData = AuthController.buildRegisterResponse(signUpResult.user, finalSession);
 
       res.status(201).json(responseData);
     } catch (error: unknown) {
@@ -121,7 +121,7 @@ export class AuthController {
     return null;
   }
 
-  private static async performSignUp(credentials: { email: string; password: string }, userData: { nickname: string; full_name: string; metadata?: Record<string, unknown> }) {
+  private static async performSignUp(credentials: { email: string; password: string }, userData: { nickname: string; full_name: string; role: string; metadata?: Record<string, unknown> }) {
     const { data, error } = await supabase.auth.signUp({
       email: credentials.email,
       password: credentials.password,
@@ -129,6 +129,7 @@ export class AuthController {
         data: {
           nickname: userData.nickname,
           full_name: userData.full_name,
+          role: userData.role,
           ...(userData.metadata || {}),
         },
       },
@@ -160,7 +161,7 @@ export class AuthController {
     return { user: data.user, session: data.session };
   }
 
-  private static async createUserProfile(user: { id: string }, email: string, nickname: string, full_name: string): Promise<void> {
+  private static async createUserProfile(user: { id: string }, email: string, nickname: string, full_name: string, role: string): Promise<void> {
     try {
       const { data: profileData, error: profileError } = await supabase
         .from("user_profiles")
@@ -169,7 +170,7 @@ export class AuthController {
           email,
           nickname: nickname || email.split("@")[0],
           full_name: full_name || null,
-          role: "player",
+          role: role || "player",
         })
         .select()
         .single();

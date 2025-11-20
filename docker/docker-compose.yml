@@ -1,6 +1,10 @@
 services:
   app:
     image: "teijeiro7/smashlyapp:0.1"
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    pull_policy: never
     container_name: smashly-app
     ports:
       - "443:443"

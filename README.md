@@ -6,7 +6,7 @@
 
 ## 📋 Resumen de la Versión 0.1
 
-**Smashly** es una aplicación web para jugadores de pádel amateur y semi-profesionales que buscan encontrar la pala más adecuada según sus características y estilo de juego. 
+**Smashly** es una aplicación web para jugadores de pádel amateur y semi-profesionales que buscan encontrar la pala más adecuada según sus características y estilo de juego.
 
 En la **versión 0.1**, la aplicación incluye las siguientes funcionalidades principales:
 
@@ -25,25 +25,32 @@ En la **versión 0.1**, la aplicación incluye las siguientes funcionalidades pr
 <summary><b>Ver capturas de la versión 0.1</b></summary>
 
 #### Página Principal
+
 ![Página Principal](public/images/readme-images/MAIN-PAGE.png)
 
 #### Catálogo de Palas
+
 ![Catálogo](public/images/readme-images/CATALOG-PAGE.png)
 
 #### Detalle de Pala
+
 ![Detalle de Pala](public/images/readme-images/RACKET-DETAIL-PAGE.png)
 
 #### Comparador
+
 ![Comparador](public/images/readme-images/COMPARE-PAGE.png)
 
 #### Formulario de Recomendación
+
 ![Formulario](public/images/readme-images/FORM-PAGE.png)
 
 #### Registro y Login
+
 ![Registro](public/images/readme-images/REGISTER-PAGE.png)
 ![Login](public/images/readme-images/LOGIN-PAGE.png)
 
 #### Sección FAQ
+
 ![FAQ](public/images/readme-images/FAQ-PAGE.png)
 
 </details>
@@ -58,10 +65,9 @@ En la **versión 0.1**, la aplicación incluye las siguientes funcionalidades pr
 
 ## 🎥 Vídeo Demostrativo - Versión 0.1
 
-> 📹 **Duración**: 1 minuto  
-> 📺 **Contenido**: Funcionalidades principales organizadas por tipo de usuario
 
-[![Ver vídeo en YouTube](https://img.shields.io/badge/YouTube-Ver%20Demo-red?style=for-the-badge&logo=youtube)](https://youtu.be/TU_VIDEO_AQUI)
+<video src="public/videos/videoDemoFase3.mp4" controls style="max-width:100%; height:auto; border:1px solid #ddd; border-radius:8px;"></video>
+<p><a href="public/videos/videoDemoFase3.mp4">Abrir video en el navegador</a></p>
 
 **Funcionalidades mostradas por tipo de usuario:**
 
@@ -76,6 +82,7 @@ En la **versión 0.1**, la aplicación incluye las siguientes funcionalidades pr
 En las **versiones futuras** se espera implementar:
 
 ### Versión 0.2 (Funcionalidades Intermedias)
+
 - 📊 **Historial de precios**: Gráficos de evolución de precios por pala y tienda
 - 💾 **Exportación a PDF**: Descarga de comparativas personalizadas
 - 🔔 **Sistema de notificaciones**: Avisos de cambios de precio y ofertas
@@ -83,6 +90,7 @@ En las **versiones futuras** se espera implementar:
 - 🎨 **Mejoras en el comparador**: Comparación de más de 2 palas simultáneamente
 
 ### Versión 0.3 (Funcionalidades Avanzadas)
+
 - 🤖 **Recomendación con IA**: Sistema de recomendación inteligente mejorado con Gemini AI
 - 🕷️ **Scraping automático**: Actualización automática de precios desde tiendas externas
 - 📊 **Panel de estadísticas**: Dashboards para usuarios y administradores
@@ -95,18 +103,22 @@ En las **versiones futuras** se espera implementar:
 ## � Índice de Documentación
 
 ### 📄 Documentación Principal
+
 1. **🚀 [Ejecución](#ejecución)** - Instrucciones para ejecutar la aplicación
+2. **🏗️ Arquitectura** - Consulta el diagrama detallado en `docs/development-guide.md` (sección "Diagrama detallado")
 2. **⚙️ [Funcionalidades v0.1](docs/functionalities-v0.1.md)** - Funcionalidades implementadas con capturas
 3. **📋 [Funcionalidades Detalladas](docs/functionalities.md)** - Lista completa de funcionalidades (implementadas y pendientes)
 4. **🧑‍💻 [Guía de Desarrollo](docs/development-guide.md)** - Documentación técnica completa
 
 ### � Documentación del Inicio del Proyecto
+
 5. **🎯 [Objetivos](docs/objectives.md)** - Objetivos funcionales y técnicos
 6. **� [Metodología](docs/methodology.md)** - Metodología de desarrollo
 7. **� [Análisis](docs/analysis.md)** - Análisis inicial del proyecto
 8. **🔄 [Seguimiento](docs/following.md)** - Enlaces a tableros y blog
 
 ### 👥 Información del Proyecto
+
 9. **👨‍🎓 [Autores](docs/authors.md)** - Información del equipo y tutores
 
 ---
@@ -118,11 +130,13 @@ En las **versiones futuras** se espera implementar:
 Antes de ejecutar la aplicación, asegúrate de tener instalado:
 
 #### Windows / Mac
+
 - **Docker Desktop**: [Descargar Docker Desktop](https://www.docker.com/products/docker-desktop/)
   - Incluye Docker Engine y Docker Compose
   - Sigue las instrucciones de instalación según tu sistema operativo
 
 #### Linux
+
 - **Docker**: [Instalar Docker en Linux](https://docs.docker.com/engine/install/)
 - **Docker Compose**: [Instalar Docker Compose](https://docs.docker.com/compose/install/)
 
@@ -131,23 +145,25 @@ Antes de ejecutar la aplicación, asegúrate de tener instalado:
 La aplicación está publicada en **Docker Hub** y se puede ejecutar fácilmente con Docker Compose.
 
 1. **Descargar el archivo docker-compose.yml**:
+
    ```bash
    curl -O https://raw.githubusercontent.com/codeurjc-students/2025-Smashlyapp/main/docker/docker-compose.yml
    ```
 
 2. **Crear archivo de variables de entorno** (`.env`):
+
    ```bash
    # Configuración de Supabase (requerido)
    SUPABASE_URL=tu_url_de_supabase
    SUPABASE_ANON_KEY=tu_clave_anonima
    SUPABASE_SERVICE_ROLE_KEY=tu_clave_de_servicio
-   
+
    # Configuración de JWT
    JWT_SECRET=tu_secreto_jwt
-   
+
    # API de Gemini (opcional para IA)
    GEMINI_API_KEY=tu_clave_de_gemini
-   
+
    # Configuración de MySQL (opcional, usa valores por defecto)
    MYSQL_ROOT_PASSWORD=root
    MYSQL_DATABASE=smashly
@@ -156,6 +172,7 @@ La aplicación está publicada en **Docker Hub** y se puede ejecutar fácilmente
    ```
 
 3. **Iniciar los contenedores**:
+
    ```bash
    docker-compose up -d
    ```
@@ -169,16 +186,19 @@ La aplicación está publicada en **Docker Hub** y se puede ejecutar fácilmente
 La aplicación incluye datos de ejemplo pre-cargados con las siguientes cuentas:
 
 #### Usuario Administrador
+
 - **Email**: `admin@smashly.com`
 - **Contraseña**: `Admin123!`
 - **Permisos**: Acceso completo al panel de administración
 
 #### Usuario Registrado
+
 - **Email**: `user@smashly.com`
 - **Contraseña**: `User123!`
 - **Permisos**: Gestión de perfil, favoritos y reseñas
 
 #### Usuario de Prueba
+
 - **Email**: `test@smashly.com`
 - **Contraseña**: `Test123!`
 - **Permisos**: Usuario estándar
@@ -190,6 +210,7 @@ docker-compose down
 ```
 
 Para eliminar también los volúmenes de datos:
+
 ```bash
 docker-compose down -v
 ```
@@ -216,6 +237,5 @@ limitations under the License.
 
 **Smashly © 2025** - Trabajo de Fin de Grado  
 Ingeniería del Software - Universidad Rey Juan Carlos
-
 
 </div>

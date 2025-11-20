@@ -56,6 +56,15 @@ const loginSchema = Joi.object({
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
+  nickname: Joi.string()
+    .min(3)
+    .max(50)
+    .pattern(/^[a-zA-Z0-9_]+$/)
+    .required(),
+  full_name: Joi.string().optional().allow(""),
+  role: Joi.string()
+    .valid("player", "store_owner")
+    .required(),
   metadata: Joi.object().optional(),
 });
 

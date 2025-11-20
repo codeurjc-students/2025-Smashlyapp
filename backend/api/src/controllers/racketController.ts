@@ -25,9 +25,15 @@ export class RacketController {
    */
   static async getAllRackets(req: Request, res: Response): Promise<void> {
     try {
-      const page = parseInt(req.query.page as string) || 0;
-      const limit = parseInt(req.query.limit as string) || 50;
-      const usePagination = req.query.paginated === "true";
+      const rawPage = parseInt(req.query.page as string);
+      const limit = parseInt(req.query.limit as string) || 10;
+      const hasPageParam = typeof req.query.page !== "undefined";
+      const hasLimitParam = typeof req.query.limit !== "undefined";
+      const usePagination =
+        req.query.paginated === "true" || hasPageParam || hasLimitParam;
+
+      // Soportar page 1-based en la query (mapeando a 0-based para el servicio)
+      const page = isNaN(rawPage) ? 0 : rawPage > 0 ? rawPage - 1 : 0;
 
       if (usePagination) {
         const result = await RacketService.getRacketsWithPagination(

@@ -98,9 +98,24 @@ export const storeController = {
       const { verified } = req.query;
       const verifiedFilter =
         verified === "true" ? true : verified === "false" ? false : undefined;
+      const page = parseInt(req.query.page as string) || 0;
+      const limit = parseInt(req.query.limit as string) || 20;
+      const usePagination = req.query.paginated === "true";
+
+      if (usePagination) {
+        const result = await storeService.getStoresWithPagination(
+          verifiedFilter,
+          page,
+          limit
+        );
+        return res.status(200).json({
+          success: true,
+          data: result,
+          timestamp: new Date().toISOString(),
+        });
+      }
 
       const stores = await storeService.getAllStores(verifiedFilter);
-
       return res.status(200).json(stores);
     } catch (error) {
       logger.error("Error fetching stores:", error);

@@ -1,0 +1,547 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="1380px" preserveAspectRatio="none" style="width:2258px;height:1380px;" version="1.1" viewBox="0 0 2258 1380" width="2258px" zoomAndPan="magnify"><defs/><g><text fill="#000000" font-family="sans-serif" font-size="18" lengthAdjust="spacing" textLength="376" x="934.5" y="17.4023">Smashly Arquitectura (Servidor + Frontend)</text><!--MD5=[a10bb3759edc5b15ee875ad0aa43aed6]
+cluster V--><polygon fill="#EEEEEE" points="221,709.1992,349,709.1992,356,731.6875,459,731.6875,459,1373.1992,221,1373.1992,221,709.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="221" x2="356" y1="731.6875" y2="731.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="122" x="225" y="724.7344">Views (Frontend)</text><!--MD5=[609b674de53f196fb987d4cab447ff4c]
+cluster VC--><polygon fill="#EEEEEE" points="582,952.1992,706,952.1992,713,974.6875,818,974.6875,818,1292.1992,582,1292.1992,582,952.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="582" x2="713" y1="974.6875" y2="974.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="118" x="586" y="967.7344">Contexts (React)</text><!--MD5=[1ac9b63f17d08b9db78f5274c4c864c3]
+cluster VComp--><polygon fill="#EEEEEE" points="16,1114.1992,113,1114.1992,120,1136.6875,193,1136.6875,193,1373.1992,16,1373.1992,16,1114.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="16" x2="120" y1="1136.6875" y2="1136.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="91" x="20" y="1129.7344">Components</text><!--MD5=[82730e224b6509be5d181d7d4b0e8fee]
+cluster SRV--><polygon fill="#EEEEEE" points="331.64,117.1992,439.64,117.1992,446.64,139.6875,921,139.6875,921,392.1992,331.64,392.1992,331.64,117.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="331.64" x2="446.64" y1="139.6875" y2="139.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="102" x="335.64" y="132.7344">Server (app.ts)</text><!--MD5=[6d975ff341ba8838095dabf4f0549e77]
+cluster R--><polygon fill="#EEEEEE" points="953,199.1992,1079,199.1992,1086,221.6875,1337,221.6875,1337,1030.1992,953,1030.1992,953,199.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="953" x2="1086" y1="221.6875" y2="221.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="120" x="957" y="214.7344">Routes (Express)</text><!--MD5=[bcd90e38684526cc25b54125ceae23d2]
+cluster M--><polygon fill="#EEEEEE" points="1365,60.1992,1454,60.1992,1461,82.6875,1587,82.6875,1587,452.1992,1365,452.1992,1365,60.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="1365" x2="1461" y1="82.6875" y2="82.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="83" x="1369" y="75.7344">Middleware</text><!--MD5=[e964c2537204c4818a6857a4ece8a291]
+cluster C--><polygon fill="#EEEEEE" points="1381.5,476.1992,1468.5,476.1992,1475.5,498.6875,1570.5,498.6875,1570.5,1059.1992,1381.5,1059.1992,1381.5,476.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="1381.5" x2="1475.5" y1="498.6875" y2="498.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="81" x="1385.5" y="491.7344">Controllers</text><!--MD5=[af4e165634b2a4ca3c4688fff127cc50]
+cluster S--><polygon fill="#EEEEEE" points="1624.5,476.1992,1688.5,476.1992,1695.5,498.6875,1788.5,498.6875,1788.5,978.1992,1624.5,978.1992,1624.5,476.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="1624.5" x2="1695.5" y1="498.6875" y2="498.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="58" x="1628.5" y="491.7344">Services</text><!--MD5=[f6e6e24a8096a8e61f901e9be08ab5fd]
+cluster D--><polygon fill="#EEEEEE" points="1615,257.1992,1707,257.1992,1714,279.6875,2029,279.6875,2029,452.1992,1615,452.1992,1615,257.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="1615" x2="1714" y1="279.6875" y2="279.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="86" x="1619" y="272.7344">Data Access</text><!--MD5=[e169ac431914a6adb8cf110c9da1459f]
+cluster DB--><polygon fill="#EEEEEE" points="2057,27.1992,2195,27.1992,2202,49.6875,2241,49.6875,2241,764.1992,2057,764.1992,2057,27.1992" style="stroke:#333333;stroke-width:1.5;"/><line style="stroke:#333333;stroke-width:1.5;" x1="2057" x2="2202" y1="49.6875" y2="49.6875"/><text fill="#000000" font-family="sans-serif" font-size="14" font-weight="bold" lengthAdjust="spacing" textLength="132" x="2061" y="42.7344">Database / Tables</text><!--MD5=[94820e64cd4cf205eee2f95f98160624]
+entity VHome--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="113" x="283.5" y="1310.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="376.5" y="1315.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="374.5" y="1317.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="374.5" y="1321.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="73" x="298.5" y="1344.4944">HomePage</text><!--MD5=[e05c364934b9945ab7c99413773c25db]
+entity VCatalog--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="126" x="277" y="1229.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="383" y="1234.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="381" y="1236.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="381" y="1240.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="86" x="292" y="1263.4944">CatalogPage</text><!--MD5=[6db031282fffd8122585221af08a90c7]
+entity VRacketDetail--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="157" x="261.5" y="1148.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="398.5" y="1153.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="396.5" y="1155.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="396.5" y="1159.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="117" x="276.5" y="1182.4944">RacketDetailPage</text><!--MD5=[d0d29102053e8ac6eb0e42d49a0e5ed7]
+entity VLogin--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="136" x="272" y="824.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="388" y="829.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="386" y="831.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="386" y="835.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="96" x="287" y="858.4944">LoginPage.tsx</text><!--MD5=[22af18b2dc5189df3cc5b6abf289c232]
+entity VRegister--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="154" x="263" y="905.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="397" y="910.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="395" y="912.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="395" y="916.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="114" x="278" y="939.4944">RegisterPage.tsx</text><!--MD5=[7ea0a72e72d5dbd95da21bdab70c4b59]
+entity VUser--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="104" x="288" y="986.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="372" y="991.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="370" y="993.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="370" y="997.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="64" x="303" y="1020.4944">UserPage</text><!--MD5=[bd405cba8ef29552461ca858a9201af1]
+entity VAdminPanel--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="155" x="262.5" y="1067.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="397.5" y="1072.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="395.5" y="1074.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="395.5" y="1078.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="115" x="277.5" y="1101.4944">AdminPanelPage</text><!--MD5=[18a6675e21b898ac67975fcfac8b4ddc]
+entity VOther--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="206" x="237" y="743.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="423" y="748.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="421" y="750.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="421" y="754.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="166" x="252" y="777.4944">FAQPage / ComingSoon</text><!--MD5=[dc5e50a2af4f600af17e899c8e98e698]
+entity CtxAuth--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="153" x="623.5" y="986.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="756.5" y="991.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="754.5" y="993.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="754.5" y="997.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="113" x="638.5" y="1020.4944">AuthContext.tsx</text><!--MD5=[3afa09883b4e51d7f4124a31168978f0]
+entity CtxRackets--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="172" x="614" y="1148.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="766" y="1153.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="764" y="1155.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="764" y="1159.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="132" x="629" y="1182.4944">RacketsContext.tsx</text><!--MD5=[2e84c7fab6a1893b2226a5e9dcb9f8b2]
+entity CtxLists--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="150" x="625" y="1067.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="755" y="1072.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="753" y="1074.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="753" y="1078.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="110" x="640" y="1101.4944">ListsContext.tsx</text><!--MD5=[74788600dc99e63537939bda9eca3c51]
+entity CtxCompare--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="204" x="598" y="1229.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="782" y="1234.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="780" y="1236.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="780" y="1240.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="164" x="613" y="1263.4944">ComparisonContext.tsx</text><!--MD5=[6dfc4c6e567b3a0ce149fba16d36f72f]
+entity CompLayout--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="85" x="62" y="1229.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="127" y="1234.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="125" y="1236.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="125" y="1240.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="45" x="77" y="1263.4944">Layout</text><!--MD5=[e6aa3e8b727936617e41baa69abd0da6]
+entity CompProtected--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="145" x="32" y="1148.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="157" y="1153.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="155" y="1155.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="155" y="1159.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="47" y="1182.4944">ProtectedRoute</text><!--MD5=[425106bd4e6350d4538e3a05d4ab81e5]
+entity CompErrorBoundary--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="140" x="34.5" y="1310.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="154.5" y="1315.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="152.5" y="1317.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="152.5" y="1321.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="100" x="49.5" y="1344.4944">ErrorBoundary</text><!--MD5=[941389f0bebf1f85a3498bdc76e7863b]
+entity SrvMiddlewares--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="394" x="503" y="240.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="877" y="245.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="875" y="247.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="875" y="251.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="354" x="518" y="274.4944">helmet + cors + rateLimit + compression + morgan</text><!--MD5=[f7168f190082c1accc221ee5cdd0c802]
+entity SrvSwagger--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="240" x="580" y="159.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="800" y="164.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="798" y="166.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="798" y="170.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="200" x="595" y="193.4944">Swagger UI /api/v1/api-docs</text><!--MD5=[9d78b40db2a99bed5d965ff344e11d4b]
+entity SrvStatic--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="164" x="618" y="321.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="762" y="326.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="760" y="328.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="760" y="332.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="124" x="633" y="355.4944">Static SPA fallback</text><!--MD5=[974a06f641ffa6ff59cfcac58722ab36]
+entity RAuth--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="183" x="1053.5" y="723.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1216.5" y="728.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1214.5" y="730.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1214.5" y="734.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="47" x="1068.5" y="757.2444">auth.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="143" x="1068.5" y="773.7327">POST /api/v1/auth/*</text><!--MD5=[f11ab176f7992e0dfa9865cbdcb391af]
+entity RUsers--><rect fill="#FFFFFF" height="95.9531" style="stroke:#333333;stroke-width:1.5;" width="352" x="969" y="821.2192"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1301" y="826.2192"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1299" y="828.2192"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1299" y="832.2192"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="53" x="984" y="854.7544">users.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="312" x="984" y="871.2427">GET/POST/PUT/DELETE /api/v1/users/profile</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="83" x="984" y="887.7309">GET /search</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="79" x="984" y="904.2192">GET /lists/*</text><!--MD5=[2529f96ad3b555bce83370b936243700]
+entity RRackets--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="192" x="1049" y="951.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1221" y="956.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1219" y="958.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1219" y="962.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="65" x="1064" y="985.2444">rackets.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="152" x="1064" y="1001.7327">GET /api/v1/rackets/*</text><!--MD5=[d3e144da5a778c57d26080c0fae60e44]
+entity RReviews--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="147" x="1071.5" y="527.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1198.5" y="532.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1196.5" y="534.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1196.5" y="538.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="107" x="1086.5" y="561.2444">reviewRoutes.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="72" x="1086.5" y="577.7327">/reviews/*</text><!--MD5=[a2ba4db0e547d1f6bb1e98e4b0e03dc1]
+entity RLists--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="88" x="1101" y="625.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1169" y="630.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1167" y="632.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1167" y="636.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="36" x="1116" y="659.2444">list.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="48" x="1116" y="675.7327">/lists/*</text><!--MD5=[c6e4a4e6799c9acab11e833d570ac398]
+entity RAdmin--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="104" x="1093" y="331.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1177" y="336.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1175" y="338.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1175" y="342.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="59" x="1108" y="365.2444">admin.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="64" x="1108" y="381.7327">/admin/*</text><!--MD5=[b521fa3171aa753a6ab3ae7ecd9946d8]
+entity RStores--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="103" x="1093.5" y="429.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1176.5" y="434.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1174.5" y="436.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1174.5" y="440.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="58" x="1108.5" y="463.2444">stores.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="63" x="1108.5" y="479.7327">/stores/*</text><!--MD5=[fde9e4f72bb8b58068a20cc1e4dd714e]
+entity RHealth--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="99" x="1095.5" y="233.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1174.5" y="238.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1172.5" y="240.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1172.5" y="244.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="59" x="1110.5" y="267.2444">health.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="50" x="1110.5" y="283.7327">/health</text><!--MD5=[16f1480d097f48b6914ccb0d41a5b42a]
+entity MAuth--><rect fill="#FFFFFF" height="79.4648" style="stroke:#333333;stroke-width:1.5;" width="156" x="1398" y="356.4692"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1534" y="361.4692"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1532" y="363.4692"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1532" y="367.4692"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="47" x="1413" y="390.0044">auth.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="116" x="1413" y="406.4927">authenticateUser</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="90" x="1413" y="422.9809">optionalAuth</text><!--MD5=[769dd66cf7cdf7a6e0aa2517ccebfe6f]
+entity MValidation--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="190" x="1381" y="176.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1551" y="181.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1549" y="183.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1549" y="187.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="83" x="1396" y="210.2444">validation.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="150" x="1396" y="226.7327">Joi schemas + helpers</text><!--MD5=[712dd6c1b155847e55cdb382d7ede61e]
+entity MRequireAdmin--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="151" x="1400.5" y="274.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1531.5" y="279.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1529.5" y="281.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1529.5" y="285.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="111" x="1415.5" y="308.4944">requireAdmin.ts</text><!--MD5=[c9f4f6a4250380062e8d319138c1e85e]
+entity MError--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="180" x="1386" y="94.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1546" y="99.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1544" y="101.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1544" y="105.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="140" x="1401" y="128.4944">Global error handler</text><!--MD5=[5800a360f684b59913b5d9b83b62b7b2]
+entity CAuth--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="143" x="1404.5" y="834.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1527.5" y="839.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1525.5" y="841.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1525.5" y="845.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="103" x="1419.5" y="868.4944">AuthController</text><!--MD5=[056c219025dbf22b6127422defbde131]
+entity CUsers--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="141" x="1405.5" y="915.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1526.5" y="920.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1524.5" y="922.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1524.5" y="926.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="101" x="1420.5" y="949.4944">UserController</text><!--MD5=[115bc6f887f66b6c74390b4a2fc552f4]
+entity CRackets--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="155" x="1398.5" y="996.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1533.5" y="1001.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1531.5" y="1003.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1531.5" y="1007.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="115" x="1413.5" y="1030.4944">RacketController</text><!--MD5=[07f14b1524daa958e4b7ff91ba5b85cf]
+entity CReviews--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="157" x="1397.5" y="672.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1534.5" y="677.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1532.5" y="679.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1532.5" y="683.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="117" x="1412.5" y="706.4944">ReviewController</text><!--MD5=[6f7c807bb8f5b81c549ad287d74bdfb2]
+entity CLists--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="133" x="1409.5" y="753.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1522.5" y="758.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1520.5" y="760.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1520.5" y="764.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="93" x="1424.5" y="787.4944">ListController</text><!--MD5=[3cc8405f94339d0b6de74433097a646c]
+entity CAdmin--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="155" x="1398.5" y="510.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1533.5" y="515.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1531.5" y="517.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1531.5" y="521.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="115" x="1413.5" y="544.4944">AdminController</text><!--MD5=[5ae95c5997caf7891b02d018e1f63847]
+entity CStores--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="146" x="1403" y="591.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1529" y="596.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1527" y="598.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1527" y="602.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="106" x="1418" y="625.4944">StoreController</text><!--MD5=[bb7fcbcf2292b1429fa60e1872dedc5f]
+entity SUsers--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="118" x="1647.5" y="834.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1745.5" y="839.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1743.5" y="841.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1743.5" y="845.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="78" x="1662.5" y="868.4944">userService</text><!--MD5=[b0e7db23b5f45e6c298a1431a3638f38]
+entity SRackets--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="130" x="1641.5" y="915.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1751.5" y="920.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1749.5" y="922.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1749.5" y="926.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="90" x="1656.5" y="949.4944">racketService</text><!--MD5=[68bde232e6d9b1f2d57ec3659e0048b6]
+entity SReviews--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="132" x="1640.5" y="672.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1752.5" y="677.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1750.5" y="679.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1750.5" y="683.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="92" x="1655.5" y="706.4944">reviewService</text><!--MD5=[43c2dca27eb88804b63e5ef9b08f3894]
+entity SLists--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="108" x="1652.5" y="753.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1740.5" y="758.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1738.5" y="760.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1738.5" y="764.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="68" x="1667.5" y="787.4944">listService</text><!--MD5=[8c65381e56580d21a8b41357a7c9b549]
+entity SStores--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="123" x="1645" y="591.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1748" y="596.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1746" y="598.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1746" y="602.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="83" x="1660" y="625.4944">storeService</text><!--MD5=[5bf95382f75d3ad34aafb2597f2883d8]
+entity SAdmin--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="131" x="1641" y="510.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1752" y="515.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1750" y="517.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1750" y="521.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="91" x="1656" y="544.4944">adminService</text><!--MD5=[af267862b8b1645971840c84b79818c5]
+entity DSupabase--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="171" x="1842" y="373.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1993" y="378.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1991" y="380.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1991" y="384.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="131" x="1857" y="407.2444">config/supabase.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="107" x="1857" y="423.7327">Supabase client</text><!--MD5=[861ce2f0c1c5f9832d7814c83b02f3b0]
+entity DConfig--><rect fill="#FFFFFF" height="62.9766" style="stroke:#333333;stroke-width:1.5;" width="145" x="1634" y="373.7092"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1759" y="378.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1757" y="380.7092"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1757" y="384.7092"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="105" x="1649" y="407.2444">config/index.ts</text><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="69" x="1649" y="423.7327">API config</text><!--MD5=[3975c6e57ccf780fc8a0a48503574245]
+entity DLogger--><rect fill="#FFFFFF" height="46.4883" style="stroke:#333333;stroke-width:1.5;" width="151" x="1631" y="291.9592"/><rect fill="#FFFFFF" height="10" style="stroke:#333333;stroke-width:1.5;" width="15" x="1762" y="296.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1760" y="298.9592"/><rect fill="#FFFFFF" height="2" style="stroke:#333333;stroke-width:1.5;" width="4" x="1760" y="302.9592"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="111" x="1646" y="325.4944">config/logger.ts</text><!--MD5=[37d5dd96512dc089e8a0a0237a6f155f]
+entity TProfiles--><path d="M2089.5,712.4592 C2089.5,702.4592 2149,702.4592 2149,702.4592 C2149,702.4592 2208.5,702.4592 2208.5,712.4592 L2208.5,737.9475 C2208.5,747.9475 2149,747.9475 2149,747.9475 C2149,747.9475 2089.5,747.9475 2089.5,737.9475 L2089.5,712.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2089.5,712.4592 C2089.5,722.4592 2149,722.4592 2149,722.4592 C2149,722.4592 2208.5,722.4592 2208.5,712.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="99" x="2099.5" y="739.9944">(user_profiles)</text><!--MD5=[19f919dfe701c053f47d6b6a81eccf2c]
+entity TStores--><path d="M2113,632.4592 C2113,622.4592 2149,622.4592 2149,622.4592 C2149,622.4592 2185,622.4592 2185,632.4592 L2185,657.9475 C2185,667.9475 2149,667.9475 2149,667.9475 C2149,667.9475 2113,667.9475 2113,657.9475 L2113,632.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2113,632.4592 C2113,642.4592 2149,642.4592 2149,642.4592 C2149,642.4592 2185,642.4592 2185,632.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="52" x="2123" y="659.9944">(stores)</text><!--MD5=[cb9804425ee9755707b4d729834cc728]
+entity TStoreReq--><path d="M2083.5,552.4592 C2083.5,542.4592 2149,542.4592 2149,542.4592 C2149,542.4592 2214.5,542.4592 2214.5,552.4592 L2214.5,577.9475 C2214.5,587.9475 2149,587.9475 2149,587.9475 C2149,587.9475 2083.5,587.9475 2083.5,577.9475 L2083.5,552.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2083.5,552.4592 C2083.5,562.4592 2149,562.4592 2149,562.4592 C2149,562.4592 2214.5,562.4592 2214.5,552.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="111" x="2093.5" y="579.9944">(store_requests)</text><!--MD5=[c433f54e22ddc659f4a80d7fd4d80e14]
+entity TRackets--><path d="M2109.5,472.4592 C2109.5,462.4592 2149,462.4592 2149,462.4592 C2149,462.4592 2188.5,462.4592 2188.5,472.4592 L2188.5,497.9475 C2188.5,507.9475 2149,507.9475 2149,507.9475 C2149,507.9475 2109.5,507.9475 2109.5,497.9475 L2109.5,472.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2109.5,472.4592 C2109.5,482.4592 2149,482.4592 2149,482.4592 C2149,482.4592 2188.5,482.4592 2188.5,472.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="59" x="2119.5" y="499.9944">(rackets)</text><!--MD5=[5abeeaba939b78c738658ec35e825d76]
+entity TLists--><path d="M2120.5,392.4592 C2120.5,382.4592 2149,382.4592 2149,382.4592 C2149,382.4592 2177.5,382.4592 2177.5,392.4592 L2177.5,417.9475 C2177.5,427.9475 2149,427.9475 2149,427.9475 C2149,427.9475 2120.5,427.9475 2120.5,417.9475 L2120.5,392.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2120.5,392.4592 C2120.5,402.4592 2149,402.4592 2149,402.4592 C2149,402.4592 2177.5,402.4592 2177.5,392.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="37" x="2130.5" y="419.9944">(lists)</text><!--MD5=[5a24d84c40d185981b50437f54579e66]
+entity TListRackets--><path d="M2096,312.4592 C2096,302.4592 2149,302.4592 2149,302.4592 C2149,302.4592 2202,302.4592 2202,312.4592 L2202,337.9475 C2202,347.9475 2149,347.9475 2149,347.9475 C2149,347.9475 2096,347.9475 2096,337.9475 L2096,312.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2096,312.4592 C2096,322.4592 2149,322.4592 2149,322.4592 C2149,322.4592 2202,322.4592 2202,312.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="86" x="2106" y="339.9944">(list_rackets)</text><!--MD5=[9e02eff5512a047cf998c3b73cf8f892]
+entity TReviews--><path d="M2108.5,232.4592 C2108.5,222.4592 2149,222.4592 2149,222.4592 C2149,222.4592 2189.5,222.4592 2189.5,232.4592 L2189.5,257.9475 C2189.5,267.9475 2149,267.9475 2149,267.9475 C2149,267.9475 2108.5,267.9475 2108.5,257.9475 L2108.5,232.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2108.5,232.4592 C2108.5,242.4592 2149,242.4592 2149,242.4592 C2149,242.4592 2189.5,242.4592 2189.5,232.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="61" x="2118.5" y="259.9944">(reviews)</text><!--MD5=[3a8818414d047b98249ca799edd32f70]
+entity TReviewLikes--><path d="M2093,152.4592 C2093,142.4592 2149,142.4592 2149,142.4592 C2149,142.4592 2205,142.4592 2205,152.4592 L2205,177.9475 C2205,187.9475 2149,187.9475 2149,187.9475 C2149,187.9475 2093,187.9475 2093,177.9475 L2093,152.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2093,152.4592 C2093,162.4592 2149,162.4592 2149,162.4592 C2149,162.4592 2205,162.4592 2205,152.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="92" x="2103" y="179.9944">(review_likes)</text><!--MD5=[30e6c175bd15a3223860557188e7725c]
+entity TReviewComments--><path d="M2073,72.4592 C2073,62.4592 2149,62.4592 2149,62.4592 C2149,62.4592 2225,62.4592 2225,72.4592 L2225,97.9475 C2225,107.9475 2149,107.9475 2149,107.9475 C2149,107.9475 2073,107.9475 2073,97.9475 L2073,72.4592 " fill="#FEFECE" style="stroke:#000000;stroke-width:1.5;"/><path d="M2073,72.4592 C2073,82.4592 2149,82.4592 2149,82.4592 C2149,82.4592 2225,82.4592 2225,72.4592 " fill="none" style="stroke:#000000;stroke-width:1.5;"/><text fill="#000000" font-family="sans-serif" font-size="14" lengthAdjust="spacing" textLength="132" x="2083" y="99.9944">(review_comments)</text><!--MD5=[b606830830bbc2340d67f37c4e57fbd2]
+link VHome to CtxRackets--><path d="M396.74,1334.1992 C468.27,1334.1992 582,1334.1992 582,1334.1992 C582,1334.1992 582,1186.1492 582,1186.1492 C582,1186.1492 607.11,1186.1492 607.11,1186.1492 " fill="none" id="VHome-to-CtxRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="612.11,1186.1492,603.11,1182.1492,607.11,1186.1492,603.11,1190.1492,612.11,1186.1492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[cbfe783d388de6d8ef516cbc55a7ecc3]
+link VCatalog to CtxRackets--><path d="M403.25,1253.1992 C470.11,1253.1992 566,1253.1992 566,1253.1992 C566,1253.1992 566,1176.8492 566,1176.8492 C566,1176.8492 607.11,1176.8492 607.11,1176.8492 " fill="none" id="VCatalog-to-CtxRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="612.11,1176.8492,603.11,1172.8492,607.11,1176.8492,603.11,1180.8492,612.11,1176.8492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[b6b1484204c3108c8c7c16d71351fa39]
+link VRacketDetail to CtxRackets--><path d="M418.56,1167.5492 C418.56,1167.5492 607.22,1167.5492 607.22,1167.5492 " fill="none" id="VRacketDetail-to-CtxRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="612.22,1167.5492,603.22,1163.5492,607.22,1167.5492,603.22,1171.5492,612.22,1167.5492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[976469a40e6b762eab230234900d2e70]
+link VLogin to CtxAuth--><path d="M408.14,840.4492 C512.5,840.4492 700,840.4492 700,840.4492 C700,840.4492 700,980.0792 700,980.0792 " fill="none" id="VLogin-to-CtxAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="700,985.0792,704,976.0792,700,980.0792,696,976.0792,700,985.0792" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[17ce31491fb96698e61a29f883745d49]
+link VRegister to CtxAuth--><path d="M409,952.6492 C409,971.9892 409,996.2492 409,996.2492 C409,996.2492 616.65,996.2492 616.65,996.2492 " fill="none" id="VRegister-to-CtxAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="621.65,996.2492,612.65,992.2492,616.65,996.2492,612.65,1000.2492,621.65,996.2492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[609f0596155a341bbd4b6e1d1e469e12]
+link VUser to CtxAuth--><path d="M392.35,1005.5492 C392.35,1005.5492 616.51,1005.5492 616.51,1005.5492 " fill="none" id="VUser-to-CtxAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="621.51,1005.5492,612.51,1001.5492,616.51,1005.5492,612.51,1009.5492,621.51,1005.5492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[31f3a8cab142ffefec1b51fb0a705b06]
+link VUser to CtxLists--><path d="M392.43,1014.8492 C454.92,1014.8492 551,1014.8492 551,1014.8492 C551,1014.8492 551,1079.5792 551,1079.5792 C551,1079.5792 618.11,1079.5792 618.11,1079.5792 " fill="none" id="VUser-to-CtxLists" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="623.11,1079.5792,614.11,1075.5792,618.11,1079.5792,614.11,1083.5792,623.11,1079.5792" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[fff7bb4b6e101421008a115556022b6c]
+link VAdminPanel to CtxAuth--><path d="M400,1067.7492 C400,1048.4092 400,1024.1492 400,1024.1492 C400,1024.1492 616.62,1024.1492 616.62,1024.1492 " fill="none" id="VAdminPanel-to-CtxAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="621.62,1024.1492,612.62,1020.1492,616.62,1024.1492,612.62,1028.1492,621.62,1024.1492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[c5e4646a9e519cd8553e96829450dff9]
+link VAdminPanel to CtxRackets--><path d="M417.91,1102.8192 C472.22,1102.8192 535,1102.8192 535,1102.8192 C535,1102.8192 535,1158.2492 535,1158.2492 C535,1158.2492 607.12,1158.2492 607.12,1158.2492 " fill="none" id="VAdminPanel-to-CtxRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="612.12,1158.2492,603.12,1154.2492,607.12,1158.2492,603.12,1162.2492,612.12,1158.2492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[0c90021a00593679e12c1367510d0fa3]
+link VAdminPanel to CtxLists--><path d="M417.67,1091.1992 C417.67,1091.1992 618.11,1091.1992 618.11,1091.1992 " fill="none" id="VAdminPanel-to-CtxLists" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="623.11,1091.1992,614.11,1087.1992,618.11,1091.1992,614.11,1095.1992,623.11,1091.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[020e9905689c4799d05a490192eca174]
+link CompProtected to CtxAuth--><path d="M105,1148.5992 C105,1110.1992 105,1038.4392 105,1038.4392 C105,1038.4392 700,1038.4392 700,1038.4392 C700,1038.4392 700,1037.9792 700,1037.9792 " fill="none" id="CompProtected-to-CtxAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="700,1035.2892,696,1044.2892,700,1040.2892,704,1044.2892,700,1035.2892" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[07b65e9d407b0ee251cf21feef675c17]
+link CompLayout to VHome--><path d="M147.29,1253.1992 C196.03,1253.1992 269,1253.1992 269,1253.1992 C269,1253.1992 269,1326.4492 269,1326.4492 C269,1326.4492 276.51,1326.4492 276.51,1326.4492 " fill="none" id="CompLayout-to-VHome" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="281.51,1326.4492,272.51,1322.4492,276.51,1326.4492,272.51,1330.4492,281.51,1326.4492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[64dddac44e43b5c2587d0b8c6d170d35]
+link CompErrorBoundary to VHome--><path d="M174.84,1341.9492 C174.84,1341.9492 276.55,1341.9492 276.55,1341.9492 " fill="none" id="CompErrorBoundary-to-VHome" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="281.55,1341.9492,272.55,1337.9492,276.55,1341.9492,272.55,1345.9492,281.55,1341.9492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[2133a789de6fd458937ee92af8d62c7b]
+link CtxAuth to RAuth--><path d="M738,986.7192 C738,925.4292 738,765.3192 738,765.3192 C738,765.3192 1046.64,765.3192 1046.64,765.3192 " fill="none" id="CtxAuth-to-RAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1051.64,765.3192,1042.64,761.3192,1046.64,765.3192,1042.64,769.3192,1051.64,765.3192" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[f1953626e5dbcb765894034420f799e4]
+link CtxRackets to RRackets--><path d="M786.33,1172.1992 C915.74,1172.1992 1145,1172.1992 1145,1172.1992 C1145,1172.1992 1145,1021.3492 1145,1021.3492 " fill="none" id="CtxRackets-to-RRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1145,1016.3492,1141,1025.3492,1145,1021.3492,1149,1025.3492,1145,1016.3492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[862778d4b345329c247c155155d61dab]
+link CtxLists to RUsers--><path d="M775.19,1091.1992 C866.66,1091.1992 1009,1091.1992 1009,1091.1992 C1009,1091.1992 1009,924.1592 1009,924.1592 " fill="none" id="CtxLists-to-RUsers" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1009,919.1592,1005,928.1592,1009,924.1592,1013,928.1592,1009,919.1592" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[a649f4545c78b8a618966d501d1508a5]
+link CtxCompare to RRackets--><path d="M794,1229.4592 C794,1166.6292 794,1000.8192 794,1000.8192 C794,1000.8192 1042.11,1000.8192 1042.11,1000.8192 " fill="none" id="CtxCompare-to-RRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1047.11,1000.8192,1038.11,996.8192,1042.11,1000.8192,1038.11,1004.8192,1047.11,1000.8192" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[0522f8066cdd860c1d898f7f4723a7a7]
+link SRV to SrvMiddlewares--><path d="M340.51,383.6992 C351.01,383.6992 519,383.6992 519,383.6992 C519,383.6992 519,294.3192 519,294.3192 " fill="none" id="SRV-to-SrvMiddlewares" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="519,289.3192,515,298.3192,519,294.3192,523,298.3192,519,289.3192" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[c97060df5a4f81cce39e6fc27aa6dc32]
+link SRV to SrvSwagger--><path d="M331.5948,383.6992 C331.4834,383.6992 331.3714,383.6992 331.2587,383.6992 C330.8079,383.6992 330.3467,383.6992 329.8768,383.6992 C328.937,383.6992 327.9625,383.6992 326.9673,383.6992 C324.977,383.6992 322.9041,383.6992 320.8613,383.6992 C312.69,383.6992 305,383.6992 305,383.6992 C305,383.6992 305,183.1992 305,183.1992 C305,183.1992 573.1,183.1992 573.1,183.1992 " fill="none" id="SRV-to-SrvSwagger" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="578.1,183.1992,569.1,179.1992,573.1,183.1992,569.1,187.1992,578.1,183.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[062e802d8b0eba9127a306d5f800de40]
+link SRV to SrvStatic--><path d="M341,384.0892 C341,381.7992 341,345.1992 341,345.1992 C341,345.1992 611.12,345.1992 611.12,345.1992 " fill="none" id="SRV-to-SrvStatic" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="616.12,345.1992,607.12,341.1992,611.12,345.1992,607.12,349.1992,616.12,345.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[1edea797b4f015d47f53e1a98a7a507f]
+link SRV to RAuth--><path d="M340,392.5533 C340,392.9994 340,393.4621 340,393.9411 C340,394.8991 340,395.9222 340,397.0081 C340,399.1797 340,401.6021 340,404.2554 C340,414.8685 340,429.1752 340,445.9038 C340,479.3608 340,522.5048 340,565.1605 C340,650.4717 340,733.8292 340,733.8292 C340,733.8292 1046.53,733.8292 1046.53,733.8292 " fill="none" id="SRV-to-RAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1051.53,733.8292,1042.53,729.8292,1046.53,733.8292,1042.53,737.8292,1051.53,733.8292" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[d13c3ce8dc8ce98eb850c2d8010c10bd]
+link SRV to RUsers--><path d="M850,392.3873 C850,393.4491 850,394.608 850,395.8605 C850,398.3655 850,401.2449 850,404.4697 C850,417.3691 850,435.7969 850,457.9102 C850,502.1367 850,561.1055 850,620.0742 C850,738.0117 850,855.9492 850,855.9492 C850,855.9492 962.2,855.9492 962.2,855.9492 " fill="none" id="SRV-to-RUsers" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="967.2,855.9492,958.2,851.9492,962.2,855.9492,958.2,859.9492,967.2,855.9492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[e03e48de41ca2f803304b159135d2932]
+link SRV to RRackets--><path d="M331.4192,384.1992 C331.2896,384.1992 331.1587,384.1992 331.0266,384.1992 C330.7623,384.1992 330.493,384.1992 330.2187,384.1992 C325.8307,384.1992 320.1818,384.1992 313.7217,384.1992 C300.8016,384.1992 284.6369,384.1992 268.8262,384.1992 C237.205,384.1992 207,384.1992 207,384.1992 C207,384.1992 207,975.4492 207,975.4492 C207,975.4492 1042.07,975.4492 1042.07,975.4492 " fill="none" id="SRV-to-RRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1047.07,975.4492,1038.07,971.4492,1042.07,975.4492,1038.07,979.4492,1047.07,975.4492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[b9bf9602188d07d466093842ccaa066e]
+link SRV to RReviews--><path d="M662,392.6506 C662,392.8036 662,392.9587 662,393.1157 C662,393.4297 662,393.7516 662,394.0811 C662,394.7401 662,395.4297 662,396.1487 C662,397.5865 662,399.1415 662,400.803 C662,404.126 662,407.875 662,411.9648 C662,428.3242 662,450.1367 662,471.9492 C662,515.5742 662,559.1992 662,559.1992 C662,559.1992 1064.6,559.1992 1064.6,559.1992 " fill="none" id="SRV-to-RReviews" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1069.6,559.1992,1060.6,555.1992,1064.6,559.1992,1060.6,563.1992,1069.6,559.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[6860f72abf95675b14c8e59a1209a80e]
+link SRV to RLists--><path d="M331.5817,384.6992 C331.4064,384.6992 331.229,384.6992 331.0495,384.6992 C329.6132,384.6992 328.0427,384.6992 326.3669,384.6992 C319.6638,384.6992 311.2775,384.6992 303.075,384.6992 C286.67,384.6992 271,384.6992 271,384.6992 C271,384.6992 271,667.6992 271,667.6992 C271,667.6992 1094.24,667.6992 1094.24,667.6992 " fill="none" id="SRV-to-RLists" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1099.24,667.6992,1090.24,663.6992,1094.24,667.6992,1090.24,671.6992,1099.24,667.6992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[66382e2aada812b0fe444af9fbc6306b]
+link SRV to RAdmin--><path d="M924.3774,389.9392 C925.6016,389.9392 926.8212,389.9392 928.0362,389.9392 C932.8962,389.9392 937.6823,389.9392 942.3888,389.9392 C951.8018,389.9392 960.8966,389.9392 969.6275,389.9392 C1039.475,389.9392 1086.04,389.9392 1086.04,389.9392 " fill="none" id="SRV-to-RAdmin" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1091.04,389.9392,1082.04,385.9392,1086.04,389.9392,1082.04,393.9392,1091.04,389.9392" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[6773b4ddcda82bdeb4199e0dd5bf7f21]
+link SRV to RStores--><path d="M340,392.3431 C340,392.5423 340,392.7446 340,392.9497 C340,393.7705 340,394.6384 340,395.549 C340,397.3701 340,399.3616 340,401.4866 C340,409.9864 340,420.6211 340,431.023 C340,451.8267 340,471.6992 340,471.6992 C340,471.6992 1086.6,471.6992 1086.6,471.6992 " fill="none" id="SRV-to-RStores" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1091.6,471.6992,1082.6,467.6992,1086.6,471.6992,1082.6,475.6992,1091.6,471.6992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[54356493910757c4d32800b195ecc884]
+link SRV to RHealth--><path d="M922.5703,292.0692 C925.0488,292.0692 927.5094,292.0692 929.9515,292.0692 C934.8356,292.0692 939.6455,292.0692 944.3754,292.0692 C953.8352,292.0692 962.9751,292.0692 971.7494,292.0692 C1041.9438,292.0692 1088.74,292.0692 1088.74,292.0692 " fill="none" id="SRV-to-RHealth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1093.74,292.0692,1084.74,288.0692,1088.74,292.0692,1084.74,296.0692,1093.74,292.0692" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[1b08f5a2cb424764e7242f2c169511f5]
+link RAuth to MValidation--><path d="M1236.83,735.8292 C1305.29,735.8292 1387,735.8292 1387,735.8292 C1387,735.8292 1387,246.5292 1387,246.5292 " fill="none" id="RAuth-to-MValidation" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1387,241.5292,1383,250.5292,1387,246.5292,1391,250.5292,1387,241.5292" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[0505c41273c2cf1db89bf4d61fa793c8]
+link RAuth to CAuth--><path d="M1236.85,775.7792 C1291.79,775.7792 1351,775.7792 1351,775.7792 C1351,775.7792 1351,858.1992 1351,858.1992 C1351,858.1992 1397.5,858.1992 1397.5,858.1992 " fill="none" id="RAuth-to-CAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1402.5,858.1992,1393.5,854.1992,1397.5,858.1992,1393.5,862.1992,1402.5,858.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[3acb64c6005e0840438e57aff1a9e445]
+link RUsers to MAuth--><path d="M1279,820.9192 C1279,704.5292 1279,418.0392 1279,418.0392 C1279,418.0392 1391.06,418.0392 1391.06,418.0392 " fill="none" id="RUsers-to-MAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.06,418.0392,1387.06,414.0392,1391.06,418.0392,1387.06,422.0392,1396.06,418.0392" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[006fd384da13e60000738246b210dbef]
+link RUsers to CUsers--><path d="M1281,917.6392 C1281,927.2492 1281,934.4392 1281,934.4392 C1281,934.4392 1398.54,934.4392 1398.54,934.4392 " fill="none" id="RUsers-to-CUsers" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1403.54,934.4392,1394.54,930.4392,1398.54,934.4392,1394.54,938.4392,1403.54,934.4392" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[36ff00f17dab2c2b1782ca39162d39ea]
+link RRackets to MAuth--><path d="M1241.34,957.0792 C1288.81,957.0792 1336,957.0792 1336,957.0792 C1336,957.0792 1336,423.8692 1336,423.8692 C1336,423.8692 1391.3,423.8692 1391.3,423.8692 " fill="none" id="RRackets-to-MAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.3,423.8692,1387.3,419.8692,1391.3,423.8692,1387.3,427.8692,1396.3,423.8692" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[6a0000841ec283cf7f0313897bdafeca]
+link RRackets to CRackets--><path d="M1241.18,1005.8192 C1241.18,1005.8192 1391.71,1005.8192 1391.71,1005.8192 " fill="none" id="RRackets-to-CRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.71,1005.8192,1387.71,1001.8192,1391.71,1005.8192,1387.71,1009.8192,1396.71,1005.8192" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[e137e9b4a43ad882b4e2216c6b85160f]
+link RReviews to MAuth--><path d="M1211,527.5292 C1211,482.7692 1211,406.3592 1211,406.3592 C1211,406.3592 1391.05,406.3592 1391.05,406.3592 " fill="none" id="RReviews-to-MAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.05,406.3592,1387.05,402.3592,1391.05,406.3592,1387.05,410.3592,1396.05,406.3592" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[d8a554960bc0d27cea8a0df48f4ed398]
+link RReviews to CReviews--><path d="M1204,591.0892 C1204,626.3392 1204,678.1992 1204,678.1992 C1204,678.1992 1390.81,678.1992 1390.81,678.1992 " fill="none" id="RReviews-to-CReviews" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1395.81,678.1992,1386.81,674.1992,1390.81,678.1992,1386.81,682.1992,1395.81,678.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[f319ef28745da761f2fd72f3a1530da0]
+link RLists to MAuth--><path d="M1189.21,632.0792 C1207.71,632.0792 1225,632.0792 1225,632.0792 C1225,632.0792 1225,412.1992 1225,412.1992 C1225,412.1992 1391.1,412.1992 1391.1,412.1992 " fill="none" id="RLists-to-MAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.1,412.1992,1387.1,408.1992,1391.1,412.1992,1387.1,416.1992,1396.1,412.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[1596aee22328e5ceb16034b5f6fdb235]
+link RLists to CLists--><path d="M1189.46,683.4392 C1253.99,683.4392 1366,683.4392 1366,683.4392 C1366,683.4392 1366,764.8692 1366,764.8692 C1366,764.8692 1402.65,764.8692 1402.65,764.8692 " fill="none" id="RLists-to-CLists" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1407.65,764.8692,1398.65,760.8692,1402.65,764.8692,1398.65,768.8692,1407.65,764.8692" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[1c5c1b8c975946b4a066d34fd75c67c8]
+link RAdmin to MAuth--><path d="M1197.45,369.2092 C1197.45,369.2092 1391.08,369.2092 1391.08,369.2092 " fill="none" id="RAdmin-to-MAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.08,369.2092,1387.08,365.2092,1391.08,369.2092,1387.08,373.2092,1396.08,369.2092" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[03f992dd7e786fbe9aafd4be504e5eb0]
+link RAdmin to MRequireAdmin--><path d="M1145,331.3992 C1145,319.6092 1145,309.0692 1145,309.0692 C1145,309.0692 1393.55,309.0692 1393.55,309.0692 " fill="none" id="RAdmin-to-MRequireAdmin" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1398.55,309.0692,1389.55,305.0692,1393.55,309.0692,1389.55,313.0692,1398.55,309.0692" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[2564af890459675b2e9029b2870d4d9c]
+link RAdmin to CAdmin--><path d="M1197.23,381.9492 C1201.37,381.9492 1204,381.9492 1204,381.9492 C1204,381.9492 1204,519.3292 1204,519.3292 C1204,519.3292 1391.54,519.3292 1391.54,519.3292 " fill="none" id="RAdmin-to-CAdmin" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.54,519.3292,1387.54,515.3292,1391.54,519.3292,1387.54,523.3292,1396.54,519.3292" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[50ea2f9d1141b71da2a48c57d0ea9088]
+link RStores to MAuth--><path d="M1145,429.4392 C1145,414.7592 1145,400.5292 1145,400.5292 C1145,400.5292 1391.04,400.5292 1391.04,400.5292 " fill="none" id="RStores-to-MAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1396.04,400.5292,1387.04,396.5292,1391.04,400.5292,1387.04,404.5292,1396.04,400.5292" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[a8677a3018e61c506f3a99a09f84fbb2]
+link RStores to CStores--><path d="M1196.52,477.5692 C1214.83,477.5692 1231,477.5692 1231,477.5692 C1231,477.5692 1231,608.8292 1231,608.8292 C1231,608.8292 1396.31,608.8292 1396.31,608.8292 " fill="none" id="RStores-to-CStores" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1401.31,608.8292,1392.31,604.8292,1396.31,608.8292,1392.31,612.8292,1401.31,608.8292" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[d0a552ebe20c52bb425b3541358be0a1]
+link RHealth to MValidation--><path d="M1194.98,258.5292 C1267.16,258.5292 1392,258.5292 1392,258.5292 C1392,258.5292 1392,246.5892 1392,246.5892 " fill="none" id="RHealth-to-MValidation" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1392,241.5892,1388,250.5892,1392,246.5892,1396,250.5892,1392,241.5892" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[c04a663a0ce10415602ea780cf3aedd6]
+reverse link MError to SRV--><path d="M1379.32,118.1992 C1379.32,118.1992 1314.3,118.1992 1216.77,118.1992 C1168.005,118.1992 1111.1125,118.1992 1050.1563,118.1992 C1019.6781,118.1992 988.1841,118.1992 956.182,118.1992 C948.1815,118.1992 940.1493,118.1992 932.0932,118.1992 C930.0792,118.1992 928.0637,118.1992 926.0468,118.1992 " fill="none" id="MError-backto-SRV" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1384.32,118.1992,1375.32,114.1992,1379.32,118.1992,1375.32,122.1992,1384.32,118.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[4ab348a544438bfb7324a7a21682ddf1]
+link CAuth to SUsers--><path d="M1547.98,850.4492 C1547.98,850.4492 1640.53,850.4492 1640.53,850.4492 " fill="none" id="CAuth-to-SUsers" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1645.53,850.4492,1636.53,846.4492,1640.53,850.4492,1636.53,854.4492,1645.53,850.4492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[e71b13f5931b511cb2892fbcbb0a9d21]
+link CUsers to SUsers--><path d="M1546.64,939.1992 C1556.31,939.1992 1563,939.1992 1563,939.1992 C1563,939.1992 1563,865.9492 1563,865.9492 C1563,865.9492 1640.79,865.9492 1640.79,865.9492 " fill="none" id="CUsers-to-SUsers" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1645.79,865.9492,1636.79,861.9492,1640.79,865.9492,1636.79,869.9492,1645.79,865.9492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[a64b984c02d98021b9b0ef20f2179741]
+link CRackets to SRackets--><path d="M1553.88,1020.1992 C1620.95,1020.1992 1707,1020.1992 1707,1020.1992 C1707,1020.1992 1707,969.1392 1707,969.1392 " fill="none" id="CRackets-to-SRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1707,964.1392,1703,973.1392,1707,969.1392,1711,973.1392,1707,964.1392" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[e22e0011f3a017e08022042983ba35ac]
+link CReviews to SReviews--><path d="M1554.68,696.1992 C1554.68,696.1992 1633.55,696.1992 1633.55,696.1992 " fill="none" id="CReviews-to-SReviews" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1638.55,696.1992,1629.55,692.1992,1633.55,696.1992,1629.55,700.1992,1638.55,696.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[231182778a187bec769395afaedfc4e1]
+link CLists to SLists--><path d="M1542.98,777.1992 C1542.98,777.1992 1645.63,777.1992 1645.63,777.1992 " fill="none" id="CLists-to-SLists" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1650.63,777.1992,1641.63,773.1992,1645.63,777.1992,1641.63,781.1992,1650.63,777.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[1f56a495bf0643ae0781fad539b173f5]
+link CStores to SStores--><path d="M1549.25,615.1992 C1549.25,615.1992 1638.15,615.1992 1638.15,615.1992 " fill="none" id="CStores-to-SStores" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1643.15,615.1992,1634.15,611.1992,1638.15,615.1992,1634.15,619.1992,1643.15,615.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[20c78430f34abcfa475c5b26eed47935]
+link CAdmin to SAdmin--><path d="M1553.72,534.1992 C1553.72,534.1992 1634.14,534.1992 1634.14,534.1992 " fill="none" id="CAdmin-to-SAdmin" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1639.14,534.1992,1630.14,530.1992,1634.14,534.1992,1630.14,538.1992,1639.14,534.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[9cd84d083b96c6ae21c3c4d7f07c42a1]
+link SUsers to DSupabase--><path d="M1765.86,858.1992 C1834.15,858.1992 1937,858.1992 1937,858.1992 C1937,858.1992 1937,443.5692 1937,443.5692 " fill="none" id="SUsers-to-DSupabase" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1937,438.5692,1933,447.5692,1937,443.5692,1941,447.5692,1937,438.5692" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[7b7fe68b50e10858a916ae0431968f7f]
+link SRackets to DSupabase--><path d="M1771.73,939.1992 C1845.65,939.1992 1956,939.1992 1956,939.1992 C1956,939.1992 1956,443.5192 1956,443.5192 " fill="none" id="SRackets-to-DSupabase" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1956,438.5192,1952,447.5192,1956,443.5192,1960,447.5192,1956,438.5192" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[2ef7c1ce19bce2a1978f13940b929319]
+link SReviews to DSupabase--><path d="M1772.75,687.7092 C1828.43,687.7092 1899,687.7092 1899,687.7092 C1899,687.7092 1899,443.5692 1899,443.5692 " fill="none" id="SReviews-to-DSupabase" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1899,438.5692,1895,447.5692,1899,443.5692,1903,447.5692,1899,438.5692" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[e4a1afe2fdec455a11d2feb63f4cafff]
+link SLists to DSupabase--><path d="M1760.97,777.1992 C1823.63,777.1992 1918,777.1992 1918,777.1992 C1918,777.1992 1918,443.4292 1918,443.4292 " fill="none" id="SLists-to-DSupabase" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1918,438.4292,1914,447.4292,1918,443.4292,1922,447.4292,1918,438.4292" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[190d3dad6daaf8134c7caae8819eb865]
+link SStores to DSupabase--><path d="M1768.16,607.2092 C1818.03,607.2092 1880,607.2092 1880,607.2092 C1880,607.2092 1880,443.2792 1880,443.2792 " fill="none" id="SStores-to-DSupabase" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1880,438.2792,1876,447.2792,1880,443.2792,1884,447.2792,1880,438.2792" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[335afbf539c225a84d25147cffdd60ca]
+link SAdmin to DSupabase--><path d="M1772.47,526.7092 C1814.46,526.7092 1861,526.7092 1861,526.7092 C1861,526.7092 1861,443.6392 1861,443.6392 " fill="none" id="SAdmin-to-DSupabase" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1861,438.6392,1857,447.6392,1861,443.6392,1865,447.6392,1861,438.6392" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[ff136bb223b19ca42fc1dd644cf8c78b]
+link DSupabase to TProfiles--><path d="M1975,437.0592 C1975,515.3692 1975,710.9492 1975,710.9492 C1975,710.9492 2082.61,710.9492 2082.61,710.9492 " fill="none" id="DSupabase-to-TProfiles" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2087.61,710.9492,2078.61,706.9492,2082.61,710.9492,2078.61,714.9492,2087.61,710.9492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[aaaec9c98fbe37a8efd956429dbb637b]
+link DSupabase to TStores--><path d="M1994,436.9992 C1994,499.0892 1994,630.4492 1994,630.4492 C1994,630.4492 2106.15,630.4492 2106.15,630.4492 " fill="none" id="DSupabase-to-TStores" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2111.15,630.4492,2102.15,626.4492,2106.15,630.4492,2102.15,634.4492,2111.15,630.4492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[76760cb6fa5bc7b648a76dddfcb88bab]
+link DSupabase to TStoreReq--><path d="M2013.39,433.7692 C2051.55,433.7692 2088,433.7692 2088,433.7692 C2088,433.7692 2088,535.4892 2088,535.4892 " fill="none" id="DSupabase-to-TStoreReq" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2088,540.4892,2092,531.4892,2088,535.4892,2084,531.4892,2088,540.4892" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[946487650a46a258e2dc68b958f373cf]
+link DSupabase to TRackets--><path d="M2013.29,430.8592 C2062.66,430.8592 2115,430.8592 2115,430.8592 C2115,430.8592 2115,455.6392 2115,455.6392 " fill="none" id="DSupabase-to-TRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2115,460.6392,2119,451.6392,2115,455.6392,2111,451.6392,2115,460.6392" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[b5631b5f1c348f5dd1a156a1af5bf87f]
+link DSupabase to TLists--><path d="M2013.45,405.1992 C2013.45,405.1992 2113.7,405.1992 2113.7,405.1992 " fill="none" id="DSupabase-to-TLists" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2118.7,405.1992,2109.7,401.1992,2113.7,405.1992,2109.7,409.1992,2118.7,405.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[6b8a6b1caef4442ffd85c28d84bd03d1]
+link DSupabase to TListRackets--><path d="M2013.45,379.5392 C2057.92,379.5392 2103,379.5392 2103,379.5392 C2103,379.5392 2103,354.7592 2103,354.7592 " fill="none" id="DSupabase-to-TListRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2103,349.7592,2099,358.7592,2103,354.7592,2107,358.7592,2103,349.7592" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[e26315da0236cdc31332922fac8264d7]
+link DSupabase to TReviews--><path d="M1956,373.2392 C1956,327.5692 1956,249.1092 1956,249.1092 C1956,249.1092 2101.56,249.1092 2101.56,249.1092 " fill="none" id="DSupabase-to-TReviews" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2106.56,249.1092,2097.56,245.1092,2101.56,249.1092,2097.56,253.1092,2106.56,249.1092" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[cb098cf307f029819fc2f9feca02ce76]
+link DSupabase to TReviewLikes--><path d="M1899,373.2692 C1899,311.6392 1899,182.3292 1899,182.3292 C1899,182.3292 2086.07,182.3292 2086.07,182.3292 " fill="none" id="DSupabase-to-TReviewLikes" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2091.07,182.3292,2082.07,178.3292,2086.07,182.3292,2082.07,186.3292,2091.07,182.3292" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[9594dec02abb99534370563ab2269243]
+link DSupabase to TReviewComments--><path d="M2013.3,376.6292 C2047.1,376.6292 2078,376.6292 2078,376.6292 C2078,376.6292 2078,114.5792 2078,114.5792 " fill="none" id="DSupabase-to-TReviewComments" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="2078,109.5792,2074,118.5792,2078,114.5792,2082,118.5792,2078,109.5792" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[5713fe5f0282cb891989a343e9c83adb]
+link DConfig to DSupabase--><path d="M1779.48,405.1992 C1779.48,405.1992 1835.04,405.1992 1835.04,405.1992 " fill="none" id="DConfig-to-DSupabase" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1840.04,405.1992,1831.04,401.1992,1835.04,405.1992,1831.04,409.1992,1840.04,405.1992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[f45a96ed3a259a4e81d1f86df1e0c0c6]
+link DLogger to SRV--><path d="M1707,291.6992 C1707,246.3592 1707,151.2092 1707,151.2092 C1707,151.2092 1365.25,151.2092 1023.5,151.2092 C1002.1406,151.2092 980.7813,151.2092 959.5053,151.2092 C948.8673,151.2092 938.2502,151.2092 927.6644,151.2092 " fill="none" id="DLogger-to-SRV" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="927.6644,151.2092,936.6644,155.2092,932.6644,151.2092,936.6644,147.2092,927.6644,151.2092" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[dc42189345a364143cd1912ff5896577]
+link SrvSwagger to RAuth--><path d="M820.29,186.6192 C925.63,186.6192 1062,186.6192 1062,186.6192 C1062,186.6192 1062,716.8992 1062,716.8992 " fill="none" id="SrvSwagger-to-RAuth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1062,721.8992,1066,712.8992,1062,716.8992,1058,712.8992,1062,721.8992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[615688c821acd42c9557007c4ee6722a]
+link SrvSwagger to RRackets--><path d="M820.29,203.1392 C867.68,203.1392 911,203.1392 911,203.1392 C911,203.1392 911,963.9492 911,963.9492 C911,963.9492 1042.3,963.9492 1042.3,963.9492 " fill="none" id="SrvSwagger-to-RRackets" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1047.3,963.9492,1038.3,959.9492,1042.3,963.9492,1038.3,967.9492,1047.3,963.9492" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[58a464d7244a5c5cc3190f2434022bd9]
+link SrvSwagger to RUsers--><path d="M820.24,189.9292 C907.76,189.9292 1011,189.9292 1011,189.9292 C1011,189.9292 1011,814.3792 1011,814.3792 " fill="none" id="SrvSwagger-to-RUsers" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1011,819.3792,1015,810.3792,1011,814.3792,1007,810.3792,1011,819.3792" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[35237b76833b2004e82e9ea83da3b503]
+link SrvSwagger to RReviews--><path d="M820.34,183.3192 C932.31,183.3192 1082,183.3192 1082,183.3192 C1082,183.3192 1082,520.9592 1082,520.9592 " fill="none" id="SrvSwagger-to-RReviews" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1082,525.9592,1086,516.9592,1082,520.9592,1078,516.9592,1082,525.9592" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[1743920f12367c23d222868d4ebcf6b5]
+link SrvSwagger to RLists--><path d="M820.28,199.8392 C874.25,199.8392 926,199.8392 926,199.8392 C926,199.8392 926,646.6992 926,646.6992 C926,646.6992 1094.17,646.6992 1094.17,646.6992 " fill="none" id="SrvSwagger-to-RLists" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1099.17,646.6992,1090.17,642.6992,1094.17,646.6992,1090.17,650.6992,1099.17,646.6992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[4d7e1bf3fad2a12e33a3368092d50539]
+link SrvSwagger to RAdmin--><path d="M820.41,193.2292 C886.43,193.2292 955,193.2292 955,193.2292 C955,193.2292 955,350.0792 955,350.0792 C955,350.0792 1086.07,350.0792 1086.07,350.0792 " fill="none" id="SrvSwagger-to-RAdmin" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1091.07,350.0792,1082.07,346.0792,1086.07,350.0792,1082.07,354.0792,1091.07,350.0792" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[6fd67c49b803ba480bf6e80470f1b27c]
+link SrvSwagger to RStores--><path d="M820.35,196.5292 C880.23,196.5292 940,196.5292 940,196.5292 C940,196.5292 940,450.6992 940,450.6992 C940,450.6992 1086.49,450.6992 1086.49,450.6992 " fill="none" id="SrvSwagger-to-RStores" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1091.49,450.6992,1082.49,446.6992,1086.49,450.6992,1082.49,454.6992,1091.49,450.6992" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[3783ea2ad325406fa480d07a27acb2bb]
+link SrvSwagger to RHealth--><path d="M820.42,180.0192 C952.21,180.0192 1145,180.0192 1145,180.0192 C1145,180.0192 1145,226.9692 1145,226.9692 " fill="none" id="SrvSwagger-to-RHealth" style="stroke:#444444;stroke-width:2.0;"/><polygon fill="#444444" points="1145,231.9692,1149,222.9692,1145,226.9692,1141,222.9692,1145,231.9692" style="stroke:#444444;stroke-width:2.0;"/><!--MD5=[2bf65f8bc1e7489a88935ad105146d57]
+@startuml
+title Smashly Arquitectura (Servidor + Frontend)
+
+left to right direction
+
+skinparam Shadowing false
+skinparam linetype ortho
+skinparam ArrowColor #444
+skinparam ArrowThickness 2
+skinparam package {
+  BorderColor #333
+  BackgroundColor #EEE
+  FontColor #000
+  RoundCorner 8
+}
+skinparam component {
+  BorderColor #333
+  BackgroundColor #FFF
+}
+
+' - - - Frontend - - -
+package "Views (Frontend)" as V {
+  [HomePage] as VHome
+  [CatalogPage] as VCatalog
+  [RacketDetailPage] as VRacketDetail
+  [LoginPage.tsx] as VLogin
+  [RegisterPage.tsx] as VRegister
+  [UserPage] as VUser
+  [AdminPanelPage] as VAdminPanel
+  [FAQPage / ComingSoon] as VOther
+}
+
+package "Contexts (React)" as VC {
+  [AuthContext.tsx] as CtxAuth
+  [RacketsContext.tsx] as CtxRackets
+  [ListsContext.tsx] as CtxLists
+  [ComparisonContext.tsx] as CtxCompare
+}
+
+package "Components" as VComp {
+  [Layout] as CompLayout
+  [ProtectedRoute] as CompProtected
+  [ErrorBoundary] as CompErrorBoundary
+}
+
+' - - - Backend - - -
+package "Server (app.ts)" as SRV {
+  [helmet + cors + rateLimit + compression + morgan] as SrvMiddlewares
+  [Swagger UI /api/v1/api-docs] as SrvSwagger
+  [Static SPA fallback] as SrvStatic
+}
+
+package "Routes (Express)" as R {
+  [auth.ts\nPOST /api/v1/auth/*] as RAuth
+  [users.ts\nGET/POST/PUT/DELETE /api/v1/users/profile\nGET /search\nGET /lists/*] as RUsers
+  [rackets.ts\nGET /api/v1/rackets/*] as RRackets
+  [reviewRoutes.ts\n/reviews/*] as RReviews
+  [list.ts\n/lists/*] as RLists
+  [admin.ts\n/admin/*] as RAdmin
+  [stores.ts\n/stores/*] as RStores
+  [health.ts\n/health] as RHealth
+}
+
+package "Middleware" as M {
+  [auth.ts\nauthenticateUser\noptionalAuth] as MAuth
+  [validation.ts\nJoi schemas + helpers] as MValidation
+  [requireAdmin.ts] as MRequireAdmin
+  [Global error handler] as MError
+}
+
+package "Controllers" as C {
+  [AuthController] as CAuth
+  [UserController] as CUsers
+  [RacketController] as CRackets
+  [ReviewController] as CReviews
+  [ListController] as CLists
+  [AdminController] as CAdmin
+  [StoreController] as CStores
+}
+
+package "Services" as S {
+  [userService] as SUsers
+  [racketService] as SRackets
+  [reviewService] as SReviews
+  [listService] as SLists
+  [storeService] as SStores
+  [adminService] as SAdmin
+}
+
+package "Data Access" as D {
+  [config/supabase.ts\nSupabase client] as DSupabase
+  [config/index.ts\nAPI config] as DConfig
+  [config/logger.ts] as DLogger
+}
+
+package "Database / Tables" as DB {
+  database "(user_profiles)" as TProfiles
+  database "(stores)" as TStores
+  database "(store_requests)" as TStoreReq
+  database "(rackets)" as TRackets
+  database "(lists)" as TLists
+  database "(list_rackets)" as TListRackets
+  database "(reviews)" as TReviews
+  database "(review_likes)" as TReviewLikes
+  database "(review_comments)" as TReviewComments
+}
+
+' - - - Conexiones Frontend - - -
+VHome - -> CtxRackets
+VCatalog - -> CtxRackets
+VRacketDetail - -> CtxRackets
+VLogin - -> CtxAuth
+VRegister - -> CtxAuth
+VUser - -> CtxAuth
+VUser - -> CtxLists
+VAdminPanel - -> CtxAuth
+VAdminPanel - -> CtxRackets
+VAdminPanel - -> CtxLists
+
+CompProtected - -> CtxAuth
+CompLayout - -> VHome
+CompErrorBoundary - -> VHome
+
+CtxAuth - -> RAuth
+CtxRackets - -> RRackets
+CtxLists - -> RUsers
+CtxCompare - -> RRackets
+
+' - - - Conexiones Backend - - -
+SRV - -> SrvMiddlewares
+SRV - -> SrvSwagger
+SRV - -> SrvStatic
+
+SRV - -> RAuth
+SRV - -> RUsers
+SRV - -> RRackets
+SRV - -> RReviews
+SRV - -> RLists
+SRV - -> RAdmin
+SRV - -> RStores
+SRV - -> RHealth
+
+RAuth - -> MValidation
+RAuth - -> CAuth
+RUsers - -> MAuth
+RUsers - -> CUsers
+RRackets - -> MAuth
+RRackets - -> CRackets
+RReviews - -> MAuth
+RReviews - -> CReviews
+RLists - -> MAuth
+RLists - -> CLists
+RAdmin - -> MAuth
+RAdmin - -> MRequireAdmin
+RAdmin - -> CAdmin
+RStores - -> MAuth
+RStores - -> CStores
+RHealth - -> MValidation
+
+MError <- SRV
+
+CAuth - -> SUsers
+CUsers - -> SUsers
+CRackets - -> SRackets
+CReviews - -> SReviews
+CLists - -> SLists
+CStores - -> SStores
+CAdmin - -> SAdmin
+
+SUsers - -> DSupabase
+SRackets - -> DSupabase
+SReviews - -> DSupabase
+SLists - -> DSupabase
+SStores - -> DSupabase
+SAdmin - -> DSupabase
+
+DSupabase - -> TProfiles
+DSupabase - -> TStores
+DSupabase - -> TStoreReq
+DSupabase - -> TRackets
+DSupabase - -> TLists
+DSupabase - -> TListRackets
+DSupabase - -> TReviews
+DSupabase - -> TReviewLikes
+DSupabase - -> TReviewComments
+
+DConfig - -> DSupabase
+DLogger - -> SRV
+
+SrvSwagger - -> RAuth
+SrvSwagger - -> RRackets
+SrvSwagger - -> RUsers
+SrvSwagger - -> RReviews
+SrvSwagger - -> RLists
+SrvSwagger - -> RAdmin
+SrvSwagger - -> RStores
+SrvSwagger - -> RHealth
+
+@enduml
+
+@startuml
+title Smashly Arquitectura (Servidor + Frontend)
+
+left to right direction
+
+skinparam Shadowing false
+skinparam linetype ortho
+skinparam ArrowColor #444
+skinparam ArrowThickness 2
+skinparam package {
+  BorderColor #333
+  BackgroundColor #EEE
+  FontColor #000
+  RoundCorner 8
+}
+skinparam component {
+  BorderColor #333
+  BackgroundColor #FFF
+}
+
+package "Views (Frontend)" as V {
+  [HomePage] as VHome
+  [CatalogPage] as VCatalog
+  [RacketDetailPage] as VRacketDetail
+  [LoginPage.tsx] as VLogin
+  [RegisterPage.tsx] as VRegister
+  [UserPage] as VUser
+  [AdminPanelPage] as VAdminPanel
+  [FAQPage / ComingSoon] as VOther
+}
+
+package "Contexts (React)" as VC {
+  [AuthContext.tsx] as CtxAuth
+  [RacketsContext.tsx] as CtxRackets
+  [ListsContext.tsx] as CtxLists
+  [ComparisonContext.tsx] as CtxCompare
+}
+
+package "Components" as VComp {
+  [Layout] as CompLayout
+  [ProtectedRoute] as CompProtected
+  [ErrorBoundary] as CompErrorBoundary
+}
+
+package "Server (app.ts)" as SRV {
+  [helmet + cors + rateLimit + compression + morgan] as SrvMiddlewares
+  [Swagger UI /api/v1/api-docs] as SrvSwagger
+  [Static SPA fallback] as SrvStatic
+}
+
+package "Routes (Express)" as R {
+  [auth.ts\nPOST /api/v1/auth/*] as RAuth
+  [users.ts\nGET/POST/PUT/DELETE /api/v1/users/profile\nGET /search\nGET /lists/*] as RUsers
+  [rackets.ts\nGET /api/v1/rackets/*] as RRackets
+  [reviewRoutes.ts\n/reviews/*] as RReviews
+  [list.ts\n/lists/*] as RLists
+  [admin.ts\n/admin/*] as RAdmin
+  [stores.ts\n/stores/*] as RStores
+  [health.ts\n/health] as RHealth
+}
+
+package "Middleware" as M {
+  [auth.ts\nauthenticateUser\noptionalAuth] as MAuth
+  [validation.ts\nJoi schemas + helpers] as MValidation
+  [requireAdmin.ts] as MRequireAdmin
+  [Global error handler] as MError
+}
+
+package "Controllers" as C {
+  [AuthController] as CAuth
+  [UserController] as CUsers
+  [RacketController] as CRackets
+  [ReviewController] as CReviews
+  [ListController] as CLists
+  [AdminController] as CAdmin
+  [StoreController] as CStores
+}
+
+package "Services" as S {
+  [userService] as SUsers
+  [racketService] as SRackets
+  [reviewService] as SReviews
+  [listService] as SLists
+  [storeService] as SStores
+  [adminService] as SAdmin
+}
+
+package "Data Access" as D {
+  [config/supabase.ts\nSupabase client] as DSupabase
+  [config/index.ts\nAPI config] as DConfig
+  [config/logger.ts] as DLogger
+}
+
+package "Database / Tables" as DB {
+  database "(user_profiles)" as TProfiles
+  database "(stores)" as TStores
+  database "(store_requests)" as TStoreReq
+  database "(rackets)" as TRackets
+  database "(lists)" as TLists
+  database "(list_rackets)" as TListRackets
+  database "(reviews)" as TReviews
+  database "(review_likes)" as TReviewLikes
+  database "(review_comments)" as TReviewComments
+}
+
+VHome - -> CtxRackets
+VCatalog - -> CtxRackets
+VRacketDetail - -> CtxRackets
+VLogin - -> CtxAuth
+VRegister - -> CtxAuth
+VUser - -> CtxAuth
+VUser - -> CtxLists
+VAdminPanel - -> CtxAuth
+VAdminPanel - -> CtxRackets
+VAdminPanel - -> CtxLists
+
+CompProtected - -> CtxAuth
+CompLayout - -> VHome
+CompErrorBoundary - -> VHome
+
+CtxAuth - -> RAuth
+CtxRackets - -> RRackets
+CtxLists - -> RUsers
+CtxCompare - -> RRackets
+
+SRV - -> SrvMiddlewares
+SRV - -> SrvSwagger
+SRV - -> SrvStatic
+
+SRV - -> RAuth
+SRV - -> RUsers
+SRV - -> RRackets
+SRV - -> RReviews
+SRV - -> RLists
+SRV - -> RAdmin
+SRV - -> RStores
+SRV - -> RHealth
+
+RAuth - -> MValidation
+RAuth - -> CAuth
+RUsers - -> MAuth
+RUsers - -> CUsers
+RRackets - -> MAuth
+RRackets - -> CRackets
+RReviews - -> MAuth
+RReviews - -> CReviews
+RLists - -> MAuth
+RLists - -> CLists
+RAdmin - -> MAuth
+RAdmin - -> MRequireAdmin
+RAdmin - -> CAdmin
+RStores - -> MAuth
+RStores - -> CStores
+RHealth - -> MValidation
+
+MError <- SRV
+
+CAuth - -> SUsers
+CUsers - -> SUsers
+CRackets - -> SRackets
+CReviews - -> SReviews
+CLists - -> SLists
+CStores - -> SStores
+CAdmin - -> SAdmin
+
+SUsers - -> DSupabase
+SRackets - -> DSupabase
+SReviews - -> DSupabase
+SLists - -> DSupabase
+SStores - -> DSupabase
+SAdmin - -> DSupabase
+
+DSupabase - -> TProfiles
+DSupabase - -> TStores
+DSupabase - -> TStoreReq
+DSupabase - -> TRackets
+DSupabase - -> TLists
+DSupabase - -> TListRackets
+DSupabase - -> TReviews
+DSupabase - -> TReviewLikes
+DSupabase - -> TReviewComments
+
+DConfig - -> DSupabase
+DLogger - -> SRV
+
+SrvSwagger - -> RAuth
+SrvSwagger - -> RRackets
+SrvSwagger - -> RUsers
+SrvSwagger - -> RReviews
+SrvSwagger - -> RLists
+SrvSwagger - -> RAdmin
+SrvSwagger - -> RStores
+SrvSwagger - -> RHealth
+
+@enduml
+
+PlantUML version 1.2021.00(Sun Jan 10 11:25:05 CET 2021)
+(MIT source distribution)
+Java Runtime: Java(TM) SE Runtime Environment
+JVM: Java HotSpot(TM) 64-Bit Server VM
+Default Encoding: UTF-8
+Language: en
+Country: US
+--></g></svg>
