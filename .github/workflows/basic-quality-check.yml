@@ -38,6 +38,8 @@ jobs:
 
       - name: Run unit tests
         run: npm run test:unit
+        env:
+          NODE_ENV: test
 
       - name: Generate coverage report (Jest)
         run: npm run test:coverage
@@ -90,6 +92,8 @@ jobs:
 
       - name: Run unit tests
         run: npm run test:unit
+        env:
+          NODE_ENV: test
 
       - name: Generate coverage report
         run: npm run test:coverage

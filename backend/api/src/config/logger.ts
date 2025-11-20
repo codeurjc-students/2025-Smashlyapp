@@ -31,14 +31,7 @@ const format = winston.format.combine(
 );
 
 // Define which transports the logger must use to print out messages
-const transports = [
-  // Allow console logging only in development
-  new winston.transports.Console({
-    format: winston.format.combine(
-      winston.format.colorize(),
-      winston.format.simple()
-    )
-  }),
+const transports: winston.transport[] = [
   // Allow to print all the error level messages inside the error.log file
   new winston.transports.File({
     filename: 'logs/error.log',
@@ -58,10 +51,22 @@ const transports = [
   }),
 ];
 
+// Console logging only when not running tests
+if (process.env.NODE_ENV !== 'test') {
+  transports.unshift(
+    new winston.transports.Console({
+      format: winston.format.combine(
+        winston.format.colorize(),
+        winston.format.simple()
+      )
+    })
+  );
+}
+
 // Create the logger instance that has to be exported 
 // and used to log messages
 const logger = winston.createLogger({
-  level: process.env.NODE_ENV === 'production' ? 'warn' : 'debug',
+  level: process.env.NODE_ENV === 'production' ? 'warn' : (process.env.NODE_ENV === 'test' ? 'error' : 'debug'),
   levels,
   format,
   transports,

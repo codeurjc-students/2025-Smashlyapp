@@ -108,10 +108,29 @@ export class AdminController {
    */
   static async getAllUsers(req: RequestWithUser, res: Response): Promise<void> {
     try {
-      const { data: users, error } = await supabase
+      const page = Number((req.query?.page as string) || 1);
+      const perPage = Number((req.query?.perPage as string) || 100);
+      const offset = Math.max(0, (isNaN(page) ? 1 : page) - 1) * (isNaN(perPage) ? 100 : perPage);
+
+      // Construir consulta base
+      let query = supabase
         .from("user_profiles")
         .select("id, email, nickname, full_name, role, created_at")
         .order("created_at", { ascending: false });
+
+      // Intentar limitación directa solo si está disponible en el cliente
+      const canLimit = (query as any) && typeof (query as any).limit === "function";
+      if (canLimit) {
+        query = (query as any).limit(isNaN(perPage) ? 100 : perPage);
+      }
+
+      const { data: rawUsers, error } = await (query as any);
+      let users = rawUsers || [];
+
+      // Fallback de paginación en memoria si fuera necesario
+      if (offset > 0 || (!isNaN(perPage) && perPage > 0)) {
+        users = users.slice(offset, offset + (isNaN(perPage) ? 100 : perPage));
+      }
 
       if (error) {
         throw error;
@@ -119,7 +138,7 @@ export class AdminController {
 
       res.json({
         success: true,
-        data: users || [],
+        data: users,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
