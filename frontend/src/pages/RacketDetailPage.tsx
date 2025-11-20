@@ -6,7 +6,6 @@ import React, { useEffect, useState } from 'react';
 import {
   FiArrowLeft,
   FiExternalLink,
-  FiInfo,
   FiLoader,
   FiStar,
   FiTag,

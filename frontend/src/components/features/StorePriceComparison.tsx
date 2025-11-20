@@ -424,7 +424,6 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
 
   // Encontrar el precio más bajo para resaltarlo
   const lowestPrice = Math.min(...availablePrices.map(store => store.price || Infinity));
-  const highestPrice = Math.max(...availablePrices.map(store => store.price || 0));
 
   // UI simplificada: sin barra de precio
 
@@ -493,7 +492,7 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
         </GuestMessage>
       ) : (
         <ChartContainer $compact={compact}>
-          {sortedDisplayedStores.map((store, index) => {
+          {sortedDisplayedStores.map((store) => {
               const isLowest = store.price === lowestPrice && store.available;
               const rank = storeRankMap.get(store.store);
               const medal = rank !== undefined && rank < 4 ? getMedalEmoji(rank) : null;
