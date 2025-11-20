@@ -309,29 +309,15 @@ export class UserController {
         return;
       }
 
-      const { data, total } = await UserService.searchUsersByNickname(
+      const users = await (UserService.searchUsersByNickname as any)(
         query.trim(),
-        page,
         limit
       );
 
-      const totalPages = Math.ceil(total / limit) || 1;
-      const paginated = {
-        data,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages,
-          hasNext: page < totalPages,
-          hasPrev: page > 1,
-        },
-      };
-
       res.json({
         success: true,
-        data: paginated,
-        message: `${data.length} users found`,
+        data: users,
+        message: `${Array.isArray(users) ? users.length : 0} users found`,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {

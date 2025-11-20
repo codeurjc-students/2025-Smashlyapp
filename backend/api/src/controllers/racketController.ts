@@ -32,8 +32,8 @@ export class RacketController {
       const usePagination =
         req.query.paginated === "true" || hasPageParam || hasLimitParam;
 
-      // Soportar page 1-based en la query (mapeando a 0-based para el servicio)
-      const page = isNaN(rawPage) ? 0 : rawPage > 0 ? rawPage - 1 : 0;
+      // Page 1-based por defecto, sin remapeo
+      const page = isNaN(rawPage) ? 1 : rawPage > 0 ? rawPage : 1;
 
       if (usePagination) {
         const result = await RacketService.getRacketsWithPagination(

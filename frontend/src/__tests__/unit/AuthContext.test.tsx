@@ -1,7 +1,8 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
+import { act } from 'react';
 import userEvent from '@testing-library/user-event';
-import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { AuthProvider, useAuth } from '../../contexts/AuthContext';
 
 // Helper component to interact with AuthContext in tests
 const AuthActionsProbe: React.FC = () => {
@@ -84,7 +85,9 @@ test('signIn stores token, loads profile and sets authenticated state', async ()
 
   expect(screen.getByTestId('status').textContent).toBe('no');
 
-  await userEvent.click(screen.getByTestId('login'));
+  await act(async () => {
+    await userEvent.click(screen.getByTestId('login'));
+  });
 
   await waitFor(() => {
     expect(localStorage.getItem('auth_token')).toBe('token123');
@@ -101,11 +104,15 @@ test('signOut clears token and resets authenticated state', async () => {
   );
 
   // Login first
-  await userEvent.click(screen.getByTestId('login'));
+  await act(async () => {
+    await userEvent.click(screen.getByTestId('login'));
+  });
   await waitFor(() => expect(localStorage.getItem('auth_token')).toBe('token123'));
 
   // Logout
-  await userEvent.click(screen.getByTestId('logout'));
+  await act(async () => {
+    await userEvent.click(screen.getByTestId('logout'));
+  });
 
   await waitFor(() => {
     expect(localStorage.getItem('auth_token')).toBeNull();
@@ -160,7 +167,9 @@ test('signIn returns friendly error on invalid credentials', async () => {
     </AuthProvider>
   );
 
-  await userEvent.click(screen.getByTestId('login-invalid'));
+  await act(async () => {
+    await userEvent.click(screen.getByTestId('login-invalid'));
+  });
   await waitFor(() => {
     expect(screen.getByTestId('error').textContent).toMatch('Credenciales inválidas');
     expect(localStorage.getItem('auth_token')).toBeNull();

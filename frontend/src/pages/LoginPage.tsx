@@ -81,10 +81,10 @@ const InputContainer = styled.div`
   position: relative;
 `;
 
-const Input = styled.input<{ hasError?: boolean }>`
+const Input = styled.input<{ $hasError?: boolean }>`
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
-  border: 2px solid ${props => (props.hasError ? '#ef4444' : '#e5e7eb')};
+  border: 2px solid ${props => (props.$hasError ? '#ef4444' : '#e5e7eb')};
   border-radius: 12px;
   font-size: 1rem;
   transition: all 0.2s ease;
@@ -150,7 +150,7 @@ const ForgotPassword = styled(Link)`
   }
 `;
 
-const LoginButton = styled.button<{ loading?: boolean }>`
+const LoginButton = styled.button<{ $loading?: boolean }>`
   background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
   color: white;
   border: none;
@@ -158,15 +158,15 @@ const LoginButton = styled.button<{ loading?: boolean }>`
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
-  cursor: ${props => (props.loading ? 'not-allowed' : 'pointer')};
+  cursor: ${props => (props.$loading ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
   box-shadow: 0 4px 14px rgba(22, 163, 74, 0.3);
-  opacity: ${props => (props.loading ? 0.7 : 1)};
+  opacity: ${props => (props.$loading ? 0.7 : 1)};
 
   &:hover {
-    transform: ${props => (props.loading ? 'none' : 'translateY(-2px)')};
+    transform: ${props => (props.$loading ? 'none' : 'translateY(-2px)')};
     box-shadow: ${props =>
-      props.loading ? '0 4px 14px rgba(22, 163, 74, 0.3)' : '0 8px 25px rgba(22, 163, 74, 0.4)'};
+      props.$loading ? '0 4px 14px rgba(22, 163, 74, 0.3)' : '0 8px 25px rgba(22, 163, 74, 0.4)'};
   }
 
   &:active {
@@ -321,7 +321,7 @@ const LoginPage: React.FC = () => {
                 placeholder='tu@email.com'
                 value={formData.email}
                 onChange={handleChange}
-                hasError={!!errors.email}
+                $hasError={!!errors.email}
                 autoComplete='email'
               />
             </InputContainer>
@@ -341,7 +341,7 @@ const LoginPage: React.FC = () => {
                 placeholder='Tu contraseña'
                 value={formData.password}
                 onChange={handleChange}
-                hasError={!!errors.password}
+                $hasError={!!errors.password}
                 autoComplete='current-password'
               />
               <PasswordToggle type='button' onClick={() => setShowPassword(!showPassword)}>
@@ -353,7 +353,7 @@ const LoginPage: React.FC = () => {
 
           <ForgotPassword to='/forgot-password'>¿Olvidaste tu contraseña?</ForgotPassword>
 
-          <LoginButton type='submit' loading={loading} disabled={loading}>
+          <LoginButton type='submit' $loading={loading} disabled={loading}>
             {loading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
           </LoginButton>
         </Form>

@@ -13,7 +13,6 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import UserPage from "./pages/UserPage";
 import AdminPanelPage from "./pages/AdminPanelPage";
-import ErrorPage from "./pages/ErrorPage";
 import { AuthProvider } from "./contexts/AuthContext";
 import NotFoundPage from "./pages/NotFoundPage";
 
