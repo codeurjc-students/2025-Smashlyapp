@@ -5,6 +5,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useComparison } from '../contexts/ComparisonContext';
 import { useRackets } from '../contexts/RacketsContext';
+import { RacketService } from '../services/racketService';
 import { useAuth } from '../contexts/AuthContext';
 import { Racket } from '../types/racket';
 import { AddToListModal } from '../components/features/AddToListModal';
@@ -537,13 +538,14 @@ const CatalogPage: React.FC = () => {
   // State
   const [filteredRackets, setFilteredRackets] = useState<Racket[]>([]);
   const [displayedRackets, setDisplayedRackets] = useState<Racket[]>([]);
+  const [serverTotal, setServerTotal] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Todas');
   const [showBestsellers, setShowBestsellers] = useState(false);
   const [showOffers, setShowOffers] = useState(false);
   const [sortBy, setSortBy] = useState('bestseller');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [displayCount, setDisplayCount] = useState(12);
+  const [displayCount, setDisplayCount] = useState(10);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [selectedRacket, setSelectedRacket] = useState<Racket | null>(null);
 
@@ -554,6 +556,18 @@ const CatalogPage: React.FC = () => {
       setSearchQuery(queryParam);
     }
   }, [searchParams]);
+
+  // Fetch server-side total count
+  useEffect(() => {
+    (async () => {
+      try {
+        const stats = await RacketService.getStats();
+        setServerTotal(stats.total);
+      } catch (e) {
+        // Ignorar errores; fallback al total del contexto
+      }
+    })();
+  }, []);
 
   // Filter and search effect
   useEffect(() => {
@@ -639,7 +653,7 @@ const CatalogPage: React.FC = () => {
   ];
 
   // Get stats
-  const totalRackets = rackets.length;
+  const totalRackets = serverTotal ?? rackets.length;
   const bestsellersCount = rackets.filter(r => r.es_bestseller).length;
   const offersCount = rackets.filter(r => r.en_oferta).length;
 
@@ -649,7 +663,7 @@ const CatalogPage: React.FC = () => {
   };
 
   const handleLoadMore = () => {
-    setDisplayCount(prev => prev + 12);
+    setDisplayCount(prev => prev + 10);
   };
 
   const clearFilters = () => {
@@ -767,7 +781,9 @@ const CatalogPage: React.FC = () => {
 
         {/* Results Header */}
         <ResultsHeader>
-          <ResultsCount>{filteredRackets.length} palas encontradas</ResultsCount>
+          <ResultsCount>
+            Mostrando {displayedRackets.length} de {totalRackets} palas
+          </ResultsCount>
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <SortSelect value={sortBy} onChange={e => setSortBy(e.target.value)}>
@@ -928,13 +944,15 @@ const CatalogPage: React.FC = () => {
               Total de palas mostradas: {displayedRackets.length}
             </p>
 
-            {displayedRackets.length < filteredRackets.length && (
+            {displayedRackets.length < (serverTotal ?? filteredRackets.length) && (
               <LoadMoreButton
                 onClick={handleLoadMore}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                Cargar más palas ({filteredRackets.length - displayedRackets.length} restantes)
+                Cargar más palas ({
+                  (serverTotal ?? filteredRackets.length) - displayedRackets.length
+                } restantes)
               </LoadMoreButton>
             )}
           </>

@@ -26,11 +26,9 @@ export class RacketController {
   static async getAllRackets(req: Request, res: Response): Promise<void> {
     try {
       const rawPage = parseInt(req.query.page as string);
-      const limit = parseInt(req.query.limit as string) || 10;
-      const hasPageParam = typeof req.query.page !== "undefined";
-      const hasLimitParam = typeof req.query.limit !== "undefined";
-      const usePagination =
-        req.query.paginated === "true" || hasPageParam || hasLimitParam;
+      const rawLimit = parseInt(req.query.limit as string);
+      const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : undefined;
+      const usePagination = req.query.paginated === "true";
 
       // Page 1-based por defecto, sin remapeo
       const page = isNaN(rawPage) ? 1 : rawPage > 0 ? rawPage : 1;
@@ -38,7 +36,7 @@ export class RacketController {
       if (usePagination) {
         const result = await RacketService.getRacketsWithPagination(
           page,
-          limit
+          limit ?? 10
         );
         res.json({
           success: true,
