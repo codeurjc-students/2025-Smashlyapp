@@ -102,6 +102,18 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Check for DockerHub secrets
+        run: |
+          if [ -z "${{ secrets.DOCKERHUB_USERNAME }}" ]; then
+            echo "::error::Secret DOCKERHUB_USERNAME is not set. Please add it to Repository Secrets or ensure the correct Environment is used."
+            exit 1
+          fi
+          if [ -z "${{ secrets.DOCKERHUB_TOKEN }}" ]; then
+            echo "::error::Secret DOCKERHUB_TOKEN is not set. Please add it to Repository Secrets."
+            exit 1
+          fi
+          echo "Secrets are present."
+
       - name: Publish Docker image and Compose (dev)
         uses: ./.github/actions/publish-artifacts
         with:
