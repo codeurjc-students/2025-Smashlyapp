@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import toast from "react-hot-toast";
+import React, { useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   FiEye,
   FiEyeOff,
@@ -12,12 +12,13 @@ import {
   FiPhone,
   FiShoppingBag,
   FiUser,
-} from "react-icons/fi";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import styled from "styled-components";
-import { useAuth } from "../contexts/AuthContext.tsx";
-import storeService from "../services/storeService";
-import StoreRequestModal from "../components/features/StoreRequestModal";
+} from 'react-icons/fi';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext.tsx';
+import storeService from '../services/storeService';
+import StoreRequestModal from '../components/features/StoreRequestModal';
+import OnboardingPromptModal from '../components/features/OnboardingPromptModal';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -118,7 +119,7 @@ const Input = styled.input`
     color: #9ca3af;
   }
 
-  &[type="password"] {
+  &[type='password'] {
     padding-right: 3rem;
   }
 `;
@@ -161,9 +162,9 @@ const RegisterButton = styled.button<{ loading?: boolean }>`
   border-radius: 12px;
   font-size: 1rem;
   font-weight: 600;
-  cursor: ${(props) => (props.loading ? "not-allowed" : "pointer")};
+  cursor: ${props => (props.loading ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
-  opacity: ${(props) => (props.loading ? 0.7 : 1)};
+  opacity: ${props => (props.loading ? 0.7 : 1)};
   margin-top: 0.5rem;
 
   &:hover:not(:disabled) {
@@ -216,7 +217,7 @@ const RequirementsList = styled.ul`
 `;
 
 const RequirementItem = styled.li<{ met: boolean }>`
-  color: ${(props) => (props.met ? "#16a34a" : "#6b7280")};
+  color: ${props => (props.met ? '#16a34a' : '#6b7280')};
   margin: 0.25rem 0;
 `;
 
@@ -229,10 +230,9 @@ const RegistrationTypeSelector = styled.div`
 const TypeCard = styled.button<{ isSelected: boolean }>`
   flex: 1;
   padding: 1.5rem;
-  border: 2px solid
-    ${(props) => (props.isSelected ? "#16a34a" : "#e5e7eb")};
+  border: 2px solid ${props => (props.isSelected ? '#16a34a' : '#e5e7eb')};
   border-radius: 12px;
-  background: ${(props) => (props.isSelected ? "#f0fdf4" : "white")};
+  background: ${props => (props.isSelected ? '#f0fdf4' : 'white')};
   cursor: pointer;
   transition: all 0.2s ease;
   text-align: center;
@@ -283,7 +283,7 @@ const TextArea = styled.textarea`
   }
 `;
 
-type RegistrationType = "player" | "store";
+type RegistrationType = 'player' | 'store';
 
 interface FormData {
   registrationType: RegistrationType;
@@ -333,21 +333,21 @@ const RegisterPage: React.FC = () => {
   // Get redirect path from URL params or default to home
   const redirectTo = searchParams.get('redirect') || '/';
   const [formData, setFormData] = useState<FormData>({
-    registrationType: "player",
-    fullName: "",
-    nickname: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-    storeName: "",
-    legalName: "",
-    cifNif: "",
-    contactEmail: "",
-    phoneNumber: "",
-    websiteUrl: "",
-    logoUrl: "",
-    shortDescription: "",
-    location: "",
+    registrationType: 'player',
+    fullName: '',
+    nickname: '',
+    email: '',
+    password: '',
+    confirmPassword: '',
+    storeName: '',
+    legalName: '',
+    cifNif: '',
+    contactEmail: '',
+    phoneNumber: '',
+    websiteUrl: '',
+    logoUrl: '',
+    shortDescription: '',
+    location: '',
   });
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -370,77 +370,74 @@ const RegisterPage: React.FC = () => {
 
     // Validar campos comunes
     if (!formData.fullName.trim()) {
-      newErrors.fullName = "El nombre completo es requerido";
+      newErrors.fullName = 'El nombre completo es requerido';
     } else if (formData.fullName.trim().length < 2) {
-      newErrors.fullName = "El nombre debe tener al menos 2 caracteres";
+      newErrors.fullName = 'El nombre debe tener al menos 2 caracteres';
     }
 
     if (!formData.nickname.trim()) {
-      newErrors.nickname = "El nickname es requerido";
+      newErrors.nickname = 'El nickname es requerido';
     } else if (formData.nickname.trim().length < 3) {
-      newErrors.nickname = "El nickname debe tener al menos 3 caracteres";
+      newErrors.nickname = 'El nickname debe tener al menos 3 caracteres';
     } else if (!/^[a-zA-Z0-9_]+$/.test(formData.nickname)) {
-      newErrors.nickname =
-        "El nickname solo puede contener letras, números y guiones bajos";
+      newErrors.nickname = 'El nickname solo puede contener letras, números y guiones bajos';
     }
 
     if (!formData.email.trim()) {
-      newErrors.email = "El email es requerido";
+      newErrors.email = 'El email es requerido';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Ingresa un email válido";
+      newErrors.email = 'Ingresa un email válido';
     }
 
     if (!formData.password) {
-      newErrors.password = "La contraseña es requerida";
+      newErrors.password = 'La contraseña es requerida';
     } else if (!isPasswordValid) {
-      newErrors.password = "La contraseña no cumple con los requisitos";
+      newErrors.password = 'La contraseña no cumple con los requisitos';
     }
 
     if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Confirma tu contraseña";
+      newErrors.confirmPassword = 'Confirma tu contraseña';
     } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Las contraseñas no coinciden";
+      newErrors.confirmPassword = 'Las contraseñas no coinciden';
     }
 
     // Validar campos específicos de tienda
-    if (formData.registrationType === "store") {
+    if (formData.registrationType === 'store') {
       if (!formData.storeName?.trim()) {
-        newErrors.storeName = "El nombre de la tienda es requerido";
+        newErrors.storeName = 'El nombre de la tienda es requerido';
       }
 
       if (!formData.legalName?.trim()) {
-        newErrors.legalName = "La razón social es requerida";
+        newErrors.legalName = 'La razón social es requerida';
       }
 
       if (!formData.cifNif?.trim()) {
-        newErrors.cifNif = "El CIF/NIF es requerido";
+        newErrors.cifNif = 'El CIF/NIF es requerido';
       } else if (!/^[A-Z0-9]{9}$/i.test(formData.cifNif.trim())) {
-        newErrors.cifNif = "El CIF/NIF debe tener 9 caracteres alfanuméricos";
+        newErrors.cifNif = 'El CIF/NIF debe tener 9 caracteres alfanuméricos';
       }
 
       if (!formData.contactEmail?.trim()) {
-        newErrors.contactEmail = "El email de contacto es requerido";
-      } else if (
-        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail.trim())
-      ) {
-        newErrors.contactEmail = "Ingresa un email válido";
+        newErrors.contactEmail = 'El email de contacto es requerido';
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contactEmail.trim())) {
+        newErrors.contactEmail = 'Ingresa un email válido';
       }
 
       if (!formData.phoneNumber?.trim()) {
-        newErrors.phoneNumber = "El teléfono es requerido";
+        newErrors.phoneNumber = 'El teléfono es requerido';
       } else if (!/^[+]?[\d\s-]{9,}$/.test(formData.phoneNumber.trim())) {
-        newErrors.phoneNumber = "Ingresa un teléfono válido";
+        newErrors.phoneNumber = 'Ingresa un teléfono válido';
       }
 
       if (!formData.location?.trim()) {
-        newErrors.location = "La ubicación es requerida";
+        newErrors.location = 'La ubicación es requerida';
       }
 
       if (formData.websiteUrl?.trim()) {
         try {
           new URL(formData.websiteUrl.trim());
         } catch {
-          newErrors.websiteUrl = "Ingresa una URL válida";
+          newErrors.websiteUrl = 'Ingresa una URL válida';
         }
       }
 
@@ -448,7 +445,7 @@ const RegisterPage: React.FC = () => {
         try {
           new URL(formData.logoUrl.trim());
         } catch {
-          newErrors.logoUrl = "Ingresa una URL válida";
+          newErrors.logoUrl = 'Ingresa una URL válida';
         }
       }
     }
@@ -457,18 +454,16 @@ const RegisterPage: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
 
     // Limpiar errores cuando el usuario empiece a escribir
     if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({
+      setErrors(prev => ({
         ...prev,
         [name]: undefined,
       }));
@@ -495,24 +490,27 @@ const RegisterPage: React.FC = () => {
       );
 
       if (error) {
-        toast.error(error || "Error al crear la cuenta");
+        toast.error(error || 'Error al crear la cuenta');
         return;
       }
 
       if (!token) {
-        toast.error("Error al obtener el token de autenticación");
-        console.error("❌ No token returned from signUp");
+        toast.error('Error al obtener el token de autenticación');
+        console.error('❌ No token returned from signUp');
         return;
       }
 
-      console.log("✅ Token received from signUp:", token ? "Present" : "Missing");
+      console.log('✅ Token received from signUp:', token ? 'Present' : 'Missing');
 
       // Si es una tienda, crear también la solicitud de tienda
-      if (formData.registrationType === "store") {
+      if (formData.registrationType === 'store') {
         try {
-          console.log("🏪 Creating store request...");
-          console.log("Token (first 20 chars):", token ? token.substring(0, 20) + "..." : "Missing");
-          console.log("Store data:", {
+          console.log('🏪 Creating store request...');
+          console.log(
+            'Token (first 20 chars):',
+            token ? token.substring(0, 20) + '...' : 'Missing'
+          );
+          console.log('Store data:', {
             store_name: formData.storeName,
             legal_name: formData.legalName,
             cif_nif: formData.cifNif,
@@ -536,28 +534,26 @@ const RegisterPage: React.FC = () => {
             token
           );
 
-          console.log("✅ Store request created successfully");
+          console.log('✅ Store request created successfully');
           // Mostrar modal de confirmación
           setShowStoreModal(true);
         } catch (storeError: any) {
-          console.error("❌ Error creating store:", storeError);
-          console.error("Error message:", storeError.message);
-          console.error("Error stack:", storeError.stack);
+          console.error('❌ Error creating store:', storeError);
+          console.error('Error message:', storeError.message);
+          console.error('Error stack:', storeError.stack);
           toast.error(
             `Cuenta creada pero error al registrar la tienda: ${storeError.message}. Revisa tu email para confirmar tu cuenta.`
           );
           // Aunque haya error en la tienda, redirigir al login después de 3 segundos
-          setTimeout(() => navigate("/login"), 3000);
+          setTimeout(() => navigate('/login'), 3000);
         }
       } else {
-        toast.success(
-          "¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta."
-        );
-        navigate(redirectTo);
+        toast.success('¡Cuenta creada exitosamente! Revisa tu email para confirmar tu cuenta.');
+        setShowOnboardingModal(true);
       }
     } catch (error) {
-      toast.error("Error inesperado. Inténtalo de nuevo.");
-      console.error("Registration error:", error);
+      toast.error('Error inesperado. Inténtalo de nuevo.');
+      console.error('Registration error:', error);
     } finally {
       setLoading(false);
     }
@@ -568,12 +564,20 @@ const RegisterPage: React.FC = () => {
     navigate(redirectTo);
   };
 
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+
+  const handleOnboardingClose = () => {
+    setShowOnboardingModal(false);
+    navigate('/');
+  };
+
   return (
     <Container>
+      <OnboardingPromptModal isOpen={showOnboardingModal} onClose={handleOnboardingClose} />
       <RegisterCard>
         <Header>
           <Logo>
-            <FiUser size={36} color="white" />
+            <FiUser size={36} color='white' />
           </Logo>
           <Title>Crear Cuenta</Title>
           <Subtitle>Únete a la comunidad de Smashly</Subtitle>
@@ -582,92 +586,84 @@ const RegisterPage: React.FC = () => {
         <Form onSubmit={handleSubmit}>
           <RegistrationTypeSelector>
             <TypeCard
-              type="button"
-              isSelected={formData.registrationType === "player"}
+              type='button'
+              isSelected={formData.registrationType === 'player'}
               onClick={() =>
-                setFormData((prev) => ({
+                setFormData(prev => ({
                   ...prev,
-                  registrationType: "player",
+                  registrationType: 'player',
                 }))
               }
             >
               <TypeIcon>👤</TypeIcon>
               <TypeTitle>Jugador</TypeTitle>
-              <TypeDescription>
-                Únete como jugador y descubre palas
-              </TypeDescription>
+              <TypeDescription>Únete como jugador y descubre palas</TypeDescription>
             </TypeCard>
             <TypeCard
-              type="button"
-              isSelected={formData.registrationType === "store"}
+              type='button'
+              isSelected={formData.registrationType === 'store'}
               onClick={() =>
-                setFormData((prev) => ({
+                setFormData(prev => ({
                   ...prev,
-                  registrationType: "store",
+                  registrationType: 'store',
                 }))
               }
             >
               <TypeIcon>🏪</TypeIcon>
               <TypeTitle>Tienda</TypeTitle>
-              <TypeDescription>
-                Registra tu tienda de pádel
-              </TypeDescription>
+              <TypeDescription>Registra tu tienda de pádel</TypeDescription>
             </TypeCard>
           </RegistrationTypeSelector>
 
-          {formData.registrationType === "store" && (
+          {formData.registrationType === 'store' && (
             <>
               <InputGroup>
-                <Label htmlFor="storeName">Nombre de la Tienda *</Label>
+                <Label htmlFor='storeName'>Nombre de la Tienda *</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiShoppingBag size={20} />
                   </InputIcon>
                   <Input
-                    id="storeName"
-                    name="storeName"
-                    type="text"
-                    placeholder="Nombre comercial de tu tienda"
+                    id='storeName'
+                    name='storeName'
+                    type='text'
+                    placeholder='Nombre comercial de tu tienda'
                     value={formData.storeName}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.storeName && (
-                  <ErrorMessage>{errors.storeName}</ErrorMessage>
-                )}
+                {errors.storeName && <ErrorMessage>{errors.storeName}</ErrorMessage>}
               </InputGroup>
 
               <InputGroup>
-                <Label htmlFor="legalName">Razón Social *</Label>
+                <Label htmlFor='legalName'>Razón Social *</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiFileText size={20} />
                   </InputIcon>
                   <Input
-                    id="legalName"
-                    name="legalName"
-                    type="text"
-                    placeholder="Nombre legal de la empresa"
+                    id='legalName'
+                    name='legalName'
+                    type='text'
+                    placeholder='Nombre legal de la empresa'
                     value={formData.legalName}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.legalName && (
-                  <ErrorMessage>{errors.legalName}</ErrorMessage>
-                )}
+                {errors.legalName && <ErrorMessage>{errors.legalName}</ErrorMessage>}
               </InputGroup>
 
               <InputGroup>
-                <Label htmlFor="cifNif">CIF/NIF *</Label>
+                <Label htmlFor='cifNif'>CIF/NIF *</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiFileText size={20} />
                   </InputIcon>
                   <Input
-                    id="cifNif"
-                    name="cifNif"
-                    type="text"
-                    placeholder="Ej: B12345678"
+                    id='cifNif'
+                    name='cifNif'
+                    type='text'
+                    placeholder='Ej: B12345678'
                     value={formData.cifNif}
                     onChange={handleInputChange}
                   />
@@ -678,206 +674,189 @@ const RegisterPage: React.FC = () => {
           )}
 
           <InputGroup>
-            <Label htmlFor="fullName">Nombre Completo</Label>
+            <Label htmlFor='fullName'>Nombre Completo</Label>
             <InputContainer>
               <InputIcon>
                 <FiUser size={20} />
               </InputIcon>
               <Input
-                id="fullName"
-                name="fullName"
-                type="text"
-                placeholder="Ingresa tu nombre completo"
+                id='fullName'
+                name='fullName'
+                type='text'
+                placeholder='Ingresa tu nombre completo'
                 value={formData.fullName}
                 onChange={handleInputChange}
-                autoComplete="name"
+                autoComplete='name'
               />
             </InputContainer>
             {errors.fullName && <ErrorMessage>{errors.fullName}</ErrorMessage>}
           </InputGroup>
 
           <InputGroup>
-            <Label htmlFor="nickname">Nickname</Label>
+            <Label htmlFor='nickname'>Nickname</Label>
             <InputContainer>
               <InputIcon>
                 <FiUser size={20} />
               </InputIcon>
               <Input
-                id="nickname"
-                name="nickname"
-                type="text"
-                placeholder="Elige un nickname único"
+                id='nickname'
+                name='nickname'
+                type='text'
+                placeholder='Elige un nickname único'
                 value={formData.nickname}
                 onChange={handleInputChange}
-                autoComplete="username"
+                autoComplete='username'
               />
             </InputContainer>
             {errors.nickname && <ErrorMessage>{errors.nickname}</ErrorMessage>}
           </InputGroup>
 
           <InputGroup>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor='email'>Email</Label>
             <InputContainer>
               <InputIcon>
                 <FiMail size={20} />
               </InputIcon>
               <Input
-                id="email"
-                name="email"
-                type="email"
-                placeholder="tu@email.com"
+                id='email'
+                name='email'
+                type='email'
+                placeholder='tu@email.com'
                 value={formData.email}
                 onChange={handleInputChange}
-                autoComplete="email"
+                autoComplete='email'
               />
             </InputContainer>
             {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
           </InputGroup>
 
-          {formData.registrationType === "store" && (
+          {formData.registrationType === 'store' && (
             <>
               <InputGroup>
-                <Label htmlFor="contactEmail">Email de Contacto *</Label>
+                <Label htmlFor='contactEmail'>Email de Contacto *</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiMail size={20} />
                   </InputIcon>
                   <Input
-                    id="contactEmail"
-                    name="contactEmail"
-                    type="email"
-                    placeholder="contacto@tutienda.com"
+                    id='contactEmail'
+                    name='contactEmail'
+                    type='email'
+                    placeholder='contacto@tutienda.com'
                     value={formData.contactEmail}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.contactEmail && (
-                  <ErrorMessage>{errors.contactEmail}</ErrorMessage>
-                )}
+                {errors.contactEmail && <ErrorMessage>{errors.contactEmail}</ErrorMessage>}
               </InputGroup>
 
               <InputGroup>
-                <Label htmlFor="phoneNumber">Teléfono *</Label>
+                <Label htmlFor='phoneNumber'>Teléfono *</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiPhone size={20} />
                   </InputIcon>
                   <Input
-                    id="phoneNumber"
-                    name="phoneNumber"
-                    type="tel"
-                    placeholder="+34 XXX XXX XXX"
+                    id='phoneNumber'
+                    name='phoneNumber'
+                    type='tel'
+                    placeholder='+34 XXX XXX XXX'
                     value={formData.phoneNumber}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.phoneNumber && (
-                  <ErrorMessage>{errors.phoneNumber}</ErrorMessage>
-                )}
+                {errors.phoneNumber && <ErrorMessage>{errors.phoneNumber}</ErrorMessage>}
               </InputGroup>
 
               <InputGroup>
-                <Label htmlFor="location">Ubicación *</Label>
+                <Label htmlFor='location'>Ubicación *</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiMapPin size={20} />
                   </InputIcon>
                   <Input
-                    id="location"
-                    name="location"
-                    type="text"
-                    placeholder="Ciudad, País"
+                    id='location'
+                    name='location'
+                    type='text'
+                    placeholder='Ciudad, País'
                     value={formData.location}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.location && (
-                  <ErrorMessage>{errors.location}</ErrorMessage>
-                )}
+                {errors.location && <ErrorMessage>{errors.location}</ErrorMessage>}
               </InputGroup>
 
               <InputGroup>
-                <Label htmlFor="websiteUrl">Sitio Web (opcional)</Label>
+                <Label htmlFor='websiteUrl'>Sitio Web (opcional)</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiGlobe size={20} />
                   </InputIcon>
                   <Input
-                    id="websiteUrl"
-                    name="websiteUrl"
-                    type="url"
-                    placeholder="https://tutienda.com"
+                    id='websiteUrl'
+                    name='websiteUrl'
+                    type='url'
+                    placeholder='https://tutienda.com'
                     value={formData.websiteUrl}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.websiteUrl && (
-                  <ErrorMessage>{errors.websiteUrl}</ErrorMessage>
-                )}
+                {errors.websiteUrl && <ErrorMessage>{errors.websiteUrl}</ErrorMessage>}
               </InputGroup>
 
               <InputGroup>
-                <Label htmlFor="logoUrl">URL del Logo (opcional)</Label>
+                <Label htmlFor='logoUrl'>URL del Logo (opcional)</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiImage size={20} />
                   </InputIcon>
                   <Input
-                    id="logoUrl"
-                    name="logoUrl"
-                    type="url"
-                    placeholder="https://ejemplo.com/logo.png"
+                    id='logoUrl'
+                    name='logoUrl'
+                    type='url'
+                    placeholder='https://ejemplo.com/logo.png'
                     value={formData.logoUrl}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.logoUrl && (
-                  <ErrorMessage>{errors.logoUrl}</ErrorMessage>
-                )}
+                {errors.logoUrl && <ErrorMessage>{errors.logoUrl}</ErrorMessage>}
               </InputGroup>
 
               <InputGroup>
-                <Label htmlFor="shortDescription">
-                  Descripción Breve (opcional)
-                </Label>
+                <Label htmlFor='shortDescription'>Descripción Breve (opcional)</Label>
                 <InputContainer>
                   <InputIcon>
                     <FiFileText size={20} />
                   </InputIcon>
                   <TextArea
-                    id="shortDescription"
-                    name="shortDescription"
-                    placeholder="Describe tu tienda..."
+                    id='shortDescription'
+                    name='shortDescription'
+                    placeholder='Describe tu tienda...'
                     value={formData.shortDescription}
                     onChange={handleInputChange}
                   />
                 </InputContainer>
-                {errors.shortDescription && (
-                  <ErrorMessage>{errors.shortDescription}</ErrorMessage>
-                )}
+                {errors.shortDescription && <ErrorMessage>{errors.shortDescription}</ErrorMessage>}
               </InputGroup>
             </>
           )}
 
           <InputGroup>
-            <Label htmlFor="password">Contraseña</Label>
+            <Label htmlFor='password'>Contraseña</Label>
             <InputContainer>
               <InputIcon>
                 <FiLock size={20} />
               </InputIcon>
               <Input
-                id="password"
-                name="password"
-                type={showPassword ? "text" : "password"}
-                placeholder="Crea una contraseña segura"
+                id='password'
+                name='password'
+                type={showPassword ? 'text' : 'password'}
+                placeholder='Crea una contraseña segura'
                 value={formData.password}
                 onChange={handleInputChange}
-                autoComplete="new-password"
+                autoComplete='new-password'
               />
-              <PasswordToggle
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-              >
+              <PasswordToggle type='button' onClick={() => setShowPassword(!showPassword)}>
                 {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </PasswordToggle>
             </InputContainer>
@@ -895,9 +874,7 @@ const RegisterPage: React.FC = () => {
                   <RequirementItem met={passwordRequirements.lowercase}>
                     Una letra minúscula
                   </RequirementItem>
-                  <RequirementItem met={passwordRequirements.number}>
-                    Un número
-                  </RequirementItem>
+                  <RequirementItem met={passwordRequirements.number}>Un número</RequirementItem>
                   <RequirementItem met={passwordRequirements.special}>
                     Un carácter especial
                   </RequirementItem>
@@ -907,44 +884,39 @@ const RegisterPage: React.FC = () => {
           </InputGroup>
 
           <InputGroup>
-            <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+            <Label htmlFor='confirmPassword'>Confirmar Contraseña</Label>
             <InputContainer>
               <InputIcon>
                 <FiLock size={20} />
               </InputIcon>
               <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="Repite tu contraseña"
+                id='confirmPassword'
+                name='confirmPassword'
+                type={showConfirmPassword ? 'text' : 'password'}
+                placeholder='Repite tu contraseña'
                 value={formData.confirmPassword}
                 onChange={handleInputChange}
-                autoComplete="new-password"
+                autoComplete='new-password'
               />
               <PasswordToggle
-                type="button"
+                type='button'
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
               >
-                {showConfirmPassword ? (
-                  <FiEyeOff size={20} />
-                ) : (
-                  <FiEye size={20} />
-                )}
+                {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
               </PasswordToggle>
             </InputContainer>
-            {errors.confirmPassword && (
-              <ErrorMessage>{errors.confirmPassword}</ErrorMessage>
-            )}
+            {errors.confirmPassword && <ErrorMessage>{errors.confirmPassword}</ErrorMessage>}
           </InputGroup>
 
-          <RegisterButton type="submit" loading={loading} disabled={loading}>
-            {loading ? "Creando cuenta..." : "Crear Cuenta"}
+          <RegisterButton type='submit' loading={loading} disabled={loading}>
+            {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
           </RegisterButton>
         </Form>
 
         <LoginLink>
           <LoginText>
-            ¿Ya tienes cuenta? <Link to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>Inicia sesión</Link>
+            ¿Ya tienes cuenta?{' '}
+            <Link to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>Inicia sesión</Link>
           </LoginText>
         </LoginLink>
       </RegisterCard>
@@ -953,7 +925,7 @@ const RegisterPage: React.FC = () => {
         isOpen={showStoreModal}
         onClose={handleModalClose}
         onContinue={handleModalClose}
-        storeName={formData.storeName || "tu tienda"}
+        storeName={formData.storeName || 'tu tienda'}
       />
     </Container>
   );

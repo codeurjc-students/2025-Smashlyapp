@@ -43,36 +43,46 @@ Las funcionalidades se clasifican en **Básicas**, **Intermedias** y **Avanzadas
 
 ---
 
-## 🟡 Funcionalidades Intermedias
+## 🟡 Funcionalidades Intermedias (Objetivo v1.0)
 
-| Funcionalidad                                          | Estado | Usuario no registrado        | Usuario registrado                          | Administrador                          |
-| ------------------------------------------------------ | ------ | ---------------------------- | ------------------------------------------- | -------------------------------------- |
-| **Comparar palas**                                     | ✅     | Panel flotante hasta 3 palas | Comparación completa + guardar comparativas | Definir reglas, fuentes y pesos        |
-| **Ver palas _trending_**                               | ⏳     | Sí                           | Personalización según actividad             | Configurar algoritmo/triggers          |
-| **Descargar comparativa en PDF**                       | ⏳     | —                            | Sus propias comparativas                    | Plantillas/branding global             |
-| **Avisos de bajada/subida de precios**                 | ⏳     | —                            | Suscripción por pala/tienda/umbral          | Configurar umbrales globales y cuotas  |
-| **Rellenar datos personales para formulario avanzado** | ✅     | —                            | Guardar perfil de juego y preferencias      | Ver agregados anonimizados             |
-| **Formulario "mejor pala" avanzado**                   | ⏳     | Formulario básico            | Versión avanzada con historial              | Definir preguntas, pesos, A/B tests    |
-| **Historial de precios por pala (gráfico)**            | ⏳     | Consultar gráfico básico     | Consultar más detalles, exportar datos      | Configurar frecuencia y almacenamiento |
-| **Soporte / contacto**                                 | ⏳     | Formulario básico            | Historial de tickets                        | Gestión de soporte                     |
-| **Filtros y ordenamiento de reseñas**                  | ✅     | Ver reseñas filtradas        | Filtrar por estrellas y ordenar             | Filtrar por estrellas y ordenar        |
-| **Sistema de likes en reseñas**                        | ✅     | —                            | Like/unlike reseñas                         | Like/unlike reseñas                    |
-| **Gráfico de distribución de ratings**                 | ✅     | Ver distribución             | Ver distribución                            | Ver distribución + analytics           |
-| **Perfil físico y de juego del usuario**               | ✅     | —                            | Peso, altura, nivel, limitaciones           | Ver datos agregados                    |
+Estas funcionalidades constituyen el núcleo de la **Versión 1.0**. El objetivo es enriquecer la experiencia de descubrimiento y decisión de compra.
 
-**Notas de implementación v0.1:**
+| Funcionalidad                          | Estado | Usuario no registrado                     | Usuario registrado                          | Administrador                          |
+| :------------------------------------- | :----- | :---------------------------------------- | :------------------------------------------ | :------------------------------------- |
+| **Comparar palas**                     | ✅     | Panel flotante hasta 3 palas              | Comparación completa + guardar comparativas | Definir reglas, fuentes y pesos        |
+| **Comparativa con gráficos**           | ⏳     | Ver gráficos radar/barras en comparador   | Idem + guardar preferencia de vista         | Configurar parámetros visuales         |
+| **Compartir comparativa**              | ⏳     | Ver comparativa compartida (link)         | Generar links de sus comparativas           | —                                      |
+| **Descargar comparativa en PDF**       | ⏳     | —                                         | Sus propias comparativas                    | Plantillas/branding global             |
+| **Página de "Mejor Pala" (Wizard)**    | ⏳     | Wizard interactivo básico                 | Wizard avanzado con guardado de resultados  | Configurar árbol de decisión           |
+| **Sistema de filtrado avanzado**       | ⏳     | Filtros por forma, dureza, balance, nivel | Guardar filtros predefinidos                | Gestionar atributos de filtrado        |
+| **Historial de visto recientemente**   | ⏳     | Últimas 3 palas (session storage)         | Historial persistente en perfil y Home      | Analítica de palas más visitadas       |
+| **Home personalizada**                 | ⏳     | Home genérica (Bestsellers)               | Home basada en preferencias/historial       | Configurar algoritmos de recomendación |
+| **Sección de Preguntas y Respuestas**  | ⏳     | Leer preguntas y respuestas               | Preguntar y responder (con moderación)      | Moderar contenido                      |
+| **Modo oscuro**                        | ⏳     | Toggle manual                             | Preferencia guardada en perfil              | —                                      |
+| **Avisos de bajada de precios**        | ⏳     | —                                         | Suscripción por pala/tienda                 | Configurar alertas globales            |
+| **Historial de precios (Gráfico)**     | ⏳     | Ver gráfico simple (30 días)              | Ver histórico completo                      | Configurar retención de datos          |
+| **Listas Públicas y Compartibles**     | ⏳     | Ver listas públicas                       | Crear listas públicas y compartir link      | Moderar listas ofensivas               |
+| **Badges de Usuario (Pro/Verificado)** | ⏳     | Ver badges en reseñas                     | Obtener badges por actividad/nivel          | Asignar badges manualmente             |
+| **Perfil Público de Tienda**           | ⏳     | Ver perfil y ofertas de tienda            | —                                           | Gestionar tiendas                      |
+| **Glosario Interactivo**               | ⏳     | Tooltips en términos técnicos             | —                                           | Editar definiciones                    |
+| **Soporte / contacto**                 | ⏳     | Formulario básico                         | Historial de tickets                        | Gestión de soporte                     |
 
-- ✅ **Comparador de palas**: Implementado panel flotante de comparación que permite añadir hasta 3 palas. Sistema completo con prevención de duplicados y persistencia entre páginas mediante ComparisonContext.
-- ✅ **Filtros y ordenamiento de reseñas**: Sistema completo con filtrado por número de estrellas (1-5) y ordenamiento por fecha (reciente), rating (alto/bajo) y número de likes. Implementado en ReviewFilters.tsx.
-- ✅ **Sistema de likes**: Los usuarios registrados pueden dar like/unlike a reseñas de otros usuarios. Contador de likes visible en cada reseña.
-- ✅ **Gráfico de distribución**: Visualización en barras horizontales mostrando la distribución porcentual de ratings (1-5 estrellas) en cada pala.
-- ✅ **Perfil físico y de juego**: Usuarios pueden completar perfil con peso, altura, fecha de nacimiento (con cálculo automático de edad), nivel de juego (principiante/intermedio/avanzado/profesional), y observaciones sobre limitaciones físicas o estilo de juego.
-- ⏳ **Formulario avanzado**: Implementado formulario básico de recomendación. La versión avanzada con IA y historial está en desarrollo.
-- ⏳ **Palas trending**: Planificado para v0.2 con algoritmo basado en vistas, comparaciones y favoritos.
-- ⏳ **PDF export**: Planificado para v0.2 con plantillas personalizables.
-- ⏳ **Avisos de precios**: Planificado para v0.2 con sistema de notificaciones configurable.
-- ⏳ **Historial de precios**: Planificado para v0.2 con gráficos interactivos y exportación de datos.
-- ⏳ **Soporte**: Planificado sistema de tickets para v0.2.
+**Notas de implementación v0.1 (Ya completadas):**
+
+- ✅ **Comparador de palas**: Implementado panel flotante y tabla comparativa básica.
+- ✅ **Filtros y ordenamiento de reseñas**: Sistema completo implementado.
+- ✅ **Sistema de likes**: Implementado en reseñas.
+- ✅ **Gráfico de distribución**: Implementado en reseñas.
+- ✅ **Perfil físico y de juego**: Implementado en UserProfile.
+- ✅ **Rellenar datos personales**: Implementado.
+
+**Planificación v1.0 (Nuevas):**
+
+- ⏳ **Wizard "Mejor Pala"**: Prioridad alta. Sistema paso a paso para recomendar palas.
+- ⏳ **Filtros Avanzados**: Prioridad alta. Exponer metadatos técnicos (forma, goma, etc.) en el catálogo.
+- ⏳ **Engagement**: Historial de navegación, Q&A en productos y Home personalizada.
+- ⏳ **Social**: Compartir comparativas y listas públicas.
+- ⏳ **Visual**: Modo oscuro y gráficos en comparador.
 
 ---
 

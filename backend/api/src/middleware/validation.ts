@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import Joi from "joi";
-import { ApiResponse } from "../types";
+import { Request, Response, NextFunction } from 'express';
+import Joi from 'joi';
+import { ApiResponse } from '../types';
 
 /**
  * Schema for validating user profile data
@@ -12,13 +12,13 @@ const userProfileSchema = Joi.object({
     .max(50)
     .pattern(/^[a-zA-Z0-9_]+$/)
     .required(),
-  fullName: Joi.string().optional().allow(""),
+  fullName: Joi.string().optional().allow(''),
   weight: Joi.number().min(30).max(200).optional(),
   height: Joi.number().min(100).max(250).optional(),
   birthdate: Joi.string().isoDate().optional(),
   game_level: Joi.string()
     .optional()
-    .valid("principiante", "intermedio", "avanzado", "profesional"),
+    .valid('Principiante', 'Intermedio', 'Avanzado', 'Profesional'),
   limitations: Joi.array().items(Joi.string()).optional(),
 });
 
@@ -31,14 +31,14 @@ const updateProfileSchema = Joi.object({
     .max(50)
     .pattern(/^[a-zA-Z0-9_]+$/)
     .optional(),
-  full_name: Joi.string().optional().allow(""),
-  avatar_url: Joi.string().uri().optional().allow(""),
+  full_name: Joi.string().optional().allow(''),
+  avatar_url: Joi.string().uri().optional().allow(''),
   weight: Joi.number().min(30).max(200).optional(),
   height: Joi.number().min(100).max(250).optional(),
   birthdate: Joi.string().isoDate().optional(),
   game_level: Joi.string()
     .optional()
-    .valid("principiante", "intermedio", "avanzado", "profesional"),
+    .valid('Principiante', 'Intermedio', 'Avanzado', 'Profesional'),
   limitations: Joi.array().items(Joi.string()).optional(),
 });
 
@@ -61,10 +61,8 @@ const registerSchema = Joi.object({
     .max(50)
     .pattern(/^[a-zA-Z0-9_]+$/)
     .required(),
-  full_name: Joi.string().optional().allow(""),
-  role: Joi.string()
-    .valid("player", "store_owner")
-    .required(),
+  full_name: Joi.string().optional().allow(''),
+  role: Joi.string().valid('player', 'store_owner').required(),
   metadata: Joi.object().optional(),
 });
 
@@ -86,16 +84,16 @@ export function validateBody(schema: Joi.ObjectSchema) {
     });
 
     if (error) {
-      const errors = error.details.map((detail) => ({
-        field: detail.path.join("."),
+      const errors = error.details.map(detail => ({
+        field: detail.path.join('.'),
         message: detail.message,
         value: detail.context?.value,
       }));
 
       res.status(400).json({
         success: false,
-        error: "Invalid input data",
-        message: "The provided data does not meet the required format",
+        error: 'Invalid input data',
+        message: 'The provided data does not meet the required format',
         details: errors,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -111,20 +109,15 @@ export function validateBody(schema: Joi.ObjectSchema) {
 /**
  * Middleware to validate pagination query parameters
  */
-export function validatePagination(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function validatePagination(req: Request, res: Response, next: NextFunction): void {
   const page = parseInt(req.query.page as string);
   const limit = parseInt(req.query.limit as string);
 
   if (req.query.page && (isNaN(page) || page < 0)) {
     res.status(400).json({
       success: false,
-      error: "Invalid page parameter",
-      message:
-        'The "page" parameter must be an integer greater than or equal to 0',
+      error: 'Invalid page parameter',
+      message: 'The "page" parameter must be an integer greater than or equal to 0',
       timestamp: new Date().toISOString(),
     } as ApiResponse);
     return;
@@ -133,7 +126,7 @@ export function validatePagination(
   if (req.query.limit && (isNaN(limit) || limit < 1 || limit > 100)) {
     res.status(400).json({
       success: false,
-      error: "Invalid limit parameter",
+      error: 'Invalid limit parameter',
       message: 'The "limit" parameter must be an integer between 1 and 100',
       timestamp: new Date().toISOString(),
     } as ApiResponse);
@@ -146,14 +139,16 @@ export function validatePagination(
 /**
  * Middleware to validate ID parameters
  */
-export function validateIdParam(paramName: string = "id"): (req: Request, res: Response, next: NextFunction) => void {
+export function validateIdParam(
+  paramName: string = 'id'
+): (req: Request, res: Response, next: NextFunction) => void {
   return (req: Request, res: Response, next: NextFunction): void => {
     const id = parseInt(req.params[paramName]);
 
     if (isNaN(id) || id <= 0) {
       res.status(400).json({
         success: false,
-        error: "Invalid ID",
+        error: 'Invalid ID',
         message: `The parameter "${paramName}" must be a positive integer`,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -168,17 +163,13 @@ export function validateIdParam(paramName: string = "id"): (req: Request, res: R
 /**
  * Middleware to validate search parameters
  */
-export function validateSearchQuery(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function validateSearchQuery(req: Request, res: Response, next: NextFunction): void {
   const query = req.query.q as string;
 
-  if (!query || typeof query !== "string" || query.trim().length < 2) {
+  if (!query || typeof query !== 'string' || query.trim().length < 2) {
     res.status(400).json({
       success: false,
-      error: "Invalid search query",
+      error: 'Invalid search query',
       message: 'The "q" parameter must be a string of at least 2 characters',
       timestamp: new Date().toISOString(),
     } as ApiResponse);
@@ -196,7 +187,7 @@ function validatePriceFilter(key: string, value: string, res: Response): boolean
   if (isNaN(numValue) || numValue < 0) {
     res.status(400).json({
       success: false,
-      error: "Invalid price filter",
+      error: 'Invalid price filter',
       message: `The filter "${key}" must be a positive number`,
       timestamp: new Date().toISOString(),
     } as ApiResponse);
@@ -206,11 +197,11 @@ function validatePriceFilter(key: string, value: string, res: Response): boolean
 }
 
 function validateBooleanFilter(key: string, value: string, res: Response): boolean {
-  const validValues = ["true", "false", "1", "0"];
+  const validValues = ['true', 'false', '1', '0'];
   if (!validValues.includes(value.toLowerCase())) {
     res.status(400).json({
       success: false,
-      error: "Invalid boolean filter",
+      error: 'Invalid boolean filter',
       message: `El filtro "${key}" debe ser "true" o "false"`,
       timestamp: new Date().toISOString(),
     } as ApiResponse);
@@ -223,8 +214,8 @@ function validateSortBy(sortBy: string, allowedFields: string[], res: Response):
   if (!allowedFields.includes(sortBy)) {
     res.status(400).json({
       success: false,
-      error: "Invalid sort field",
-      message: `Allowed sorting fields are: ${allowedFields.join(", ")}`,
+      error: 'Invalid sort field',
+      message: `Allowed sorting fields are: ${allowedFields.join(', ')}`,
       timestamp: new Date().toISOString(),
     } as ApiResponse);
     return false;
@@ -233,10 +224,10 @@ function validateSortBy(sortBy: string, allowedFields: string[], res: Response):
 }
 
 function validateSortOrder(sortOrder: string, res: Response): boolean {
-  if (!["asc", "desc"].includes(sortOrder)) {
+  if (!['asc', 'desc'].includes(sortOrder)) {
     res.status(400).json({
       success: false,
-      error: "Invalid sort order",
+      error: 'Invalid sort order',
       message: 'Order must be "asc" or "desc"',
       timestamp: new Date().toISOString(),
     } as ApiResponse);
@@ -245,14 +236,18 @@ function validateSortOrder(sortOrder: string, res: Response): boolean {
   return true;
 }
 
-function validateQueryFilters(query: Record<string, unknown>, allowedFilters: string[], res: Response): boolean {
+function validateQueryFilters(
+  query: Record<string, unknown>,
+  allowedFilters: string[],
+  res: Response
+): boolean {
   for (const [key, value] of Object.entries(query)) {
     if (allowedFilters.includes(key) && value) {
-      if ((key === "min_price" || key === "max_price")) {
+      if (key === 'min_price' || key === 'max_price') {
         if (!validatePriceFilter(key, value as string, res)) return false;
       }
 
-      if ((key === "on_offer" || key === "is_bestseller")) {
+      if (key === 'on_offer' || key === 'is_bestseller') {
         if (!validateBooleanFilter(key, value as string, res)) return false;
       }
     }
@@ -260,19 +255,25 @@ function validateQueryFilters(query: Record<string, unknown>, allowedFilters: st
   return true;
 }
 
-export function validateSearchFilters(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void {
+export function validateSearchFilters(req: Request, res: Response, next: NextFunction): void {
   const allowedFilters = [
-    "brand", "shape", "balance", "game_level",
-    "min_price", "max_price", "on_offer", "is_bestseller",
+    'brand',
+    'shape',
+    'balance',
+    'game_level',
+    'min_price',
+    'max_price',
+    'on_offer',
+    'is_bestseller',
   ];
 
   const allowedSortFields = [
-    "name", "brand", "current_price", "created_at",
-    "characteristics_shape", "characteristics_balance",
+    'name',
+    'brand',
+    'current_price',
+    'created_at',
+    'characteristics_shape',
+    'characteristics_balance',
   ];
 
   // Validar filtros
