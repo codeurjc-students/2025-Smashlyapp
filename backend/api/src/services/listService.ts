@@ -5,6 +5,7 @@ import {
   CreateListRequest,
   UpdateListRequest,
 } from "../types/list";
+import { mapToFrontendFormat, processRacketData } from "./racketService";
 
 export class ListService {
   /**
@@ -63,10 +64,21 @@ export class ListService {
       throw new Error(`Error getting list: ${error.message}`);
     }
 
+    // Process and map rackets to frontend format
+    const rawRackets = data.list_rackets?.map((lr: any) => lr.rackets).filter(Boolean) || [];
+    
+    // Debug: log raw rackets
+    console.log('🔍 Raw rackets from DB:', JSON.stringify(rawRackets.slice(0, 1), null, 2));
+    
+    const processedRackets = processRacketData(rawRackets);
+    const mappedRackets = processedRackets.map(mapToFrontendFormat);
+    
+    // Debug: log mapped rackets
+    console.log('🔍 Mapped rackets:', JSON.stringify(mappedRackets.slice(0, 1), null, 2));
+
     return {
       ...data,
-      rackets:
-        data.list_rackets?.map((lr: { rackets: unknown }) => lr.rackets) || [],
+      rackets: mappedRackets,
       racket_count: data.list_rackets?.length || 0,
     };
   }

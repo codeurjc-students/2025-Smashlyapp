@@ -9,6 +9,7 @@ import { FaLightbulb, FaBalanceScale, FaHeart, FaChartBar } from 'react-icons/fa
 import { RacketService } from '../services/racketService';
 import { RacketViewService, RecentlyViewedRacket } from '../services/racketViewService';
 import { Racket } from '../types/racket';
+import { ListService } from '../services/listService';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -173,6 +174,7 @@ export const PlayerDashboard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<Racket[]>([]);
+  const [favoritesCount, setFavoritesCount] = useState<number>(0);
   const [recommendations, setRecommendations] = useState<Racket[]>([]);
   const [offers, setOffers] = useState<Racket[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedRacket[]>([]);
@@ -185,9 +187,20 @@ export const PlayerDashboard: React.FC = () => {
       try {
         setLoading(true);
 
-        // Fetch favorites (placeholder - implement when favorites service is ready)
-        // const favs = await favoritesService.getFavorites();
-        // setFavorites(favs.slice(0, 4));
+        // Fetch favorites count from "Favoritas" list
+        const lists = await ListService.getUserLists();
+        const favoritasList = lists.find(list => list.name === 'Favoritas');
+        if (favoritasList) {
+          setFavoritesCount(favoritasList.racket_count || 0);
+          
+          // If we want to show the rackets, fetch the list with details
+          if (favoritasList.racket_count && favoritasList.racket_count > 0) {
+            const listWithRackets = await ListService.getListById(favoritasList.id);
+            if (listWithRackets?.rackets) {
+              setFavorites(listWithRackets.rackets.slice(0, 4));
+            }
+          }
+        }
 
         // Fetch recommendations based on user profile
         // const recs = await racketService.getRecommendedRackets(user?.game_level);
@@ -254,11 +267,11 @@ export const PlayerDashboard: React.FC = () => {
           <SubGreeting>Bienvenido de vuelta a Smashly</SubGreeting>
           <Stats>
             <Stat>
-              <StatValue>{favorites.length}</StatValue>
+              <StatValue>{favoritesCount}</StatValue>
               <StatLabel>Favoritas</StatLabel>
             </Stat>
             <Stat>
-              <StatValue>{user?.game_level || 'N/A'}</StatValue>
+              <StatValue>{user?.game_level || 'Intermedio'}</StatValue>
               <StatLabel>Nivel</StatLabel>
             </Stat>
           </Stats>

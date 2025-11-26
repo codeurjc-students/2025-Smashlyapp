@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { FiUsers, FiShoppingBag, FiPackage, FiTrendingUp, FiActivity, FiStar } from "react-icons/fi";
+import { FiUsers, FiShoppingBag, FiPackage, FiTrendingUp, FiActivity, FiStar, FiHeart } from "react-icons/fi";
 import toast from "react-hot-toast";
 import { AdminService, AdminMetrics, Activity } from "../../services/adminService";
 
@@ -286,6 +286,16 @@ const AdminDashboard: React.FC = () => {
           <MetricInfo>
             <MetricLabel>Usuarios Activos</MetricLabel>
             <MetricValue>{metrics.activeUsers.toLocaleString()}</MetricValue>
+          </MetricInfo>
+        </MetricCard>
+
+        <MetricCard>
+          <MetricIcon color="#ec4899">
+            <FiHeart />
+          </MetricIcon>
+          <MetricInfo>
+            <MetricLabel>Palas Favoritas</MetricLabel>
+            <MetricValue>{metrics.totalFavorites.toLocaleString()}</MetricValue>
           </MetricInfo>
         </MetricCard>
       </MetricsGrid>

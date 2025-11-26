@@ -33,6 +33,7 @@ export interface AdminMetrics {
   totalReviews: number;
   pendingRequests: number;
   activeUsers: number;
+  totalFavorites: number;
   usersChange: number;
   racketsChange: number;
 }

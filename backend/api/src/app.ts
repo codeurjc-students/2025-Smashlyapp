@@ -20,6 +20,7 @@ import comparisonRoutes from './routes/comparisonRoutes';
 import proxyRoutes from './routes/proxyRoutes';
 import recommendationRoutes from './routes/recommendationRoutes';
 import racketViewRoutes from './routes/racketViews';
+import uploadRoutes from './routes/upload';
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
 import path from 'path';
@@ -110,6 +111,7 @@ app.use('/api/v1/comparison', comparisonRoutes); // Rutas de comparación
 app.use('/api/v1/proxy', proxyRoutes); // Rutas de proxy para imágenes
 app.use('/api/v1/recommendations', recommendationRoutes); // Rutas de recomendaciones
 app.use('/api/v1/racket-views', racketViewRoutes); // Rutas de visualizaciones de palas
+app.use('/api/v1/upload', uploadRoutes); // Rutas de subida de archivos
 
 // Swagger UI - servir OpenAPI spec desde docs/api-docs.yaml
 try {

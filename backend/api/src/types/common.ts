@@ -72,6 +72,7 @@ export interface RequestWithUser extends Request {
     email: string;
     role?: string;
   };
+  file?: Express.Multer.File; // Para manejar uploads de archivos
 }
 
 // Tipos para configuración

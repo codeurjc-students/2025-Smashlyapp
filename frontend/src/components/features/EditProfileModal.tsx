@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
-import { FiX, FiSave, FiUser, FiCalendar, FiActivity } from "react-icons/fi";
+import { FiX, FiSave, FiUser, FiCalendar, FiActivity, FiCamera, FiTrash2 } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import { UserProfile } from "../../services/userProfileService";
+import { UploadService } from "../../services/uploadService";
 
 interface EditProfileModalProps {
   isOpen: boolean;
@@ -247,6 +248,92 @@ const HelperText = styled.span`
   margin-top: -0.25rem;
 `;
 
+const AvatarSection = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.5rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+`;
+
+const AvatarPreview = styled.div`
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid #16a34a;
+  background: #e5e7eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  svg {
+    color: #9ca3af;
+  }
+`;
+
+const AvatarButtons = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+`;
+
+const AvatarButton = styled.button<{ variant?: "primary" | "danger" }>`
+  padding: 0.625rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  ${(props) =>
+    props.variant === "danger"
+      ? `
+    background: #fee;
+    color: #dc2626;
+    &:hover {
+      background: #fecaca;
+    }
+  `
+      : `
+    background: #16a34a;
+    color: white;
+    &:hover {
+      background: #15803d;
+    }
+  `}
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const HiddenInput = styled.input`
+  display: none;
+`;
+
+const ErrorText = styled.span`
+  font-size: 0.75rem;
+  color: #dc2626;
+  text-align: center;
+`;
+
 export const EditProfileModal: React.FC<EditProfileModalProps> = ({
   isOpen,
   onClose,
@@ -263,6 +350,11 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     limitations: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState<string | null>(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (isOpen && userProfile) {
@@ -275,8 +367,20 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
         game_level: userProfile.game_level || "",
         limitations: userProfile.limitations?.[0] || "", // Tomar el primer elemento del array
       });
+      setAvatarPreview(userProfile.avatar_url || null);
+      setAvatarFile(null);
+      setAvatarError(null);
     }
   }, [isOpen, userProfile]);
+
+  // Limpiar URL de vista previa al cerrar
+  useEffect(() => {
+    return () => {
+      if (avatarPreview && avatarFile) {
+        UploadService.revokePreviewUrl(avatarPreview);
+      }
+    };
+  }, [avatarPreview, avatarFile]);
 
   const handleChange = (
     e: React.ChangeEvent<
@@ -287,16 +391,96 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setAvatarError(null);
+
+    // Validar el archivo
+    const validation = UploadService.validateImageFile(file);
+    if (!validation.isValid) {
+      setAvatarError(validation.error || "Archivo no válido");
+      return;
+    }
+
+    // Liberar URL anterior si existe
+    if (avatarPreview && avatarFile) {
+      UploadService.revokePreviewUrl(avatarPreview);
+    }
+
+    // Crear vista previa
+    const previewUrl = UploadService.createPreviewUrl(file);
+    setAvatarFile(file);
+    setAvatarPreview(previewUrl);
+  };
+
+  const handleRemoveAvatar = async () => {
+    if (!userProfile.avatar_url && !avatarFile) return;
+
+    try {
+      setIsUploadingAvatar(true);
+      setAvatarError(null);
+
+      // Si hay un avatar en el servidor, eliminarlo
+      if (userProfile.avatar_url) {
+        await UploadService.deleteAvatar();
+      }
+
+      // Limpiar estado local
+      if (avatarPreview && avatarFile) {
+        UploadService.revokePreviewUrl(avatarPreview);
+      }
+      setAvatarFile(null);
+      setAvatarPreview(null);
+
+      // Actualizar el perfil sin avatar
+      await onSave({ avatar_url: null } as any);
+    } catch (error: any) {
+      console.error("Error removing avatar:", error);
+      setAvatarError(error.message || "Error al eliminar el avatar");
+    } finally {
+      setIsUploadingAvatar(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     setIsSubmitting(true);
+    setAvatarError(null);
+    
     try {
+      // Subir avatar si hay uno nuevo
+      let avatarUrl = userProfile.avatar_url;
+      if (avatarFile) {
+        try {
+          setIsUploadingAvatar(true);
+          avatarUrl = await UploadService.uploadAvatar(avatarFile);
+        } catch (error: any) {
+          setAvatarError(error.message || "Error al subir el avatar");
+          setIsUploadingAvatar(false);
+          setIsSubmitting(false);
+          return;
+        } finally {
+          setIsUploadingAvatar(false);
+        }
+      }
+
       const updates: any = {
         nickname: formData.nickname.trim(),
         full_name: formData.full_name.trim() || undefined,
         game_level: formData.game_level || undefined,
       };
+
+      // Incluir avatar_url si cambió
+      if (avatarUrl !== userProfile.avatar_url) {
+        updates.avatar_url = avatarUrl;
+      }
 
       // Convertir limitations de string a array si tiene contenido
       if (formData.limitations.trim()) {
@@ -355,6 +539,51 @@ export const EditProfileModal: React.FC<EditProfileModalProps> = ({
             </Header>
 
             <Form onSubmit={handleSubmit}>
+              {/* Sección de Avatar */}
+              <AvatarSection>
+                <AvatarPreview>
+                  {avatarPreview ? (
+                    <img src={avatarPreview} alt="Avatar preview" />
+                  ) : (
+                    <FiUser size={48} />
+                  )}
+                </AvatarPreview>
+                <AvatarButtons>
+                  <AvatarButton
+                    type="button"
+                    onClick={handleAvatarClick}
+                    disabled={isSubmitting || isUploadingAvatar}
+                  >
+                    <FiCamera size={16} />
+                    {avatarPreview ? "Cambiar Foto" : "Subir Foto"}
+                  </AvatarButton>
+                  {(avatarPreview || userProfile.avatar_url) && (
+                    <AvatarButton
+                      type="button"
+                      variant="danger"
+                      onClick={handleRemoveAvatar}
+                      disabled={isSubmitting || isUploadingAvatar}
+                    >
+                      <FiTrash2 size={16} />
+                      Eliminar
+                    </AvatarButton>
+                  )}
+                </AvatarButtons>
+                <HiddenInput
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  onChange={handleAvatarChange}
+                />
+                {avatarError && <ErrorText>{avatarError}</ErrorText>}
+                {isUploadingAvatar && (
+                  <HelperText>Subiendo imagen...</HelperText>
+                )}
+                <HelperText>
+                  Formatos: JPEG, PNG, WebP. Tamaño máximo: 5MB
+                </HelperText>
+              </AvatarSection>
+
               <FormSection>
                 <SectionTitle>
                   <FiUser />

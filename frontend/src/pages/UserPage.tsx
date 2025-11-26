@@ -237,6 +237,13 @@ const Avatar = styled.div`
   border: 5px solid white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const UserPage: React.FC = () => {

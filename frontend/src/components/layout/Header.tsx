@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { FiMenu, FiSearch, FiX, FiUser } from "react-icons/fi";
+import React, { useState, useRef, useEffect } from "react";
+import { FiMenu, FiSearch, FiX, FiUser, FiLogOut } from "react-icons/fi";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { useAuth } from "../../contexts/AuthContext";
@@ -304,12 +304,103 @@ const LogoutButton = styled.button<{
   `}
 `;
 
+// User Avatar Menu Styles
+const UserMenuContainer = styled.div`
+  position: relative;
+`;
+
+const AvatarButton = styled.button`
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: white;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  padding: 0;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  svg {
+    color: #16a34a;
+    font-size: 20px;
+  }
+`;
+
+const UserDropdown = styled.div<{ isOpen: boolean }>`
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  opacity: ${(props) => (props.isOpen ? "1" : "0")};
+  visibility: ${(props) => (props.isOpen ? "visible" : "hidden")};
+  transform: translateY(${(props) => (props.isOpen ? "0" : "-10px")});
+  transition: all 0.2s ease;
+  z-index: 1000;
+  overflow: hidden;
+`;
+
+const DropdownItem = styled.button`
+  width: 100%;
+  padding: 12px 16px;
+  background: none;
+  border: none;
+  text-align: left;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  &:hover {
+    background: #f3f4f6;
+  }
+
+  &:first-child {
+    border-radius: 12px 12px 0 0;
+  }
+
+  &:last-child {
+    border-radius: 0 0 12px 12px;
+  }
+
+  svg {
+    font-size: 18px;
+    color: #16a34a;
+  }
+
+  &:last-child svg {
+    color: #dc2626;
+  }
+`;
+
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const location = useLocation();
   const { userProfile, signOut } = useAuth();
   const navigate = useNavigate();
+  const userMenuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -332,7 +423,28 @@ const Header: React.FC = () => {
   const closeAllMenus = () => {
     setIsMenuOpen(false);
     setIsMobileSearchOpen(false);
+    setIsUserMenuOpen(false);
   };
+
+  // Close user menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        userMenuRef.current &&
+        !userMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isUserMenuOpen]);
 
   return (
     <HeaderContainer>
@@ -348,22 +460,36 @@ const Header: React.FC = () => {
 
         <AuthButtons>
           {userProfile ? (
-            <>
-              <NavLink to="/profile" isActive={isActive("/profile")}>
-                <FiUser style={{ marginRight: "8px" }} />
-                {userProfile.nickname || userProfile.email}
-              </NavLink>
-              <LogoutButton
-                variant="secondary"
-                onClick={async () => {
-                  await signOut();
-                  closeAllMenus();
-                  navigate("/login");
-                }}
-              >
-                Cerrar sesión
-              </LogoutButton>
-            </>
+            <UserMenuContainer ref={userMenuRef}>
+              <AvatarButton onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
+                {userProfile.avatar_url ? (
+                  <img src={userProfile.avatar_url} alt="Avatar" />
+                ) : (
+                  <FiUser />
+                )}
+              </AvatarButton>
+              <UserDropdown isOpen={isUserMenuOpen}>
+                <DropdownItem
+                  onClick={() => {
+                    navigate("/profile");
+                    setIsUserMenuOpen(false);
+                  }}
+                >
+                  <FiUser />
+                  Mi cuenta
+                </DropdownItem>
+                <DropdownItem
+                  onClick={async () => {
+                    await signOut();
+                    setIsUserMenuOpen(false);
+                    navigate("/login");
+                  }}
+                >
+                  <FiLogOut />
+                  Cerrar sesión
+                </DropdownItem>
+              </UserDropdown>
+            </UserMenuContainer>
           ) : (
             <>
               <AuthButton
@@ -455,7 +581,7 @@ const Header: React.FC = () => {
                       onClick={closeAllMenus}
                     >
                       <FiUser style={{ marginRight: "8px" }} />
-                      {userProfile.nickname || userProfile.email}
+                      Mi cuenta
                     </NavLink>
                     <LogoutButton
                       variant="secondary"
@@ -467,6 +593,7 @@ const Header: React.FC = () => {
                       }}
                       style={{ cursor: "pointer", marginTop: "0.5rem" }}
                     >
+                      <FiLogOut style={{ marginRight: "8px" }} />
                       Cerrar sesión
                     </LogoutButton>
                   </>

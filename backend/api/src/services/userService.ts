@@ -81,6 +81,27 @@ export class UserService {
         );
       }
 
+      // Create default "Favoritas" list for the new user
+      // The trigger in the database should handle this automatically,
+      // but we add a fallback here for safety
+      try {
+        const { error: listError } = await supabase
+          .from("lists")
+          .insert({
+            user_id: userId,
+            name: "Favoritas",
+            description: "Mis palas favoritas",
+          });
+
+        if (listError && listError.code !== "23505") {
+          // 23505 is unique constraint violation (list already exists)
+          logger.warn("Error creating default favorites list:", listError);
+        }
+      } catch (listError) {
+        // Non-critical error, just log it
+        logger.warn("Failed to create default favorites list:", listError);
+      }
+
       logger.info("✅ User profile created successfully for:", userId);
       return data;
     } catch (error: unknown) {

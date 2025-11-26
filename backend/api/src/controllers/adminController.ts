@@ -49,6 +49,27 @@ async function getPendingStoresCount(): Promise<number> {
   return count || 0;
 }
 
+async function getFavoritesCount(): Promise<number> {
+  // Get count of rackets in "Favoritas" lists
+  const { data: favoritesLists } = await supabase
+    .from("lists")
+    .select("id")
+    .eq("name", "Favoritas");
+
+  if (!favoritesLists || favoritesLists.length === 0) {
+    return 0;
+  }
+
+  const listIds = favoritesLists.map(list => list.id);
+  
+  const { count } = await supabase
+    .from("list_rackets")
+    .select("*", { count: "exact", head: true })
+    .in("list_id", listIds);
+
+  return count || 0;
+}
+
 async function collectMetricsData() {
   const [
     totalUsers,
@@ -56,14 +77,16 @@ async function collectMetricsData() {
     totalReviews,
     activeUsers,
     totalStores,
-    pendingRequests
+    pendingRequests,
+    totalFavorites
   ] = await Promise.all([
     getTableCount("user_profiles"),
     getTableCount("rackets"),
     getTableCount("reviews"),
     getActiveUsersCount(),
     getVerifiedStoresCount(),
-    getPendingStoresCount()
+    getPendingStoresCount(),
+    getFavoritesCount()
   ]);
 
   return {
@@ -73,6 +96,7 @@ async function collectMetricsData() {
     totalReviews: totalReviews || 0,
     pendingRequests: pendingRequests || 0,
     activeUsers: activeUsers || 0,
+    totalFavorites: totalFavorites || 0,
     usersChange: 12.5,
     racketsChange: 8.3,
   };
