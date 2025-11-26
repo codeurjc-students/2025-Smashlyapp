@@ -44,19 +44,15 @@ const Logo = styled(Link)`
   }
 `;
 
-// Central Search Container (Desktop)
 const CentralSearchContainer = styled.div`
-  flex: 1;
-  max-width: 500px;
-  margin: 0 2rem;
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
-
-  @media (max-width: 1024px) {
-    max-width: 400px;
-    margin: 0 1.5rem;
-  }
+  max-width: 500px;
+  width: 100%;
 
   @media (max-width: 768px) {
     display: none;
@@ -491,22 +487,31 @@ const Header: React.FC = () => {
               </UserDropdown>
             </UserMenuContainer>
           ) : (
-            <>
-              <AuthButton
-                to={`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`}
-                variant="secondary"
-                onClick={closeAllMenus}
-              >
-                Iniciar sesión
-              </AuthButton>
-              <AuthButton
-                to={`/register?redirect=${encodeURIComponent(location.pathname + location.search)}`}
-                variant="primary"
-                onClick={closeAllMenus}
-              >
-                Registrarse
-              </AuthButton>
-            </>
+            <UserMenuContainer ref={userMenuRef}>
+              <AvatarButton onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
+                <FiUser />
+              </AvatarButton>
+              <UserDropdown isOpen={isUserMenuOpen}>
+                <DropdownItem
+                  onClick={() => {
+                    navigate(`/login?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+                    setIsUserMenuOpen(false);
+                  }}
+                >
+                  <FiUser />
+                  Iniciar sesión
+                </DropdownItem>
+                <DropdownItem
+                  onClick={() => {
+                    navigate(`/register?redirect=${encodeURIComponent(location.pathname + location.search)}`);
+                    setIsUserMenuOpen(false);
+                  }}
+                >
+                  <FiUser />
+                  Registrarse
+                </DropdownItem>
+              </UserDropdown>
+            </UserMenuContainer>
           )}
         </AuthButtons>
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
+import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
 import { BasicForm } from '../components/recommendation/BasicForm';
 import { AdvancedForm } from '../components/recommendation/AdvancedForm';
 import { RecommendationResult } from '../components/recommendation/RecommendationResult';
@@ -104,6 +105,7 @@ const AlertButton = styled.button`
 
 export const BestRacketPage: React.FC = () => {
   const { user } = useAuth();
+  const { addTask, updateTaskProgress, completeTask, failTask } = useBackgroundTasks();
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
   const [formType, setFormType] = useState<'basic' | 'advanced'>('basic');
   const [result, setResult] = useState<ResultType | null>(null);
@@ -157,11 +159,26 @@ export const BestRacketPage: React.FC = () => {
   const handleBasicSubmit = async (data: BasicFormData) => {
     setBasicData(data);
     setStep('loading');
+    
+    // Crear tarea en segundo plano
+    const taskId = addTask('recommendation', { formData: data });
+    
+    // Simular progreso
+    const progressInterval = setInterval(() => {
+      updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
+    }, 500);
+    
     try {
       const res = await RecommendationService.generate('basic', data);
+      
+      clearInterval(progressInterval);
+      completeTask(taskId, res);
+      
       setResult(res);
       setStep('result');
     } catch (error) {
+      clearInterval(progressInterval);
+      failTask(taskId, 'Error al generar la recomendación');
       console.error(error);
       toast.error('Error al generar la recomendación');
       setStep('form');
@@ -171,11 +188,26 @@ export const BestRacketPage: React.FC = () => {
   const handleAdvancedSubmit = async (data: AdvancedFormData) => {
     setAdvancedData(data);
     setStep('loading');
+    
+    // Crear tarea en segundo plano
+    const taskId = addTask('recommendation', { formData: data });
+    
+    // Simular progreso
+    const progressInterval = setInterval(() => {
+      updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
+    }, 500);
+    
     try {
       const res = await RecommendationService.generate('advanced', data);
+      
+      clearInterval(progressInterval);
+      completeTask(taskId, res);
+      
       setResult(res);
       setStep('result');
     } catch (error) {
+      clearInterval(progressInterval);
+      failTask(taskId, 'Error al generar la recomendación');
       console.error(error);
       toast.error('Error al generar la recomendación');
       setStep('form');

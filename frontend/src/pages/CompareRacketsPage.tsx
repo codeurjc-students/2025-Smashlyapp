@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiX, FiPlus, FiCpu, FiDownload, FiSave, FiCheck } from 'react-icons/fi';
 import { useRackets } from '../contexts/RacketsContext';
 import { useAuth } from '../contexts/AuthContext';
+import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
 import { ComparisonService } from '../services/comparisonService';
 import { Racket } from '../types/racket';
 import ReactMarkdown from 'react-markdown';
@@ -12,6 +13,7 @@ import toast from 'react-hot-toast';
 import Fuse from 'fuse.js';
 // Importamos el nuevo servicio
 import { RacketPdfGenerator } from '../services/pdfGenerator';
+import RacketRadarChart, { RacketMetrics } from '../components/features/RacketRadarChart';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -125,7 +127,7 @@ const SelectedRacketsContainer = styled.div`
 `;
 
 const SelectedRacketCard = styled(motion.div)`
-  background: #f9fafb;
+  background: white;
   border: 1px solid #e5e7eb;
   border-radius: 16px;
   padding: 1rem;
@@ -401,9 +403,11 @@ const CloseButton = styled.button`
 const CompareRacketsPage: React.FC = () => {
   const { rackets } = useRackets();
   const { user, isAuthenticated } = useAuth();
+  const { addTask, updateTaskProgress, completeTask, failTask } = useBackgroundTasks();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRackets, setSelectedRackets] = useState<Racket[]>([]);
   const [comparisonResult, setComparisonResult] = useState<string | null>(null);
+  const [comparisonMetrics, setComparisonMetrics] = useState<RacketMetrics[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
@@ -442,6 +446,16 @@ const CompareRacketsPage: React.FC = () => {
     setLoading(true);
     setComparisonResult(null);
 
+    // Crear tarea en segundo plano
+    const taskId = addTask('comparison', {
+      racketNames: selectedRackets.map(r => r.nombre)
+    });
+
+    // Simular progreso
+    const progressInterval = setInterval(() => {
+      updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
+    }, 500);
+
     try {
       // Prepare user profile if authenticated
       const userProfile =
@@ -454,13 +468,15 @@ const CompareRacketsPage: React.FC = () => {
 
       const racketIds = selectedRackets.map(r => r.id!);
       const response = await ComparisonService.compareRackets(racketIds, userProfile);
+      
+      clearInterval(progressInterval);
+      completeTask(taskId, { comparison: response.comparison, metrics: response.metrics });
+      
       setComparisonResult(response.comparison);
-
-      // Scroll to result
-      setTimeout(() => {
-        resultRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }, 100);
+      setComparisonMetrics(response.metrics || null);
     } catch (error) {
+      clearInterval(progressInterval);
+      failTask(taskId, 'Error al realizar la comparación');
       console.error('Error comparing rackets:', error);
       toast.error('Error al realizar la comparación. Inténtalo de nuevo.');
     } finally {
@@ -500,7 +516,8 @@ const CompareRacketsPage: React.FC = () => {
     try {
       await ComparisonService.saveComparison(
         selectedRackets.map(r => r.id!),
-        comparisonResult
+        comparisonResult,
+        comparisonMetrics || undefined
       );
       toast.success('Comparación guardada en tu perfil');
     } catch (error) {
@@ -630,6 +647,10 @@ const CompareRacketsPage: React.FC = () => {
                     </ActionButton>
                   </ActionButtons>
                 </ResultHeader>
+
+                {comparisonMetrics && comparisonMetrics.length > 0 && (
+                  <RacketRadarChart metrics={comparisonMetrics} />
+                )}
 
                 <MarkdownContent>
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult}</ReactMarkdown>

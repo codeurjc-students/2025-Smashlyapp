@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { FiGrid, FiList, FiSearch, FiEye, FiTag, FiX, FiHeart } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
@@ -412,25 +412,6 @@ const ViewDetailsButton = styled.button`
   }
 `;
 
-const LoadMoreButton = styled(motion.button)`
-  display: block;
-  margin: 3rem auto 0;
-  background: white;
-  color: #16a34a;
-  border: 2px solid #16a34a;
-  padding: 1rem 2rem;
-  border-radius: 12px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #f0f9ff;
-    transform: translateY(-2px);
-  }
-`;
-
 const EmptyState = styled.div`
   text-align: center;
   padding: 4rem 2rem;
@@ -545,9 +526,14 @@ const CatalogPage: React.FC = () => {
   const [showOffers, setShowOffers] = useState(false);
   const [sortBy, setSortBy] = useState('most-viewed');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [displayCount, setDisplayCount] = useState(10);
+  const [displayCount, setDisplayCount] = useState(9);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [selectedRacket, setSelectedRacket] = useState<Racket | null>(null);
+  const observerTarget = useRef<HTMLDivElement>(null);
+  
+  const ITEMS_PER_PAGE = 9;
 
   // Initialize search from URL params
   useEffect(() => {
@@ -647,7 +633,9 @@ const CatalogPage: React.FC = () => {
 
   // Update displayed rackets when filters change
   useEffect(() => {
-    setDisplayedRackets(filteredRackets.slice(0, displayCount));
+    const newDisplayed = filteredRackets.slice(0, displayCount);
+    setDisplayedRackets(newDisplayed);
+    setHasMore(newDisplayed.length < filteredRackets.length);
   }, [filteredRackets, displayCount]);
 
   // Get unique brands
@@ -666,9 +654,40 @@ const CatalogPage: React.FC = () => {
     navigate(`/racket-detail?id=${encodeURIComponent(racket.nombre)}`);
   };
 
-  const handleLoadMore = () => {
-    setDisplayCount(prev => prev + 10);
-  };
+  const handleLoadMore = useCallback(() => {
+    if (loadingMore || !hasMore) return;
+
+    setLoadingMore(true);
+    
+    // Simular un pequeño delay para mejor UX
+    setTimeout(() => {
+      setDisplayCount(prev => prev + ITEMS_PER_PAGE);
+      setLoadingMore(false);
+    }, 300);
+  }, [loadingMore, hasMore]);
+
+  // Intersection Observer para scroll infinito
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      entries => {
+        if (entries[0].isIntersecting && hasMore && !loadingMore) {
+          handleLoadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    const currentTarget = observerTarget.current;
+    if (currentTarget) {
+      observer.observe(currentTarget);
+    }
+
+    return () => {
+      if (currentTarget) {
+        observer.unobserve(currentTarget);
+      }
+    };
+  }, [hasMore, loadingMore, handleLoadMore]);
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -753,14 +772,6 @@ const CatalogPage: React.FC = () => {
                 onChange={e => setSearchQuery(e.target.value)}
               />
             </SearchContainer>
-
-            <FilterButton
-              active={showMostViewed}
-              onClick={() => setShowMostViewed(!showMostViewed)}
-            >
-              <FiEye />
-              Más Vistas
-            </FilterButton>
 
             <FilterButton active={showOffers} onClick={() => setShowOffers(!showOffers)}>
               <FiTag />
@@ -948,16 +959,32 @@ const CatalogPage: React.FC = () => {
               Total de palas mostradas: {displayedRackets.length}
             </p>
 
-            {displayedRackets.length < (serverTotal ?? filteredRackets.length) && (
-              <LoadMoreButton
-                onClick={handleLoadMore}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                Cargar más palas ({
-                  (serverTotal ?? filteredRackets.length) - displayedRackets.length
-                } restantes)
-              </LoadMoreButton>
+            {/* Elemento observador para scroll infinito */}
+            <div ref={observerTarget} style={{ height: '20px', margin: '2rem 0' }} />
+            
+            {/* Indicador de carga */}
+            {loadingMore && (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '2rem',
+                color: '#6b7280',
+                fontSize: '0.875rem',
+                fontWeight: 500
+              }}>
+                Cargando más palas...
+              </div>
+            )}
+            
+            {/* Mensaje de fin */}
+            {!hasMore && displayedRackets.length > 0 && (
+              <div style={{ 
+                textAlign: 'center', 
+                padding: '2rem',
+                color: '#9ca3af',
+                fontSize: '0.875rem'
+              }}>
+                Has visto todas las palas del catálogo
+              </div>
             )}
           </>
         )}

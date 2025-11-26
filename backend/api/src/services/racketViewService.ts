@@ -80,10 +80,13 @@ export class RacketViewService {
           viewed_at,
           rackets (
             id,
-            nombre,
-            marca,
-            imagen,
-            precio_actual
+            name,
+            brand,
+            image,
+            padelmarket_actual_price,
+            padelnuestro_actual_price,
+            padelpoint_actual_price,
+            padelproshop_actual_price
           )
         `
         )
@@ -98,14 +101,26 @@ export class RacketViewService {
       // Transformar los datos al formato esperado
       const recentlyViewed: RecentlyViewedRacket[] = (data || [])
         .filter((item: any) => item.rackets) // Filtrar items sin pala (por si fue eliminada)
-        .map((item: any) => ({
-          id: item.rackets.id,
-          nombre: item.rackets.nombre,
-          marca: item.rackets.marca,
-          imagen: item.rackets.imagen,
-          precio_actual: item.rackets.precio_actual,
-          viewed_at: item.viewed_at,
-        }));
+        .map((item: any) => {
+          // Obtener el precio más bajo disponible
+          const prices = [
+            item.rackets.padelmarket_actual_price,
+            item.rackets.padelnuestro_actual_price,
+            item.rackets.padelpoint_actual_price,
+            item.rackets.padelproshop_actual_price,
+          ].filter((p) => p !== null && p !== undefined);
+          
+          const precio_actual = prices.length > 0 ? Math.min(...prices) : undefined;
+
+          return {
+            id: item.rackets.id,
+            nombre: item.rackets.name,
+            marca: item.rackets.brand,
+            imagen: item.rackets.image,
+            precio_actual,
+            viewed_at: item.viewed_at,
+          };
+        });
 
       return recentlyViewed;
     } catch (error) {

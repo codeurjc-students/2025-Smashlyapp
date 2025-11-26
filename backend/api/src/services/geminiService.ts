@@ -1,6 +1,22 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { Racket, UserFormData } from '../types/racket';
 
+// Interfaz para las métricas de cada pala
+export interface RacketMetrics {
+  racketName: string;
+  potencia: number;
+  control: number;
+  salidaDeBola: number;
+  manejabilidad: number;
+  puntoDulce: number;
+}
+
+// Interfaz para la respuesta de comparación completa
+export interface ComparisonResult {
+  textComparison: string;
+  metrics: RacketMetrics[];
+}
+
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
   private model: any;
@@ -14,7 +30,7 @@ export class GeminiService {
     this.model = this.genAI.getGenerativeModel({ model: 'gemini-3-pro-preview' });
   }
 
-  async compareRackets(rackets: Racket[], userProfile?: UserFormData): Promise<string> {
+  async compareRackets(rackets: Racket[], userProfile?: UserFormData): Promise<ComparisonResult> {
     if (!process.env.GEMINI_API_KEY) {
       throw new Error('GEMINI_API_KEY no está configurada en el servidor');
     }
@@ -91,6 +107,8 @@ Tus instrucciones paso a paso son:
 4. **Conclusión Final:**
    Resume en una frase: "¿Para quién es la Pala A y para quién es la Pala B?".
 
+Centrate simplemente en darme los puntos anteriores, sin introducciones ni conclusiones adicionales.
+
 ${userContext}
 
 ---
@@ -98,10 +116,75 @@ DATOS DE LAS PALAS A COMPARAR:
 ${racketsInfo}
     `;
 
+    // Prompt adicional para obtener las métricas numéricas
+    const metricsPrompt = `
+Basándote en el análisis técnico de las siguientes palas de pádel, asigna valores numéricos del 1 al 10 para cada una de estas métricas:
+
+- **Potencia**: Capacidad de generar velocidad en la pelota (1=muy bajo, 10=muy alto)
+- **Control**: Precisión y capacidad de colocar la pelota (1=muy bajo, 10=muy alto)
+- **Salida de Bola**: Facilidad de impulsión, especialmente en juego defensivo (1=muy bajo, 10=muy alto)
+- **Manejabilidad**: Facilidad de movimiento y cambios rápidos de dirección (1=muy bajo, 10=muy alto)
+- **Punto Dulce**: Tamaño del área efectiva de impacto (1=muy pequeño, 10=muy grande)
+
+DATOS DE LAS PALAS:
+${racketsInfo}
+
+IMPORTANTE: Responde ÚNICAMENTE con un JSON válido en el siguiente formato (sin markdown, sin texto adicional):
+[
+  {
+    "racketName": "Nombre completo de la pala 1",
+    "potencia": 8,
+    "control": 7,
+    "salidaDeBola": 6,
+    "manejabilidad": 9,
+    "puntoDulce": 7
+  },
+  {
+    "racketName": "Nombre completo de la pala 2",
+    "potencia": 7,
+    "control": 8,
+    "salidaDeBola": 7,
+    "manejabilidad": 8,
+    "puntoDulce": 8
+  }
+]
+    `;
+
     try {
-      const result = await this.model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
+      // Generar la comparación de texto
+      const textResult = await this.model.generateContent(prompt);
+      const textResponse = await textResult.response;
+      const textComparison = textResponse.text();
+
+      // Generar las métricas numéricas
+      const metricsResult = await this.model.generateContent(metricsPrompt);
+      const metricsResponse = await metricsResult.response;
+      let metricsText = metricsResponse.text();
+
+      // Limpiar el texto de la respuesta de posibles markdown o caracteres extras
+      metricsText = metricsText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+
+      let metrics: RacketMetrics[];
+      try {
+        metrics = JSON.parse(metricsText);
+      } catch (parseError) {
+        console.error('Error parsing metrics JSON:', parseError);
+        console.error('Raw metrics text:', metricsText);
+        // Valores por defecto si falla el parsing
+        metrics = rackets.map((r: any) => ({
+          racketName: r.nombre || r.name || 'Pala',
+          potencia: 5,
+          control: 5,
+          salidaDeBola: 5,
+          manejabilidad: 5,
+          puntoDulce: 5,
+        }));
+      }
+
+      return {
+        textComparison,
+        metrics,
+      };
     } catch (error: any) {
       console.error('Error calling Gemini API:', error);
       const errorMessage = error.message || 'Error desconocido de Gemini';

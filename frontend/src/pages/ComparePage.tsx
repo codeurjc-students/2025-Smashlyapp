@@ -1,8 +1,9 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { FiCpu, FiLayers, FiArrowRight } from 'react-icons/fi';
+import { FiCpu, FiLayers, FiArrowRight, FiBookmark } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -39,6 +40,34 @@ const Subtitle = styled.p`
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
+`;
+
+const HeaderActions = styled.div`
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+`;
+
+const SecondaryButton = styled.button`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  color: #16a34a;
+  border: 2px solid #16a34a;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #f0fdf4;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
+  }
 `;
 
 const MainContent = styled.div`
@@ -128,6 +157,7 @@ const ArrowIcon = styled(FiArrowRight)`
 
 const ComparePage: React.FC = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   return (
     <Container>
@@ -139,6 +169,14 @@ const ComparePage: React.FC = () => {
           Utiliza nuestras herramientas avanzadas para encontrar la pala perfecta para tu estilo de
           juego o compara diferentes modelos
         </Subtitle>
+        {isAuthenticated && (
+          <HeaderActions>
+            <SecondaryButton onClick={() => navigate('/comparisons')}>
+              <FiBookmark />
+              Mis Comparaciones Guardadas
+            </SecondaryButton>
+          </HeaderActions>
+        )}
       </Header>
 
       <MainContent>

@@ -4,6 +4,8 @@ import { ScrollToTop } from './components/common/ScrollToTop';
 import { ComparisonProvider } from './contexts/ComparisonContext';
 import { RacketsProvider } from './contexts/RacketsContext';
 import { ListsProvider } from './contexts/ListsContext';
+import { BackgroundTasksProvider } from './contexts/BackgroundTasksContext';
+import { BackgroundTaskPopup } from './components/common/BackgroundTaskPopup';
 import CatalogPage from './pages/CatalogPage';
 import HomePage from './pages/HomePage';
 import RacketDetailPage from './pages/RacketDetailPage';
@@ -18,6 +20,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import NotFoundPage from './pages/NotFoundPage';
 import ComparePage from './pages/ComparePage';
 import CompareRacketsPage from './pages/CompareRacketsPage';
+import MyComparisonsPage from './pages/MyComparisonsPage';
+import SharedComparisonPage from './pages/SharedComparisonPage';
 import { FloatingCompareButton } from './components/common/FloatingCompareButton';
 
 export default function App() {
@@ -26,25 +30,30 @@ export default function App() {
       <RacketsProvider>
         <ComparisonProvider>
           <ListsProvider>
-            <ScrollToTop />
-            <Layout>
-              <FloatingCompareButton />
-              <Routes>
-                <Route path='/' element={<HomePage />} />
-                <Route path='/dashboard' element={<PlayerDashboard />} />
-                <Route path='/catalog' element={<CatalogPage />} />
-                <Route path='/racket-detail' element={<RacketDetailPage />} />
-                <Route path='/compare' element={<ComparePage />} />
-                <Route path='/compare-rackets' element={<CompareRacketsPage />} />
-                <Route path='/best-racket' element={<BestRacketPage />} />
-                <Route path='/faq' element={<FAQPage />} />
-                <Route path='/login' element={<LoginPage />} />
-                <Route path='/register' element={<RegisterPage />} />
-                <Route path='/profile' element={<UserPage />} />
-                <Route path='/admin' element={<AdminPanelPage />} />
-                <Route path='*' element={<NotFoundPage />} />
-              </Routes>
-            </Layout>
+            <BackgroundTasksProvider>
+              <ScrollToTop />
+              <Layout>
+                <FloatingCompareButton />
+                <BackgroundTaskPopup />
+                <Routes>
+                  <Route path='/' element={<HomePage />} />
+                  <Route path='/dashboard' element={<PlayerDashboard />} />
+                  <Route path='/catalog' element={<CatalogPage />} />
+                  <Route path='/racket-detail' element={<RacketDetailPage />} />
+                  <Route path='/compare' element={<ComparePage />} />
+                  <Route path='/compare-rackets' element={<CompareRacketsPage />} />
+                  <Route path='/comparisons' element={<MyComparisonsPage />} />
+                  <Route path='/shared/:token' element={<SharedComparisonPage />} />
+                  <Route path='/best-racket' element={<BestRacketPage />} />
+                  <Route path='/faq' element={<FAQPage />} />
+                  <Route path='/login' element={<LoginPage />} />
+                  <Route path='/register' element={<RegisterPage />} />
+                  <Route path='/profile' element={<UserPage />} />
+                  <Route path='/admin' element={<AdminPanelPage />} />
+                  <Route path='*' element={<NotFoundPage />} />
+                </Routes>
+              </Layout>
+            </BackgroundTasksProvider>
           </ListsProvider>
         </ComparisonProvider>
       </RacketsProvider>

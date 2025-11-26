@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import { QuickActionCard } from '../components/dashboard/QuickActionCard';
 import { ProfileCompletionBar } from '../components/dashboard/ProfileCompletionBar';
 import { calculateProfileCompletion } from '../utils/profileUtils';
-import { FaLightbulb, FaBalanceScale, FaHeart, FaChartBar } from 'react-icons/fa';
+import { FaLightbulb, FaBalanceScale, FaChartBar, FaUser } from 'react-icons/fa';
 import { RacketService } from '../services/racketService';
 import { RacketViewService, RecentlyViewedRacket } from '../services/racketViewService';
 import { Racket } from '../types/racket';
@@ -209,7 +209,7 @@ export const PlayerDashboard: React.FC = () => {
         // Fetch offers and recently viewed in parallel
         const [allRackets, recentlyViewedData] = await Promise.all([
           RacketService.getAllRackets(),
-          RacketViewService.getRecentlyViewed(6).catch(() => []), // Si falla, devolver array vacío
+          RacketViewService.getRecentlyViewed(4).catch(() => []), // Obtener últimas 4 palas vistas
         ]);
 
         // Filter offers and shuffle them to show different ones each time
@@ -245,17 +245,17 @@ export const PlayerDashboard: React.FC = () => {
       onClick: () => navigate('/compare-rackets'),
     },
     {
-      icon: FaHeart,
-      title: 'Mis favoritos',
-      description: 'Ver palas guardadas',
-      onClick: () => navigate('/favorites'),
-    },
-    {
       icon: FaChartBar,
       title: 'Mis comparaciones',
       description: 'Historial de comparaciones',
       onClick: () => navigate('/comparisons'),
     },
+    {
+      icon: FaUser,
+      title: 'Mi Cuenta',
+      description: 'Ver y editar perfil',
+      onClick: () => navigate('/profile'),
+    }
   ];
 
   return (
@@ -277,14 +277,6 @@ export const PlayerDashboard: React.FC = () => {
           </Stats>
         </HeroSection>
 
-        {/* Profile Completion */}
-        <Section>
-          <ProfileCompletionBar
-            percentage={profileCompletion.percentage}
-            suggestions={profileCompletion.suggestions}
-          />
-        </Section>
-
         {/* Quick Actions */}
         <Section>
           <SectionTitle>🎯 Accesos Rápidos</SectionTitle>
@@ -294,44 +286,6 @@ export const PlayerDashboard: React.FC = () => {
             ))}
           </QuickActionsGrid>
         </Section>
-
-        {/* Recently Viewed Rackets */}
-        {recentlyViewed.length > 0 && (
-          <Section>
-            <SectionTitle>👁️ Últimas Palas Vistas</SectionTitle>
-            <RacketsGrid>
-              {recentlyViewed.map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
-                  <RacketName>{racket.nombre}</RacketName>
-                  <RacketBrand>{racket.marca}</RacketBrand>
-                  {racket.precio_actual && (
-                    <RacketPrice>{racket.precio_actual}€</RacketPrice>
-                  )}
-                </RacketCard>
-              ))}
-            </RacketsGrid>
-          </Section>
-        )}
-
-        {/* Personalized Recommendations */}
-        {recommendations.length > 0 && (
-          <Section>
-            <SectionTitle>💡 Recomendadas para ti</SectionTitle>
-            <RacketsGrid>
-              {recommendations.map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
-                  <RacketName>{racket.nombre}</RacketName>
-                  <RacketBrand>{racket.marca}</RacketBrand>
-                  {racket.precio_actual && (
-                    <RacketPrice>{racket.precio_actual}€</RacketPrice>
-                  )}
-                </RacketCard>
-              ))}
-            </RacketsGrid>
-          </Section>
-        )}
 
         {/* Favorites Preview */}
         {favorites.length > 0 && (
@@ -352,6 +306,25 @@ export const PlayerDashboard: React.FC = () => {
             <ViewAllButton onClick={() => navigate('/favorites')}>
               Ver todas →
             </ViewAllButton>
+          </Section>
+        )}
+
+        {/* Recently Viewed Rackets */}
+        {recentlyViewed.length > 0 && (
+          <Section>
+            <SectionTitle>👁️ Últimas Palas Vistas</SectionTitle>
+            <RacketsGrid>
+              {recentlyViewed.slice(0, 4).map((racket) => (
+                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
+                  {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
+                  <RacketName>{racket.nombre}</RacketName>
+                  <RacketBrand>{racket.marca}</RacketBrand>
+                  {racket.precio_actual && (
+                    <RacketPrice>{racket.precio_actual}€</RacketPrice>
+                  )}
+                </RacketCard>
+              ))}
+            </RacketsGrid>
           </Section>
         )}
 
