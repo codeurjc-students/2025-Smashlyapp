@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
 import { FiDatabase, FiDollarSign, FiSearch, FiTarget, FiZap } from 'react-icons/fi';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import AiBanner from '../components/features/AiBanner';
+import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -228,6 +229,21 @@ const StatItem = styled.div`
 `;
 
 const HomePage: React.FC = () => {
+  const { user, isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect authenticated users to their respective dashboards
+  useEffect(() => {
+    if (isAuthenticated && user?.role) {
+      const role = user.role.toLowerCase();
+      if (role === 'player') {
+        navigate('/dashboard', { replace: true });
+      } else if (role === 'admin') {
+        navigate('/admin', { replace: true });
+      }
+    }
+  }, [isAuthenticated, user, navigate]);
+
   const phrases = [
     'conocer y mejorar mas sobre pádel',
     'encontrar la mejor pala para ti',

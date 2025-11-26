@@ -339,4 +339,119 @@ export class AdminController {
       } as ApiResponse);
     }
   }
+
+  /**
+   * GET /api/v1/admin/recent-activity
+   * Obtiene la actividad reciente del sistema
+   */
+  static async getRecentActivity(
+    req: RequestWithUser,
+    res: Response
+  ): Promise<void> {
+    try {
+      const limit = parseInt(req.query.limit as string) || 10;
+
+      // Obtener usuarios recientes
+      const { data: recentUsers } = await supabase
+        .from("user_profiles")
+        .select("id, full_name, nickname, email, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      // Obtener palas recientes
+      const { data: recentRackets } = await supabase
+        .from("rackets")
+        .select("id, nombre, marca, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      // Obtener reviews recientes
+      const { data: recentReviews } = await supabase
+        .from("reviews")
+        .select(`
+          id, 
+          rating, 
+          created_at,
+          user_profiles!inner(full_name, nickname),
+          rackets!inner(nombre)
+        `)
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      // Obtener solicitudes de tiendas recientes
+      const { data: recentStores } = await supabase
+        .from("stores")
+        .select("id, store_name, verified, created_at")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      // Combinar y formatear todas las actividades
+      const activities: any[] = [];
+
+      // Agregar usuarios
+      recentUsers?.forEach((user) => {
+        activities.push({
+          id: `user-${user.id}`,
+          type: "user",
+          title: `Nuevo usuario: ${user.full_name || user.nickname || user.email}`,
+          time: user.created_at,
+          icon: "user",
+        });
+      });
+
+      // Agregar palas
+      recentRackets?.forEach((racket) => {
+        activities.push({
+          id: `racket-${racket.id}`,
+          type: "racket",
+          title: `Nueva pala: ${racket.marca} ${racket.nombre}`,
+          time: racket.created_at,
+          icon: "package",
+        });
+      });
+
+      // Agregar reviews
+      recentReviews?.forEach((review: any) => {
+        const userName = review.user_profiles?.full_name || review.user_profiles?.nickname || "Usuario";
+        const racketName = review.rackets?.nombre || "Pala";
+        activities.push({
+          id: `review-${review.id}`,
+          type: "review",
+          title: `${userName} valoró ${racketName} con ${review.rating} estrellas`,
+          time: review.created_at,
+          icon: "star",
+        });
+      });
+
+      // Agregar tiendas
+      recentStores?.forEach((store) => {
+        const status = store.verified ? "verificada" : "pendiente de verificación";
+        activities.push({
+          id: `store-${store.id}`,
+          type: "store",
+          title: `Tienda ${store.store_name} - ${status}`,
+          time: store.created_at,
+          icon: "shopping-bag",
+        });
+      });
+
+      // Ordenar por fecha y limitar
+      activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
+      const limitedActivities = activities.slice(0, limit);
+
+      res.json({
+        success: true,
+        data: limitedActivities,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error("Error in getRecentActivity:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error del servidor",
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
 }

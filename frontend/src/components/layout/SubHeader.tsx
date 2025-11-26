@@ -2,6 +2,7 @@ import React from 'react';
 import { FiBook, FiCompass, FiHome, FiLayers } from 'react-icons/fi';
 import { Link, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
+import { useAuth } from '../../contexts/AuthContext';
 
 const SubHeaderContainer = styled.div`
   background: white;
@@ -84,15 +85,19 @@ const NavText = styled.span`
 
 const SubHeader: React.FC = () => {
   const location = useLocation();
+  const { user, isAuthenticated } = useAuth();
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Determine home path based on user authentication
+  const homePath = isAuthenticated && user?.role?.toLowerCase() === 'player' ? '/dashboard' : '/';
+
   const navigationItems = [
     {
-      to: '/',
+      to: homePath,
       icon: <FiHome />,
       text: 'Inicio',
-      isActive: isActive('/'),
+      isActive: isActive(homePath) || (homePath === '/dashboard' && isActive('/')),
     },
     {
       to: '/catalog',

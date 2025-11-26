@@ -26,7 +26,20 @@ interface ComparisonProviderProps {
 export const ComparisonProvider: React.FC<ComparisonProviderProps> = ({
   children,
 }) => {
-  const [rackets, setRackets] = useState<Racket[]>([]);
+  const [rackets, setRackets] = useState<Racket[]>(() => {
+    // Load from localStorage on init
+    try {
+      const stored = localStorage.getItem('smashly_comparison_list');
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Persist to localStorage whenever list changes
+  React.useEffect(() => {
+    localStorage.setItem('smashly_comparison_list', JSON.stringify(rackets));
+  }, [rackets]);
 
   // Add racket to comparison
   const addRacket = (racket: Racket): boolean => {

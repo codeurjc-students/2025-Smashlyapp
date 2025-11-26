@@ -108,4 +108,16 @@ ${racketsInfo}
       throw new Error(`Error al generar la comparación con IA: ${errorMessage}`);
     }
   }
+  static async generateContent(prompt: string): Promise<string> {
+    const service = new GeminiService();
+    try {
+      const result = await service.model.generateContent(prompt);
+      const response = await result.response;
+      return response.text();
+    } catch (error: any) {
+      console.error('Error calling Gemini API:', error);
+      const errorMessage = error.message || 'Error desconocido de Gemini';
+      throw new Error(`Error al generar contenido con IA: ${errorMessage}`);
+    }
+  }
 }

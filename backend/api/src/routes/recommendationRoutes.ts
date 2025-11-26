@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { RecommendationController } from '../controllers/recommendationController';
-import { authenticate } from '../middleware/auth'; // Assuming auth middleware exists
+import { authenticateUser as authenticate } from '../middleware/auth';
 
 const router = Router();
 

@@ -301,4 +301,27 @@ export class AdminService {
 
     await handleApiResponse<void>(response);
   }
+
+  /**
+   * Obtiene la actividad reciente del sistema
+   */
+  static async getRecentActivity(limit: number = 10): Promise<Activity[]> {
+    const response = await fetch(
+      buildApiUrl(API_ENDPOINTS.ADMIN.RECENT_ACTIVITY, { limit }),
+      {
+        method: "GET",
+        headers: getCommonHeaders(),
+      }
+    );
+
+    return handleApiResponse<Activity[]>(response);
+  }
+}
+
+export interface Activity {
+  id: string;
+  type: 'user' | 'racket' | 'review' | 'store';
+  title: string;
+  time: string;
+  icon: string;
 }

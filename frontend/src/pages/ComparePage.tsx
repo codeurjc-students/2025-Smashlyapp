@@ -143,7 +143,7 @@ const ComparePage: React.FC = () => {
 
       <MainContent>
         <Card
-          onClick={() => navigate('/ai-recommendation')} // Assuming this route exists or will be created
+          onClick={() => navigate('/best-racket')}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
         >

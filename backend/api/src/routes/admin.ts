@@ -58,4 +58,10 @@ router.post("/stores/:id/verify", AdminController.verifyStore);
  */
 router.delete("/stores/:id/reject", AdminController.rejectStore);
 
+/**
+ * GET /api/v1/admin/recent-activity
+ * Gets recent system activity
+ */
+router.get("/recent-activity", AdminController.getRecentActivity);
+
 export default router;

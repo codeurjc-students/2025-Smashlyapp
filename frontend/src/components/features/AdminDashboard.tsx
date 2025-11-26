@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { FiUsers, FiShoppingBag, FiPackage, FiTrendingUp, FiActivity, FiStar } from "react-icons/fi";
 import toast from "react-hot-toast";
-import { AdminService, AdminMetrics } from "../../services/adminService";
+import { AdminService, AdminMetrics, Activity } from "../../services/adminService";
 
 const DashboardContainer = styled.div`
   display: grid;
@@ -144,12 +144,25 @@ const LoadingContainer = styled.div`
   color: #666;
 `;
 
-interface Activity {
-  id: string;
-  type: 'user' | 'racket' | 'review' | 'store';
-  title: string;
-  time: string;
-}
+// Helper function to format relative time
+const formatRelativeTime = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) {
+    return 'Hace unos segundos';
+  } else if (diffInSeconds < 3600) {
+    const minutes = Math.floor(diffInSeconds / 60);
+    return `Hace ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`;
+  } else if (diffInSeconds < 86400) {
+    const hours = Math.floor(diffInSeconds / 3600);
+    return `Hace ${hours} ${hours === 1 ? 'hora' : 'horas'}`;
+  } else {
+    const days = Math.floor(diffInSeconds / 86400);
+    return `Hace ${days} ${days === 1 ? 'día' : 'días'}`;
+  }
+};
 
 const AdminDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
@@ -162,37 +175,14 @@ const AdminDashboard: React.FC = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Cargar métricas reales desde la API
-      const metricsData = await AdminService.getDashboardMetrics();
-      setMetrics(metricsData);
-
-      // Actividades simuladas por ahora (se pueden implementar más adelante)
-      setActivities([
-        {
-          id: '1',
-          type: 'user',
-          title: 'Nuevo usuario registrado recientemente',
-          time: 'Hace 5 minutos',
-        },
-        {
-          id: '2',
-          type: 'racket',
-          title: 'Nueva pala agregada al catálogo',
-          time: 'Hace 15 minutos',
-        },
-        {
-          id: '3',
-          type: 'review',
-          title: 'Nueva review publicada',
-          time: 'Hace 1 hora',
-        },
-        {
-          id: '4',
-          type: 'store',
-          title: 'Solicitud de tienda en proceso',
-          time: 'Hace 2 horas',
-        },
+      // Cargar métricas y actividades en paralelo
+      const [metricsData, activitiesData] = await Promise.all([
+        AdminService.getDashboardMetrics(),
+        AdminService.getRecentActivity(10),
       ]);
+      
+      setMetrics(metricsData);
+      setActivities(activitiesData);
     } catch (error: any) {
       console.error('Error loading dashboard data:', error);
       
@@ -309,7 +299,7 @@ const AdminDashboard: React.FC = () => {
                 <ActivityIcon>{getActivityIcon(activity.type)}</ActivityIcon>
                 <ActivityContent>
                   <ActivityTitle>{activity.title}</ActivityTitle>
-                  <ActivityTime>{activity.time}</ActivityTime>
+                  <ActivityTime>{formatRelativeTime(activity.time)}</ActivityTime>
                 </ActivityContent>
               </ActivityItem>
             ))}
