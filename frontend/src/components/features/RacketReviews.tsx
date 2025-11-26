@@ -82,7 +82,7 @@ export const RacketReviews: React.FC<RacketReviewsProps> = ({ racketId }) => {
   return (
     <Container>
       <Header>
-        <Title>Opiniones de usuarios</Title>
+        <Title>Opiniones y Preguntas de usuarios</Title>
 
         {user && !userHasReview && (
           <AddButton onClick={() => setShowForm(!showForm)}>

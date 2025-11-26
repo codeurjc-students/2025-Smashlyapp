@@ -7,6 +7,7 @@ import { ProfileCompletionBar } from '../components/dashboard/ProfileCompletionB
 import { calculateProfileCompletion } from '../utils/profileUtils';
 import { FaLightbulb, FaBalanceScale, FaHeart, FaChartBar } from 'react-icons/fa';
 import { RacketService } from '../services/racketService';
+import { RacketViewService, RecentlyViewedRacket } from '../services/racketViewService';
 import { Racket } from '../types/racket';
 
 const Container = styled.div`
@@ -174,6 +175,7 @@ export const PlayerDashboard: React.FC = () => {
   const [favorites, setFavorites] = useState<Racket[]>([]);
   const [recommendations, setRecommendations] = useState<Racket[]>([]);
   const [offers, setOffers] = useState<Racket[]>([]);
+  const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedRacket[]>([]);
   const [loading, setLoading] = useState(true);
 
   const profileCompletion = calculateProfileCompletion(user);
@@ -191,10 +193,20 @@ export const PlayerDashboard: React.FC = () => {
         // const recs = await racketService.getRecommendedRackets(user?.game_level);
         // setRecommendations(recs.slice(0, 3));
 
-        // Fetch offers
-        const allRackets = await RacketService.getAllRackets();
+        // Fetch offers and recently viewed in parallel
+        const [allRackets, recentlyViewedData] = await Promise.all([
+          RacketService.getAllRackets(),
+          RacketViewService.getRecentlyViewed(6).catch(() => []), // Si falla, devolver array vacío
+        ]);
+
+        // Filter offers and shuffle them to show different ones each time
         const onOffer = allRackets.filter((r: Racket) => r.en_oferta);
-        setOffers(onOffer.slice(0, 4));
+        
+        // Shuffle array using Fisher-Yates algorithm
+        const shuffled = [...onOffer].sort(() => Math.random() - 0.5);
+        
+        setOffers(shuffled.slice(0, 4));
+        setRecentlyViewed(recentlyViewedData);
 
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -270,13 +282,32 @@ export const PlayerDashboard: React.FC = () => {
           </QuickActionsGrid>
         </Section>
 
+        {/* Recently Viewed Rackets */}
+        {recentlyViewed.length > 0 && (
+          <Section>
+            <SectionTitle>👁️ Últimas Palas Vistas</SectionTitle>
+            <RacketsGrid>
+              {recentlyViewed.map((racket) => (
+                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
+                  {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
+                  <RacketName>{racket.nombre}</RacketName>
+                  <RacketBrand>{racket.marca}</RacketBrand>
+                  {racket.precio_actual && (
+                    <RacketPrice>{racket.precio_actual}€</RacketPrice>
+                  )}
+                </RacketCard>
+              ))}
+            </RacketsGrid>
+          </Section>
+        )}
+
         {/* Personalized Recommendations */}
         {recommendations.length > 0 && (
           <Section>
             <SectionTitle>💡 Recomendadas para ti</SectionTitle>
             <RacketsGrid>
               {recommendations.map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/rackets/${racket.id}`)}>
+                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
                   {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
@@ -295,7 +326,7 @@ export const PlayerDashboard: React.FC = () => {
             <SectionTitle>❤️ Tus Favoritas</SectionTitle>
             <RacketsGrid>
               {favorites.map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/rackets/${racket.id}`)}>
+                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
                   {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
@@ -317,7 +348,7 @@ export const PlayerDashboard: React.FC = () => {
             <SectionTitle>🔥 Ofertas que te pueden interesar</SectionTitle>
             <RacketsGrid>
               {offers.map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/rackets/${racket.id}`)}>
+                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
                   {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>

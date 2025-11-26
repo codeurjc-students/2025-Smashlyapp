@@ -158,6 +158,9 @@ export function mapToFrontendFormat(racket: any): any {
     created_at: racket.created_at,
     updated_at: racket.updated_at,
 
+    // View count
+    view_count: racket.view_count || 0,
+
     // Campos computados (ya en español)
     precio_actual: racket.precio_actual,
     precio_original: racket.precio_original,
@@ -197,10 +200,29 @@ async function fetchRemainingRackets(initialData: any[], count: number): Promise
 
 export class RacketService {
   /**
-   * Obtiene todas las palas de la base de datos
+   * Obtiene todas las palas de la base de datos ordenadas por popularidad (vistas)
    */
   static async getAllRackets(): Promise<Racket[]> {
     try {
+      // First, get view counts for all rackets
+      const { data: viewCounts, error: viewError } = await supabase
+        .from('racket_views')
+        .select('racket_id')
+        .order('racket_id');
+
+      if (viewError) {
+        logger.warn('Error fetching view counts, continuing without them:', viewError);
+      }
+
+      // Count views per racket
+      const viewCountMap = new Map<number, number>();
+      if (viewCounts) {
+        viewCounts.forEach((view: any) => {
+          const count = viewCountMap.get(view.racket_id) || 0;
+          viewCountMap.set(view.racket_id, count + 1);
+        });
+      }
+
       const { data, error, count } = await supabase
         .from('rackets')
         .select('*', { count: 'exact' })
@@ -219,15 +241,23 @@ export class RacketService {
       );
 
       // If there are more records than we got, use pagination
+      let allData = data || [];
       if (count && data && count > data.length) {
         logger.info(`Fetching remaining ${count - data.length} rackets...`);
-        const allData = await fetchRemainingRackets(data, count);
+        allData = await fetchRemainingRackets(data, count);
         logger.info(`Final count: ${allData.length} rackets loaded`);
-        const processedData = processRacketData(allData);
-        return processedData.map(mapToFrontendFormat);
       }
 
-      const processedData = processRacketData(data || []);
+      // Add view counts to each racket
+      const dataWithViews = allData.map((racket: any) => ({
+        ...racket,
+        view_count: viewCountMap.get(racket.id) || 0,
+      }));
+
+      // Sort by view count (most viewed first)
+      dataWithViews.sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+
+      const processedData = processRacketData(dataWithViews);
       return processedData.map(mapToFrontendFormat);
     } catch (error: unknown) {
       logger.error('Failed to connect to Supabase:', error);

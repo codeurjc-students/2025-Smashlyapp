@@ -18,6 +18,7 @@ import { RacketFeatures } from '../components/features/RacketFeatures';
 import { RacketReviews } from '../components/features/RacketReviews';
 import { StorePriceComparison } from '../components/features/StorePriceComparison';
 import { RacketService } from '../services/racketService';
+import { RacketViewService } from '../services/racketViewService';
 import { getLowestPrice } from '../utils/priceUtils';
 import { toTitleCase } from '../utils/textUtils';
 
@@ -439,6 +440,17 @@ const RacketDetailPage: React.FC = () => {
 
     loadRacket();
   }, [racketId, rackets]);
+
+  // Record racket view when racket is loaded and user is authenticated
+  useEffect(() => {
+    if (racket && racket.id && isAuthenticated) {
+      // Record the view asynchronously without blocking the UI
+      RacketViewService.recordView(racket.id).catch((error) => {
+        // Silently fail - viewing tracking is not critical
+        console.debug('Could not record racket view:', error);
+      });
+    }
+  }, [racket, isAuthenticated]);
 
   // Loading state (check if rackets are still loading from context)
   if (loading) {

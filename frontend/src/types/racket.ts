@@ -100,6 +100,9 @@ export interface Racket {
   created_at?: string;
   updated_at?: string;
   
+  // View count (popularidad)
+  view_count?: number;
+  
   // Campos computados para compatibilidad con el código existente
   precio_actual: number;
   precio_original: number;

@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState } from 'react';
-import { FiGrid, FiList, FiSearch, FiStar, FiTag, FiX, FiHeart } from 'react-icons/fi';
+import { FiGrid, FiList, FiSearch, FiEye, FiTag, FiX, FiHeart } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useComparison } from '../contexts/ComparisonContext';
@@ -541,9 +541,9 @@ const CatalogPage: React.FC = () => {
   const [serverTotal, setServerTotal] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBrand, setSelectedBrand] = useState('Todas');
-  const [showBestsellers, setShowBestsellers] = useState(false);
+  const [showMostViewed, setShowMostViewed] = useState(false);
   const [showOffers, setShowOffers] = useState(false);
-  const [sortBy, setSortBy] = useState('bestseller');
+  const [sortBy, setSortBy] = useState('most-viewed');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [displayCount, setDisplayCount] = useState(10);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
@@ -592,9 +592,13 @@ const CatalogPage: React.FC = () => {
       filtered = filtered.filter(racket => racket.marca === selectedBrand);
     }
 
-    // Apply bestsellers filter
-    if (showBestsellers) {
-      filtered = filtered.filter(racket => racket.es_bestseller);
+    // Apply most viewed filter (top 20% by view count)
+    if (showMostViewed) {
+      // Sort by view count and take top 20%
+      const sortedByViews = [...filtered].sort((a, b) => (b.view_count || 0) - (a.view_count || 0));
+      const topCount = Math.ceil(sortedByViews.length * 0.2);
+      const topViewedIds = new Set(sortedByViews.slice(0, topCount).map(r => r.id));
+      filtered = filtered.filter(racket => topViewedIds.has(racket.id));
     }
 
     // Apply offers filter
@@ -618,11 +622,11 @@ const CatalogPage: React.FC = () => {
             const brandA = a.marca || '';
             const brandB = b.marca || '';
             return brandA.localeCompare(brandB);
-          case 'bestseller':
-            // Bestsellers primero (true > false)
-            if (a.es_bestseller && !b.es_bestseller) return -1;
-            if (!a.es_bestseller && b.es_bestseller) return 1;
-            return 0;
+          case 'most-viewed':
+            // Más vistas primero (ordenar por view_count descendente)
+            const viewsA = a.view_count || 0;
+            const viewsB = b.view_count || 0;
+            return viewsB - viewsA;
           case 'offer':
             // Ofertas primero (true > false)
             if (a.en_oferta && !b.en_oferta) return -1;
@@ -639,7 +643,7 @@ const CatalogPage: React.FC = () => {
     }
 
     setFilteredRackets(filtered);
-  }, [rackets, searchQuery, selectedBrand, showBestsellers, showOffers, sortBy]);
+  }, [rackets, searchQuery, selectedBrand, showMostViewed, showOffers, sortBy]);
 
   // Update displayed rackets when filters change
   useEffect(() => {
@@ -669,9 +673,9 @@ const CatalogPage: React.FC = () => {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedBrand('Todas');
-    setShowBestsellers(false);
+    setShowMostViewed(false);
     setShowOffers(false);
-    setSortBy('bestseller');
+    setSortBy('most-viewed');
   };
 
   const goToComparison = () => {
@@ -751,11 +755,11 @@ const CatalogPage: React.FC = () => {
             </SearchContainer>
 
             <FilterButton
-              active={showBestsellers}
-              onClick={() => setShowBestsellers(!showBestsellers)}
+              active={showMostViewed}
+              onClick={() => setShowMostViewed(!showMostViewed)}
             >
-              <FiStar />
-              Bestsellers
+              <FiEye />
+              Más Vistas
             </FilterButton>
 
             <FilterButton active={showOffers} onClick={() => setShowOffers(!showOffers)}>
@@ -787,7 +791,7 @@ const CatalogPage: React.FC = () => {
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
             <SortSelect value={sortBy} onChange={e => setSortBy(e.target.value)}>
-              <option value='bestseller'>Bestsellers primero</option>
+              <option value='most-viewed'>Más vistas primero</option>
               <option value='name'>Ordenar por nombre</option>
               <option value='brand'>Ordenar por marca</option>
               <option value='price-low'>Precio: menor a mayor</option>
@@ -840,10 +844,10 @@ const CatalogPage: React.FC = () => {
                           target.src = '/placeholder-racket.svg';
                         }}
                       />
-                      {racket.es_bestseller && (
+                      {racket.view_count !== undefined && racket.view_count > 10 && (
                         <RacketBadge variant='bestseller'>
-                          <FiStar size={12} />
-                          Top
+                          <FiEye size={12} />
+                          Popular
                         </RacketBadge>
                       )}
                       {racket.en_oferta && (

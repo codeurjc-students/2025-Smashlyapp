@@ -53,6 +53,14 @@ export const API_ENDPOINTS = {
     REJECT_STORE: (id: string) => `/api/v1/admin/stores/${id}/reject`,
   },
 
+  // Racket Views
+  RACKET_VIEWS: {
+    RECENTLY_VIEWED: "/api/v1/racket-views/recently-viewed",
+    RECORD_VIEW: (racketId: number) => `/api/v1/racket-views/${racketId}`,
+    REMOVE_VIEW: (racketId: number) => `/api/v1/racket-views/${racketId}`,
+    CLEAR_HISTORY: "/api/v1/racket-views/clear",
+  },
+
   // Health
   HEALTH: "/api/v1/health",
 } as const;
