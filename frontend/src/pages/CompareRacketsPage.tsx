@@ -422,10 +422,10 @@ const CompareRacketsPage: React.FC = () => {
 
   const filteredRackets = searchQuery
     ? fuse
-        .search(searchQuery)
-        .map(result => result.item)
-        .filter(r => !selectedRackets.find(sr => sr.id === r.id))
-        .slice(0, 5)
+      .search(searchQuery)
+      .map(result => result.item)
+      .filter(r => !selectedRackets.find(sr => sr.id === r.id))
+      .slice(0, 5)
     : [];
 
   const handleAddRacket = (racket: Racket) => {
@@ -461,17 +461,17 @@ const CompareRacketsPage: React.FC = () => {
       const userProfile =
         isAuthenticated && user
           ? {
-              gameLevel: user.game_level,
-              playingStyle: 'No especificado', // UserProfile doesn't have playing_style yet, defaulting
-            }
+            gameLevel: user.game_level,
+            playingStyle: 'No especificado', // UserProfile doesn't have playing_style yet, defaulting
+          }
           : undefined;
 
       const racketIds = selectedRackets.map(r => r.id!);
       const response = await ComparisonService.compareRackets(racketIds, userProfile);
-      
+
       clearInterval(progressInterval);
       completeTask(taskId, { comparison: response.comparison, metrics: response.metrics });
-      
+
       setComparisonResult(response.comparison);
       setComparisonMetrics(response.metrics || null);
     } catch (error) {

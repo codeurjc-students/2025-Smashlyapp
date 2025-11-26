@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiMinimize2, FiCpu, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { useBackgroundTasks, TaskType, BackgroundTask } from '../../contexts/BackgroundTasksContext';
 
-const PopupContainer = styled(motion.div)<{ $minimized: boolean }>`
+const PopupContainer = styled(motion.div) <{ $minimized: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
@@ -40,11 +40,11 @@ const CircularProgress = styled.svg<{ $status: string }>`
   }
   
   .progress {
-    stroke: ${props => 
-      props.$status === 'completed' ? '#16a34a' :
+    stroke: ${props =>
+    props.$status === 'completed' ? '#16a34a' :
       props.$status === 'error' ? '#dc2626' :
-      'url(#animatedGradient)'
-    };
+        'url(#animatedGradient)'
+  };
     stroke-dasharray: 251.2;
     stroke-dashoffset: 251.2;
     transition: stroke-dashoffset 0.5s ease;
@@ -58,10 +58,10 @@ const MinimizedContent = styled.div<{ $status: string }>`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: ${props => 
+  background: ${props =>
     props.$status === 'completed' ? 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' :
-    props.$status === 'error' ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
-    '#f3f4f6'
+      props.$status === 'error' ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
+        '#f3f4f6'
   };
   border-radius: 50%;
   color: ${props => props.$status === 'running' ? '#6b7280' : 'white'};
@@ -107,10 +107,10 @@ const Header = styled.div<{ $minimized: boolean; $status: string }>`
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: ${props => 
+  background: ${props =>
     props.$status === 'completed' ? 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' :
-    props.$status === 'error' ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
-    'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+      props.$status === 'error' ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
+        'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
   };
   color: white;
 `;
@@ -273,10 +273,10 @@ const TaskName = styled.p`
 
 const TaskStatus = styled.span<{ $status: string }>`
   font-size: 0.8rem;
-  color: ${props => 
+  color: ${props =>
     props.$status === 'completed' ? '#16a34a' :
-    props.$status === 'error' ? '#dc2626' :
-    '#3b82f6'
+      props.$status === 'error' ? '#dc2626' :
+        '#3b82f6'
   };
   font-weight: 600;
 `;
@@ -394,9 +394,9 @@ export const BackgroundTaskPopup: React.FC = () => {
       <PopupContainer
         $minimized={minimized}
         initial={{ opacity: 0, y: 100, scale: 0.8 }}
-        animate={{ 
-          opacity: 1, 
-          y: 0, 
+        animate={{
+          opacity: 1,
+          y: 0,
           scale: pulse ? 1.1 : 1,
         }}
         exit={{ opacity: 0, y: 100, scale: 0.8 }}
@@ -443,13 +443,13 @@ export const BackgroundTaskPopup: React.FC = () => {
                   cy="44"
                   r="40"
                   initial={{ strokeDashoffset: circumference }}
-                  animate={{ 
+                  animate={{
                     strokeDashoffset: progressOffset
                   }}
-                  transition={{ 
+                  transition={{
                     strokeDashoffset: { duration: 0.5 }
                   }}
-                  style={{ 
+                  style={{
                     strokeDasharray: circumference,
                     strokeDashoffset: progressOffset
                   }}
@@ -460,15 +460,15 @@ export const BackgroundTaskPopup: React.FC = () => {
             {/* Contenido del círculo minimizado */}
             <MinimizedContent $status={visibleTask.status}>
               <MinimizedIcon
-                animate={visibleTask.status === 'running' ? { 
+                animate={visibleTask.status === 'running' ? {
                   rotate: 360
                 } : visibleTask.status === 'completed' ? {
                   scale: [1, 1.2, 1]
                 } : {}}
-                transition={visibleTask.status === 'running' ? { 
-                  duration: 2, 
-                  repeat: Infinity, 
-                  ease: 'linear' 
+                transition={visibleTask.status === 'running' ? {
+                  duration: 2,
+                  repeat: Infinity,
+                  ease: 'linear'
                 } : {
                   duration: 0.5
                 }}
@@ -562,8 +562,8 @@ export const BackgroundTaskPopup: React.FC = () => {
                           <TaskName>{getTaskTitle(task.type)}</TaskName>
                           <TaskStatus $status={task.status}>
                             {task.status === 'completed' ? 'Completada' :
-                             task.status === 'error' ? 'Error' :
-                             'En proceso'}
+                              task.status === 'error' ? 'Error' :
+                                'En proceso'}
                           </TaskStatus>
                         </TaskInfo>
                       </TaskItem>

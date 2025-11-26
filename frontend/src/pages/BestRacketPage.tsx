@@ -110,11 +110,11 @@ export const BestRacketPage: React.FC = () => {
   const [formType, setFormType] = useState<'basic' | 'advanced'>('basic');
   const [result, setResult] = useState<ResultType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // State for form data persistence
   const [basicData, setBasicData] = useState<Partial<BasicFormData>>({});
   const [advancedData, setAdvancedData] = useState<Partial<AdvancedFormData>>({});
-  
+
   // State for last recommendation reuse
   const [lastRecommendation, setLastRecommendation] = useState<any>(null);
   const [showReusePrompt, setShowReusePrompt] = useState(false);
@@ -143,7 +143,7 @@ export const BestRacketPage: React.FC = () => {
     if (!lastRecommendation) return;
 
     const { form_type, form_data } = lastRecommendation;
-    
+
     if (form_type === 'basic') {
       setBasicData(form_data);
       setFormType('basic');
@@ -151,7 +151,7 @@ export const BestRacketPage: React.FC = () => {
       setAdvancedData(form_data);
       setFormType('advanced');
     }
-    
+
     setShowReusePrompt(false);
     toast.success('Datos cargados correctamente');
   };
@@ -159,21 +159,21 @@ export const BestRacketPage: React.FC = () => {
   const handleBasicSubmit = async (data: BasicFormData) => {
     setBasicData(data);
     setStep('loading');
-    
+
     // Crear tarea en segundo plano
     const taskId = addTask('recommendation', { formData: data });
-    
+
     // Simular progreso
     const progressInterval = setInterval(() => {
       updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
     }, 500);
-    
+
     try {
       const res = await RecommendationService.generate('basic', data);
-      
+
       clearInterval(progressInterval);
       completeTask(taskId, res);
-      
+
       setResult(res);
       setStep('result');
     } catch (error) {
@@ -188,21 +188,21 @@ export const BestRacketPage: React.FC = () => {
   const handleAdvancedSubmit = async (data: AdvancedFormData) => {
     setAdvancedData(data);
     setStep('loading');
-    
+
     // Crear tarea en segundo plano
     const taskId = addTask('recommendation', { formData: data });
-    
+
     // Simular progreso
     const progressInterval = setInterval(() => {
       updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
     }, 500);
-    
+
     try {
       const res = await RecommendationService.generate('advanced', data);
-      
+
       clearInterval(progressInterval);
       completeTask(taskId, res);
-      
+
       setResult(res);
       setStep('result');
     } catch (error) {
@@ -216,7 +216,7 @@ export const BestRacketPage: React.FC = () => {
 
   const handleSave = async () => {
     if (!user || !result) return;
-    
+
     setIsSaving(true);
     try {
       const dataToSave = formType === 'basic' ? basicData : advancedData;
@@ -241,7 +241,7 @@ export const BestRacketPage: React.FC = () => {
       <HeroSection>
         <h1>Encuentra tu Pala Ideal</h1>
         <p>
-          {step === 'result' 
+          {step === 'result'
             ? 'Aquí tienes nuestras recomendaciones personalizadas'
             : 'Responde unas preguntas y nuestra IA analizará tu perfil para recomendarte las mejores opciones.'}
         </p>
@@ -267,14 +267,14 @@ export const BestRacketPage: React.FC = () => {
           )}
 
           <ModeSelector>
-            <ModeButton 
-              $active={formType === 'basic'} 
+            <ModeButton
+              $active={formType === 'basic'}
               onClick={() => setFormType('basic')}
             >
               Básico
             </ModeButton>
-            <ModeButton 
-              $active={formType === 'advanced'} 
+            <ModeButton
+              $active={formType === 'advanced'}
               onClick={() => {
                 if (!user) {
                   toast('Inicia sesión para acceder al modo avanzado', { icon: '🔒' });
@@ -288,14 +288,14 @@ export const BestRacketPage: React.FC = () => {
           </ModeSelector>
 
           {formType === 'basic' ? (
-            <BasicForm 
-              initialData={basicData} 
-              onSubmit={handleBasicSubmit} 
+            <BasicForm
+              initialData={basicData}
+              onSubmit={handleBasicSubmit}
             />
           ) : (
-            <AdvancedForm 
-              initialData={advancedData} 
-              onSubmit={handleAdvancedSubmit} 
+            <AdvancedForm
+              initialData={advancedData}
+              onSubmit={handleAdvancedSubmit}
             />
           )}
         </>
@@ -310,8 +310,8 @@ export const BestRacketPage: React.FC = () => {
       )}
 
       {step === 'result' && result && (
-        <RecommendationResult 
-          result={result} 
+        <RecommendationResult
+          result={result}
           onReset={handleReset}
           onSave={handleSave}
           canSave={!!user}
