@@ -17,11 +17,24 @@ const HeaderContainer = styled.header`
 const HeaderContent = styled.div`
   max-width: 1500px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 clamp(20px, 5vw, 80px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   height: 70px;
+  width: 100%;
+  
+  @media (max-width: 1600px) {
+    padding: 0 clamp(20px, 3vw, 60px);
+  }
+  
+  @media (max-width: 1200px) {
+    padding: 0 clamp(20px, 2vw, 40px);
+  }
+  
+  @media (max-width: 768px) {
+    padding: 0 20px;
+  }
 `;
 
 const Logo = styled(Link)`
@@ -144,7 +157,7 @@ const NavLink = styled(Link)<{ isActive: boolean; isMobile?: boolean }>`
     props.isActive && !props.isMobile ? 'rgba(255, 255, 255, 0.15)' : 'transparent'};
   display: block;
   position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: ${props => (props.isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.3)')};
 
   ${props =>
     props.isMobile &&

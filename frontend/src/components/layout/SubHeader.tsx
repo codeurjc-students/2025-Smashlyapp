@@ -15,13 +15,22 @@ const SubHeaderContainer = styled.div`
 `;
 
 const SubHeaderContent = styled.div`
-  max-width: 1200px;
+  max-width: 1500px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 clamp(20px, 5vw, 80px);
   display: flex;
   align-items: center;
   justify-content: center;
   height: 48px;
+  width: 100%;
+  
+  @media (max-width: 1600px) {
+    padding: 0 clamp(20px, 3vw, 60px);
+  }
+  
+  @media (max-width: 1200px) {
+    padding: 0 clamp(20px, 2vw, 40px);
+  }
 
   @media (max-width: 768px) {
     display: none; /* Hide on mobile since navigation is in mobile menu */

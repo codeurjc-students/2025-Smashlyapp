@@ -440,7 +440,7 @@ const CompareRacketsPage: React.FC = () => {
     setSelectedRackets(selectedRackets.filter(r => r.id !== id));
   };
 
-  const handleCompare = async () => {
+  const handleCompare = async () =>{
     if (selectedRackets.length < 2) return;
 
     setLoading(true);
@@ -458,13 +458,31 @@ const CompareRacketsPage: React.FC = () => {
 
     try {
       // Prepare user profile if authenticated
-      const userProfile =
-        isAuthenticated && user
-          ? {
-            gameLevel: user.game_level,
-            playingStyle: 'No especificado', // UserProfile doesn't have playing_style yet, defaulting
+      let userProfile = undefined;
+      
+      if (isAuthenticated && user) {
+        // Calculate age from birthdate if available
+        let age = undefined;
+        if (user.birthdate) {
+          const birthDate = new Date(user.birthdate);
+          const today = new Date();
+          age = today.getFullYear() - birthDate.getFullYear();
+          const monthDiff = today.getMonth() - birthDate.getMonth();
+          if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
           }
-          : undefined;
+        }
+
+        userProfile = {
+          weight: user.weight?.toString() || undefined,
+          height: user.height?.toString() || undefined,
+          age: age?.toString() || undefined,
+          gameLevel: user.game_level || undefined,
+          playingStyle: undefined, // Not available in current user profile
+          experience: undefined, // Not available in current user profile
+          preferences: user.limitations?.join(', ') || undefined,
+        };
+      }
 
       const racketIds = selectedRackets.map(r => r.id!);
       const response = await ComparisonService.compareRackets(racketIds, userProfile);
