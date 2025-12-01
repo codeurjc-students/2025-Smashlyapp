@@ -3,8 +3,6 @@ import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { QuickActionCard } from '../components/dashboard/QuickActionCard';
-import { ProfileCompletionBar } from '../components/dashboard/ProfileCompletionBar';
-import { calculateProfileCompletion } from '../utils/profileUtils';
 import { FaLightbulb, FaBalanceScale, FaChartBar, FaUser } from 'react-icons/fa';
 import { RacketService } from '../services/racketService';
 import { RacketViewService, RecentlyViewedRacket } from '../services/racketViewService';
@@ -175,12 +173,9 @@ export const PlayerDashboard: React.FC = () => {
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<Racket[]>([]);
   const [favoritesCount, setFavoritesCount] = useState<number>(0);
-  const [recommendations, setRecommendations] = useState<Racket[]>([]);
   const [offers, setOffers] = useState<Racket[]>([]);
   const [recentlyViewed, setRecentlyViewed] = useState<RecentlyViewedRacket[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const profileCompletion = calculateProfileCompletion(user);
 
   useEffect(() => {
     const fetchDashboardData = async () => {

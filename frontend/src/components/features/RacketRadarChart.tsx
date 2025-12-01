@@ -7,7 +7,6 @@ import {
   PolarAngleAxis,
   PolarRadiusAxis,
   ResponsiveContainer,
-  Legend,
   Tooltip,
 } from 'recharts';
 
@@ -50,15 +49,6 @@ const ChartSubtitle = styled.p`
 
 // Colores para hasta 3 palas
 const COLORS = ['#16a34a', '#3b82f6', '#f59e0b'];
-
-// Nombres amigables para las métricas
-const METRIC_LABELS: { [key: string]: string } = {
-  potencia: 'Potencia',
-  control: 'Control',
-  salidaDeBola: 'Salida de Bola',
-  manejabilidad: 'Manejabilidad',
-  puntoDulce: 'Punto Dulce',
-};
 
 const RacketRadarChart: React.FC<RacketRadarChartProps> = ({ metrics }) => {
   if (!metrics || metrics.length === 0) {

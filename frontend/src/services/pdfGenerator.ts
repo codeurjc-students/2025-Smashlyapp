@@ -193,13 +193,13 @@ export class RacketPdfGenerator {
         valign: 'middle',
       },
       headStyles: {
-        fillColor: THEME.colors.primary,
+        fillColor: THEME.colors.primary as [number, number, number],
         textColor: 255,
         fontStyle: 'bold',
         halign: 'center',
       },
       bodyStyles: {
-        textColor: THEME.colors.secondary,
+        textColor: THEME.colors.secondary as [number, number, number],
       },
       columnStyles: {
         // Primera columna (Características) en negrita y fondo gris claro
@@ -314,7 +314,6 @@ export class RacketPdfGenerator {
     const parts = text.split(/\*\*(.*?)\*\*/g);
 
     // Necesitamos lógica de word-wrap manual porque jsPDF no soporta mix styles en multiline automático
-    let cursorX = xBase;
     let lineHeight = fontSize * 0.5; // Espaciado aprox
 
     // Aplanamos en palabras para procesar saltos de línea

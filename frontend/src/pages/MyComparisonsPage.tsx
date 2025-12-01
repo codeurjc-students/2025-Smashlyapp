@@ -452,7 +452,7 @@ const ModalBody = styled.div`
 `;
 
 const MyComparisonsPage: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const [allComparisons, setAllComparisons] = useState<SavedComparison[]>([]);
   const [displayedComparisons, setDisplayedComparisons] = useState<SavedComparison[]>([]);
@@ -463,7 +463,7 @@ const MyComparisonsPage: React.FC = () => {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [selectedComparison, setSelectedComparison] = useState<SavedComparison | null>(null);
   const [racketsCache, setRacketsCache] = useState<Record<number, Racket>>({});
-  const [sharingId, setSharingId] = useState<string | null>(null);
+  const [_sharingId, setSharingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
   

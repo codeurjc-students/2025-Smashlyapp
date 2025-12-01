@@ -13,10 +13,10 @@ export class RecommendationController {
       }
 
       const result = await RecommendationService.generateRecommendation(type, data);
-      res.json(result);
+      return res.json(result);
     } catch (error: unknown) {
       logger.error('Error in generate recommendation controller:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -34,10 +34,10 @@ export class RecommendationController {
       }
 
       const saved = await RecommendationService.saveRecommendation(userId, type, formData, result);
-      res.status(201).json(saved);
+      return res.status(201).json(saved);
     } catch (error: unknown) {
       logger.error('Error in save recommendation controller:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
 
@@ -50,10 +50,10 @@ export class RecommendationController {
       }
 
       const recommendation = await RecommendationService.getLastRecommendation(userId);
-      res.json(recommendation || { message: 'No recommendations found' });
+      return res.json(recommendation || { message: 'No recommendations found' });
     } catch (error: unknown) {
       logger.error('Error in get last recommendation controller:', error);
-      res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: 'Internal server error' });
     }
   }
 }

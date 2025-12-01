@@ -42,7 +42,7 @@ router.get('/image', async (req: Request, res: Response) => {
       'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
     });
 
-    res.send(response.data);
+    return res.send(response.data);
   } catch (error: any) {
     logger.error('Error proxying image:', error);
 
@@ -52,7 +52,7 @@ router.get('/image', async (req: Request, res: Response) => {
       });
     }
 
-    res.status(500).json({ error: 'Internal server error while fetching image' });
+    return res.status(500).json({ error: 'Internal server error while fetching image' });
   }
 });
 

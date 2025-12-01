@@ -304,7 +304,7 @@ const SharedComparisonPage: React.FC = () => {
 
       const cache: Record<number, Racket> = {};
       rackets.forEach(item => {
-        if (item) {
+        if (item && item.racket) {
           cache[item.id] = item.racket;
         }
       });
