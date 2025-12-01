@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import {
   FiEdit2,
@@ -237,17 +237,19 @@ const Avatar = styled.div`
   border: 5px solid white;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 `;
 
 const UserPage: React.FC = () => {
   const navigate = useNavigate();
   const { userProfile, loading, refreshUserProfile } = useAuth();
   const [showEditModal, setShowEditModal] = useState(false);
-
-  // Redirigir a los administradores al panel de admin
-  if (!loading && userProfile && userProfile.role?.toLowerCase() === 'admin') {
-    return <Navigate to="/admin" replace />;
-  }
 
   const handleEditProfile = () => {
     setShowEditModal(true);

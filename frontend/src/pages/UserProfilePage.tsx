@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import toast from "react-hot-toast";
+import React, { useEffect, useState } from 'react';
+import toast from 'react-hot-toast';
 import {
   FiActivity,
   FiAlertCircle,
@@ -10,12 +10,12 @@ import {
   FiSave,
   FiTrendingUp,
   FiUser,
-} from "react-icons/fi";
-import { Link, useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { useAuth } from "../contexts/AuthContext";
-import { UserProfileService } from "../services/userProfileService";
-import { UserReviews } from "../components/features/UserReviews";
+} from 'react-icons/fi';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import styled from 'styled-components';
+import { useAuth } from '../contexts/AuthContext';
+import { UserProfileService } from '../services/userProfileService';
+import { UserReviews } from '../components/features/UserReviews';
 
 // Styled Components
 const Container = styled.div`
@@ -231,14 +231,13 @@ const SaveButton = styled.button<{ loading?: boolean }>`
   border-radius: 8px;
   font-size: 1rem;
   font-weight: 600;
-  cursor: ${(props) => (props.loading ? "not-allowed" : "pointer")};
+  cursor: ${props => (props.loading ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
-  opacity: ${(props) => (props.loading ? 0.7 : 1)};
+  opacity: ${props => (props.loading ? 0.7 : 1)};
 
   &:hover {
-    transform: ${(props) => (props.loading ? "none" : "translateY(-2px)")};
-    box-shadow: ${(props) =>
-      props.loading ? "none" : "0 8px 25px rgba(22, 163, 74, 0.4)"};
+    transform: ${props => (props.loading ? 'none' : 'translateY(-2px)')};
+    box-shadow: ${props => (props.loading ? 'none' : '0 8px 25px rgba(22, 163, 74, 0.4)')};
   }
 
   &:disabled {
@@ -298,33 +297,40 @@ interface UserProfileFormData {
 const UserProfilePage: React.FC = () => {
   const { user, userProfile, refreshUserProfile } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [isEditing, setIsEditing] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get('edit') === 'true') {
+      setIsEditing(true);
+    }
+  }, [searchParams]);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<UserProfileFormData>({
-    full_name: "",
-    peso: "",
-    altura: "",
-    birthdate: "",
-    game_level: "",
-    limitations: "",
+    full_name: '',
+    peso: '',
+    altura: '',
+    birthdate: '',
+    game_level: '',
+    limitations: '',
   });
 
   // Debug: verificar user ID
   useEffect(() => {
-    console.log("👤 User object in UserProfilePage:", user);
-    console.log("🆔 User ID:", user?.id);
+    console.log('👤 User object in UserProfilePage:', user);
+    console.log('🆔 User ID:', user?.id);
   }, [user]);
 
   // Cargar datos del perfil cuando el componente se monta
   useEffect(() => {
     if (userProfile) {
       setFormData({
-        full_name: userProfile.full_name || "",
-        peso: userProfile.weight?.toString() || "",
-        altura: userProfile.height?.toString() || "",
-        birthdate: userProfile.birthdate || "",
-        game_level: userProfile.game_level || "",
-        limitations: userProfile.limitations?.[0] || "", // Tomar el primer elemento del array
+        full_name: userProfile.full_name || '',
+        peso: userProfile.weight?.toString() || '',
+        altura: userProfile.height?.toString() || '',
+        birthdate: userProfile.birthdate || '',
+        game_level: userProfile.game_level || '',
+        limitations: userProfile.limitations?.[0] || '', // Tomar el primer elemento del array
       });
     }
   }, [userProfile]);
@@ -332,36 +338,28 @@ const UserProfilePage: React.FC = () => {
   // Redirigir si no hay usuario autenticado
   useEffect(() => {
     if (!user) {
-      navigate("/login");
+      navigate('/login');
     }
   }, [user, navigate]);
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]: value,
     }));
   };
 
   const validateForm = (): boolean => {
-    if (
-      formData.peso &&
-      (isNaN(Number(formData.peso)) || Number(formData.peso) <= 0)
-    ) {
-      toast.error("El peso debe ser un número válido mayor a 0");
+    if (formData.peso && (isNaN(Number(formData.peso)) || Number(formData.peso) <= 0)) {
+      toast.error('El peso debe ser un número válido mayor a 0');
       return false;
     }
 
-    if (
-      formData.altura &&
-      (isNaN(Number(formData.altura)) || Number(formData.altura) <= 0)
-    ) {
-      toast.error("La altura debe ser un número válido mayor a 0");
+    if (formData.altura && (isNaN(Number(formData.altura)) || Number(formData.altura) <= 0)) {
+      toast.error('La altura debe ser un número válido mayor a 0');
       return false;
     }
 
@@ -371,7 +369,7 @@ const UserProfilePage: React.FC = () => {
       const age = today.getFullYear() - birthDate.getFullYear();
 
       if (age < 5 || age > 120) {
-        toast.error("Por favor, ingresa una fecha de nacimiento válida");
+        toast.error('Por favor, ingresa una fecha de nacimiento válida');
         return false;
       }
     }
@@ -387,7 +385,7 @@ const UserProfilePage: React.FC = () => {
     }
 
     if (!user) {
-      toast.error("Usuario no autenticado");
+      toast.error('Usuario no autenticado');
       return;
     }
 
@@ -405,11 +403,11 @@ const UserProfilePage: React.FC = () => {
 
       await UserProfileService.updateUserProfile(updates);
       await refreshUserProfile(); // Actualizar el perfil en el contexto
-      toast.success("Perfil actualizado correctamente");
+      toast.success('Perfil actualizado correctamente');
       setIsEditing(false);
     } catch (error: any) {
-      console.error("Error updating profile:", error);
-      toast.error(error.message || "Error al actualizar el perfil");
+      console.error('Error updating profile:', error);
+      toast.error(error.message || 'Error al actualizar el perfil');
     } finally {
       setLoading(false);
     }
@@ -422,10 +420,7 @@ const UserProfilePage: React.FC = () => {
     const age = today.getFullYear() - birth.getFullYear();
     const monthDiff = today.getMonth() - birth.getMonth();
 
-    if (
-      monthDiff < 0 ||
-      (monthDiff === 0 && today.getDate() < birth.getDate())
-    ) {
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
       return age - 1;
     }
     return age;
@@ -439,7 +434,7 @@ const UserProfilePage: React.FC = () => {
     <Container>
       <Header>
         <HeaderContent>
-          <BackButton to="/">
+          <BackButton to='/'>
             <FiArrowLeft />
             Volver al inicio
           </BackButton>
@@ -453,9 +448,7 @@ const UserProfilePage: React.FC = () => {
             <Avatar>
               <FiUser size={40} />
             </Avatar>
-            <UserName>
-              {userProfile?.full_name || userProfile?.nickname || "Usuario"}
-            </UserName>
+            <UserName>{userProfile?.full_name || userProfile?.nickname || 'Usuario'}</UserName>
             <UserEmail>{user.email}</UserEmail>
           </ProfileHeader>
 
@@ -463,9 +456,9 @@ const UserProfilePage: React.FC = () => {
             <InfoCard>
               <InfoText>
                 <FiAlertCircle size={16} />
-                Completa tu perfil para recibir recomendaciones personalizadas
-                de palas de pádel. Esta información nos ayuda a sugerir las
-                mejores opciones según tu nivel y características físicas.
+                Completa tu perfil para recibir recomendaciones personalizadas de palas de pádel.
+                Esta información nos ayuda a sugerir las mejores opciones según tu nivel y
+                características físicas.
               </InfoText>
             </InfoCard>
 
@@ -477,15 +470,15 @@ const UserProfilePage: React.FC = () => {
 
               <FormGrid>
                 <FormGroup>
-                  <Label htmlFor="full_name">
+                  <Label htmlFor='full_name'>
                     <FiUser size={16} />
                     Nombre Completo
                   </Label>
                   <Input
-                    id="full_name"
-                    name="full_name"
-                    type="text"
-                    placeholder="Tu nombre completo"
+                    id='full_name'
+                    name='full_name'
+                    type='text'
+                    placeholder='Tu nombre completo'
                     value={formData.full_name}
                     onChange={handleInputChange}
                     disabled={!isEditing}
@@ -493,22 +486,20 @@ const UserProfilePage: React.FC = () => {
                 </FormGroup>
 
                 <FormGroup>
-                  <Label htmlFor="birthdate">
+                  <Label htmlFor='birthdate'>
                     <FiCalendar size={16} />
                     Fecha de Nacimiento
                   </Label>
                   <Input
-                    id="birthdate"
-                    name="birthdate"
-                    type="date"
+                    id='birthdate'
+                    name='birthdate'
+                    type='date'
                     value={formData.birthdate}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   />
                   {formData.birthdate && (
-                    <HelperText>
-                      Edad: {calculateAge(formData.birthdate)} años
-                    </HelperText>
+                    <HelperText>Edad: {calculateAge(formData.birthdate)} años</HelperText>
                   )}
                 </FormGroup>
               </FormGrid>
@@ -520,46 +511,42 @@ const UserProfilePage: React.FC = () => {
 
               <FormGrid>
                 <FormGroup>
-                  <Label htmlFor="peso">
+                  <Label htmlFor='peso'>
                     <FiActivity size={16} />
                     Peso (kg)
                   </Label>
                   <Input
-                    id="peso"
-                    name="peso"
-                    type="number"
-                    placeholder="70"
-                    min="20"
-                    max="200"
-                    step="0.1"
+                    id='peso'
+                    name='peso'
+                    type='number'
+                    placeholder='70'
+                    min='20'
+                    max='200'
+                    step='0.1'
                     value={formData.peso}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   />
-                  <HelperText>
-                    Nos ayuda a recomendar el peso ideal de la pala
-                  </HelperText>
+                  <HelperText>Nos ayuda a recomendar el peso ideal de la pala</HelperText>
                 </FormGroup>
 
                 <FormGroup>
-                  <Label htmlFor="altura">
+                  <Label htmlFor='altura'>
                     <FiBarChart size={16} />
                     Altura (cm)
                   </Label>
                   <Input
-                    id="altura"
-                    name="altura"
-                    type="number"
-                    placeholder="175"
-                    min="120"
-                    max="250"
+                    id='altura'
+                    name='altura'
+                    type='number'
+                    placeholder='175'
+                    min='120'
+                    max='250'
                     value={formData.altura}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   />
-                  <HelperText>
-                    Influye en el balance y longitud recomendada
-                  </HelperText>
+                  <HelperText>Influye en el balance y longitud recomendada</HelperText>
                 </FormGroup>
               </FormGrid>
 
@@ -570,28 +557,24 @@ const UserProfilePage: React.FC = () => {
 
               <FormGrid>
                 <FormGroup>
-                  <Label htmlFor="game_level">
+                  <Label htmlFor='game_level'>
                     <FiTrendingUp size={16} />
                     Nivel de Juego
                   </Label>
                   <Select
-                    id="game_level"
-                    name="game_level"
+                    id='game_level'
+                    name='game_level'
                     value={formData.game_level}
                     onChange={handleInputChange}
                     disabled={!isEditing}
                   >
-                    <option value="">Selecciona tu nivel</option>
-                    <option value="principiante">
-                      Principiante (1.0 - 2.5)
-                    </option>
-                    <option value="intermedio">Intermedio (3.0 - 4.5)</option>
-                    <option value="avanzado">Avanzado (5.0 - 6.5)</option>
-                    <option value="profesional">Profesional (7.0+)</option>
+                    <option value=''>Selecciona tu nivel</option>
+                    <option value='principiante'>Principiante (1.0 - 2.5)</option>
+                    <option value='intermedio'>Intermedio (3.0 - 4.5)</option>
+                    <option value='avanzado'>Avanzado (5.0 - 6.5)</option>
+                    <option value='profesional'>Profesional (7.0+)</option>
                   </Select>
-                  <HelperText>
-                    Basado en el sistema de clasificación Playtomic o similar
-                  </HelperText>
+                  <HelperText>Basado en el sistema de clasificación Playtomic o similar</HelperText>
                 </FormGroup>
               </FormGrid>
 
@@ -601,41 +584,33 @@ const UserProfilePage: React.FC = () => {
               </SectionTitle>
 
               <FormGroup>
-                <Label htmlFor="limitations">
+                <Label htmlFor='limitations'>
                   <FiAlertCircle size={16} />
                   Limitaciones o Condiciones Especiales
                 </Label>
                 <TextArea
-                  id="limitations"
-                  name="limitations"
-                  placeholder="Ej: Problemas de codo, espalda, muñeca, preferencias especiales, etc."
+                  id='limitations'
+                  name='limitations'
+                  placeholder='Ej: Problemas de codo, espalda, muñeca, preferencias especiales, etc.'
                   value={formData.limitations}
                   onChange={handleInputChange}
                   disabled={!isEditing}
                 />
                 <HelperText>
-                  Información opcional que nos ayuda a hacer mejores
-                  recomendaciones
+                  Información opcional que nos ayuda a hacer mejores recomendaciones
                 </HelperText>
               </FormGroup>
 
               <ButtonContainer>
-                <EditToggleButton
-                  type="button"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
+                <EditToggleButton type='button' onClick={() => setIsEditing(!isEditing)}>
                   <FiEdit />
-                  {isEditing ? "Cancelar edición" : "Editar perfil"}
+                  {isEditing ? 'Cancelar edición' : 'Editar perfil'}
                 </EditToggleButton>
 
                 {isEditing && (
-                  <SaveButton
-                    type="submit"
-                    loading={loading}
-                    disabled={loading}
-                  >
+                  <SaveButton type='submit' loading={loading} disabled={loading}>
                     <FiSave />
-                    {loading ? "Guardando..." : "Guardar cambios"}
+                    {loading ? 'Guardando...' : 'Guardar cambios'}
                   </SaveButton>
                 )}
               </ButtonContainer>
@@ -649,11 +624,11 @@ const UserProfilePage: React.FC = () => {
         ) : (
           <div
             style={{
-              padding: "2rem",
-              textAlign: "center",
-              background: "white",
-              borderRadius: "12px",
-              marginTop: "2rem",
+              padding: '2rem',
+              textAlign: 'center',
+              background: 'white',
+              borderRadius: '12px',
+              marginTop: '2rem',
             }}
           >
             <p>Cargando información del usuario...</p>

@@ -306,42 +306,53 @@ export const ViewListModal: React.FC<ViewListModalProps> = ({
                 </EmptyState>
               ) : (
                 <RacketsList>
-                  {list.rackets.map((racket) => (
-                    <RacketCard key={racket.id}>
-                      <RacketImage
-                        src={racket.imagen || "/placeholder-racket.png"}
-                        alt={racket.modelo}
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src =
-                            "/placeholder-racket.png";
-                        }}
-                      />
-                      <RacketInfo>
-                        <RacketBrand>{racket.marca}</RacketBrand>
-                        <RacketName>{racket.modelo}</RacketName>
-                        <RacketPrice>{racket.precio_actual}€</RacketPrice>
-                      </RacketInfo>
-                      <RacketActions>
-                        <ActionButton
-                          variant="primary"
-                          onClick={() => handleViewRacket(racket.nombre)}
-                          title="Ver detalles"
-                        >
-                          <FiExternalLink size={18} />
-                        </ActionButton>
-                        <ActionButton
-                          variant="danger"
-                          onClick={() =>
-                            racket.id && handleRemoveRacket(racket.id)
-                          }
-                          disabled={removingRacketId === racket.id}
-                          title="Eliminar de la lista"
-                        >
-                          <FiTrash2 size={18} />
-                        </ActionButton>
-                      </RacketActions>
-                    </RacketCard>
-                  ))}
+                  {list.rackets.map((racket: any) => {
+                    // Debug log
+                    console.log('🎾 Racket data:', racket);
+                    
+                    return (
+                      <RacketCard key={racket.id}>
+                        <RacketImage
+                          src={racket.imagen || "/placeholder-racket.png"}
+                          alt={racket.modelo || racket.nombre}
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src =
+                              "/placeholder-racket.png";
+                          }}
+                        />
+                        <RacketInfo>
+                          <RacketBrand>{racket.marca || 'Marca desconocida'}</RacketBrand>
+                          <RacketName>{racket.modelo || racket.nombre}</RacketName>
+                          <RacketPrice>
+                            {racket.precio_actual 
+                              ? `${racket.precio_actual}€` 
+                              : (racket.padelnuestro_precio_actual 
+                                ? `${racket.padelnuestro_precio_actual}€` 
+                                : 'Precio no disponible')}
+                          </RacketPrice>
+                        </RacketInfo>
+                        <RacketActions>
+                          <ActionButton
+                            variant="primary"
+                            onClick={() => handleViewRacket(racket.nombre)}
+                            title="Ver detalles"
+                          >
+                            <FiExternalLink size={18} />
+                          </ActionButton>
+                          <ActionButton
+                            variant="danger"
+                            onClick={() =>
+                              racket.id && handleRemoveRacket(racket.id)
+                            }
+                            disabled={removingRacketId === racket.id}
+                            title="Eliminar de la lista"
+                          >
+                            <FiTrash2 size={18} />
+                          </ActionButton>
+                        </RacketActions>
+                      </RacketCard>
+                    );
+                  })}
                 </RacketsList>
               )}
             </Content>

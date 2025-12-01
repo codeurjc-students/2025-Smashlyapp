@@ -1,13 +1,13 @@
-import { Request, Response } from "express";
-import { UserService } from "../services/userService";
-import logger from "../config/logger";
+import { Request, Response } from 'express';
+import { UserService } from '../services/userService';
+import logger from '../config/logger';
 import {
   UserProfile,
   CreateUserProfileRequest,
   UpdateUserProfileRequest,
   ApiResponse,
   RequestWithUser,
-} from "../types";
+} from '../types';
 
 // Helper function outside the class to avoid 'this' context issues
 function getErrorMessage(error: unknown): string {
@@ -18,23 +18,19 @@ function getErrorMessage(error: unknown): string {
 }
 
 export class UserController {
-
   /**
    * GET /api/users/profile
    * Obtiene el perfil del usuario autenticado
    */
-  static async getUserProfile(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async getUserProfile(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          error: "Unauthorized",
-          message: "Authentication required to access profile",
+          error: 'Unauthorized',
+          message: 'Authentication required to access profile',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -45,8 +41,8 @@ export class UserController {
       if (!profile) {
         res.status(404).json({
           success: false,
-          error: "Not Found",
-          message: "No profile found for this user",
+          error: 'Not Found',
+          message: 'No profile found for this user',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -58,10 +54,10 @@ export class UserController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<UserProfile>);
     } catch (error: unknown) {
-      logger.error("Error in getUserProfile:", error);
+      logger.error('Error in getUserProfile:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -72,18 +68,15 @@ export class UserController {
    * POST /api/users/profile
    * Crea un nuevo perfil de usuario
    */
-  static async createUserProfile(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async createUserProfile(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          error: "Unauthorized",
-          message: "Authentication required to create profile",
+          error: 'Unauthorized',
+          message: 'Authentication required to create profile',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -96,8 +89,8 @@ export class UserController {
       if (!validation.isValid) {
         res.status(400).json({
           success: false,
-          error: "Invalid data",
-          message: validation.errors.join(", "),
+          error: 'Invalid data',
+          message: validation.errors.join(', '),
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -108,24 +101,24 @@ export class UserController {
       res.status(201).json({
         success: true,
         data: profile,
-        message: "Perfil creado exitosamente",
+        message: 'Perfil creado exitosamente',
         timestamp: new Date().toISOString(),
       } as ApiResponse<UserProfile>);
     } catch (error: unknown) {
-      logger.error("Error in createUserProfile:", error);
+      logger.error('Error in createUserProfile:', error);
 
       // Handle specific errors
-      if (getErrorMessage(error).includes("duplicate")) {
+      if (getErrorMessage(error).includes('duplicate')) {
         res.status(409).json({
-          error: "Conflict",
-          message: "A profile already exists for this user",
+          error: 'Conflict',
+          message: 'A profile already exists for this user',
         });
       }
 
-      logger.error("Error creating profile:", error);
+      logger.error('Error creating profile:', error);
       res.status(500).json({
-        error: "Internal Server Error",
-        message: "Internal server error",
+        error: 'Internal Server Error',
+        message: 'Internal server error',
       });
     }
   }
@@ -138,8 +131,8 @@ export class UserController {
     if (!userId) {
       res.status(401).json({
         success: false,
-        error: "Usuario no autenticado",
-        message: "Se requiere autenticación para actualizar el perfil",
+        error: 'Usuario no autenticado',
+        message: 'Se requiere autenticación para actualizar el perfil',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
       return false;
@@ -152,8 +145,8 @@ export class UserController {
     if (!validation.isValid) {
       res.status(400).json({
         success: false,
-        error: "Invalid data",
-        message: validation.errors.join(", "),
+        error: 'Invalid data',
+        message: validation.errors.join(', '),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
       return false;
@@ -162,12 +155,12 @@ export class UserController {
   }
 
   private static handleUpdateError(error: unknown, res: Response): void {
-    logger.error("Error in updateUserProfile:", error);
+    logger.error('Error in updateUserProfile:', error);
 
-    if ((error as Error).message.includes("nickname")) {
+    if ((error as Error).message.includes('nickname')) {
       res.status(409).json({
         success: false,
-        error: "Data conflict",
+        error: 'Data conflict',
         message: (error as Error).message,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -176,33 +169,30 @@ export class UserController {
 
     res.status(500).json({
       success: false,
-      error: "Error interno del servidor",
+      error: 'Error interno del servidor',
       message: (error as Error).message,
       timestamp: new Date().toISOString(),
     } as ApiResponse);
   }
 
-  static async updateUserProfile(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async updateUserProfile(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
-      if (!this.validateUserAuthentication(userId, res)) return;
+      if (!UserController.validateUserAuthentication(userId, res)) return;
 
       const updates: UpdateUserProfileRequest = req.body as UpdateUserProfileRequest;
-      if (!this.validateUpdateData(updates, res)) return;
+      if (!UserController.validateUpdateData(updates, res)) return;
 
       const profile = await UserService.updateUserProfile(userId!, updates);
 
       res.json({
         success: true,
         data: profile,
-        message: "Profile updated successfully",
+        message: 'Profile updated successfully',
         timestamp: new Date().toISOString(),
       } as ApiResponse<UserProfile>);
     } catch (error: unknown) {
-      this.handleUpdateError(error, res);
+      UserController.handleUpdateError(error, res);
     }
   }
 
@@ -210,18 +200,15 @@ export class UserController {
    * DELETE /api/users/profile
    * Elimina el perfil del usuario autenticado
    */
-  static async deleteUserProfile(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async deleteUserProfile(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const userId = req.user?.id;
 
       if (!userId) {
         res.status(401).json({
           success: false,
-          error: "Unauthorized user",
-          message: "Authentication required to delete profile",
+          error: 'Unauthorized user',
+          message: 'Authentication required to delete profile',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -231,14 +218,14 @@ export class UserController {
 
       res.json({
         success: true,
-        message: "Profile deleted successfully",
+        message: 'Profile deleted successfully',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in deleteUserProfile:", error);
+      logger.error('Error in deleteUserProfile:', error);
       res.status(500).json({
         success: false,
-        error: "Internal server error",
+        error: 'Internal server error',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -249,10 +236,7 @@ export class UserController {
    * GET /api/users/nickname/:nickname/available
    * Checks if a nickname is available
    */
-  static async checkNicknameAvailability(
-    req: Request,
-    res: Response
-  ): Promise<void> {
+  static async checkNicknameAvailability(req: Request, res: Response): Promise<void> {
     try {
       const nickname = req.params.nickname;
       const excludeUserId = req.query.excludeUserId as string;
@@ -260,29 +244,26 @@ export class UserController {
       if (!nickname || nickname.length < 3) {
         res.status(400).json({
           success: false,
-          error: "Invalid nickname",
-          message: "Nickname must have at least 3 characters",
+          error: 'Invalid nickname',
+          message: 'Nickname must have at least 3 characters',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
       }
 
-      const isAvailable = await UserService.isNicknameAvailable(
-        nickname,
-        excludeUserId
-      );
+      const isAvailable = await UserService.isNicknameAvailable(nickname, excludeUserId);
 
       res.json({
         success: true,
         data: { available: isAvailable, nickname },
-        message: isAvailable ? "Nickname disponible" : "Nickname no disponible",
+        message: isAvailable ? 'Nickname disponible' : 'Nickname no disponible',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in checkNicknameAvailability:", error);
+      logger.error('Error in checkNicknameAvailability:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -302,17 +283,14 @@ export class UserController {
       if (!query || query.trim().length < 2) {
         res.status(400).json({
           success: false,
-          error: "Invalid query",
-          message: "Search must have at least 2 characters",
+          error: 'Invalid query',
+          message: 'Search must have at least 2 characters',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
       }
 
-      const users = await (UserService.searchUsersByNickname as any)(
-        query.trim(),
-        limit
-      );
+      const users = await (UserService.searchUsersByNickname as any)(query.trim(), limit);
 
       res.json({
         success: true,
@@ -321,10 +299,10 @@ export class UserController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in searchUsers:", error);
+      logger.error('Error in searchUsers:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -344,14 +322,14 @@ export class UserController {
       res.json({
         success: true,
         data: stats,
-        message: "Statistics obtained successfully",
+        message: 'Statistics obtained successfully',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getUserStats:", error);
+      logger.error('Error in getUserStats:', error);
       res.status(500).json({
         success: false,
-        error: "Internal server error",
+        error: 'Internal server error',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);

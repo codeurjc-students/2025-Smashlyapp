@@ -240,6 +240,8 @@ export const MyListsSection: React.FC = () => {
       // Recargar la lista para actualizar
       const updatedList = await getListById(selectedList.id);
       setSelectedList(updatedList);
+      // Refrescar todas las listas para actualizar el contador
+      await fetchLists();
     }
   };
 

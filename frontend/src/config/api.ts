@@ -48,8 +48,17 @@ export const API_ENDPOINTS = {
     USERS: "/api/v1/admin/users",
     RACKET_REQUESTS: "/api/v1/admin/racket-requests",
     STORE_REQUESTS: "/api/v1/admin/store-requests",
+    RECENT_ACTIVITY: "/api/v1/admin/recent-activity",
     VERIFY_STORE: (id: string) => `/api/v1/admin/stores/${id}/verify`,
     REJECT_STORE: (id: string) => `/api/v1/admin/stores/${id}/reject`,
+  },
+
+  // Racket Views
+  RACKET_VIEWS: {
+    RECENTLY_VIEWED: "/api/v1/racket-views/recently-viewed",
+    RECORD_VIEW: (racketId: number) => `/api/v1/racket-views/${racketId}`,
+    REMOVE_VIEW: (racketId: number) => `/api/v1/racket-views/${racketId}`,
+    CLEAR_HISTORY: "/api/v1/racket-views/clear",
   },
 
   // Health
