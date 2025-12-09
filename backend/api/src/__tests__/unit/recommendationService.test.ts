@@ -32,7 +32,7 @@ describe('RecommendationService', () => {
     const mockAIResponse = JSON.stringify({
       rackets: [
         {
-          name: 'Bullpadel Vertex 03',
+          id: 1,
           match_score: 95,
           reason: 'Perfecta para jugadores avanzados',
         },
