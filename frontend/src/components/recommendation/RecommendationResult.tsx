@@ -89,6 +89,13 @@ const RacketName = styled.h4`
   font-weight: 700;
 `;
 
+const RacketPrice = styled.div`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #16a34a;
+  margin-top: 0.5rem;
+`;
+
 const MatchScore = styled.div`
   background: #16a34a;
   color: white;
@@ -125,17 +132,21 @@ const Reason = styled.p`
 const ViewButton = styled(Link)`
   display: block;
   text-align: center;
-  background: #f3f4f6;
-  color: #4b5563;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
   padding: 0.75rem;
   border-radius: 12px;
   text-decoration: none;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
 
   &:hover {
-    background: #e5e7eb;
-    color: #1f2937;
+    background: linear-gradient(135deg, #15803d 0%, #14532d 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(22, 163, 74, 0.3);
+    text-decoration: none;
   }
 `;
 
@@ -189,7 +200,12 @@ export const RecommendationResult: React.FC<Props> = ({ result, onSave, onReset,
         {result.rackets.map((racket, index) => (
           <RacketCard key={index}>
             <RacketHeader>
-              <RacketName>{racket.name}</RacketName>
+              <div>
+                <RacketName>{racket.name}</RacketName>
+                {racket.price && (
+                  <RacketPrice>€{racket.price.toFixed(2)}</RacketPrice>
+                )}
+              </div>
               <MatchScore>{racket.match_score}% Match</MatchScore>
             </RacketHeader>
             <RacketContent>
@@ -197,7 +213,7 @@ export const RecommendationResult: React.FC<Props> = ({ result, onSave, onReset,
                 <RacketImage src={racket.image} alt={racket.name} />
               )}
               <Reason>{racket.reason}</Reason>
-              <ViewButton to={`/rackets/${racket.id}`}>
+              <ViewButton to={`/racket-detail?id=${racket.id}`}>
                 Ver Detalles
               </ViewButton>
             </RacketContent>

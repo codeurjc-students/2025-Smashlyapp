@@ -118,14 +118,54 @@ export const BestRacketPage: React.FC = () => {
   // State for last recommendation reuse
   const [lastRecommendation, setLastRecommendation] = useState<any>(null);
   const [showReusePrompt, setShowReusePrompt] = useState(false);
+  const [stateRestored, setStateRestored] = useState(false);
+
+  // Restore state from sessionStorage on mount
+  useEffect(() => {
+    const savedState = sessionStorage.getItem('bestRacketPageState');
+    if (savedState) {
+      try {
+        const parsed = JSON.parse(savedState);
+        setStep(parsed.step || 'form');
+        setFormType(parsed.formType || 'basic');
+        setResult(parsed.result || null);
+        setBasicData(parsed.basicData || {});
+        setAdvancedData(parsed.advancedData || {});
+        setStateRestored(true);
+      } catch (error) {
+        console.error('Error restoring state:', error);
+        setStateRestored(true);
+      }
+    } else {
+      setStateRestored(true);
+    }
+  }, []);
+
+  // Save state to sessionStorage whenever it changes
+  useEffect(() => {
+    if (!stateRestored) return; // Don't save until we've restored
+    
+    const stateToSave = {
+      step,
+      formType,
+      result,
+      basicData,
+      advancedData,
+    };
+    sessionStorage.setItem('bestRacketPageState', JSON.stringify(stateToSave));
+  }, [step, formType, result, basicData, advancedData, stateRestored]);
 
   useEffect(() => {
-    // If user is logged in, default to advanced and check for last recommendation
-    if (user) {
+    // Only set defaults if state wasn't restored
+    if (!stateRestored) return;
+    
+    // If user is logged in and we don't have a saved state, default to advanced
+    const savedState = sessionStorage.getItem('bestRacketPageState');
+    if (user && !savedState) {
       setFormType('advanced');
       checkLastRecommendation();
     }
-  }, [user]);
+  }, [user, stateRestored]);
 
   const checkLastRecommendation = async () => {
     try {
@@ -234,6 +274,8 @@ export const BestRacketPage: React.FC = () => {
   const handleReset = () => {
     setStep('form');
     setResult(null);
+    // Clear sessionStorage when explicitly resetting
+    sessionStorage.removeItem('bestRacketPageState');
   };
 
   return (
