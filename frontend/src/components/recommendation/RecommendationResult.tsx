@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 const ResultContainer = styled.div`
   max-width: 1000px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 0.5rem 2rem 2rem;
 `;
 
 const Header = styled.div`
@@ -30,22 +30,65 @@ const Header = styled.div`
 
 const AnalysisCard = styled.div`
   background: white;
-  border-radius: 24px;
-  padding: 2rem;
+  border-radius: 16px;
+  padding: 0;
   margin-bottom: 3rem;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(22, 163, 74, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+  border-left: 4px solid #16a34a;
+  overflow: hidden;
+`;
 
-  h3 {
-    color: #16a34a;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    font-weight: 700;
+const AnalysisHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1.5rem 2rem;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+`;
+
+const IconWrapper = styled.div`
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  svg {
+    width: 22px;
+    height: 22px;
+    color: white;
+  }
+`;
+
+const AnalysisTitle = styled.h3`
+  color: #1f2937;
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+`;
+
+const AnalysisContent = styled.div`
+  padding: 2rem;
+`;
+
+const AnalysisParagraph = styled.p`
+  line-height: 1.8;
+  color: #4b5563;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+
+  &:last-child {
+    margin-bottom: 0;
   }
 
-  p {
-    line-height: 1.6;
-    color: #374151;
+  strong {
+    color: #1f2937;
+    font-weight: 600;
   }
 `;
 
@@ -89,6 +132,13 @@ const RacketName = styled.h4`
   font-weight: 700;
 `;
 
+const RacketPrice = styled.div`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #16a34a;
+  margin-top: 0.5rem;
+`;
+
 const MatchScore = styled.div`
   background: #16a34a;
   color: white;
@@ -125,17 +175,21 @@ const Reason = styled.p`
 const ViewButton = styled(Link)`
   display: block;
   text-align: center;
-  background: #f3f4f6;
-  color: #4b5563;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
   padding: 0.75rem;
   border-radius: 12px;
   text-decoration: none;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(22, 163, 74, 0.2);
 
   &:hover {
-    background: #e5e7eb;
-    color: #1f2937;
+    background: linear-gradient(135deg, #15803d 0%, #14532d 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(22, 163, 74, 0.3);
+    text-decoration: none;
   }
 `;
 
@@ -173,6 +227,22 @@ interface Props {
 }
 
 export const RecommendationResult: React.FC<Props> = ({ result, onSave, onReset, isSaving, canSave }) => {
+  // Parse analysis text into paragraphs
+  const formatAnalysis = (text: string) => {
+    // Remove quotes if present
+    const cleanText = text.replace(/^["']|["']$/g, '');
+    
+    // Split by double line breaks or periods followed by capital letters
+    const paragraphs = cleanText
+      .split(/\n\n+/)
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
+    
+    return paragraphs;
+  };
+
+  const analysisParagraphs = formatAnalysis(result.analysis);
+
   return (
     <ResultContainer>
       <Header>
@@ -181,15 +251,31 @@ export const RecommendationResult: React.FC<Props> = ({ result, onSave, onReset,
       </Header>
 
       <AnalysisCard>
-        <h3>Análisis del Experto</h3>
-        <p>{result.analysis}</p>
+        <AnalysisHeader>
+          <IconWrapper>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 18v-5.25m0 0a6.01 6.01 0 001.5-.189m-1.5.189a6.01 6.01 0 01-1.5-.189m3.75 7.478a12.06 12.06 0 01-4.5 0m3.75 2.383a14.406 14.406 0 01-3 0M14.25 18v-.192c0-.983.658-1.823 1.508-2.316a7.5 7.5 0 10-7.517 0c.85.493 1.509 1.333 1.509 2.316V18" />
+            </svg>
+          </IconWrapper>
+          <AnalysisTitle>Análisis del Experto</AnalysisTitle>
+        </AnalysisHeader>
+        <AnalysisContent>
+          {analysisParagraphs.map((paragraph, index) => (
+            <AnalysisParagraph key={index}>{paragraph}</AnalysisParagraph>
+          ))}
+        </AnalysisContent>
       </AnalysisCard>
 
       <RacketsGrid>
         {result.rackets.map((racket, index) => (
           <RacketCard key={index}>
             <RacketHeader>
-              <RacketName>{racket.name}</RacketName>
+              <div>
+                <RacketName>{racket.name}</RacketName>
+                {racket.price && (
+                  <RacketPrice>€{racket.price.toFixed(2)}</RacketPrice>
+                )}
+              </div>
               <MatchScore>{racket.match_score}% Match</MatchScore>
             </RacketHeader>
             <RacketContent>
@@ -197,7 +283,7 @@ export const RecommendationResult: React.FC<Props> = ({ result, onSave, onReset,
                 <RacketImage src={racket.image} alt={racket.name} />
               )}
               <Reason>{racket.reason}</Reason>
-              <ViewButton to={`/rackets/${racket.id}`}>
+              <ViewButton to={`/racket-detail?id=${racket.id}`}>
                 Ver Detalles
               </ViewButton>
             </RacketContent>

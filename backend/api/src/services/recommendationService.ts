@@ -18,135 +18,183 @@ export class RecommendationService {
     data: BasicFormData | AdvancedFormData
   ): Promise<RecommendationResult> {
     try {
-      // 1. Prepare prompt for Gemini - let it use its own knowledge
+      // 1. Fetch all rackets from database to build catalog
+      let allRackets = await RacketService.getAllRackets();
+      
+      // 2. Filter by budget if specified
+      let maxBudget: number | null = null;
+      if (data.budget) {
+        const budgetStr = String(data.budget);
+        // Parse budget string (e.g., "100-150", "150-200", "200+")
+        if (budgetStr.includes('+')) {
+          // No upper limit for "200+" type budgets
+          const minBudget = parseInt(budgetStr.replace('+', ''));
+          allRackets = allRackets.filter((r: any) => !r.precio_actual || r.precio_actual >= minBudget);
+        } else if (budgetStr.includes('-')) {
+          const [min, max] = budgetStr.split('-').map(Number);
+          maxBudget = max;
+          allRackets = allRackets.filter((r: any) => {
+            if (!r.precio_actual) return true; // Include rackets without price
+            return r.precio_actual >= min && r.precio_actual <= max;
+          });
+        } else {
+          // Single number budget
+          const budget = parseInt(budgetStr);
+          maxBudget = budget;
+          allRackets = allRackets.filter((r: any) => !r.precio_actual || r.precio_actual <= budget);
+        }
+      }
+      
+      logger.info(`📊 Filtered catalog: ${allRackets.length} rackets within budget ${data.budget || 'any'}`);
+      
+      // 3. Build a concise catalog summary for Gemini
+      const catalogSummary = allRackets
+        .map((r: any) => {
+          const characteristics = [];
+          if (r.caracteristicas_forma) characteristics.push(`Forma: ${r.caracteristicas_forma}`);
+          if (r.caracteristicas_balance) characteristics.push(`Balance: ${r.caracteristicas_balance}`);
+          if (r.caracteristicas_nucleo) characteristics.push(`Núcleo: ${r.caracteristicas_nucleo}`);
+          if (r.caracteristicas_cara) characteristics.push(`Cara: ${r.caracteristicas_cara}`);
+          if (r.caracteristicas_nivel_de_juego) characteristics.push(`Nivel: ${r.caracteristicas_nivel_de_juego}`);
+          if (r.precio_actual) characteristics.push(`Precio: €${r.precio_actual.toFixed(2)}`);
+          
+          return `ID: ${r.id} | ${r.marca || ''} ${r.nombre || r.modelo || ''} | ${characteristics.join(', ')}`;
+        })
+        .join('\n');
+
+      // 4. Prepare prompt for Gemini with catalog restriction
+      const budgetInfo = maxBudget 
+        ? `\n⚠️ RESTRICCIÓN DE PRESUPUESTO: El usuario tiene un presupuesto máximo de €${maxBudget?.toFixed(2)}. SOLO recomienda palas dentro de este presupuesto.\n`
+        : '';
+      
       const prompt = `
-        Actúa como un Experto en Palas de Pádel con amplio conocimiento del mercado actual.
+        Actúa como un Experto en Palas de Pádel especializado en recomendaciones personalizadas.
         
         Necesito que recomiendes las 3 mejores palas de pádel para un jugador con el siguiente perfil:
         
         Tipo de análisis: ${type}
         Perfil del jugador:
         ${JSON.stringify(data, null, 2)}
+        ${budgetInfo}
+        ═══════════════════════════════════════════════════════════════
+        ⚠️  CATÁLOGO DISPONIBLE (${allRackets.length} palas) ⚠️
+        ═══════════════════════════════════════════════════════════════
         
-        INSTRUCCIONES:
-        - Recomienda 3 palas de pádel reales que existan actualmente en el mercado
-        - Usa tu conocimiento sobre palas de marcas como: Bullpadel, Nox, Head, Adidas, Babolat, Wilson, Dunlop, etc.
-        - Para cada pala, proporciona el nombre COMPLETO y EXACTO (marca + modelo)
-        - Asegúrate de que sean palas que realmente existen en 2024-2025
+        A continuación tienes el catálogo COMPLETO de palas disponibles.
         
-        Devuelve un objeto JSON con esta estructura EXACTA:
+        ⛔ RESTRICCIÓN CRÍTICA: DEBES recomendar ÚNICAMENTE palas de este catálogo usando sus IDs exactos.
+        ⛔ NO inventes palas que no estén en la lista.
+        ⛔ NO uses nombres genéricos o palas que conozcas del mercado.
+        ⛔ SOLO usa los IDs que aparecen a continuación.
+        ${maxBudget ? `⛔ RESPETA el presupuesto máximo de €${maxBudget} - todas las palas del catálogo ya están filtradas.` : ''}
+        
+        ${catalogSummary}
+        
+        ═══════════════════════════════════════════════════════════════
+        
+        INSTRUCCIONES OBLIGATORIAS:
+        
+        1. ✅ Recomienda EXACTAMENTE 3 palas del catálogo anterior
+        2. ✅ Usa el ID EXACTO de cada pala (el número que aparece después de "ID:")
+        3. ✅ Ordena las palas de mayor a menor match_score (0-100)
+        4. ✅ Proporciona razones específicas y detalladas en español
+        5. ✅ Menciona las características técnicas de cada pala del catálogo
+        6. ⛔ NO inventes IDs que no existan en el catálogo
+        7. ⛔ NO uses palas que no estén en la lista anterior
+        
+        EJEMPLO DE RESPUESTA CORRECTA:
+        Si el catálogo contiene "ID: 4989 | Wilson Blade LS V3 2025 | Forma: Redonda, Balance: Bajo...",
+        entonces puedes recomendar:
         {
           "rackets": [
             {
-              "name": "Nombre completo de la pala (ej: Bullpadel Vertex 03)",
+              "id": 4989,
+              "match_score": 92,
+              "reason": "La Wilson Blade LS V3 2025 es perfecta porque..."
+            }
+          ]
+        }
+        
+        Devuelve un objeto JSON con esta estructura EXACTA (sin bloques markdown, solo JSON puro):
+        {
+          "rackets": [
+            {
+              "id": 123,
               "match_score": 95,
-              "reason": "Explicación detallada en español de por qué esta pala es perfecta para este jugador"
+              "reason": "Explicación detallada en español de por qué esta pala es perfecta para este jugador, mencionando características específicas como forma, balance, núcleo, etc."
             },
             {
-              "name": "Nombre completo de la pala",
+              "id": 456,
               "match_score": 88,
               "reason": "Explicación detallada en español"
             },
             {
-              "name": "Nombre completo de la pala",
+              "id": 789,
               "match_score": 82,
               "reason": "Explicación detallada en español"
             }
           ],
-          "analysis": "Análisis general en español del perfil del jugador y por qué se eligieron estas palas específicas"
+          "analysis": "Análisis general en español del perfil del jugador y por qué se eligieron estas palas específicas del catálogo"
         }
         
-        IMPORTANTE:
+        ⚠️ RECORDATORIO FINAL:
         - Responde ÚNICAMENTE en español
-        - Usa nombres de palas reales y completos (marca + modelo)
-        - Ordena las palas de mayor a menor match_score
-        - Las razones deben ser específicas y detalladas
+        - Usa SOLO IDs de palas del catálogo proporcionado
+        - NO inventes palas que no estén en el catálogo
+        - Las razones deben ser específicas, técnicas y detalladas
+        - Asegúrate de que los 3 IDs existan en el catálogo anterior
       `;
 
-      // 2. Call Gemini
+      // 4. Call Gemini
+      logger.info(`📊 Sending ${allRackets.length} rackets to Gemini for recommendation`);
       const aiResponse = await GeminiService.generateContent(prompt);
 
-      // 3. Parse response
+      // 5. Parse response
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
+        logger.error('❌ Failed to parse AI response - no JSON found');
         throw new Error('Failed to parse AI response');
       }
 
       const aiResult = JSON.parse(jsonMatch[0]);
+      logger.info(`🤖 Gemini recommended ${aiResult.rackets?.length || 0} rackets`);
+      
+      // Log the IDs that Gemini recommended
+      const recommendedIds = aiResult.rackets?.map((r: any) => r.id) || [];
+      logger.info(`📋 Recommended IDs: ${recommendedIds.join(', ')}`);
 
-      // 4. Fetch all rackets from database for matching
-      const allRackets = await RacketService.getAllRackets();
-
-      // 5. Match AI recommendations to database rackets using fuzzy matching
-      const enrichedRackets = await Promise.all(
-        aiResult.rackets.map(async (rec: any) => {
-          const normalizedRecName = rec.name.toLowerCase().trim();
-          
-          // Try exact name match
-          let racket = allRackets.find(r => 
-            r.name?.toLowerCase().trim() === normalizedRecName
-          );
-          
-          // If not found, try partial match (racket name contains AI suggestion or vice versa)
-          if (!racket) {
-            racket = allRackets.find(r => {
-              const racketName = r.name?.toLowerCase().trim() || '';
-              return racketName.includes(normalizedRecName) || 
-                     normalizedRecName.includes(racketName);
-            });
-          }
-          
-          // If still not found, try matching by brand and model separately
-          if (!racket && rec.name.includes(' ')) {
-            const parts = rec.name.split(' ');
-            const possibleBrand = parts[0].toLowerCase();
-            const possibleModel = parts.slice(1).join(' ').toLowerCase();
-            
-            racket = allRackets.find(r => {
-              const racketBrand = r.brand?.toLowerCase() || '';
-              const racketName = r.name?.toLowerCase() || '';
-              const racketModel = r.model?.toLowerCase() || '';
-              
-              return (racketBrand.includes(possibleBrand) || racketName.includes(possibleBrand)) && 
-                     (racketName.includes(possibleModel) || racketModel.includes(possibleModel));
-            });
-          }
-          
-          // Try even more fuzzy matching - check if key words match
-          if (!racket) {
-            const keywords = normalizedRecName.split(' ').filter((w: string) => w.length > 3);
-            racket = allRackets.find(r => {
-              const racketName = r.name?.toLowerCase() || '';
-              return keywords.some((keyword: string) => racketName.includes(keyword)) &&
-                     keywords.filter((keyword: string) => racketName.includes(keyword)).length >= 2;
-            });
-          }
+      // 6. Match AI recommendations to database rackets by ID (simple and accurate)
+      const enrichedRackets = aiResult.rackets
+        .map((rec: any) => {
+          const racket: any = allRackets.find((r: any) => r.id === rec.id);
           
           if (racket) {
-            logger.info(`✓ Matched AI recommendation "${rec.name}" to DB racket "${racket.name}" (ID: ${racket.id})`);
+            logger.info(`✓ Matched AI recommendation ID ${rec.id} to racket "${racket.nombre}"`);
             return {
               id: racket.id,
-              name: racket.name,
+              name: racket.nombre,
               match_score: rec.match_score,
               reason: rec.reason,
-              image: racket.image,
-              brand: racket.brand,
-              price: racket.current_price,
+              image: racket.imagen,
+              brand: racket.marca,
+              price: racket.precio_actual,
             };
           } else {
-            logger.warn(`✗ Could not match AI recommendation "${rec.name}" to any racket in database`);
-            return {
-              id: 0,
-              name: rec.name,
-              match_score: rec.match_score,
-              reason: rec.reason,
-              image: null,
-              brand: null,
-              price: null,
-            };
+            logger.warn(`✗ Could not find racket with ID ${rec.id} in database - Gemini ignored instructions!`);
+            return null;
           }
         })
-      );
+        .filter((r: any) => r !== null); // Remove any null entries
+
+      // 7. Ensure we have at least some recommendations
+      if (enrichedRackets.length === 0) {
+        logger.error('❌ No valid recommendations - Gemini did not follow catalog restrictions');
+        throw new Error('No valid recommendations could be generated from the catalog. Please try again.');
+      }
+      
+      if (enrichedRackets.length < aiResult.rackets.length) {
+        logger.warn(`⚠️  Only ${enrichedRackets.length} out of ${aiResult.rackets.length} recommendations were valid`);
+      }
 
       const result: RecommendationResult = {
         rackets: enrichedRackets,
