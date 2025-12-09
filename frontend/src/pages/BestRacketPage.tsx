@@ -280,14 +280,16 @@ export const BestRacketPage: React.FC = () => {
 
   return (
     <PageContainer>
-      <HeroSection>
-        <h1>Encuentra tu Pala Ideal</h1>
-        <p>
-          {step === 'result'
-            ? 'Aquí tienes nuestras recomendaciones personalizadas'
-            : 'Responde unas preguntas y nuestra IA analizará tu perfil para recomendarte las mejores opciones.'}
-        </p>
-      </HeroSection>
+      {step !== 'result' && (
+        <HeroSection>
+          <h1>Encuentra tu Pala Ideal</h1>
+          <p>
+            {step === 'loading'
+              ? 'Analizando tu perfil con IA...'
+              : 'Responde unas preguntas y nuestra IA analizará tu perfil para recomendarte las mejores opciones.'}
+          </p>
+        </HeroSection>
+      )}
 
       {step === 'form' && (
         <>
