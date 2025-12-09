@@ -1,8 +1,24 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { FiUsers, FiShoppingBag, FiPackage, FiTrendingUp, FiActivity, FiStar, FiHeart } from "react-icons/fi";
-import toast from "react-hot-toast";
-import { AdminService, AdminMetrics, Activity } from "../../services/adminService";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import {
+  FiUsers,
+  FiShoppingBag,
+  FiPackage,
+  FiTrendingUp,
+  FiActivity,
+  FiStar,
+  FiHeart,
+  FiRefreshCw,
+  FiArrowRight,
+} from 'react-icons/fi';
+import toast from 'react-hot-toast';
+import { useNavigate } from 'react-router-dom';
+import {
+  AdminService,
+  AdminMetrics,
+  Activity,
+  PendingUpdatesCounts,
+} from '../../services/adminService';
 
 const DashboardContainer = styled.div`
   display: grid;
@@ -23,7 +39,9 @@ const MetricCard = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-2px);
@@ -35,8 +53,8 @@ const MetricIcon = styled.div<{ color: string }>`
   width: 60px;
   height: 60px;
   border-radius: 12px;
-  background: ${(props) => props.color}15;
-  color: ${(props) => props.color};
+  background: ${props => props.color}15;
+  color: ${props => props.color};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,7 +78,7 @@ const MetricValue = styled.div`
 `;
 
 const MetricChange = styled.div<{ positive: boolean }>`
-  color: ${(props) => (props.positive ? "#16a34a" : "#dc2626")};
+  color: ${props => (props.positive ? '#16a34a' : '#dc2626')};
   font-size: 0.875rem;
   font-weight: 600;
   display: flex;
@@ -73,7 +91,7 @@ const ChartsSection = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -144,6 +162,100 @@ const LoadingContainer = styled.div`
   color: #666;
 `;
 
+const CatalogUpdatesSection = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  margin-bottom: 2rem;
+  border-left: 4px solid #16a34a;
+`;
+
+const CatalogHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f0fdf4;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+`;
+
+const CatalogTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #16a34a;
+  }
+
+  .icon {
+    font-size: 1.75rem;
+    color: #16a34a;
+  }
+`;
+
+const ViewAllButton = styled.button`
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+  font-size: 0.9rem;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
+  }
+`;
+
+const CatalogStats = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+`;
+
+const CatalogStatCard = styled.div`
+  background: #f0fdf4;
+  border-radius: 12px;
+  padding: 1.25rem;
+  border: 1px solid #dcfce7;
+  transition: all 0.2s;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);
+  }
+
+  .label {
+    font-size: 0.875rem;
+    color: #15803d;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+
+  .value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #16a34a;
+  }
+`;
+
 // Helper function to format relative time
 const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
@@ -167,7 +279,9 @@ const formatRelativeTime = (dateString: string): string => {
 const AdminDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [pendingCounts, setPendingCounts] = useState<PendingUpdatesCounts | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadDashboardData();
@@ -175,22 +289,28 @@ const AdminDashboard: React.FC = () => {
 
   const loadDashboardData = async () => {
     try {
-      // Cargar métricas y actividades en paralelo
-      const [metricsData, activitiesData] = await Promise.all([
+      // Cargar métricas, actividades y contadores de actualizaciones en paralelo
+      const [metricsData, activitiesData, countsData] = await Promise.all([
         AdminService.getDashboardMetrics(),
         AdminService.getRecentActivity(10),
+        AdminService.getPendingUpdatesCounts().catch(() => null),
       ]);
-      
+
       setMetrics(metricsData);
       setActivities(activitiesData);
+      setPendingCounts(countsData);
     } catch (error: any) {
       console.error('Error loading dashboard data:', error);
-      
+
       // Mostrar error más específico
       if (error.message.includes('404')) {
-        toast.error('El servidor backend necesita reiniciarse para cargar las nuevas rutas de administración');
+        toast.error(
+          'El servidor backend necesita reiniciarse para cargar las nuevas rutas de administración'
+        );
       } else {
-        toast.error('Error al cargar los datos del dashboard. Verifica que el backend esté corriendo.');
+        toast.error(
+          'Error al cargar los datos del dashboard. Verifica que el backend esté corriendo.'
+        );
       }
     } finally {
       setLoading(false);
@@ -220,37 +340,67 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <DashboardContainer>
+      {/* Sección de Actualizaciones del Catálogo */}
+      <CatalogUpdatesSection>
+        <CatalogHeader>
+          <CatalogTitle>
+            <FiRefreshCw className='icon' />
+            <h2>Actualizaciones del Catálogo</h2>
+          </CatalogTitle>
+          <ViewAllButton onClick={() => navigate('/admin/pending-updates')}>
+            Ver Todas las Actualizaciones
+            <FiArrowRight />
+          </ViewAllButton>
+        </CatalogHeader>
+        <CatalogStats>
+          <CatalogStatCard>
+            <div className='label'>⏳ Pendientes</div>
+            <div className='value'>{pendingCounts?.pending || 0}</div>
+          </CatalogStatCard>
+          <CatalogStatCard>
+            <div className='label'>✅ Aprobadas</div>
+            <div className='value'>{pendingCounts?.approved || 0}</div>
+          </CatalogStatCard>
+          <CatalogStatCard>
+            <div className='label'>❌ Rechazadas</div>
+            <div className='value'>{pendingCounts?.rejected || 0}</div>
+          </CatalogStatCard>
+          <CatalogStatCard>
+            <div className='label'>📊 Total</div>
+            <div className='value'>{pendingCounts?.total || 0}</div>
+          </CatalogStatCard>
+        </CatalogStats>
+      </CatalogUpdatesSection>
+
       <MetricsGrid>
         <MetricCard>
-          <MetricIcon color="#16a34a">
+          <MetricIcon color='#16a34a'>
             <FiUsers />
           </MetricIcon>
           <MetricInfo>
             <MetricLabel>Total Usuarios</MetricLabel>
             <MetricValue>{metrics.totalUsers.toLocaleString()}</MetricValue>
             <MetricChange positive={metrics.usersChange > 0}>
-              <FiTrendingUp />
-              +{metrics.usersChange}% este mes
+              <FiTrendingUp />+{metrics.usersChange}% este mes
             </MetricChange>
           </MetricInfo>
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#3b82f6">
+          <MetricIcon color='#3b82f6'>
             <FiPackage />
           </MetricIcon>
           <MetricInfo>
             <MetricLabel>Total Palas</MetricLabel>
             <MetricValue>{metrics.totalRackets.toLocaleString()}</MetricValue>
             <MetricChange positive={metrics.racketsChange > 0}>
-              <FiTrendingUp />
-              +{metrics.racketsChange}% este mes
+              <FiTrendingUp />+{metrics.racketsChange}% este mes
             </MetricChange>
           </MetricInfo>
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#f59e0b">
+          <MetricIcon color='#f59e0b'>
             <FiShoppingBag />
           </MetricIcon>
           <MetricInfo>
@@ -260,7 +410,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#8b5cf6">
+          <MetricIcon color='#8b5cf6'>
             <FiStar />
           </MetricIcon>
           <MetricInfo>
@@ -270,7 +420,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#ef4444">
+          <MetricIcon color='#ef4444'>
             <FiActivity />
           </MetricIcon>
           <MetricInfo>
@@ -280,7 +430,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#10b981">
+          <MetricIcon color='#10b981'>
             <FiTrendingUp />
           </MetricIcon>
           <MetricInfo>
@@ -290,7 +440,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#ec4899">
+          <MetricIcon color='#ec4899'>
             <FiHeart />
           </MetricIcon>
           <MetricInfo>
@@ -304,7 +454,7 @@ const AdminDashboard: React.FC = () => {
         <ChartCard>
           <ChartTitle>Actividad Reciente</ChartTitle>
           <ActivityList>
-            {activities.map((activity) => (
+            {activities.map(activity => (
               <ActivityItem key={activity.id}>
                 <ActivityIcon>{getActivityIcon(activity.type)}</ActivityIcon>
                 <ActivityContent>

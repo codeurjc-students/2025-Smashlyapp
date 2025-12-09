@@ -1,9 +1,4 @@
-import {
-  API_ENDPOINTS,
-  buildApiUrl,
-  getCommonHeaders,
-  ApiResponse,
-} from "../config/api";
+import { API_ENDPOINTS, buildApiUrl, getCommonHeaders, ApiResponse } from '../config/api';
 
 /**
  * Helper para manejar respuestas de la API
@@ -11,15 +6,13 @@ import {
 async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || `Error: ${response.status} ${response.statusText}`
-    );
+    throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`);
   }
 
   const data: ApiResponse<T> = await response.json();
 
   if (!data.success) {
-    throw new Error(data.message || data.error || "Error desconocido");
+    throw new Error(data.message || data.error || 'Error desconocido');
   }
 
   return data.data as T;
@@ -43,7 +36,7 @@ export interface AdminUser {
   email: string;
   nickname: string;
   full_name?: string;
-  role: "admin" | "player";
+  role: 'admin' | 'player';
   created_at: string;
 }
 
@@ -71,7 +64,7 @@ export interface RacketRequest {
   precio_actual: number;
   forma?: string;
   balance?: string;
-  status: "pending" | "approved" | "rejected";
+  status: 'pending' | 'approved' | 'rejected';
   requester?: string;
   requestDate?: string;
 }
@@ -82,7 +75,7 @@ export class AdminService {
    */
   static async getDashboardMetrics(): Promise<AdminMetrics> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.METRICS), {
-      method: "GET",
+      method: 'GET',
       headers: getCommonHeaders(),
     });
 
@@ -94,7 +87,7 @@ export class AdminService {
    */
   static async getAllUsers(): Promise<AdminUser[]> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.USERS), {
-      method: "GET",
+      method: 'GET',
       headers: getCommonHeaders(),
     });
 
@@ -104,18 +97,12 @@ export class AdminService {
   /**
    * Actualiza el rol de un usuario
    */
-  static async updateUserRole(
-    userId: string,
-    role: "admin" | "player"
-  ): Promise<AdminUser> {
-    const response = await fetch(
-      buildApiUrl(`${API_ENDPOINTS.ADMIN.USERS}/${userId}/role`),
-      {
-        method: "PATCH",
-        headers: getCommonHeaders(),
-        body: JSON.stringify({ role }),
-      }
-    );
+  static async updateUserRole(userId: string, role: 'admin' | 'player'): Promise<AdminUser> {
+    const response = await fetch(buildApiUrl(`${API_ENDPOINTS.ADMIN.USERS}/${userId}/role`), {
+      method: 'PATCH',
+      headers: getCommonHeaders(),
+      body: JSON.stringify({ role }),
+    });
 
     return handleApiResponse<AdminUser>(response);
   }
@@ -124,13 +111,10 @@ export class AdminService {
    * Elimina un usuario
    */
   static async deleteUser(userId: string): Promise<void> {
-    const response = await fetch(
-      buildApiUrl(`${API_ENDPOINTS.ADMIN.USERS}/${userId}`),
-      {
-        method: "DELETE",
-        headers: getCommonHeaders(),
-      }
-    );
+    const response = await fetch(buildApiUrl(`${API_ENDPOINTS.ADMIN.USERS}/${userId}`), {
+      method: 'DELETE',
+      headers: getCommonHeaders(),
+    });
 
     await handleApiResponse<void>(response);
   }
@@ -139,13 +123,10 @@ export class AdminService {
    * Obtiene todas las solicitudes de tiendas
    */
   static async getStoreRequests(): Promise<StoreRequest[]> {
-    const response = await fetch(
-      buildApiUrl(API_ENDPOINTS.ADMIN.STORE_REQUESTS),
-      {
-        method: "GET",
-        headers: getCommonHeaders(),
-      }
-    );
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.STORE_REQUESTS), {
+      method: 'GET',
+      headers: getCommonHeaders(),
+    });
 
     return handleApiResponse<StoreRequest[]>(response);
   }
@@ -157,7 +138,7 @@ export class AdminService {
     const response = await fetch(
       buildApiUrl(`${API_ENDPOINTS.ADMIN.STORE_REQUESTS}/${requestId}/approve`),
       {
-        method: "POST",
+        method: 'POST',
         headers: getCommonHeaders(),
       }
     );
@@ -172,7 +153,7 @@ export class AdminService {
     const response = await fetch(
       buildApiUrl(`${API_ENDPOINTS.ADMIN.STORE_REQUESTS}/${requestId}/reject`),
       {
-        method: "POST",
+        method: 'POST',
         headers: getCommonHeaders(),
       }
     );
@@ -184,13 +165,10 @@ export class AdminService {
    * Obtiene todas las solicitudes de palas
    */
   static async getRacketRequests(): Promise<RacketRequest[]> {
-    const response = await fetch(
-      buildApiUrl(API_ENDPOINTS.ADMIN.RACKET_REQUESTS),
-      {
-        method: "GET",
-        headers: getCommonHeaders(),
-      }
-    );
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.RACKET_REQUESTS), {
+      method: 'GET',
+      headers: getCommonHeaders(),
+    });
 
     return handleApiResponse<RacketRequest[]>(response);
   }
@@ -198,15 +176,11 @@ export class AdminService {
   /**
    * Aprueba una solicitud de pala
    */
-  static async approveRacketRequest(
-    requestId: number
-  ): Promise<RacketRequest> {
+  static async approveRacketRequest(requestId: number): Promise<RacketRequest> {
     const response = await fetch(
-      buildApiUrl(
-        `${API_ENDPOINTS.ADMIN.RACKET_REQUESTS}/${requestId}/approve`
-      ),
+      buildApiUrl(`${API_ENDPOINTS.ADMIN.RACKET_REQUESTS}/${requestId}/approve`),
       {
-        method: "POST",
+        method: 'POST',
         headers: getCommonHeaders(),
       }
     );
@@ -221,7 +195,7 @@ export class AdminService {
     const response = await fetch(
       buildApiUrl(`${API_ENDPOINTS.ADMIN.RACKET_REQUESTS}/${requestId}/reject`),
       {
-        method: "POST",
+        method: 'POST',
         headers: getCommonHeaders(),
       }
     );
@@ -234,7 +208,7 @@ export class AdminService {
    */
   static async createRacket(racketData: any): Promise<any> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.RACKETS), {
-      method: "POST",
+      method: 'POST',
       headers: getCommonHeaders(),
       body: JSON.stringify(racketData),
     });
@@ -246,14 +220,11 @@ export class AdminService {
    * Actualiza una pala existente
    */
   static async updateRacket(racketId: number, racketData: any): Promise<any> {
-    const response = await fetch(
-      buildApiUrl(`${API_ENDPOINTS.RACKETS}/${racketId}`),
-      {
-        method: "PUT",
-        headers: getCommonHeaders(),
-        body: JSON.stringify(racketData),
-      }
-    );
+    const response = await fetch(buildApiUrl(`${API_ENDPOINTS.RACKETS}/${racketId}`), {
+      method: 'PUT',
+      headers: getCommonHeaders(),
+      body: JSON.stringify(racketData),
+    });
 
     return handleApiResponse<any>(response);
   }
@@ -262,13 +233,10 @@ export class AdminService {
    * Elimina una pala
    */
   static async deleteRacket(racketId: number): Promise<void> {
-    const response = await fetch(
-      buildApiUrl(`${API_ENDPOINTS.RACKETS}/${racketId}`),
-      {
-        method: "DELETE",
-        headers: getCommonHeaders(),
-      }
-    );
+    const response = await fetch(buildApiUrl(`${API_ENDPOINTS.RACKETS}/${racketId}`), {
+      method: 'DELETE',
+      headers: getCommonHeaders(),
+    });
 
     await handleApiResponse<void>(response);
   }
@@ -277,13 +245,10 @@ export class AdminService {
    * Verifica/aprueba una tienda
    */
   static async verifyStore(storeId: string): Promise<any> {
-    const response = await fetch(
-      buildApiUrl(API_ENDPOINTS.ADMIN.VERIFY_STORE(storeId)),
-      {
-        method: "POST",
-        headers: getCommonHeaders(),
-      }
-    );
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.VERIFY_STORE(storeId)), {
+      method: 'POST',
+      headers: getCommonHeaders(),
+    });
 
     return handleApiResponse<any>(response);
   }
@@ -292,13 +257,10 @@ export class AdminService {
    * Rechaza una solicitud de tienda
    */
   static async rejectStore(storeId: string): Promise<void> {
-    const response = await fetch(
-      buildApiUrl(API_ENDPOINTS.ADMIN.REJECT_STORE(storeId)),
-      {
-        method: "DELETE",
-        headers: getCommonHeaders(),
-      }
-    );
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.REJECT_STORE(storeId)), {
+      method: 'DELETE',
+      headers: getCommonHeaders(),
+    });
 
     await handleApiResponse<void>(response);
   }
@@ -307,13 +269,10 @@ export class AdminService {
    * Obtiene la actividad reciente del sistema
    */
   static async getRecentActivity(limit: number = 10): Promise<Activity[]> {
-    const response = await fetch(
-      buildApiUrl(API_ENDPOINTS.ADMIN.RECENT_ACTIVITY, { limit }),
-      {
-        method: "GET",
-        headers: getCommonHeaders(),
-      }
-    );
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.RECENT_ACTIVITY, { limit }), {
+      method: 'GET',
+      headers: getCommonHeaders(),
+    });
 
     return handleApiResponse<Activity[]>(response);
   }
@@ -326,3 +285,33 @@ export interface Activity {
   time: string;
   icon: string;
 }
+
+export interface PendingUpdatesCounts {
+  pending: number;
+  approved: number;
+  rejected: number;
+  total: number;
+}
+
+// Extend AdminService with getPendingUpdatesCounts method
+declare module './adminService' {
+  namespace AdminService {
+    function getPendingUpdatesCounts(): Promise<PendingUpdatesCounts>;
+  }
+}
+
+// Add the method to AdminService
+(AdminService as any).getPendingUpdatesCounts = async function (): Promise<PendingUpdatesCounts> {
+  const response = await fetch(buildApiUrl(API_ENDPOINTS.PENDING_UPDATES.COUNTS), {
+    method: 'GET',
+    headers: getCommonHeaders(),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} ${response.statusText}`);
+  }
+
+  // Este endpoint devuelve los datos directamente, no envueltos en {success, data}
+  const counts = await response.json();
+  return counts;
+};
