@@ -14,6 +14,7 @@ export interface BackgroundTask {
     racketNames?: string[];
     formData?: any;
   };
+  originPage?: string; // Page where the task was initiated
   startedAt: Date;
   completedAt?: Date;
 }
@@ -21,7 +22,7 @@ export interface BackgroundTask {
 interface BackgroundTasksContextType {
   tasks: BackgroundTask[];
   activeTask: BackgroundTask | null;
-  addTask: (type: TaskType, metadata?: BackgroundTask['metadata']) => string;
+  addTask: (type: TaskType, metadata?: BackgroundTask['metadata'], originPage?: string) => string;
   updateTaskProgress: (taskId: string, progress: number) => void;
   completeTask: (taskId: string, result: any) => void;
   failTask: (taskId: string, error: string) => void;
@@ -46,33 +47,39 @@ interface BackgroundTasksProviderProps {
 export const BackgroundTasksProvider: React.FC<BackgroundTasksProviderProps> = ({ children }) => {
   const [tasks, setTasks] = useState<BackgroundTask[]>([]);
 
-  const addTask = useCallback((type: TaskType, metadata?: BackgroundTask['metadata']): string => {
-    const taskId = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const newTask: BackgroundTask = {
-      id: taskId,
-      type,
-      status: 'running',
-      progress: 0,
-      metadata,
-      startedAt: new Date(),
-    };
-    setTasks(prev => [...prev, newTask]);
-    return taskId;
-  }, []);
+  const addTask = useCallback(
+    (type: TaskType, metadata?: BackgroundTask['metadata'], originPage?: string): string => {
+      const taskId = `${type}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      const newTask: BackgroundTask = {
+        id: taskId,
+        type,
+        status: 'running',
+        progress: 0,
+        metadata,
+        originPage,
+        startedAt: new Date(),
+      };
+      setTasks(prev => [...prev, newTask]);
+      return taskId;
+    },
+    []
+  );
 
   const updateTaskProgress = useCallback((taskId: string, progress: number) => {
-    setTasks(prev =>
-      prev.map(task =>
-        task.id === taskId ? { ...task, progress } : task
-      )
-    );
+    setTasks(prev => prev.map(task => (task.id === taskId ? { ...task, progress } : task)));
   }, []);
 
   const completeTask = useCallback((taskId: string, result: any) => {
     setTasks(prev =>
       prev.map(task =>
         task.id === taskId
-          ? { ...task, status: 'completed' as TaskStatus, result, completedAt: new Date(), progress: 100 }
+          ? {
+              ...task,
+              status: 'completed' as TaskStatus,
+              result,
+              completedAt: new Date(),
+              progress: 100,
+            }
           : task
       )
     );
@@ -110,8 +117,6 @@ export const BackgroundTasksProvider: React.FC<BackgroundTasksProviderProps> = (
   };
 
   return (
-    <BackgroundTasksContext.Provider value={value}>
-      {children}
-    </BackgroundTasksContext.Provider>
+    <BackgroundTasksContext.Provider value={value}>{children}</BackgroundTasksContext.Provider>
   );
 };

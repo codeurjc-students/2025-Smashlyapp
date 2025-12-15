@@ -269,7 +269,9 @@ const RacketCard = styled(motion.li)<{ view: 'grid' | 'list' }>`
   transition: all 0.3s ease;
   border: 1px solid rgba(22, 163, 74, 0.1);
 
-  display: ${props => (props.view === 'list' ? 'flex' : 'block')};
+  display: ${props => (props.view === 'list' ? 'flex' : 'flex')};
+  flex-direction: ${props => (props.view === 'list' ? 'row' : 'column')};
+  height: ${props => (props.view === 'grid' ? '100%' : 'auto')};
 
   &:hover {
     transform: translateY(-4px);
@@ -318,6 +320,7 @@ const RacketInfo = styled.div<{ view: 'grid' | 'list' }>`
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: 0.75rem;
 `;
 
 const RacketBrand = styled.div`
@@ -345,6 +348,7 @@ const PriceContainer = styled.div<{ view: 'grid' | 'list' }>`
   gap: 0.75rem;
   margin-bottom: ${props => (props.view === 'grid' ? '1rem' : '0.75rem')};
   flex-wrap: wrap;
+  min-height: ${props => (props.view === 'grid' ? '4rem' : 'auto')};
 `;
 
 const CurrentPrice = styled.div`
@@ -532,7 +536,7 @@ const CatalogPage: React.FC = () => {
   const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [selectedRacket, setSelectedRacket] = useState<Racket | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
-  
+
   const ITEMS_PER_PAGE = 9;
 
   // Initialize search from URL params
@@ -658,7 +662,7 @@ const CatalogPage: React.FC = () => {
     if (loadingMore || !hasMore) return;
 
     setLoadingMore(true);
-    
+
     // Simular un pequeño delay para mejor UX
     setTimeout(() => {
       setDisplayCount(prev => prev + ITEMS_PER_PAGE);
@@ -961,28 +965,32 @@ const CatalogPage: React.FC = () => {
 
             {/* Elemento observador para scroll infinito */}
             <div ref={observerTarget} style={{ height: '20px', margin: '2rem 0' }} />
-            
+
             {/* Indicador de carga */}
             {loadingMore && (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2rem',
-                color: '#6b7280',
-                fontSize: '0.875rem',
-                fontWeight: 500
-              }}>
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '2rem',
+                  color: '#6b7280',
+                  fontSize: '0.875rem',
+                  fontWeight: 500,
+                }}
+              >
                 Cargando más palas...
               </div>
             )}
-            
+
             {/* Mensaje de fin */}
             {!hasMore && displayedRackets.length > 0 && (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2rem',
-                color: '#9ca3af',
-                fontSize: '0.875rem'
-              }}>
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '2rem',
+                  color: '#9ca3af',
+                  fontSize: '0.875rem',
+                }}
+              >
                 Has visto todas las palas del catálogo
               </div>
             )}

@@ -2,21 +2,26 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiX, FiMinimize2, FiCpu, FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
-import { useBackgroundTasks, TaskType, BackgroundTask } from '../../contexts/BackgroundTasksContext';
+import { useNavigate, useLocation } from 'react-router-dom';
+import {
+  useBackgroundTasks,
+  TaskType,
+  BackgroundTask,
+} from '../../contexts/BackgroundTasksContext';
 
-const PopupContainer = styled(motion.div) <{ $minimized: boolean }>`
+const PopupContainer = styled(motion.div)<{ $minimized: boolean }>`
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: ${props => props.$minimized ? '80px' : '500px'};
-  height: ${props => props.$minimized ? '80px' : 'auto'};
+  width: ${props => (props.$minimized ? '80px' : '500px')};
+  height: ${props => (props.$minimized ? '80px' : 'auto')};
   background: white;
-  border-radius: ${props => props.$minimized ? '50%' : '20px'};
+  border-radius: ${props => (props.$minimized ? '50%' : '20px')};
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
   z-index: 1000;
-  overflow: ${props => props.$minimized ? 'visible' : 'hidden'};
-  border: ${props => props.$minimized ? 'none' : '2px solid #e5e7eb'};
-  cursor: ${props => props.$minimized ? 'pointer' : 'default'};
+  overflow: ${props => (props.$minimized ? 'visible' : 'hidden')};
+  border: ${props => (props.$minimized ? 'none' : '2px solid #e5e7eb')};
+  cursor: ${props => (props.$minimized ? 'pointer' : 'default')};
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 `;
 
@@ -28,23 +33,24 @@ const CircularProgress = styled.svg<{ $status: string }>`
   height: 88px;
   transform: rotate(-90deg);
   filter: drop-shadow(0 0 8px rgba(22, 163, 74, 0.3));
-  
+
   circle {
     fill: none;
     stroke-width: 4;
     stroke-linecap: round;
   }
-  
+
   .background {
     stroke: rgba(229, 231, 235, 0.3);
   }
-  
+
   .progress {
     stroke: ${props =>
-    props.$status === 'completed' ? '#16a34a' :
-      props.$status === 'error' ? '#dc2626' :
-        'url(#animatedGradient)'
-  };
+      props.$status === 'completed'
+        ? '#16a34a'
+        : props.$status === 'error'
+          ? '#dc2626'
+          : 'url(#animatedGradient)'};
     stroke-dasharray: 251.2;
     stroke-dashoffset: 251.2;
     transition: stroke-dashoffset 0.5s ease;
@@ -59,15 +65,16 @@ const MinimizedContent = styled.div<{ $status: string }>`
   align-items: center;
   justify-content: center;
   background: ${props =>
-    props.$status === 'completed' ? 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' :
-      props.$status === 'error' ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
-        '#f3f4f6'
-  };
+    props.$status === 'completed'
+      ? 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)'
+      : props.$status === 'error'
+        ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
+        : '#f3f4f6'};
   border-radius: 50%;
-  color: ${props => props.$status === 'running' ? '#6b7280' : 'white'};
+  color: ${props => (props.$status === 'running' ? '#6b7280' : 'white')};
   position: relative;
   z-index: 1;
-  border: ${props => props.$status === 'running' ? '3px solid #16a34a' : 'none'};
+  border: ${props => (props.$status === 'running' ? '3px solid #16a34a' : 'none')};
 `;
 
 const MinimizedIcon = styled(motion.div)`
@@ -102,16 +109,44 @@ const CompletionBadge = styled(motion.div)`
   border: 2px solid white;
 `;
 
+const CompletionTooltip = styled(motion.div)`
+  position: absolute;
+  bottom: 90px;
+  right: 0;
+  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: 0 4px 20px rgba(22, 163, 74, 0.4);
+  z-index: 1001;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    right: 20px;
+    width: 0;
+    height: 0;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 8px solid #15803d;
+  }
+`;
+
 const Header = styled.div<{ $minimized: boolean; $status: string }>`
-  display: ${props => props.$minimized ? 'none' : 'flex'};
+  display: ${props => (props.$minimized ? 'none' : 'flex')};
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
   background: ${props =>
-    props.$status === 'completed' ? 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)' :
-      props.$status === 'error' ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)' :
-        'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-  };
+    props.$status === 'completed'
+      ? 'linear-gradient(135deg, #16a34a 0%, #15803d 100%)'
+      : props.$status === 'error'
+        ? 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
+        : 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'};
   color: white;
 `;
 
@@ -138,7 +173,7 @@ const Subtitle = styled.p<{ $minimized: boolean }>`
   margin: 0;
   font-size: 0.8rem;
   opacity: 0.9;
-  display: ${props => props.$minimized ? 'none' : 'block'};
+  display: ${props => (props.$minimized ? 'none' : 'block')};
 `;
 
 const HeaderActions = styled.div`
@@ -274,10 +309,7 @@ const TaskName = styled.p`
 const TaskStatus = styled.span<{ $status: string }>`
   font-size: 0.8rem;
   color: ${props =>
-    props.$status === 'completed' ? '#16a34a' :
-      props.$status === 'error' ? '#dc2626' :
-        '#3b82f6'
-  };
+    props.$status === 'completed' ? '#16a34a' : props.$status === 'error' ? '#dc2626' : '#3b82f6'};
   font-weight: 600;
 `;
 
@@ -311,19 +343,29 @@ const getTaskSubtitle = (task: BackgroundTask): string => {
 
 export const BackgroundTaskPopup: React.FC = () => {
   const { tasks, activeTask, dismissTask } = useBackgroundTasks();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [minimized, setMinimized] = useState(true);
   const [pulse, setPulse] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
-  // Mostrar popup cuando hay una tarea activa
+  // Mostrar popup cuando hay una tarea activa o completada recientemente
   useEffect(() => {
-    if (activeTask) {
-      setShowPopup(true);
-      setMinimized(true);
+    if (tasks.length > 0) {
+      const lastTask = tasks[tasks.length - 1];
+      // Mostrar si hay una tarea en ejecución o completada
+      if (
+        lastTask.status === 'running' ||
+        lastTask.status === 'completed' ||
+        lastTask.status === 'error'
+      ) {
+        setShowPopup(true);
+        setMinimized(true);
+      }
     } else {
       setShowPopup(false);
     }
-  }, [activeTask]);
+  }, [tasks]);
 
   // Efecto de pulso cuando está minimizado y hay una tarea completada
   useEffect(() => {
@@ -350,7 +392,21 @@ export const BackgroundTaskPopup: React.FC = () => {
   };
 
   const handleToggleMinimize = () => {
-    setMinimized(!minimized);
+    if (minimized) {
+      // Si está minimizado, solo navegar a la página correspondiente
+      if (visibleTask.type === 'comparison') {
+        navigate('/compare-rackets');
+      } else if (visibleTask.type === 'recommendation') {
+        navigate('/best-racket');
+      }
+      // Cerrar el popup después de navegar (dar tiempo para que se cargue la página)
+      setTimeout(() => {
+        dismissTask(visibleTask.id);
+      }, 1500);
+    } else {
+      // Si está expandido, minimizar
+      setMinimized(true);
+    }
   };
 
   const handleViewResult = () => {
@@ -381,9 +437,9 @@ export const BackgroundTaskPopup: React.FC = () => {
 
   const getTaskLabel = () => {
     if (visibleTask.type === 'comparison') {
-      return 'Comparar';
+      return visibleTask.status === 'running' ? 'Comparando...' : 'Comparar';
     }
-    return 'Recomendar';
+    return visibleTask.status === 'running' ? 'Buscando...' : 'Recomendar';
   };
 
   const circumference = 2 * Math.PI * 40; // radio = 40
@@ -409,49 +465,49 @@ export const BackgroundTaskPopup: React.FC = () => {
             {visibleTask.status === 'running' && (
               <CircularProgress $status={visibleTask.status}>
                 <defs>
-                  <linearGradient id="animatedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#16a34a">
+                  <linearGradient id='animatedGradient' x1='0%' y1='0%' x2='100%' y2='100%'>
+                    <stop offset='0%' stopColor='#16a34a'>
                       <animate
-                        attributeName="stop-color"
-                        values="#16a34a; #22c55e; #4ade80; #22c55e; #16a34a"
-                        dur="3s"
-                        repeatCount="indefinite"
+                        attributeName='stop-color'
+                        values='#16a34a; #22c55e; #4ade80; #22c55e; #16a34a'
+                        dur='3s'
+                        repeatCount='indefinite'
                       />
                     </stop>
-                    <stop offset="50%" stopColor="#22c55e">
+                    <stop offset='50%' stopColor='#22c55e'>
                       <animate
-                        attributeName="stop-color"
-                        values="#22c55e; #4ade80; #16a34a; #4ade80; #22c55e"
-                        dur="3s"
-                        repeatCount="indefinite"
+                        attributeName='stop-color'
+                        values='#22c55e; #4ade80; #16a34a; #4ade80; #22c55e'
+                        dur='3s'
+                        repeatCount='indefinite'
                       />
                     </stop>
-                    <stop offset="100%" stopColor="#4ade80">
+                    <stop offset='100%' stopColor='#4ade80'>
                       <animate
-                        attributeName="stop-color"
-                        values="#4ade80; #16a34a; #22c55e; #16a34a; #4ade80"
-                        dur="3s"
-                        repeatCount="indefinite"
+                        attributeName='stop-color'
+                        values='#4ade80; #16a34a; #22c55e; #16a34a; #4ade80'
+                        dur='3s'
+                        repeatCount='indefinite'
                       />
                     </stop>
                   </linearGradient>
                 </defs>
-                <circle className="background" cx="44" cy="44" r="40" />
+                <circle className='background' cx='44' cy='44' r='40' />
                 <motion.circle
-                  className="progress"
-                  cx="44"
-                  cy="44"
-                  r="40"
+                  className='progress'
+                  cx='44'
+                  cy='44'
+                  r='40'
                   initial={{ strokeDashoffset: circumference }}
                   animate={{
-                    strokeDashoffset: progressOffset
+                    strokeDashoffset: progressOffset,
                   }}
                   transition={{
-                    strokeDashoffset: { duration: 0.5 }
+                    strokeDashoffset: { duration: 0.5 },
                   }}
                   style={{
                     strokeDasharray: circumference,
-                    strokeDashoffset: progressOffset
+                    strokeDashoffset: progressOffset,
                   }}
                 />
               </CircularProgress>
@@ -460,18 +516,28 @@ export const BackgroundTaskPopup: React.FC = () => {
             {/* Contenido del círculo minimizado */}
             <MinimizedContent $status={visibleTask.status}>
               <MinimizedIcon
-                animate={visibleTask.status === 'running' ? {
-                  rotate: 360
-                } : visibleTask.status === 'completed' ? {
-                  scale: [1, 1.2, 1]
-                } : {}}
-                transition={visibleTask.status === 'running' ? {
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: 'linear'
-                } : {
-                  duration: 0.5
-                }}
+                animate={
+                  visibleTask.status === 'running'
+                    ? {
+                        rotate: 360,
+                      }
+                    : visibleTask.status === 'completed'
+                      ? {
+                          scale: [1, 1.2, 1],
+                        }
+                      : {}
+                }
+                transition={
+                  visibleTask.status === 'running'
+                    ? {
+                        duration: 2,
+                        repeat: Infinity,
+                        ease: 'linear',
+                      }
+                    : {
+                        duration: 0.5,
+                      }
+                }
               >
                 {getTaskIcon()}
               </MinimizedIcon>
@@ -488,13 +554,36 @@ export const BackgroundTaskPopup: React.FC = () => {
                 <FiCheckCircle size={14} />
               </CompletionBadge>
             )}
+
+            {/* Tooltip de completado - solo si no estás en la página de destino */}
+            {visibleTask.status === 'completed' && (
+              <>
+                {visibleTask.type === 'comparison' && location.pathname !== '/compare-rackets' && (
+                  <CompletionTooltip
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Comparación terminada
+                  </CompletionTooltip>
+                )}
+                {visibleTask.type === 'recommendation' && location.pathname !== '/best-racket' && (
+                  <CompletionTooltip
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    Recomendación lista
+                  </CompletionTooltip>
+                )}
+              </>
+            )}
           </>
         ) : (
           <>
-            <Header
-              $minimized={minimized}
-              $status={visibleTask.status}
-            >
+            <Header $minimized={minimized} $status={visibleTask.status}>
               <HeaderLeft>
                 {getStatusIcon()}
                 <HeaderTitle>
@@ -524,21 +613,17 @@ export const BackgroundTaskPopup: React.FC = () => {
                       transition={{ duration: 0.5 }}
                     />
                   </ProgressBar>
-                  <ProgressText>
-                    {visibleTask.progress || 0}% completado
-                  </ProgressText>
+                  <ProgressText>{visibleTask.progress || 0}% completado</ProgressText>
                 </ProgressSection>
               )}
 
               {visibleTask.status === 'completed' && (
                 <ResultSection>
                   <ResultTitle>
-                    <FiCheckCircle color="#16a34a" />
+                    <FiCheckCircle color='#16a34a' />
                     ¡Análisis Completado!
                   </ResultTitle>
-                  <ViewResultButton onClick={handleViewResult}>
-                    Ver Resultado
-                  </ViewResultButton>
+                  <ViewResultButton onClick={handleViewResult}>Ver Resultado</ViewResultButton>
                 </ResultSection>
               )}
 
@@ -556,18 +641,24 @@ export const BackgroundTaskPopup: React.FC = () => {
                     Tareas Recientes
                   </h4>
                   <TaskList>
-                    {tasks.slice(0, -1).reverse().slice(0, 3).map((task: BackgroundTask) => (
-                      <TaskItem key={task.id}>
-                        <TaskInfo>
-                          <TaskName>{getTaskTitle(task.type)}</TaskName>
-                          <TaskStatus $status={task.status}>
-                            {task.status === 'completed' ? 'Completada' :
-                              task.status === 'error' ? 'Error' :
-                                'En proceso'}
-                          </TaskStatus>
-                        </TaskInfo>
-                      </TaskItem>
-                    ))}
+                    {tasks
+                      .slice(0, -1)
+                      .reverse()
+                      .slice(0, 3)
+                      .map((task: BackgroundTask) => (
+                        <TaskItem key={task.id}>
+                          <TaskInfo>
+                            <TaskName>{getTaskTitle(task.type)}</TaskName>
+                            <TaskStatus $status={task.status}>
+                              {task.status === 'completed'
+                                ? 'Completada'
+                                : task.status === 'error'
+                                  ? 'Error'
+                                  : 'En proceso'}
+                            </TaskStatus>
+                          </TaskInfo>
+                        </TaskItem>
+                      ))}
                   </TaskList>
                 </div>
               )}

@@ -65,7 +65,8 @@ export class GeminiService {
 
   private buildRacketsInfo(rackets: Racket[]): string {
     return rackets
-      .map((r: any, index) => `PALA ${index + 1}:
+      .map(
+        (r: any, index) => `PALA ${index + 1}:
 Nombre: ${r.nombre}
 Marca: ${r.marca || r.caracteristicas_marca || 'N/A'}
 Modelo: ${r.modelo || 'N/A'}
@@ -74,7 +75,8 @@ Goma: ${r.caracteristicas_nucleo || 'N/A'}
 Cara/Fibra: ${r.caracteristicas_cara || 'N/A'}
 Balance: ${r.caracteristicas_balance || 'N/A'}
 Dureza: ${r.caracteristicas_dureza || 'N/A'}
-Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}`)
+Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}`
+      )
       .join('\n\n');
   }
 
@@ -99,55 +101,29 @@ Por favor, ten en cuenta estas características en la sección "Veredicto Situac
     const numCols = rackets.length > 2 ? 'Pala 3 |' : '';
     const numSep = rackets.length > 2 ? ':--- |' : '';
     const numVals = rackets.length > 2 ? '... |' : '';
-    
-    return `Eres un analista profesional de equipamiento deportivo especializado en pádel, con certificación técnica en ciencia de materiales y biomecánica deportiva. Tu misión es proporcionar comparaciones técnicas objetivas y profesionales que ayuden a los jugadores a tomar decisiones informadas.
 
-DIRECTRICES FUNDAMENTALES:
-- Mantén un tono profesional, objetivo y técnico en todo momento
-- Basa tu análisis exclusivamente en las propiedades físicas de los materiales y la geometría de las palas
-- Evita lenguaje de marketing o afirmaciones subjetivas
-- Utiliza terminología técnica precisa del sector del pádel
-- Estructura tu respuesta siguiendo EXACTAMENTE el formato especificado
-
-ESTRUCTURA OBLIGATORIA DE RESPUESTA:
-
----
+    return `Eres un analista profesional de pádel. Proporciona una comparación técnica objetiva basada en materiales y geometría.
 
 ### 📊 RESUMEN EJECUTIVO
-
-[Párrafo breve de 2-3 líneas que sintetice las diferencias clave entre las palas comparadas y para qué tipo de jugador está diseñada cada una]
-
----
+[2-3 líneas: diferencias clave y para qué jugador es cada pala]
 
 ### 🔬 ANÁLISIS TÉCNICO DE MATERIALES
 
 #### ${(rackets[0] as any)?.nombre || 'Pala 1'}
-
-**Composición del Núcleo:** [Analiza el tipo de goma y su densidad]
-**Estructura de Caras:** [Analiza el tipo de fibra y su rigidez]
-**Geometría y Balance:** [Analiza la forma y distribución de peso]
-
-**Comportamiento Resultante:**
-- **Tacto:** [Blando/Medio/Duro] - [Justificación técnica basada en la interacción goma-fibra]
-- **Punto Dulce:** [Pequeño/Medio/Grande] - [Justificación basada en forma y distribución de agujeros]
-- **Transmisión de Energía:** [Baja/Media/Alta] - [Explicación de cómo los materiales afectan la transferencia de energía]
+**Núcleo:** [Tipo de goma y densidad]
+**Caras:** [Tipo de fibra y rigidez]
+**Geometría:** [Forma y balance]
+**Comportamiento:** Tacto [Blando/Medio/Duro], Punto Dulce [Pequeño/Medio/Grande], Transmisión [Baja/Media/Alta]
 
 #### ${(rackets[1] as any)?.nombre || 'Pala 2'}
+**Núcleo:** [Tipo de goma y densidad]
+**Caras:** [Tipo de fibra y rigidez]
+**Geometría:** [Forma y balance]
+**Comportamiento:** Tacto [Blando/Medio/Duro], Punto Dulce [Pequeño/Medio/Grande], Transmisión [Baja/Media/Alta]
 
-**Composición del Núcleo:** [Analiza el tipo de goma y su densidad]
-**Estructura de Caras:** [Analiza el tipo de fibra y su rigidez]
-**Geometría y Balance:** [Analiza la forma y distribución de peso]
+${rackets.length > 2 ? `#### ${(rackets[2] as any)?.nombre || 'Pala 3'}\n**Núcleo:** [Tipo de goma]\n**Caras:** [Tipo de fibra]\n**Geometría:** [Forma y balance]\n**Comportamiento:** Tacto, Punto Dulce, Transmisión\n` : ''}
 
-**Comportamiento Resultante:**
-- **Tacto:** [Blando/Medio/Duro] - [Justificación técnica basada en la interacción goma-fibra]
-- **Punto Dulce:** [Pequeño/Medio/Grande] - [Justificación basada en forma y distribución de agujeros]
-- **Transmisión de Energía:** [Baja/Media/Alta] - [Explicación de cómo los materiales afectan la transferencia de energía]
-
-${rackets.length > 2 ? `#### ${(rackets[2] as any)?.nombre || 'Pala 3'}\n\n**Composición del Núcleo:** [Analiza el tipo de goma y su densidad]\n**Estructura de Caras:** [Analiza el tipo de fibra y su rigidez]\n**Geometría y Balance:** [Analiza la forma y distribución de peso]\n\n**Comportamiento Resultante:**\n- **Tacto:** [Blando/Medio/Duro] - [Justificación técnica]\n- **Punto Dulce:** [Pequeño/Medio/Grande] - [Justificación técnica]\n- **Transmisión de Energía:** [Baja/Media/Alta] - [Explicación técnica]\n` : ''}
-
----
-
-### 📋 TABLA COMPARATIVA DE ESPECIFICACIONES
+### 📋 TABLA COMPARATIVA
 
 | Característica | ${(rackets[0] as any)?.nombre || 'Pala 1'} | ${(rackets[1] as any)?.nombre || 'Pala 2'} | ${numCols}
 | :--- | :--- | :--- | ${numSep}
@@ -155,109 +131,81 @@ ${rackets.length > 2 ? `#### ${(rackets[2] as any)?.nombre || 'Pala 3'}\n\n**Com
 | **Balance** | ... | ... | ${numVals}
 | **Punto Dulce** | ... | ... | ${numVals}
 | **Salida de Bola** | ... | ... | ${numVals}
-| **Potencia Bruta** | ... | ... | ${numVals}
-| **Maniobrabilidad** | ... | ... | ${numVals}
-| **Nivel Técnico Requerido** | ... | ... | ${numVals}
+| **Potencia** | ... | ... | ${numVals}
+| **Manejabilidad** | ... | ... | ${numVals}
+| **Nivel Requerido** | ... | ... | ${numVals}
 
----
+### 🎯 ANÁLISIS POR CATEGORÍAS
 
-### 🎯 ANÁLISIS POR CATEGORÍAS DE RENDIMIENTO
-
-#### Potencia y Velocidad de Bola
-[Análisis comparativo de qué pala genera mayor velocidad de bola y por qué, basándote en rigidez de materiales y balance]
+#### Potencia y Velocidad
+[Comparación basada en rigidez y balance]
 
 #### Control y Precisión
-[Análisis comparativo de qué pala ofrece mayor control y por qué, considerando punto dulce y tacto]
+[Comparación basada en punto dulce y tacto]
 
 #### Manejabilidad y Defensa
-[Análisis comparativo de qué pala es más manejable y mejor para defensa, considerando peso y balance]
+[Comparación basada en peso y balance]
 
-#### Confort y Prevención de Lesiones
-[Análisis comparativo de qué pala transmite menos vibraciones y es más amigable con las articulaciones]
+#### Confort
+[Comparación de absorción de vibraciones]
 
----
+### 👤 PERFILES RECOMENDADOS
 
-### 👤 RECOMENDACIONES POR PERFIL DE JUGADOR
+#### ${(rackets[0] as any)?.nombre || 'Pala 1'}
+**Nivel:** [Nivel]
+**Estilo:** [Estilo de juego]
+**Características:** [Físicas recomendadas]
 
-#### ✅ Perfil Óptimo para ${(rackets[0] as any)?.nombre || 'Pala 1'}
-**Nivel:** [Principiante/Intermedio/Avanzado/Profesional]
-**Estilo de Juego:** [Descripción detallada]
-**Características Físicas:** [Recomendaciones de edad, condición física, etc.]
-**Objetivos:** [Qué busca conseguir este jugador]
+#### ${(rackets[1] as any)?.nombre || 'Pala 2'}
+**Nivel:** [Nivel]
+**Estilo:** [Estilo de juego]
+**Características:** [Físicas recomendadas]
 
-#### ✅ Perfil Óptimo para ${(rackets[1] as any)?.nombre || 'Pala 2'}
-**Nivel:** [Principiante/Intermedio/Avanzado/Profesional]
-**Estilo de Juego:** [Descripción detallada]
-**Características Físicas:** [Recomendaciones de edad, condición física, etc.]
-**Objetivos:** [Qué busca conseguir este jugador]
+${rackets.length > 2 ? `#### ${(rackets[2] as any)?.nombre || 'Pala 3'}\n**Nivel:** [Nivel]\n**Estilo:** [Estilo]\n**Características:** [Físicas]\n` : ''}
 
-${rackets.length > 2 ? `#### ✅ Perfil Óptimo para ${(rackets[2] as any)?.nombre || 'Pala 3'}\n**Nivel:** [Principiante/Intermedio/Avanzado/Profesional]\n**Estilo de Juego:** [Descripción detallada]\n**Características Físicas:** [Recomendaciones]\n**Objetivos:** [Qué busca conseguir este jugador]\n` : ''}
+### 🏆 VEREDICTOS
 
----
+#### Jugador Defensivo
+**Ganadora:** [Pala]
+**Por qué:** [Justificación técnica]
 
-### 🏆 VEREDICTO POR ESCENARIOS
+#### Jugador Ofensivo
+**Ganadora:** [Pala]
+**Por qué:** [Justificación técnica]
 
-#### Escenario 1: Jugador Defensivo/De Control
-**Recomendación:** [Nombre de la pala ganadora]
-**Justificación:** [Explicación técnica de por qué esta pala es superior para este estilo, mencionando específicamente características como punto dulce, manejabilidad y salida de bola]
+#### Confort/Prevención Lesiones
+**Ganadora:** [Pala]
+**Por qué:** [Justificación técnica]
 
-#### Escenario 2: Jugador Ofensivo/Atacante
-**Recomendación:** [Nombre de la pala ganadora]
-**Justificación:** [Explicación técnica de por qué esta pala maximiza la potencia y el juego aéreo, mencionando rigidez, balance y transmisión de energía]
+${userContext ? `\n#### Tu Perfil Específico\n**Recomendación:** [Pala]\n**Por qué:** [Justificación personalizada]\n` : ''}
 
-#### Escenario 3: Prevención de Lesiones/Confort
-**Recomendación:** [Nombre de la pala ganadora]
-**Justificación:** [Explicación técnica de por qué esta pala es más amigable con las articulaciones, mencionando absorción de vibraciones y balance]
-
-${userContext ? `\n#### Escenario 4: Recomendación Personalizada para Tu Perfil\n**Recomendación:** [Nombre de la pala más adecuada según el perfil del usuario]\n**Justificación:** [Explicación detallada de por qué esta pala se ajusta mejor a las características específicas del usuario: nivel, estilo, edad, experiencia, etc.]\n` : ''}
-
----
-
-### 🎓 CONCLUSIÓN PROFESIONAL
-
-[Resumen final en 2-3 líneas que sintetice claramente: "La [Pala A] está diseñada para [tipo de jugador específico con características X], mientras que la [Pala B] es ideal para [tipo de jugador específico con características Y]"]
-
----
-
-IMPORTANTE: NO incluyas introducciones, saludos ni despedidas. Comienza directamente con el título "versus" de las palas y termina con la conclusión profesional.
+### 🎓 CONCLUSIÓN
+[2-3 líneas: "La [Pala A] es ideal para [tipo jugador X], mientras que la [Pala B] es mejor para [tipo jugador Y]"]
 
 ${userContext}
 
----
-DATOS TÉCNICOS DE LAS PALAS:
+DATOS TÉCNICOS:
 ${racketsInfo}
 
 ===METRICS===
-Basándote en tu análisis técnico profesional, asigna valores numéricos precisos del 1 al 10 para cada métrica:
+Asigna valores 1-10 para:
+- Potencia: Velocidad de bola
+- Control: Precisión
+- Salida de Bola: Facilidad impulsión
+- Manejabilidad: Agilidad
+- Punto Dulce: Área efectiva
 
-- **Potencia** (1-10): Capacidad de generar velocidad de bola en golpes de ataque
-- **Control** (1-10): Precisión y capacidad de colocación en golpes técnicos
-- **Salida de Bola** (1-10): Facilidad de impulsión en situaciones defensivas y globos
-- **Manejabilidad** (1-10): Agilidad en movimientos rápidos y cambios de dirección
-- **Punto Dulce** (1-10): Tamaño del área efectiva de impacto óptimo
-
-FORMATO JSON REQUERIDO (sin bloques markdown, solo JSON puro):
+JSON (sin markdown):
 [
-  {
-    "racketName": "Nombre completo exacto de la pala 1",
-    "potencia": 8,
-    "control": 7,
-    "salidaDeBola": 6,
-    "manejabilidad": 9,
-    "puntoDulce": 7
-  },
-  {
-    "racketName": "Nombre completo exacto de la pala 2",
-    "potencia": 9,
-    "control": 6,
-    "salidaDeBola": 5,
-    "manejabilidad": 7,
-    "puntoDulce": 6
-  }
+  {"racketName": "Nombre pala 1", "potencia": 8, "control": 7, "salidaDeBola": 6, "manejabilidad": 9, "puntoDulce": 7},
+  {"racketName": "Nombre pala 2", "potencia": 9, "control": 6, "salidaDeBola": 5, "manejabilidad": 7, "puntoDulce": 6}
 ]`;
   }
 
-  private parseResponse(fullText: string, rackets: Racket[]): { textComparison: string; metrics: RacketMetrics[] } {
+  private parseResponse(
+    fullText: string,
+    rackets: Racket[]
+  ): { textComparison: string; metrics: RacketMetrics[] } {
     // Intentar separar la comparación textual de las métricas JSON
     const metricsMarkerIndex = fullText.lastIndexOf('===METRICS===');
     let textComparison: string;
@@ -280,8 +228,11 @@ FORMATO JSON REQUERIDO (sin bloques markdown, solo JSON puro):
     }
 
     // Limpiar y parsear las métricas
-    metricsText = metricsText.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-    
+    metricsText = metricsText
+      .replace(/```json\n?/g, '')
+      .replace(/```\n?/g, '')
+      .trim();
+
     let metrics: RacketMetrics[];
     try {
       metrics = JSON.parse(metricsText);

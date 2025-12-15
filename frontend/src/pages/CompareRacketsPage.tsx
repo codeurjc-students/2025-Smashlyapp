@@ -403,7 +403,7 @@ const CloseButton = styled.button`
 const CompareRacketsPage: React.FC = () => {
   const { rackets } = useRackets();
   const { user, isAuthenticated } = useAuth();
-  const { addTask, updateTaskProgress, completeTask, failTask } = useBackgroundTasks();
+  const { addTask, updateTaskProgress, completeTask, failTask, tasks } = useBackgroundTasks();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRackets, setSelectedRackets] = useState<Racket[]>([]);
   const [comparisonResult, setComparisonResult] = useState<string | null>(null);
@@ -422,11 +422,31 @@ const CompareRacketsPage: React.FC = () => {
 
   const filteredRackets = searchQuery
     ? fuse
-      .search(searchQuery)
-      .map(result => result.item)
-      .filter(r => !selectedRackets.find(sr => sr.id === r.id))
-      .slice(0, 5)
+        .search(searchQuery)
+        .map(result => result.item)
+        .filter(r => !selectedRackets.find(sr => sr.id === r.id))
+        .slice(0, 5)
     : [];
+
+  // Efecto para cargar resultados de tareas completadas en segundo plano
+
+  React.useEffect(() => {
+    // Buscar la última tarea de comparación completada
+    const completedComparisonTask = tasks
+      .filter(task => task.type === 'comparison' && task.status === 'completed')
+      .sort(
+        (a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime()
+      )[0];
+
+    if (completedComparisonTask && completedComparisonTask.result) {
+      const { comparison, metrics } = completedComparisonTask.result;
+      if (comparison && !comparisonResult) {
+        // Solo mostrar si no hay ya un resultado visible
+        setComparisonResult(comparison);
+        setComparisonMetrics(metrics || null);
+      }
+    }
+  }, [tasks, comparisonResult]);
 
   const handleAddRacket = (racket: Racket) => {
     if (selectedRackets.length < 3) {
@@ -440,16 +460,20 @@ const CompareRacketsPage: React.FC = () => {
     setSelectedRackets(selectedRackets.filter(r => r.id !== id));
   };
 
-  const handleCompare = async () =>{
+  const handleCompare = async () => {
     if (selectedRackets.length < 2) return;
 
     setLoading(true);
     setComparisonResult(null);
 
     // Crear tarea en segundo plano
-    const taskId = addTask('comparison', {
-      racketNames: selectedRackets.map(r => r.nombre)
-    });
+    const taskId = addTask(
+      'comparison',
+      {
+        racketNames: selectedRackets.map(r => r.nombre),
+      },
+      '/compare'
+    );
 
     // Simular progreso
     const progressInterval = setInterval(() => {
@@ -459,7 +483,7 @@ const CompareRacketsPage: React.FC = () => {
     try {
       // Prepare user profile if authenticated
       let userProfile = undefined;
-      
+
       if (isAuthenticated && user) {
         // Calculate age from birthdate if available
         let age = undefined;

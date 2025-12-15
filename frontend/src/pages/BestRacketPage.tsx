@@ -6,7 +6,11 @@ import { BasicForm } from '../components/recommendation/BasicForm';
 import { AdvancedForm } from '../components/recommendation/AdvancedForm';
 import { RecommendationResult } from '../components/recommendation/RecommendationResult';
 import { RecommendationService } from '../services/recommendationService';
-import { BasicFormData, AdvancedFormData, RecommendationResult as ResultType } from '../types/recommendation';
+import {
+  BasicFormData,
+  AdvancedFormData,
+  RecommendationResult as ResultType,
+} from '../types/recommendation';
 import { toast } from 'react-hot-toast';
 
 const PageContainer = styled.div`
@@ -50,13 +54,13 @@ const ModeSelector = styled.div`
 const ModeButton = styled.button<{ $active: boolean }>`
   padding: 0.75rem 1.5rem;
   border-radius: 20px;
-  border: 1px solid ${props => props.$active ? '#16a34a' : '#e5e7eb'};
-  background: ${props => props.$active ? '#f0fdf4' : 'white'};
-  color: ${props => props.$active ? '#16a34a' : '#6b7280'};
+  border: 1px solid ${props => (props.$active ? '#16a34a' : '#e5e7eb')};
+  background: ${props => (props.$active ? '#f0fdf4' : 'white')};
+  color: ${props => (props.$active ? '#16a34a' : '#6b7280')};
   cursor: pointer;
   transition: all 0.2s;
   font-weight: 600;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 
   &:hover {
     border-color: #16a34a;
@@ -76,7 +80,7 @@ const AlertBox = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
 `;
 
 const AlertText = styled.p`
@@ -144,7 +148,7 @@ export const BestRacketPage: React.FC = () => {
   // Save state to sessionStorage whenever it changes
   useEffect(() => {
     if (!stateRestored) return; // Don't save until we've restored
-    
+
     const stateToSave = {
       step,
       formType,
@@ -158,7 +162,7 @@ export const BestRacketPage: React.FC = () => {
   useEffect(() => {
     // Only set defaults if state wasn't restored
     if (!stateRestored) return;
-    
+
     // If user is logged in and we don't have a saved state, default to advanced
     const savedState = sessionStorage.getItem('bestRacketPageState');
     if (user && !savedState) {
@@ -201,7 +205,7 @@ export const BestRacketPage: React.FC = () => {
     setStep('loading');
 
     // Crear tarea en segundo plano
-    const taskId = addTask('recommendation', { formData: data });
+    const taskId = addTask('recommendation', { formData: data }, '/best-racket');
 
     // Simular progreso
     const progressInterval = setInterval(() => {
@@ -230,7 +234,7 @@ export const BestRacketPage: React.FC = () => {
     setStep('loading');
 
     // Crear tarea en segundo plano
-    const taskId = addTask('recommendation', { formData: data });
+    const taskId = addTask('recommendation', { formData: data }, '/best-racket');
 
     // Simular progreso
     const progressInterval = setInterval(() => {
@@ -296,25 +300,24 @@ export const BestRacketPage: React.FC = () => {
           {showReusePrompt && (
             <AlertBox>
               <AlertText>
-                Hemos encontrado una recomendación anterior del {new Date(lastRecommendation.created_at).toLocaleDateString()}.
-                ¿Quieres reutilizar esos datos?
+                Hemos encontrado una recomendación anterior del{' '}
+                {new Date(lastRecommendation.created_at).toLocaleDateString()}. ¿Quieres reutilizar
+                esos datos?
               </AlertText>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <AlertButton onClick={() => setShowReusePrompt(false)} style={{ background: 'transparent', border: '1px solid white' }}>
+                <AlertButton
+                  onClick={() => setShowReusePrompt(false)}
+                  style={{ background: 'transparent', border: '1px solid white' }}
+                >
                   No, empezar de cero
                 </AlertButton>
-                <AlertButton onClick={handleReuseData}>
-                  Sí, cargar datos
-                </AlertButton>
+                <AlertButton onClick={handleReuseData}>Sí, cargar datos</AlertButton>
               </div>
             </AlertBox>
           )}
 
           <ModeSelector>
-            <ModeButton
-              $active={formType === 'basic'}
-              onClick={() => setFormType('basic')}
-            >
+            <ModeButton $active={formType === 'basic'} onClick={() => setFormType('basic')}>
               Básico
             </ModeButton>
             <ModeButton
@@ -332,15 +335,9 @@ export const BestRacketPage: React.FC = () => {
           </ModeSelector>
 
           {formType === 'basic' ? (
-            <BasicForm
-              initialData={basicData}
-              onSubmit={handleBasicSubmit}
-            />
+            <BasicForm initialData={basicData} onSubmit={handleBasicSubmit} />
           ) : (
-            <AdvancedForm
-              initialData={advancedData}
-              onSubmit={handleAdvancedSubmit}
-            />
+            <AdvancedForm initialData={advancedData} onSubmit={handleAdvancedSubmit} />
           )}
         </>
       )}
