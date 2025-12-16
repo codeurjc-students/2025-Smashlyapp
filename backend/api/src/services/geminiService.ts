@@ -46,21 +46,57 @@ export class GeminiService {
     // Construir un único prompt que incluya tanto la comparación textual como las métricas
     const combinedPrompt = this.buildCombinedPrompt(rackets, racketsInfo, userContext);
 
-    try {
-      // Una única llamada a la API para obtener ambos resultados
-      const result = await this.model.generateContent(combinedPrompt);
-      const response = await result.response;
-      const fullText = response.text();
+    // Implementar reintentos con backoff exponencial
+    const maxRetries = 3;
+    let lastError: any;
 
-      // Separar la comparación textual de las métricas JSON
-      const { textComparison, metrics } = this.parseResponse(fullText, rackets);
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        console.log(`Intento ${attempt + 1} de ${maxRetries} para generar comparación...`);
+        
+        // Una única llamada a la API para obtener ambos resultados
+        const result = await this.model.generateContent(combinedPrompt);
+        const response = await result.response;
+        const fullText = response.text();
 
-      return { textComparison, metrics };
-    } catch (error: any) {
-      console.error('Error calling Gemini API:', error);
-      const errorMessage = error.message || 'Error desconocido de Gemini';
-      throw new Error(`Error al generar la comparación con IA: ${errorMessage}`);
+        // Separar la comparación textual de las métricas JSON
+        const { textComparison, metrics } = this.parseResponse(fullText, rackets);
+
+        console.log('Comparación generada exitosamente');
+        return { textComparison, metrics };
+      } catch (error: any) {
+        lastError = error;
+        const errorMessage = error.message || 'Error desconocido';
+        
+        // Verificar si es un error de sobrecarga (503) o rate limit (429)
+        const isRetryableError = 
+          errorMessage.includes('503') || 
+          errorMessage.includes('overloaded') ||
+          errorMessage.includes('429') ||
+          errorMessage.includes('rate limit');
+
+        if (isRetryableError && attempt < maxRetries - 1) {
+          // Calcular tiempo de espera con backoff exponencial: 1s, 2s, 4s
+          const waitTime = Math.pow(2, attempt) * 1000;
+          console.warn(
+            `Gemini API temporalmente no disponible (intento ${attempt + 1}/${maxRetries}). ` +
+            `Reintentando en ${waitTime / 1000}s...`
+          );
+          
+          // Esperar antes de reintentar
+          await new Promise(resolve => setTimeout(resolve, waitTime));
+          continue;
+        }
+
+        // Si no es un error reintentable o ya agotamos los intentos, lanzar el error
+        console.error('Error calling Gemini API:', error);
+        break;
+      }
     }
+
+    // Si llegamos aquí, todos los intentos fallaron
+    const errorMessage = lastError?.message || 'Error desconocido de Gemini';
+    throw new Error(`Error al generar la comparación con IA: ${errorMessage}`);
   }
 
   private buildRacketsInfo(rackets: Racket[]): string {

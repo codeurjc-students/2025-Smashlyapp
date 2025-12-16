@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, memo } from 'react';
 import styled from 'styled-components';
 import {
   Radar,
@@ -30,6 +30,9 @@ const ChartContainer = styled.div`
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   margin: 2rem 0;
+  /* Optimización de rendering */
+  will-change: contents;
+  transform: translateZ(0);
 `;
 
 const ChartTitle = styled.h3`
@@ -50,113 +53,122 @@ const ChartSubtitle = styled.p`
 // Colores para hasta 3 palas
 const COLORS = ['#16a34a', '#3b82f6', '#f59e0b'];
 
-const RacketRadarChart: React.FC<RacketRadarChartProps> = ({ metrics }) => {
-  if (!metrics || metrics.length === 0) {
+// Tooltip personalizado optimizado - memoizado
+const CustomTooltip = memo(({ active, payload, metrics }: any) => {
+  if (!active || !payload || !payload.length) {
     return null;
   }
 
-  // Transformar los datos al formato requerido por Recharts
-  const chartData = [
-    {
-      metric: 'Potencia',
-      ...metrics.reduce((acc, racket, idx) => {
-        acc[`pala${idx + 1}`] = racket.potencia;
-        return acc;
-      }, {} as any),
-    },
-    {
-      metric: 'Control',
-      ...metrics.reduce((acc, racket, idx) => {
-        acc[`pala${idx + 1}`] = racket.control;
-        return acc;
-      }, {} as any),
-    },
-    {
-      metric: 'Salida de Bola',
-      ...metrics.reduce((acc, racket, idx) => {
-        acc[`pala${idx + 1}`] = racket.salidaDeBola;
-        return acc;
-      }, {} as any),
-    },
-    {
-      metric: 'Manejabilidad',
-      ...metrics.reduce((acc, racket, idx) => {
-        acc[`pala${idx + 1}`] = racket.manejabilidad;
-        return acc;
-      }, {} as any),
-    },
-    {
-      metric: 'Punto Dulce',
-      ...metrics.reduce((acc, racket, idx) => {
-        acc[`pala${idx + 1}`] = racket.puntoDulce;
-        return acc;
-      }, {} as any),
-    },
-  ];
-
-  // Tooltip personalizado
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div
+  return (
+    <div
+      style={{
+        background: 'white',
+        padding: '12px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        border: '1px solid #e5e7eb',
+      }}
+    >
+      <p style={{ margin: 0, fontWeight: 600, marginBottom: '8px' }}>
+        {payload[0].payload.metric}
+      </p>
+      {payload.map((entry: any, index: number) => (
+        <p
+          key={index}
           style={{
-            background: 'white',
-            padding: '12px',
-            borderRadius: '8px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-            border: '1px solid #e5e7eb',
+            margin: '4px 0',
+            color: entry.color,
+            fontSize: '0.875rem',
           }}
         >
-          <p style={{ margin: 0, fontWeight: 600, marginBottom: '8px' }}>
-            {payload[0].payload.metric}
-          </p>
-          {payload.map((entry: any, index: number) => (
-            <p
-              key={index}
-              style={{
-                margin: '4px 0',
-                color: entry.color,
-                fontSize: '0.875rem',
-              }}
-            >
-              {metrics[index]?.racketName}: <strong>{entry.value}/10</strong>
-            </p>
-          ))}
-        </div>
-      );
-    }
-    return null;
-  };
+          {metrics[index]?.racketName}: <strong>{entry.value}/10</strong>
+        </p>
+      ))}
+    </div>
+  );
+});
 
-  // Leyenda personalizada
-  const renderLegend = () => {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem', flexWrap: 'wrap' }}>
-        {metrics.map((racket, index) => (
+CustomTooltip.displayName = 'CustomTooltip';
+
+// Leyenda personalizada optimizada - memoizada
+const Legend = memo(({ metrics }: { metrics: RacketMetrics[] }) => {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '2rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+      {metrics.map((racket, index) => (
+        <div
+          key={index}
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}
+        >
           <div
-            key={index}
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
+              width: '12px',
+              height: '12px',
+              borderRadius: '50%',
+              backgroundColor: COLORS[index],
             }}
-          >
-            <div
-              style={{
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-                backgroundColor: COLORS[index],
-              }}
-            />
-            <span style={{ fontSize: '0.875rem', color: '#374151', fontWeight: 500 }}>
-              {racket.racketName}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  };
+          />
+          <span style={{ fontSize: '0.875rem', color: '#374151', fontWeight: 500 }}>
+            {racket.racketName}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+});
+
+Legend.displayName = 'Legend';
+
+const RacketRadarChart: React.FC<RacketRadarChartProps> = ({ metrics }) => {
+  // Memoizar la transformación de datos para evitar recalcular en cada render
+  const chartData = useMemo(() => {
+    if (!metrics || metrics.length === 0) return [];
+
+    return [
+      {
+        metric: 'Potencia',
+        ...metrics.reduce((acc, racket, idx) => {
+          acc[`pala${idx + 1}`] = racket.potencia;
+          return acc;
+        }, {} as any),
+      },
+      {
+        metric: 'Control',
+        ...metrics.reduce((acc, racket, idx) => {
+          acc[`pala${idx + 1}`] = racket.control;
+          return acc;
+        }, {} as any),
+      },
+      {
+        metric: 'Salida de Bola',
+        ...metrics.reduce((acc, racket, idx) => {
+          acc[`pala${idx + 1}`] = racket.salidaDeBola;
+          return acc;
+        }, {} as any),
+      },
+      {
+        metric: 'Manejabilidad',
+        ...metrics.reduce((acc, racket, idx) => {
+          acc[`pala${idx + 1}`] = racket.manejabilidad;
+          return acc;
+        }, {} as any),
+      },
+      {
+        metric: 'Punto Dulce',
+        ...metrics.reduce((acc, racket, idx) => {
+          acc[`pala${idx + 1}`] = racket.puntoDulce;
+          return acc;
+        }, {} as any),
+      },
+    ];
+  }, [metrics]);
+
+  if (!metrics || metrics.length === 0) {
+    return null;
+  }
 
   return (
     <ChartContainer>
@@ -176,7 +188,7 @@ const RacketRadarChart: React.FC<RacketRadarChartProps> = ({ metrics }) => {
             domain={[0, 10]}
             tick={{ fill: '#6b7280', fontSize: 12 }}
           />
-          <Tooltip content={<CustomTooltip />} />
+          <Tooltip content={<CustomTooltip metrics={metrics} />} />
           {metrics.map((racket, index) => (
             <Radar
               key={index}
@@ -186,13 +198,18 @@ const RacketRadarChart: React.FC<RacketRadarChartProps> = ({ metrics }) => {
               fill={COLORS[index]}
               fillOpacity={0.15}
               strokeWidth={2}
+              isAnimationActive={false}
             />
           ))}
         </RadarChart>
       </ResponsiveContainer>
-      {renderLegend()}
+      <Legend metrics={metrics} />
     </ChartContainer>
   );
 };
 
-export default RacketRadarChart;
+// Memoizar el componente completo para evitar re-renders innecesarios
+export default memo(RacketRadarChart, (prevProps, nextProps) => {
+  // Comparación profunda de las métricas
+  return JSON.stringify(prevProps.metrics) === JSON.stringify(nextProps.metrics);
+});

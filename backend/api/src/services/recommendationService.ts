@@ -8,6 +8,8 @@ import {
 } from '../types/recommendation';
 import { RacketService } from './racketService';
 import { GeminiService } from './geminiService';
+import { CacheService } from './cacheService';
+import { RacketFilterService } from './racketFilterService';
 
 export class RecommendationService {
   /**
@@ -17,92 +19,76 @@ export class RecommendationService {
     type: 'basic' | 'advanced',
     data: BasicFormData | AdvancedFormData
   ): Promise<RecommendationResult> {
+    const startTime = Date.now();
+    
     try {
-      // 1. Fetch all rackets from database to build catalog
+      // 1. Check cache first
+      const cacheHash = CacheService.generateProfileHash(data);
+      const cachedResult = CacheService.get(cacheHash);
+      
+      if (cachedResult) {
+        const elapsed = Date.now() - startTime;
+        logger.info(`⚡ Returned cached recommendation in ${elapsed}ms`);
+        return cachedResult;
+      }
+      
+      // 2. Fetch all rackets from database to build catalog
       let allRackets = await RacketService.getAllRackets();
+      logger.info(`📊 Loaded ${allRackets.length} rackets from database`);
 
-      // 2. Filter by budget if specified
-      let maxBudget: number | null = null;
-      if (data.budget) {
-        const budgetStr = String(data.budget);
-        // Parse budget string (e.g., "100-150", "150-200", "200+")
-        if (budgetStr.includes('+')) {
-          // No upper limit for "200+" type budgets
-          const minBudget = parseInt(budgetStr.replace('+', ''));
-          allRackets = allRackets.filter(
-            (r: any) => !r.precio_actual || r.precio_actual >= minBudget
-          );
-        } else if (budgetStr.includes('-')) {
-          const [min, max] = budgetStr.split('-').map(Number);
-          maxBudget = max;
-          allRackets = allRackets.filter((r: any) => {
-            if (!r.precio_actual) return true; // Include rackets without price
-            return r.precio_actual >= min && r.precio_actual <= max;
-          });
-        } else {
-          // Single number budget
-          const budget = parseInt(budgetStr);
-          maxBudget = budget;
-          allRackets = allRackets.filter((r: any) => !r.precio_actual || r.precio_actual <= budget);
-        }
+      // 3. Apply smart filtering to reduce rackets sent to Gemini
+      const filteredRackets = RacketFilterService.filterRackets(allRackets, data);
+      
+      if (filteredRackets.length === 0) {
+        throw new Error('No rackets match your criteria. Please adjust your filters.');
       }
 
-      logger.info(
-        `📊 Filtered catalog: ${allRackets.length} rackets within budget ${data.budget || 'any'}`
-      );
-
-      // 3. Build a concise catalog summary for Gemini
-      const catalogSummary = allRackets
+      // 4. Build ultra-concise catalog summary for Gemini (optimized format)
+      const catalogSummary = filteredRackets
         .map((r: any) => {
-          const characteristics = [];
-          if (r.caracteristicas_forma) characteristics.push(`Forma: ${r.caracteristicas_forma}`);
-          if (r.caracteristicas_balance)
-            characteristics.push(`Balance: ${r.caracteristicas_balance}`);
-          if (r.caracteristicas_nucleo) characteristics.push(`Núcleo: ${r.caracteristicas_nucleo}`);
-          if (r.caracteristicas_cara) characteristics.push(`Cara: ${r.caracteristicas_cara}`);
-          if (r.caracteristicas_nivel_de_juego)
-            characteristics.push(`Nivel: ${r.caracteristicas_nivel_de_juego}`);
-          if (r.precio_actual) characteristics.push(`Precio: €${r.precio_actual.toFixed(2)}`);
-
-          return `ID: ${r.id} | ${r.marca || ''} ${r.nombre || r.modelo || ''} | ${characteristics.join(', ')}`;
+          const nivel = r.caracteristicas_nivel_de_juego || 'N/A';
+          const forma = r.caracteristicas_forma || 'N/A';
+          const balance = r.caracteristicas_balance || 'N/A';
+          const precio = r.precio_actual ? `€${r.precio_actual}` : 'N/A';
+          
+          return `${r.id}|${r.marca} ${r.nombre}|${nivel}|${forma}|${balance}|${precio}`;
         })
         .join('\n');
 
-      // 4. Prepare prompt for Gemini with catalog restriction
-      const budgetInfo = maxBudget
-        ? `Presupuesto máximo: €${maxBudget.toFixed(2)} - SOLO recomienda palas dentro de este límite.\n`
-        : '';
+      // 5. Prepare optimized prompt for Gemini
+      const essentialProfile = {
+        nivel: data.level,
+        presupuesto: data.budget,
+        lesiones: data.injuries,
+        frecuencia: data.frequency,
+        ...('play_style' in data && {
+          estilo: data.play_style,
+          posicion: data.position,
+        }),
+      };
 
-      const prompt = `Eres un experto en palas de pádel. Recomienda las 3 mejores palas para este jugador:
+      const prompt = `Experto pádel. Recomienda TOP 3 palas para:
 
-PERFIL DEL JUGADOR:
-${JSON.stringify(data, null, 2)}
-${budgetInfo}
+PERFIL: ${JSON.stringify(essentialProfile)}
 
-CATÁLOGO DISPONIBLE (${allRackets.length} palas):
+CANDIDATAS (${filteredRackets.length} pre-filtradas):
+ID|Marca Modelo|Nivel|Forma|Balance|Precio
 ${catalogSummary}
 
-REGLAS CRÍTICAS:
-- Usa SOLO IDs del catálogo anterior
-- NO inventes palas ni IDs
-- Ordena por match_score (0-100)
-- Razones específicas en español
+REGLAS:
+- Solo IDs del catálogo
+- Orden por match_score (0-100)
+- Razón concisa (max 40 palabras)
+- Análisis breve (max 100 palabras)
 
-Responde SOLO con JSON (sin markdown):
-{
-  "rackets": [
-    {"id": 123, "match_score": 95, "reason": "Explicación detallada técnica"},
-    {"id": 456, "match_score": 88, "reason": "Explicación detallada técnica"},
-    {"id": 789, "match_score": 82, "reason": "Explicación detallada técnica"}
-  ],
-  "analysis": "Análisis general del perfil y elección de palas"
-}`;
+JSON puro (sin markdown):
+{"rackets":[{"id":123,"match_score":95,"reason":"..."},...],"analysis":"..."}`;
 
-      // 4. Call Gemini
-      logger.info(`📊 Sending ${allRackets.length} rackets to Gemini for recommendation`);
+      // 6. Call Gemini with optimized prompt
+      logger.info(`🤖 Sending ${filteredRackets.length} pre-filtered rackets to Gemini`);
       const aiResponse = await GeminiService.generateContent(prompt);
 
-      // 5. Parse response
+      // 7. Parse response
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
       if (!jsonMatch) {
         logger.error('❌ Failed to parse AI response - no JSON found');
@@ -116,10 +102,10 @@ Responde SOLO con JSON (sin markdown):
       const recommendedIds = aiResult.rackets?.map((r: any) => r.id) || [];
       logger.info(`📋 Recommended IDs: ${recommendedIds.join(', ')}`);
 
-      // 6. Match AI recommendations to database rackets by ID (simple and accurate)
+      // 8. Match AI recommendations to database rackets by ID
       const enrichedRackets = aiResult.rackets
         .map((rec: any) => {
-          const racket: any = allRackets.find((r: any) => r.id === rec.id);
+          const racket: any = filteredRackets.find((r: any) => r.id === rec.id);
 
           if (racket) {
             logger.info(`✓ Matched AI recommendation ID ${rec.id} to racket "${racket.nombre}"`);
@@ -141,7 +127,7 @@ Responde SOLO con JSON (sin markdown):
         })
         .filter((r: any) => r !== null); // Remove any null entries
 
-      // 7. Ensure we have at least some recommendations
+      // 9. Ensure we have at least some recommendations
       if (enrichedRackets.length === 0) {
         logger.error('❌ No valid recommendations - Gemini did not follow catalog restrictions');
         throw new Error(
@@ -159,6 +145,12 @@ Responde SOLO con JSON (sin markdown):
         rackets: enrichedRackets,
         analysis: aiResult.analysis,
       };
+      
+      // 10. Cache the result
+      CacheService.set(cacheHash, result);
+      
+      const elapsed = Date.now() - startTime;
+      logger.info(`✅ Generated recommendation in ${elapsed}ms`);
 
       return result;
     } catch (error: unknown) {
@@ -222,5 +214,20 @@ Responde SOLO con JSON (sin markdown):
       logger.error('Error fetching last recommendation:', error);
       throw error;
     }
+  }
+
+  /**
+   * Clear recommendation cache (call when catalog is updated)
+   */
+  static clearCache(): void {
+    CacheService.clearAll();
+    logger.info('🗑️  Recommendation cache cleared');
+  }
+
+  /**
+   * Get cache statistics
+   */
+  static getCacheStats() {
+    return CacheService.getStats();
   }
 }

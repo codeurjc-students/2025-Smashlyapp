@@ -53,7 +53,33 @@ export class RecommendationController {
       return res.json(recommendation || { message: 'No recommendations found' });
     } catch (error: unknown) {
       logger.error('Error in get last recommendation controller:', error);
-      return res.status(500).json({ error: 'Internal server error' });
+      return res.status(500).json({ error: 'Failed to fetch recommendation' });
+    }
+  }
+
+  /**
+   * Clear recommendation cache
+   */
+  static async clearCache(req: Request, res: Response) {
+    try {
+      RecommendationService.clearCache();
+      return res.json({ message: 'Cache cleared successfully' });
+    } catch (error) {
+      logger.error('Error clearing cache:', error);
+      return res.status(500).json({ error: 'Failed to clear cache' });
+    }
+  }
+
+  /**
+   * Get cache statistics
+   */
+  static async getCacheStats(req: Request, res: Response) {
+    try {
+      const stats = RecommendationService.getCacheStats();
+      return res.json(stats);
+    } catch (error) {
+      logger.error('Error getting cache stats:', error);
+      return res.status(500).json({ error: 'Failed to get cache stats' });
     }
   }
 }

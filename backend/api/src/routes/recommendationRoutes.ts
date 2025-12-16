@@ -12,4 +12,8 @@ router.post('/generate', RecommendationController.generate);
 router.post('/save', authenticate, RecommendationController.save);
 router.get('/last', authenticate, RecommendationController.getLast);
 
+// Cache management routes
+router.post('/cache/clear', RecommendationController.clearCache);
+router.get('/cache/stats', RecommendationController.getCacheStats);
+
 export default router;

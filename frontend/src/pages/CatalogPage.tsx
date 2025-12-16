@@ -346,9 +346,9 @@ const PriceContainer = styled.div<{ view: 'grid' | 'list' }>`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: ${props => (props.view === 'grid' ? '1rem' : '0.75rem')};
+  margin-bottom: ${props => (props.view === 'grid' ? '0.5rem' : '0.5rem')};
   flex-wrap: wrap;
-  min-height: ${props => (props.view === 'grid' ? '4rem' : 'auto')};
+  min-height: auto;
 `;
 
 const CurrentPrice = styled.div`
@@ -372,17 +372,6 @@ const DiscountBadge = styled.div`
   font-weight: 600;
 `;
 
-const BestPriceBadge = styled.div`
-  background: #16a34a;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-`;
 
 const ActionButtons = styled.div<{ view: 'grid' | 'list' }>`
   display: flex;
@@ -895,10 +884,6 @@ const CatalogPage: React.FC = () => {
                                       )}
                                     </>
                                   )}
-                                  <BestPriceBadge>
-                                    <FiTag size={10} />
-                                    Mejor precio
-                                  </BestPriceBadge>
                                 </>
                               );
                             }

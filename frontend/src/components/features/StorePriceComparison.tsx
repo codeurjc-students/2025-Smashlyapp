@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import React from 'react';
-import { FiExternalLink, FiTrendingDown, FiStar } from 'react-icons/fi';
+import { FiExternalLink, FiTrendingDown } from 'react-icons/fi';
 import { useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { Racket } from '@/types/racket';
@@ -226,54 +226,7 @@ const Price = styled.div<{ isLowest?: boolean; $compact?: boolean }>`
 `;
 
 
-const LowestBadge = styled.div`
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  animation: badgePulse 2s ease-in-out infinite;
-  position: relative;
-  overflow: hidden;
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-    animation: shine 3s infinite;
-  }
-
-  @keyframes badgePulse {
-    0%, 100% {
-      box-shadow: 0 4px 12px rgba(22, 163, 74, 0.4);
-      transform: scale(1);
-    }
-    50% {
-      box-shadow: 0 6px 16px rgba(22, 163, 74, 0.6);
-      transform: scale(1.05);
-    }
-  }
-
-  @keyframes shine {
-    0% {
-      left: -100%;
-    }
-    50%, 100% {
-      left: 100%;
-    }
-  }
-`;
 
 
 const StoreLink = styled.a<{ $compact?: boolean; $isLowest?: boolean }>`
@@ -509,12 +462,6 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
                         <Price isLowest={isLowest} $compact={compact}>
                           €{store.price.toFixed(2)}
                         </Price>
-                        {isLowest && (
-                          <LowestBadge>
-                            <FiStar size={14} />
-                            Mejor precio
-                          </LowestBadge>
-                        )}
                       </PriceInfo>
                     ) : (
                       <UnavailableText>No disponible</UnavailableText>

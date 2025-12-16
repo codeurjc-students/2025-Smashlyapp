@@ -213,17 +213,6 @@ const DiscountBadge = styled.div`
   font-weight: 600;
 `;
 
-const BestPriceBadge = styled.div`
-  background: #16a34a;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-`;
 
 const StoreBadge = styled.div`
   background: #f0f9ff;
@@ -552,10 +541,6 @@ const RacketDetailPage: React.FC = () => {
                               )}
                             </>
                           )}
-                          <BestPriceBadge>
-                            <FiTag size={14} />
-                            Mejor precio
-                          </BestPriceBadge>
                           <StoreBadge>en {lowestPrice.store}</StoreBadge>
                         </>
                       );

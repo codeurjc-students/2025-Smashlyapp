@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiX, FiPlus, FiCpu, FiDownload, FiSave, FiCheck } from 'react-icons/fi';
@@ -341,8 +341,7 @@ const ModalOverlay = styled(motion.div)`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.65);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -361,6 +360,10 @@ const ModalContent = styled(motion.div)`
   position: relative;
   display: flex;
   flex-direction: column;
+  /* Optimización de scroll */
+  will-change: transform;
+  transform: translateZ(0);
+  -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
     width: 8px;
@@ -410,14 +413,22 @@ const CompareRacketsPage: React.FC = () => {
   const [comparisonMetrics, setComparisonMetrics] = useState<RacketMetrics[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const [showChart, setShowChart] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
-  // Configure Fuse.js
+  // Configure Fuse.js con búsqueda mejorada
   const fuse = new Fuse(rackets, {
-    keys: ['nombre', 'marca', 'modelo'],
-    threshold: 0.3, // Adjust for sensitivity (0.0 = exact match, 1.0 = match anything)
-    distance: 100,
-    minMatchCharLength: 2,
+    keys: [
+      { name: 'nombre', weight: 0.5 },    // Mayor peso al nombre
+      { name: 'marca', weight: 0.3 },     // Peso medio a la marca
+      { name: 'modelo', weight: 0.2 },    // Menor peso al modelo
+    ],
+    threshold: 0.4,           // Más flexible para encontrar coincidencias
+    distance: 200,            // Permite coincidencias más lejanas
+    minMatchCharLength: 1,    // Permite búsquedas desde 1 carácter
+    ignoreLocation: true,     // No importa dónde aparezca la coincidencia
+    findAllMatches: true,     // Encuentra todas las coincidencias posibles
+    useExtendedSearch: false, // Búsqueda simple pero efectiva
   });
 
   const filteredRackets = searchQuery
@@ -425,11 +436,10 @@ const CompareRacketsPage: React.FC = () => {
         .search(searchQuery)
         .map(result => result.item)
         .filter(r => !selectedRackets.find(sr => sr.id === r.id))
-        .slice(0, 5)
+        .slice(0, 8)  // Mostrar más resultados (8 en lugar de 5)
     : [];
 
   // Efecto para cargar resultados de tareas completadas en segundo plano
-
   React.useEffect(() => {
     // Buscar la última tarea de comparación completada
     const completedComparisonTask = tasks
@@ -447,6 +457,23 @@ const CompareRacketsPage: React.FC = () => {
       }
     }
   }, [tasks, comparisonResult]);
+
+  // Lazy loading del gráfico - renderizar después de que el modal esté abierto
+  useEffect(() => {
+    if (comparisonResult) {
+      // Pequeño delay para permitir que el modal se abra primero
+      const timer = setTimeout(() => setShowChart(true), 150);
+      return () => clearTimeout(timer);
+    } else {
+      setShowChart(false);
+    }
+  }, [comparisonResult]);
+
+  // Memoizar el contenido de markdown para evitar re-renders
+  const memoizedMarkdownContent = useMemo(() => {
+    if (!comparisonResult) return null;
+    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult}</ReactMarkdown>;
+  }, [comparisonResult]);
 
   const handleAddRacket = (racket: Racket) => {
     if (selectedRackets.length < 3) {
@@ -516,11 +543,26 @@ const CompareRacketsPage: React.FC = () => {
 
       setComparisonResult(response.comparison);
       setComparisonMetrics(response.metrics || null);
-    } catch (error) {
+    } catch (error: any) {
       clearInterval(progressInterval);
       failTask(taskId, 'Error al realizar la comparación');
       console.error('Error comparing rackets:', error);
-      toast.error('Error al realizar la comparación. Inténtalo de nuevo.');
+      
+      // Mostrar mensaje de error más específico
+      const errorMessage = error?.message || '';
+      if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
+        toast.error('El servicio de IA está temporalmente sobrecargado. Por favor, inténtalo de nuevo en unos segundos.', {
+          duration: 5000,
+        });
+      } else if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+        toast.error('Has alcanzado el límite de comparaciones. Por favor, espera un momento e inténtalo de nuevo.', {
+          duration: 5000,
+        });
+      } else {
+        toast.error('Error al realizar la comparación. Por favor, inténtalo de nuevo.', {
+          duration: 4000,
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -637,15 +679,11 @@ const CompareRacketsPage: React.FC = () => {
           ))}
         </SelectedRacketsContainer>
 
-        <CompareButton onClick={handleCompare} disabled={selectedRackets.length < 2 || loading}>
-          {loading ? (
-            <>Analizando palas...</>
-          ) : (
-            <>
-              <FiCpu /> Comparar con IA
-            </>
-          )}
-        </CompareButton>
+        {!loading && (
+          <CompareButton onClick={handleCompare} disabled={selectedRackets.length < 2}>
+            <FiCpu /> Comparar con IA
+          </CompareButton>
+        )}
       </SelectionSection>
 
       <AnimatePresence>
@@ -654,14 +692,15 @@ const CompareRacketsPage: React.FC = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={() => setComparisonResult(null)}
           >
             <ModalContent
               onClick={e => e.stopPropagation()}
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
             >
               <CloseButton onClick={() => setComparisonResult(null)}>
                 <FiX size={24} />
@@ -690,12 +729,12 @@ const CompareRacketsPage: React.FC = () => {
                   </ActionButtons>
                 </ResultHeader>
 
-                {comparisonMetrics && comparisonMetrics.length > 0 && (
+                {showChart && comparisonMetrics && comparisonMetrics.length > 0 && (
                   <RacketRadarChart metrics={comparisonMetrics} />
                 )}
 
                 <MarkdownContent>
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult}</ReactMarkdown>
+                  {memoizedMarkdownContent}
                 </MarkdownContent>
               </ResultSection>
             </ModalContent>
