@@ -873,7 +873,7 @@ const CatalogPage: React.FC = () => {
                             if (lowestPrice) {
                               return (
                                 <>
-                                  <CurrentPrice>€{lowestPrice.price.toFixed(2)}</CurrentPrice>
+                                  <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
                                   {lowestPrice.originalPrice > lowestPrice.price && (
                                     <>
                                       <OriginalPrice>

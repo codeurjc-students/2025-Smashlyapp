@@ -164,7 +164,7 @@ const StoreRow = styled.div<{ $compact?: boolean; $isLowest?: boolean }>`
 const StoreHeader = styled.div<{ $compact?: boolean }>`
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: ${props => (props.$compact ? '0.5rem' : '0.75rem')};
 `;
 
@@ -460,7 +460,7 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
                     {store.available && store.price ? (
                       <PriceInfo $compact={compact}>
                         <Price isLowest={isLowest} $compact={compact}>
-                          €{store.price.toFixed(2)}
+                          {store.price.toFixed(2)}€
                         </Price>
                       </PriceInfo>
                     ) : (
@@ -473,7 +473,7 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
                       <PriceDiff $compact={compact} $isLowest={isLowest}>
                         {isLowest
                           ? 'Más barato'
-                          : `+€${(store.price - lowestPrice).toFixed(2)} sobre el más barato`}
+                          : `+${(store.price - lowestPrice).toFixed(2)}€ sobre el más barato`}
                       </PriceDiff>
                       {store.link && (
                         <StoreLink

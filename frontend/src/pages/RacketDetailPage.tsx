@@ -532,10 +532,10 @@ const RacketDetailPage: React.FC = () => {
                     if (lowestPrice) {
                       return (
                         <>
-                          <CurrentPrice>€{lowestPrice.price.toFixed(2)}</CurrentPrice>
+                          <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
                           {lowestPrice.originalPrice > lowestPrice.price && (
                             <>
-                              <OriginalPrice>€{lowestPrice.originalPrice.toFixed(2)}</OriginalPrice>
+                              <OriginalPrice>{lowestPrice.originalPrice.toFixed(2)}€</OriginalPrice>
                               {lowestPrice.discount > 0 && (
                                 <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
                               )}
@@ -545,7 +545,7 @@ const RacketDetailPage: React.FC = () => {
                         </>
                       );
                     }
-                    return <CurrentPrice>€{racket.precio_actual}</CurrentPrice>;
+                    return <CurrentPrice>{racket.precio_actual}€</CurrentPrice>;
                   })()}
                 </PriceContainer>
               </div>

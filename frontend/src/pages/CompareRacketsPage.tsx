@@ -1,11 +1,12 @@
 import React, { useState, useRef, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiSearch, FiX, FiPlus, FiCpu, FiDownload, FiSave, FiCheck } from 'react-icons/fi';
+import { FiSearch, FiX, FiPlus, FiCpu, FiDownload, FiSave, FiCheck, FiHeart } from 'react-icons/fi';
 import { useRackets } from '../contexts/RacketsContext';
 import { useAuth } from '../contexts/AuthContext';
 import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
 import { ComparisonService } from '../services/comparisonService';
+import { ListService } from '../services/listService';
 import { Racket } from '../types/racket';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -56,7 +57,7 @@ const SelectionSection = styled.div`
 
 const SearchContainer = styled.div`
   position: relative;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
 `;
 
 const SearchInput = styled.input`
@@ -403,6 +404,103 @@ const CloseButton = styled.button`
   }
 `;
 
+const FavoritesSection = styled.div`
+  margin-bottom: 1.5rem;
+`;
+
+const FavoritesTitle = styled.h3`
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #9ca3af;
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+`;
+
+const FavoritesGrid = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.125rem 0;
+  
+  /* Hide scrollbar but keep functionality */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
+`;
+
+const FavoriteRacketCard = styled(motion.div)<{ $isSelected?: boolean }>`
+  background: ${props => props.$isSelected ? '#f3f4f6' : 'white'};
+  border: 1.5px solid ${props => props.$isSelected ? '#d1d5db' : '#e5e7eb'};
+  border-radius: 6px;
+  padding: 0.375rem 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  cursor: ${props => props.$isSelected ? 'not-allowed' : 'pointer'};
+  transition: all 0.2s ease;
+  opacity: ${props => props.$isSelected ? 0.5 : 1};
+  white-space: nowrap;
+  flex-shrink: 0;
+  width: 300px;
+  min-width: 300px;
+
+  &:hover {
+    ${props => !props.$isSelected && `
+      border-color: #16a34a;
+      background: #f0fdf4;
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(22, 163, 74, 0.12);
+    `}
+  }
+
+  img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+  }
+`;
+
+const FavoriteRacketInfo = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.0625rem;
+  flex: 1;
+  min-width: 0;
+`;
+
+const FavoriteRacketName = styled.div`
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #1f2937;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const FavoriteRacketBrand = styled.div`
+  font-size: 0.5625rem;
+  color: #6b7280;
+  line-height: 1;
+`;
+
+const EmptyFavorites = styled.div`
+  padding: 0.75rem;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.6875rem;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px dashed #e5e7eb;
+`;
+
 const CompareRacketsPage: React.FC = () => {
   const { rackets } = useRackets();
   const { user, isAuthenticated } = useAuth();
@@ -414,6 +512,9 @@ const CompareRacketsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showChart, setShowChart] = useState(false);
+  const [modalManuallyClosed, setModalManuallyClosed] = useState(false);
+  const [favoriteRackets, setFavoriteRackets] = useState<Racket[]>([]);
+  const [loadingFavorites, setLoadingFavorites] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
 
   // Configure Fuse.js con búsqueda mejorada
@@ -448,15 +549,15 @@ const CompareRacketsPage: React.FC = () => {
         (a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime()
       )[0];
 
-    if (completedComparisonTask && completedComparisonTask.result) {
+    if (completedComparisonTask && completedComparisonTask.result && !modalManuallyClosed) {
       const { comparison, metrics } = completedComparisonTask.result;
       if (comparison && !comparisonResult) {
-        // Solo mostrar si no hay ya un resultado visible
+        // Solo mostrar si no hay ya un resultado visible y el usuario no cerró manualmente
         setComparisonResult(comparison);
         setComparisonMetrics(metrics || null);
       }
     }
-  }, [tasks, comparisonResult]);
+  }, [tasks, comparisonResult, modalManuallyClosed]);
 
   // Lazy loading del gráfico - renderizar después de que el modal esté abierto
   useEffect(() => {
@@ -468,6 +569,37 @@ const CompareRacketsPage: React.FC = () => {
       setShowChart(false);
     }
   }, [comparisonResult]);
+
+  // Cargar favoritos del usuario
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (!isAuthenticated) {
+        setFavoriteRackets([]);
+        return;
+      }
+
+      try {
+        setLoadingFavorites(true);
+        const lists = await ListService.getUserLists();
+        const favoritasList = lists.find(list => list.name === 'Favoritas');
+        
+        if (favoritasList && favoritasList.racket_count && favoritasList.racket_count > 0) {
+          const listWithRackets = await ListService.getListById(favoritasList.id);
+          // Limitar a 6 favoritos para mostrar
+          setFavoriteRackets(listWithRackets.rackets?.slice(0, 6) || []);
+        } else {
+          setFavoriteRackets([]);
+        }
+      } catch (error) {
+        console.error('Error loading favorites:', error);
+        setFavoriteRackets([]);
+      } finally {
+        setLoadingFavorites(false);
+      }
+    };
+
+    loadFavorites();
+  }, [isAuthenticated]);
 
   // Memoizar el contenido de markdown para evitar re-renders
   const memoizedMarkdownContent = useMemo(() => {
@@ -483,6 +615,14 @@ const CompareRacketsPage: React.FC = () => {
     }
   };
 
+  const handleAddFavoriteRacket = (racket: Racket) => {
+    // No agregar si ya está seleccionada o si ya hay 3
+    if (selectedRackets.find(r => r.id === racket.id) || selectedRackets.length >= 3) {
+      return;
+    }
+    setSelectedRackets([...selectedRackets, racket]);
+  };
+
   const handleRemoveRacket = (id: number) => {
     setSelectedRackets(selectedRackets.filter(r => r.id !== id));
   };
@@ -492,6 +632,7 @@ const CompareRacketsPage: React.FC = () => {
 
     setLoading(true);
     setComparisonResult(null);
+    setModalManuallyClosed(false); // Reset flag when starting new comparison
 
     // Crear tarea en segundo plano
     const taskId = addTask(
@@ -654,6 +795,46 @@ const CompareRacketsPage: React.FC = () => {
           )}
         </SearchContainer>
 
+        {/* Favorites Quick Selection */}
+        {isAuthenticated && !loadingFavorites && favoriteRackets.length > 0 && (
+          <FavoritesSection>
+            <FavoritesTitle>
+              <FiHeart /> Tus Favoritas
+            </FavoritesTitle>
+            <FavoritesGrid>
+              {favoriteRackets.map(racket => {
+                const isSelected = selectedRackets.some(r => r.id === racket.id);
+                return (
+                  <FavoriteRacketCard
+                    key={racket.id}
+                    $isSelected={isSelected}
+                    onClick={() => handleAddFavoriteRacket(racket)}
+                    whileHover={!isSelected ? { scale: 1.05 } : {}}
+                    whileTap={!isSelected ? { scale: 0.95 } : {}}
+                  >
+                    <img src={racket.imagen || '/placeholder-racket.png'} alt={racket.nombre} />
+                    <FavoriteRacketInfo>
+                      <FavoriteRacketName>{racket.nombre}</FavoriteRacketName>
+                      <FavoriteRacketBrand>{racket.marca}</FavoriteRacketBrand>
+                    </FavoriteRacketInfo>
+                  </FavoriteRacketCard>
+                );
+              })}
+            </FavoritesGrid>
+          </FavoritesSection>
+        )}
+
+        {isAuthenticated && !loadingFavorites && favoriteRackets.length === 0 && (
+          <FavoritesSection>
+            <FavoritesTitle>
+              <FiHeart /> Tus Favoritas
+            </FavoritesTitle>
+            <EmptyFavorites>
+              No tienes palas favoritas aún. Añade palas a tu lista de favoritas desde el catálogo.
+            </EmptyFavorites>
+          </FavoritesSection>
+        )}
+
         <SelectedRacketsContainer>
           {selectedRackets.map(racket => (
             <SelectedRacketCard
@@ -693,7 +874,10 @@ const CompareRacketsPage: React.FC = () => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            onClick={() => setComparisonResult(null)}
+            onClick={() => {
+              setComparisonResult(null);
+              setModalManuallyClosed(true);
+            }}
           >
             <ModalContent
               onClick={e => e.stopPropagation()}
@@ -702,7 +886,11 @@ const CompareRacketsPage: React.FC = () => {
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
             >
-              <CloseButton onClick={() => setComparisonResult(null)}>
+              <CloseButton onClick={(e) => {
+                e.stopPropagation();
+                setComparisonResult(null);
+                setModalManuallyClosed(true);
+              }}>
                 <FiX size={24} />
               </CloseButton>
 
