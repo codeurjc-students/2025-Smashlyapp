@@ -1,6 +1,6 @@
 import { supabase } from '../config/supabase';
 import logger from '../config/logger';
-import { RacketMetrics } from './geminiService';
+import { RacketMetrics } from './openRouterService';
 
 export interface Comparison {
   id: string;

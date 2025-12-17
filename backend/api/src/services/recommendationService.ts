@@ -7,7 +7,7 @@ import {
   RecommendationResult,
 } from '../types/recommendation';
 import { RacketService } from './racketService';
-import { GeminiService } from './geminiService';
+import { OpenRouterService } from './openRouterService';
 import { CacheService } from './cacheService';
 import { RacketFilterService } from './racketFilterService';
 
@@ -55,7 +55,7 @@ export class RecommendationService {
         })
         .join('\n');
 
-      // 5. Prepare optimized prompt for Gemini
+      // 5. Prepare optimized prompt with strict JSON structure
       const essentialProfile = {
         nivel: data.level,
         presupuesto: data.budget,
@@ -67,26 +67,42 @@ export class RecommendationService {
         }),
       };
 
-      const prompt = `Experto pádel. Recomienda TOP 3 palas para:
+      const prompt = `Eres un experto en pádel. Tu tarea es recomendar exactamente 3 palas del catálogo proporcionado.
 
-PERFIL: ${JSON.stringify(essentialProfile)}
+PERFIL DEL USUARIO:
+${JSON.stringify(essentialProfile, null, 2)}
 
-CANDIDATAS (${filteredRackets.length} pre-filtradas):
-ID|Marca Modelo|Nivel|Forma|Balance|Precio
+CATÁLOGO DE PALAS DISPONIBLES (${filteredRackets.length} pre-filtradas):
+ID | Marca Modelo | Nivel | Forma | Balance | Precio
 ${catalogSummary}
 
-REGLAS:
-- Solo IDs del catálogo
-- Orden por match_score (0-100)
-- Razón concisa (max 40 palabras)
-- Análisis breve (max 100 palabras)
+INSTRUCCIONES ESTRICTAS:
+1. Selecciona EXACTAMENTE 3 palas del catálogo anterior
+2. Usa SOLO los IDs que aparecen en el catálogo
+3. Ordena por match_score descendente (100 = perfecto, 0 = inadecuado)
+4. La razón debe ser concisa (máximo 40 palabras) y específica
+5. El análisis general debe ser breve (máximo 100 palabras) y útil
 
-JSON puro (sin markdown):
-{"rackets":[{"id":123,"match_score":95,"reason":"..."},...],"analysis":"..."}`;
+FORMATO DE RESPUESTA OBLIGATORIO:
+Responde ÚNICAMENTE con un objeto JSON válido, sin markdown, sin explicaciones adicionales.
 
-      // 6. Call Gemini with optimized prompt
-      logger.info(`🤖 Sending ${filteredRackets.length} pre-filtered rackets to Gemini`);
-      const aiResponse = await GeminiService.generateContent(prompt);
+Estructura exacta:
+{
+  "rackets": [
+    {
+      "id": <número del catálogo>,
+      "match_score": <0-100>,
+      "reason": "<explicación concisa de por qué es adecuada>"
+    }
+  ],
+  "analysis": "<análisis general breve del perfil y las recomendaciones>"
+}
+
+RESPONDE SOLO CON EL JSON:`;
+
+      // 6. Call OpenRouter with optimized prompt
+      logger.info(`🤖 Sending ${filteredRackets.length} pre-filtered rackets to OpenRouter`);
+      const aiResponse = await OpenRouterService.generateContent(prompt);
 
       // 7. Parse response
       const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
@@ -96,9 +112,9 @@ JSON puro (sin markdown):
       }
 
       const aiResult = JSON.parse(jsonMatch[0]);
-      logger.info(`🤖 Gemini recommended ${aiResult.rackets?.length || 0} rackets`);
+      logger.info(`🤖 OpenRouter recommended ${aiResult.rackets?.length || 0} rackets`);
 
-      // Log the IDs that Gemini recommended
+      // Log the IDs that OpenRouter recommended
       const recommendedIds = aiResult.rackets?.map((r: any) => r.id) || [];
       logger.info(`📋 Recommended IDs: ${recommendedIds.join(', ')}`);
 
@@ -120,7 +136,7 @@ JSON puro (sin markdown):
             };
           } else {
             logger.warn(
-              `✗ Could not find racket with ID ${rec.id} in database - Gemini ignored instructions!`
+              `✗ Could not find racket with ID ${rec.id} in database - AI ignored instructions!`
             );
             return null;
           }
@@ -129,7 +145,7 @@ JSON puro (sin markdown):
 
       // 9. Ensure we have at least some recommendations
       if (enrichedRackets.length === 0) {
-        logger.error('❌ No valid recommendations - Gemini did not follow catalog restrictions');
+        logger.error('❌ No valid recommendations - AI did not follow catalog restrictions');
         throw new Error(
           'No valid recommendations could be generated from the catalog. Please try again.'
         );
