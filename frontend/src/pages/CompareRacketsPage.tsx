@@ -425,34 +425,36 @@ const FavoritesGrid = styled.div`
   gap: 0.5rem;
   overflow-x: auto;
   padding: 0.125rem 0;
-  
+
   /* Hide scrollbar but keep functionality */
   scrollbar-width: none;
   -ms-overflow-style: none;
-  
+
   &::-webkit-scrollbar {
     display: none;
   }
 `;
 
 const FavoriteRacketCard = styled(motion.div)<{ $isSelected?: boolean }>`
-  background: ${props => props.$isSelected ? '#f3f4f6' : 'white'};
-  border: 1.5px solid ${props => props.$isSelected ? '#d1d5db' : '#e5e7eb'};
+  background: ${props => (props.$isSelected ? '#f3f4f6' : 'white')};
+  border: 1.5px solid ${props => (props.$isSelected ? '#d1d5db' : '#e5e7eb')};
   border-radius: 6px;
   padding: 0.375rem 0.5rem;
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  cursor: ${props => props.$isSelected ? 'not-allowed' : 'pointer'};
+  cursor: ${props => (props.$isSelected ? 'not-allowed' : 'pointer')};
   transition: all 0.2s ease;
-  opacity: ${props => props.$isSelected ? 0.5 : 1};
+  opacity: ${props => (props.$isSelected ? 0.5 : 1)};
   white-space: nowrap;
   flex-shrink: 0;
   width: 300px;
   min-width: 300px;
 
   &:hover {
-    ${props => !props.$isSelected && `
+    ${props =>
+      !props.$isSelected &&
+      `
       border-color: #16a34a;
       background: #f0fdf4;
       transform: translateY(-1px);
@@ -516,19 +518,20 @@ const CompareRacketsPage: React.FC = () => {
   const [favoriteRackets, setFavoriteRackets] = useState<Racket[]>([]);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
+  const lastShownTaskIdRef = useRef<string | null>(null);
 
   // Configure Fuse.js con búsqueda mejorada
   const fuse = new Fuse(rackets, {
     keys: [
-      { name: 'nombre', weight: 0.5 },    // Mayor peso al nombre
-      { name: 'marca', weight: 0.3 },     // Peso medio a la marca
-      { name: 'modelo', weight: 0.2 },    // Menor peso al modelo
+      { name: 'nombre', weight: 0.5 }, // Mayor peso al nombre
+      { name: 'marca', weight: 0.3 }, // Peso medio a la marca
+      { name: 'modelo', weight: 0.2 }, // Menor peso al modelo
     ],
-    threshold: 0.4,           // Más flexible para encontrar coincidencias
-    distance: 200,            // Permite coincidencias más lejanas
-    minMatchCharLength: 1,    // Permite búsquedas desde 1 carácter
-    ignoreLocation: true,     // No importa dónde aparezca la coincidencia
-    findAllMatches: true,     // Encuentra todas las coincidencias posibles
+    threshold: 0.4, // Más flexible para encontrar coincidencias
+    distance: 200, // Permite coincidencias más lejanas
+    minMatchCharLength: 1, // Permite búsquedas desde 1 carácter
+    ignoreLocation: true, // No importa dónde aparezca la coincidencia
+    findAllMatches: true, // Encuentra todas las coincidencias posibles
     useExtendedSearch: false, // Búsqueda simple pero efectiva
   });
 
@@ -537,7 +540,7 @@ const CompareRacketsPage: React.FC = () => {
         .search(searchQuery)
         .map(result => result.item)
         .filter(r => !selectedRackets.find(sr => sr.id === r.id))
-        .slice(0, 8)  // Mostrar más resultados (8 en lugar de 5)
+        .slice(0, 8) // Mostrar más resultados (8 en lugar de 5)
     : [];
 
   // Efecto para cargar resultados de tareas completadas en segundo plano
@@ -549,12 +552,23 @@ const CompareRacketsPage: React.FC = () => {
         (a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime()
       )[0];
 
-    if (completedComparisonTask && completedComparisonTask.result && !modalManuallyClosed) {
+    // Solo mostrar si:
+    // 1. Hay una tarea completada
+    // 2. No se ha mostrado antes (diferente ID)
+    // 3. El usuario no cerró manualmente el modal
+    // 4. No hay ya un resultado visible
+    if (
+      completedComparisonTask &&
+      completedComparisonTask.result &&
+      completedComparisonTask.id !== lastShownTaskIdRef.current &&
+      !modalManuallyClosed &&
+      !comparisonResult
+    ) {
       const { comparison, metrics } = completedComparisonTask.result;
-      if (comparison && !comparisonResult) {
-        // Solo mostrar si no hay ya un resultado visible y el usuario no cerró manualmente
+      if (comparison) {
         setComparisonResult(comparison);
         setComparisonMetrics(metrics || null);
+        lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como mostrada
       }
     }
   }, [tasks, comparisonResult, modalManuallyClosed]);
@@ -582,7 +596,7 @@ const CompareRacketsPage: React.FC = () => {
         setLoadingFavorites(true);
         const lists = await ListService.getUserLists();
         const favoritasList = lists.find(list => list.name === 'Favoritas');
-        
+
         if (favoritasList && favoritasList.racket_count && favoritasList.racket_count > 0) {
           const listWithRackets = await ListService.getListById(favoritasList.id);
           // Limitar a 6 favoritos para mostrar
@@ -688,17 +702,23 @@ const CompareRacketsPage: React.FC = () => {
       clearInterval(progressInterval);
       failTask(taskId, 'Error al realizar la comparación');
       console.error('Error comparing rackets:', error);
-      
+
       // Mostrar mensaje de error más específico
       const errorMessage = error?.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
-        toast.error('El servicio de IA está temporalmente sobrecargado. Por favor, inténtalo de nuevo en unos segundos.', {
-          duration: 5000,
-        });
+        toast.error(
+          'El servicio de IA está temporalmente sobrecargado. Por favor, inténtalo de nuevo en unos segundos.',
+          {
+            duration: 5000,
+          }
+        );
       } else if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
-        toast.error('Has alcanzado el límite de comparaciones. Por favor, espera un momento e inténtalo de nuevo.', {
-          duration: 5000,
-        });
+        toast.error(
+          'Has alcanzado el límite de comparaciones. Por favor, espera un momento e inténtalo de nuevo.',
+          {
+            duration: 5000,
+          }
+        );
       } else {
         toast.error('Error al realizar la comparación. Por favor, inténtalo de nuevo.', {
           duration: 4000,
@@ -875,7 +895,10 @@ const CompareRacketsPage: React.FC = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={() => {
+              // Limpiar completamente la comparación
               setComparisonResult(null);
+              setComparisonMetrics(null);
+              setSelectedRackets([]);
               setModalManuallyClosed(true);
             }}
           >
@@ -886,11 +909,16 @@ const CompareRacketsPage: React.FC = () => {
               exit={{ opacity: 0, y: 20 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
             >
-              <CloseButton onClick={(e) => {
-                e.stopPropagation();
-                setComparisonResult(null);
-                setModalManuallyClosed(true);
-              }}>
+              <CloseButton
+                onClick={e => {
+                  e.stopPropagation();
+                  // Limpiar completamente la comparación
+                  setComparisonResult(null);
+                  setComparisonMetrics(null);
+                  setSelectedRackets([]);
+                  setModalManuallyClosed(true);
+                }}
+              >
                 <FiX size={24} />
               </CloseButton>
 
@@ -921,9 +949,7 @@ const CompareRacketsPage: React.FC = () => {
                   <RacketRadarChart metrics={comparisonMetrics} />
                 )}
 
-                <MarkdownContent>
-                  {memoizedMarkdownContent}
-                </MarkdownContent>
+                <MarkdownContent>{memoizedMarkdownContent}</MarkdownContent>
               </ResultSection>
             </ModalContent>
           </ModalOverlay>

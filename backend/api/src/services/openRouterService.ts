@@ -62,7 +62,7 @@ export class OpenRouterService {
     this.client = axios.create({
       baseURL: 'https://openrouter.ai/api/v1',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
+        Authorization: `Bearer ${this.apiKey}`,
         'HTTP-Referer': this.appUrl,
         'X-Title': this.appName,
         'Content-Type': 'application/json',
@@ -91,10 +91,10 @@ export class OpenRouterService {
     // Intentar cada modelo en orden
     for (let modelIndex = 0; modelIndex < this.FREE_MODELS.length; modelIndex++) {
       const model = this.FREE_MODELS[modelIndex];
-      
+
       try {
         logger.info(`🤖 Attempting model ${modelIndex + 1}/${this.FREE_MODELS.length}: ${model}`);
-        
+
         const response = await this.client.post<OpenRouterResponse>('/chat/completions', {
           model: model,
           messages: [
@@ -108,7 +108,7 @@ export class OpenRouterService {
         });
 
         const content = response.data.choices[0]?.message?.content;
-        
+
         if (!content) {
           throw new Error('Empty response from model');
         }
@@ -118,19 +118,20 @@ export class OpenRouterService {
         if (response.data.usage) {
           logger.info(
             `📊 Tokens used: ${response.data.usage.total_tokens} ` +
-            `(prompt: ${response.data.usage.prompt_tokens}, ` +
-            `completion: ${response.data.usage.completion_tokens})`
+              `(prompt: ${response.data.usage.prompt_tokens}, ` +
+              `completion: ${response.data.usage.completion_tokens})`
           );
         }
 
         return content;
       } catch (error: any) {
         lastError = error;
-        const errorMessage = error.response?.data?.error?.message || error.message || 'Unknown error';
-        
+        const errorMessage =
+          error.response?.data?.error?.message || error.message || 'Unknown error';
+
         logger.warn(
           `❌ Model ${model} failed: ${errorMessage}. ` +
-          `Trying next model (${modelIndex + 1}/${this.FREE_MODELS.length})...`
+            `Trying next model (${modelIndex + 1}/${this.FREE_MODELS.length})...`
         );
 
         // Si no es el último modelo, continuar con el siguiente
@@ -143,10 +144,11 @@ export class OpenRouterService {
     }
 
     // Si llegamos aquí, todos los modelos fallaron
-    const errorMessage = lastError?.response?.data?.error?.message || 
-                        lastError?.message || 
-                        'Error desconocido de OpenRouter';
-    
+    const errorMessage =
+      lastError?.response?.data?.error?.message ||
+      lastError?.message ||
+      'Error desconocido de OpenRouter';
+
     logger.error('❌ All models failed. Last error:', errorMessage);
     throw new Error(`Error al generar contenido con IA: ${errorMessage}`);
   }
@@ -175,10 +177,12 @@ export class OpenRouterService {
 
     for (let modelIndex = 0; modelIndex < this.FREE_MODELS.length; modelIndex++) {
       const model = this.FREE_MODELS[modelIndex];
-      
+
       try {
-        logger.info(`🤖 Comparing rackets with model ${modelIndex + 1}/${this.FREE_MODELS.length}: ${model}`);
-        
+        logger.info(
+          `🤖 Comparing rackets with model ${modelIndex + 1}/${this.FREE_MODELS.length}: ${model}`
+        );
+
         const response = await this.client.post<OpenRouterResponse>('/chat/completions', {
           model: model,
           messages: [
@@ -192,7 +196,7 @@ export class OpenRouterService {
         });
 
         const fullText = response.data.choices[0]?.message?.content;
-        
+
         if (!fullText) {
           throw new Error('Empty response from model');
         }
@@ -204,11 +208,12 @@ export class OpenRouterService {
         return { textComparison, metrics };
       } catch (error: any) {
         lastError = error;
-        const errorMessage = error.response?.data?.error?.message || error.message || 'Unknown error';
-        
+        const errorMessage =
+          error.response?.data?.error?.message || error.message || 'Unknown error';
+
         logger.warn(
           `❌ Model ${model} failed for comparison: ${errorMessage}. ` +
-          `Trying next model (${modelIndex + 1}/${this.FREE_MODELS.length})...`
+            `Trying next model (${modelIndex + 1}/${this.FREE_MODELS.length})...`
         );
 
         // Si no es el último modelo, continuar con el siguiente
@@ -220,10 +225,11 @@ export class OpenRouterService {
     }
 
     // Si llegamos aquí, todos los modelos fallaron
-    const errorMessage = lastError?.response?.data?.error?.message || 
-                        lastError?.message || 
-                        'Error desconocido de OpenRouter';
-    
+    const errorMessage =
+      lastError?.response?.data?.error?.message ||
+      lastError?.message ||
+      'Error desconocido de OpenRouter';
+
     logger.error('❌ All models failed for comparison. Last error:', errorMessage);
     throw new Error(`Error al generar la comparación con IA: ${errorMessage}`);
   }
@@ -235,12 +241,15 @@ export class OpenRouterService {
 Nombre: ${r.nombre}
 Marca: ${r.marca || r.caracteristicas_marca || 'N/A'}
 Modelo: ${r.modelo || 'N/A'}
+Enlace: ${r.enlace || r.url || 'N/A'}
 Forma: ${r.caracteristicas_forma || r.caracteristicas_formato || 'N/A'}
 Goma: ${r.caracteristicas_nucleo || 'N/A'}
 Cara/Fibra: ${r.caracteristicas_cara || 'N/A'}
 Balance: ${r.caracteristicas_balance || 'N/A'}
 Dureza: ${r.caracteristicas_dureza || 'N/A'}
-Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}`
+Peso: ${r.peso ? `${r.peso}g` : 'N/A'}
+Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}
+Precio: ${r.precio_actual ? `€${r.precio_actual}` : 'N/A'}`
       )
       .join('\n\n');
   }
@@ -263,24 +272,78 @@ Por favor, ten en cuenta estas características en la sección "Veredicto Situac
   }
 
   private buildCombinedPrompt(rackets: Racket[], racketsInfo: string, userContext: string): string {
-    const racketNames = rackets.map((r: any, i) => `${i + 1}. ${r.nombre || `Pala ${i + 1}`}`).join('\n');
+    const racketNames = rackets
+      .map((r: any, i) => `${i + 1}. ${r.nombre || `Pala ${i + 1}`}`)
+      .join('\n');
 
-    return `Eres un analista profesional de pádel. Compara estas ${rackets.length} palas de forma técnica y objetiva.
+    // Build Testea metrics info for each racket
+    const testeaInfo = rackets
+      .map((r: any, i) => {
+        const hasCertification = r.testea_potencia !== undefined && r.testea_potencia !== null;
+        if (hasCertification) {
+          return `PALA ${i + 1} - MÉTRICAS CERTIFICADAS TESTEA PÁDEL:
+- Potencia: ${r.testea_potencia}/10
+- Control: ${r.testea_control}/10
+- Manejabilidad: ${r.testea_manejabilidad}/10
+- Confort: ${r.testea_confort}/10
+- Iniciación: ${r.testea_iniciacion || 'N/A'}/10`;
+        } else {
+          return `PALA ${i + 1} - SIN CERTIFICACIÓN TESTEA (usar estimaciones basadas en especificaciones físicas)`;
+        }
+      })
+      .join('\n\n');
+
+    return `CONTEXTO DEL SISTEMA:
+Eres el motor de comparación de "Smashly", una plataforma experta en palas de pádel que prioriza la salud biomecánica del jugador y la transparencia científica.
+
+PRINCIPIOS IRRENUNCIABLES:
+1. Seguridad Biomecánica Primero: Destaca riesgos potenciales de lesión (palas duras, balance alto, peso excesivo)
+2. Verdad Objetiva: Prioriza métricas certificadas de Testea Pádel sobre estimaciones
+3. Transparencia Total: Indica claramente qué datos son certificados vs estimados
 
 PALAS A COMPARAR:
 ${racketNames}
 
-DATOS TÉCNICOS:
+NOTA IMPORTANTE: Cada pala incluye un "Enlace" que es la URL oficial del producto. Usa este enlace como referencia definitiva para identificar exactamente a qué pala te refieres. Los enlaces garantizan que estás comparando las palas correctas.
+
+DATOS TÉCNICOS COMPLETOS:
 ${racketsInfo}
+
+${testeaInfo}
 
 ${userContext}
 
-INSTRUCCIONES ESTRICTAS:
-1. Genera una comparación técnica en formato markdown
-2. Incluye: resumen ejecutivo, análisis técnico, tabla comparativa, perfiles recomendados y conclusión
-3. Sé conciso pero informativo (máximo 500 palabras total)
-4. Usa emojis para mejorar la legibilidad
-5. Al final, proporciona métricas numéricas en JSON
+INSTRUCCIONES PARA LA COMPARACIÓN:
+
+1. **Estructura de la Comparación** (formato markdown):
+   - 📊 **Resumen Ejecutivo**: Diferencia clave entre las palas en 2-3 líneas
+   - 🔬 **Análisis Técnico por Categorías**:
+     * Potencia y Salida de Bola
+     * Control y Precisión
+     * Manejabilidad y Peso
+     * Confort y Prevención de Lesiones (CRÍTICO)
+   - 📋 **Tabla Comparativa**: Características clave lado a lado
+   - 👤 **Perfiles Recomendados**: Qué tipo de jugador se beneficia de cada pala
+   - 🛡️ **Consideraciones Biomecánicas**: Advertencias sobre lesiones para cada pala
+   - ✅ **Conclusión Final**: Recomendación basada en el perfil del usuario (si se proporcionó)
+
+2. **Consideraciones Biomecánicas OBLIGATORIAS**:
+   - Menciona si alguna pala es dura (riesgo de epicondilitis)
+   - Menciona si alguna tiene balance alto (mayor estrés en brazo/hombro)
+   - Menciona si alguna es pesada (>370g puede causar fatiga y lesiones)
+   - Destaca si alguna tiene tecnología anti-vibración
+   - Recomienda palas más seguras para jugadores con lesiones previas
+
+3. **Uso de Métricas Testea**:
+   - Si una pala tiene certificación Testea, ÚSALA y menciona que es "dato certificado"
+   - Si no tiene certificación, estima basándote en especificaciones físicas y menciona que es "estimación"
+   - Diferencia claramente entre datos duros y estimaciones
+
+4. **Formato y Estilo**:
+   - Usa emojis para mejorar legibilidad
+   - Sé conciso pero informativo (máximo 600 palabras)
+   - Usa negritas para destacar puntos clave
+   - Incluye advertencias ⚠️ para riesgos biomecánicos
 
 FORMATO DE RESPUESTA OBLIGATORIO:
 Responde con markdown seguido de un separador y luego JSON de métricas.
@@ -290,16 +353,18 @@ Estructura:
 
 ===METRICS===
 [
-  {"racketName": "Nombre exacto pala 1", "potencia": 8, "control": 7, "salidaDeBola": 6, "manejabilidad": 9, "puntoDulce": 7},
-  {"racketName": "Nombre exacto pala 2", "potencia": 9, "control": 6, "salidaDeBola": 5, "manejabilidad": 7, "puntoDulce": 6}
+{"racketName": "Nombre exacto pala 1", "potencia": 8, "control": 7, "salidaDeBola": 6, "manejabilidad": 9, "puntoDulce": 7},
+{"racketName": "Nombre exacto pala 2", "potencia": 9, "control": 6, "salidaDeBola": 5, "manejabilidad": 7, "puntoDulce": 6}
 ]
 
 MÉTRICAS (escala 1-10):
-- Potencia: Velocidad de bola
-- Control: Precisión en golpes
-- Salida de Bola: Facilidad de impulsión
-- Manejabilidad: Agilidad y manejo
-- Punto Dulce: Tamaño del área efectiva
+- Potencia: Velocidad de bola generada
+- Control: Precisión y dominio del golpeo
+- Salida de Bola: Facilidad de impulsión (correlaciona con dureza)
+- Manejabilidad: Agilidad y facilidad de manejo
+- Punto Dulce: Tamaño del área efectiva de golpeo
+
+IMPORTANTE: Si una pala tiene métricas Testea certificadas, usa esos valores exactos. Si no, estima basándote en las especificaciones físicas.
 
 RESPONDE AHORA:`;
   }
