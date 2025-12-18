@@ -3,22 +3,46 @@ import { BasicFormData, AdvancedFormData } from '../types/recommendation';
 import logger from '../config/logger';
 
 /**
- * Service for intelligently filtering rackets before sending to Gemini
- * Reduces 831 rackets to 30-50 most relevant candidates
+ * Service for intelligently filtering rackets before sending to AI
+ * PRIORITY 1: Biomechanical safety (non-negotiable)
+ * PRIORITY 2: Performance match (level, style, preferences)
  */
 export class RacketFilterService {
   /**
    * Main filtering function - applies cascading filters
+   * CRITICAL: Biomechanical filter runs FIRST to ensure player safety
    */
-  static filterRackets(
-    allRackets: Racket[],
-    profile: BasicFormData | AdvancedFormData
-  ): Racket[] {
+  static filterRackets(allRackets: Racket[], profile: BasicFormData | AdvancedFormData): Racket[] {
     logger.info(`🔍 Starting smart filtering from ${allRackets.length} rackets`);
 
     let filtered = [...allRackets];
+    const initialCount = filtered.length;
 
-    // 1. Filter by budget (already done in recommendationService, but ensure it's applied)
+    // ===== PHASE 1: BIOMECHANICAL FILTER (NON-NEGOTIABLE) =====
+    // This filter runs FIRST to prioritize player health
+    const biomechanicalResult = this.applyBiomechanicalFilter(filtered, profile);
+    filtered = biomechanicalResult.safe;
+
+    logger.info(
+      `🛡️  BIOMECHANICAL FILTER: ${biomechanicalResult.discarded.length} rackets discarded for safety`
+    );
+    if (biomechanicalResult.discarded.length > 0) {
+      logger.debug(`   Reasons: ${JSON.stringify(biomechanicalResult.reasons)}`);
+    }
+    logger.info(
+      `✅ Safe rackets: ${filtered.length} (${Math.round((filtered.length / initialCount) * 100)}% of catalog)`
+    );
+
+    // If biomechanical filter leaves us with too few options, warn but continue
+    if (filtered.length < 5) {
+      logger.warn(
+        `⚠️  Biomechanical filter left only ${filtered.length} safe options. Consider relaxing constraints.`
+      );
+    }
+
+    // ===== PHASE 2: PERFORMANCE FILTERS =====
+
+    // 1. Filter by budget
     filtered = this.filterByBudget(filtered, profile.budget);
     logger.info(`💰 After budget filter: ${filtered.length} rackets`);
 
@@ -26,32 +50,166 @@ export class RacketFilterService {
     filtered = this.filterByLevel(filtered, profile.level);
     logger.info(`🎯 After level filter: ${filtered.length} rackets`);
 
-    // 3. Filter by injuries/physical needs
-    if (profile.injuries && profile.injuries !== 'no') {
-      filtered = this.filterByInjuries(filtered);
-      logger.info(`🏥 After injury filter: ${filtered.length} rackets`);
-    }
-
-    // 4. Advanced filtering for advanced forms
+    // 3. Advanced filtering for advanced forms
     if ('play_style' in profile) {
       filtered = this.filterByPlayStyle(filtered, profile);
       logger.info(`⚡ After play style filter: ${filtered.length} rackets`);
     }
 
-    // 5. Calculate match scores for remaining rackets
+    // 4. Calculate match scores for remaining rackets
     const scored = filtered.map(racket => ({
       racket,
       score: this.calculateMatchScore(racket, profile),
     }));
 
-    // 6. Sort by score and take top candidates
+    // 5. Sort by score and take top candidates
     scored.sort((a, b) => b.score - a.score);
 
-    // 7. Ensure diversity (different brands, price ranges)
+    // 6. Ensure diversity (different brands, price ranges)
     const topCandidates = this.ensureDiversity(scored, 40);
 
     logger.info(`✅ Final filtered set: ${topCandidates.length} rackets`);
     return topCandidates.map(s => s.racket);
+  }
+
+  /**
+   * BIOMECHANICAL FILTER (PHASE 1 - Strategic Report)
+   * Descarts rackets that pose injury risk based on user profile
+   * This is a NON-NEGOTIABLE filter that prioritizes player health
+   */
+  private static applyBiomechanicalFilter(
+    rackets: Racket[],
+    profile: BasicFormData | AdvancedFormData
+  ): {
+    safe: Racket[];
+    discarded: Racket[];
+    reasons: Record<string, number>;
+  } {
+    const safe: Racket[] = [];
+    const discarded: Racket[] = [];
+    const reasons: Record<string, number> = {};
+
+    const hasInjuries = profile.injuries && profile.injuries !== 'no';
+    const isBeginnerLevel =
+      profile.level?.toLowerCase().includes('principiante') ||
+      profile.level?.toLowerCase().includes('iniciación');
+
+    // Calculate safe weight range based on profile
+    const safeWeightRange = this.calculateSafeWeightRange(profile);
+
+    for (const racket of rackets) {
+      const r: any = racket;
+      const discardReasons: string[] = [];
+
+      // Extract racket characteristics
+      const dureza = (r.caracteristicas_dureza || '').toLowerCase();
+      const balance = (r.caracteristicas_balance || '').toLowerCase();
+      const forma = (r.caracteristicas_forma || '').toLowerCase();
+      const peso = r.peso || 365;
+      const hasAntiVibration = r.tiene_antivibracion || false;
+      const confort = r.testea_confort || 0;
+
+      // RULE 1: If user has injury history
+      if (hasInjuries) {
+        // Discard hard rackets (transmit more vibration)
+        if (dureza.includes('dura') || dureza.includes('hard')) {
+          discardReasons.push('dureza_dura_con_lesiones');
+        }
+
+        // Discard high balance rackets (more stress on arm)
+        if (balance.includes('alto') || balance.includes('high')) {
+          discardReasons.push('balance_alto_con_lesiones');
+        }
+
+        // Discard rackets without anti-vibration tech
+        if (!hasAntiVibration) {
+          discardReasons.push('sin_antivibracion_con_lesiones');
+        }
+
+        // Discard rackets with low comfort score (if Testea data available)
+        if (confort > 0 && confort < 7) {
+          discardReasons.push('confort_bajo_con_lesiones');
+        }
+      }
+
+      // RULE 2: If user is beginner level
+      if (isBeginnerLevel) {
+        // Discard diamond shape (small sweet spot, hard to control)
+        if (forma.includes('diamante') || forma.includes('diamond')) {
+          discardReasons.push('diamante_para_principiante');
+        }
+
+        // Discard high balance (hard to maneuver)
+        if (balance.includes('alto') || balance.includes('high')) {
+          discardReasons.push('balance_alto_para_principiante');
+        }
+
+        // Discard heavy rackets (>370g for beginners regardless of gender)
+        if (peso > 370) {
+          discardReasons.push('peso_excesivo_para_principiante');
+        }
+      }
+
+      // RULE 3: Safe weight range (adjusted by gender, condition, injuries)
+      if (peso < safeWeightRange.min || peso > safeWeightRange.max) {
+        discardReasons.push(
+          `peso_fuera_rango_seguro_${safeWeightRange.min}-${safeWeightRange.max}g`
+        );
+      }
+
+      // Classify racket
+      if (discardReasons.length > 0) {
+        discarded.push(racket);
+        // Count reasons for logging
+        discardReasons.forEach(reason => {
+          reasons[reason] = (reasons[reason] || 0) + 1;
+        });
+      } else {
+        safe.push(racket);
+      }
+    }
+
+    return { safe, discarded, reasons };
+  }
+
+  /**
+   * Calculate safe weight range based on user profile
+   * Strategic Report baseline: 360-365g (men), 355g (women)
+   * Adjusted by: physical condition, injuries, level
+   */
+  private static calculateSafeWeightRange(profile: BasicFormData | AdvancedFormData): {
+    min: number;
+    max: number;
+  } {
+    // Baseline by gender (Strategic Report convention)
+    let baselineMax = 365; // Default for men
+    if (profile.gender === 'femenino') {
+      baselineMax = 360;
+    }
+
+    let min = 340; // Absolute minimum for adults
+    let max = baselineMax;
+
+    // Adjust for physical condition
+    if (profile.physical_condition === 'ocasional') {
+      max -= 5; // Reduce 5-10g for occasional athletes
+    }
+
+    // Adjust for skill level
+    const isBeginnerLevel =
+      profile.level?.toLowerCase().includes('principiante') ||
+      profile.level?.toLowerCase().includes('iniciación');
+    if (isBeginnerLevel) {
+      max = Math.min(max, profile.gender === 'femenino' ? 360 : 365);
+    }
+
+    // Adjust for injuries (most restrictive)
+    const hasInjuries = profile.injuries && profile.injuries !== 'no';
+    if (hasInjuries) {
+      max = Math.min(max, profile.gender === 'femenino' ? 355 : 360);
+    }
+
+    return { min, max };
   }
 
   /**
@@ -86,7 +244,7 @@ export class RacketFilterService {
     };
 
     const acceptedLevels = levelMap[level.toLowerCase()] || [];
-    
+
     return rackets.filter((r: any) => {
       const racketLevel = (r.caracteristicas_nivel_de_juego || '').toLowerCase();
       return acceptedLevels.some(lvl => racketLevel.includes(lvl));
@@ -100,11 +258,11 @@ export class RacketFilterService {
     return rackets.filter((r: any) => {
       const dureza = (r.caracteristicas_dureza || '').toLowerCase();
       const balance = (r.caracteristicas_balance || '').toLowerCase();
-      
+
       // Prefer soft rackets and low/medium balance
       const isSoft = dureza.includes('blanda') || dureza.includes('soft');
       const isLowBalance = balance.includes('bajo') || balance.includes('medio');
-      
+
       return isSoft || isLowBalance;
     });
   }
@@ -112,12 +270,9 @@ export class RacketFilterService {
   /**
    * Filter by play style (advanced form only)
    */
-  private static filterByPlayStyle(
-    rackets: Racket[],
-    profile: AdvancedFormData
-  ): Racket[] {
+  private static filterByPlayStyle(rackets: Racket[], profile: AdvancedFormData): Racket[] {
     const playStyle = profile.play_style?.toLowerCase();
-    
+
     if (!playStyle) return rackets;
 
     return rackets.filter((r: any) => {
@@ -149,7 +304,7 @@ export class RacketFilterService {
     // 1. Level match (40 points)
     const racketLevel = (racket.caracteristicas_nivel_de_juego || '').toLowerCase();
     const userLevel = profile.level.toLowerCase();
-    
+
     if (racketLevel.includes(userLevel)) {
       score += 40;
     } else if (
@@ -164,16 +319,17 @@ export class RacketFilterService {
     if (racket.precio_actual) {
       const budgetStr = String(profile.budget);
       let maxBudget = 0;
-      
+
       if (budgetStr.includes('-')) {
         maxBudget = parseInt(budgetStr.split('-')[1]);
       } else if (!budgetStr.includes('+')) {
         maxBudget = parseInt(budgetStr);
       }
-      
+
       if (maxBudget > 0) {
         const priceRatio = racket.precio_actual / maxBudget;
-        if (priceRatio <= 0.8) score += 20; // Good value
+        if (priceRatio <= 0.8)
+          score += 20; // Good value
         else if (priceRatio <= 1.0) score += 15; // Within budget
       }
     }
@@ -184,9 +340,15 @@ export class RacketFilterService {
       const forma = (racket.caracteristicas_forma || '').toLowerCase();
       const balance = (racket.caracteristicas_balance || '').toLowerCase();
 
-      if (playStyle.includes('ofensivo') && (forma.includes('diamante') || balance.includes('alto'))) {
+      if (
+        playStyle.includes('ofensivo') &&
+        (forma.includes('diamante') || balance.includes('alto'))
+      ) {
         score += 20;
-      } else if (playStyle.includes('defensivo') && (forma.includes('redonda') || balance.includes('bajo'))) {
+      } else if (
+        playStyle.includes('defensivo') &&
+        (forma.includes('redonda') || balance.includes('bajo'))
+      ) {
         score += 20;
       } else if (playStyle.includes('polivalente')) {
         score += 15;

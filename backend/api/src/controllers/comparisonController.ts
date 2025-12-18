@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { GeminiService } from '../services/geminiService';
+import { OpenRouterService } from '../services/openRouterService';
 import { RacketService } from '../services/racketService';
 import { ComparisonService } from '../services/comparisonService';
 import { RequestWithUser } from '../types';
 import logger from '../config/logger';
 
-const geminiService = new GeminiService();
+const openRouterService = new OpenRouterService();
 
 export class ComparisonController {
   static async compareRackets(req: Request, res: Response) {
@@ -33,11 +33,10 @@ export class ComparisonController {
         });
       }
 
-      const comparisonResult = await geminiService.compareRackets(rackets, userProfile);
+      const comparisonResult = await openRouterService.compareRackets(rackets, userProfile);
 
       return res.json({ 
-        comparison: comparisonResult.textComparison,
-        metrics: comparisonResult.metrics 
+        comparison: comparisonResult
       });
     } catch (error: any) {
       logger.error('Error in compareRackets controller:', error);

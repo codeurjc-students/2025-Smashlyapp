@@ -1,4 +1,5 @@
 import { API_URL, getCommonHeaders } from '../config/api';
+import { ComparisonResult } from '../types/racket';
 
 export interface RacketMetrics {
   racketName: string;
@@ -10,15 +11,14 @@ export interface RacketMetrics {
 }
 
 export interface ComparisonResponse {
-  comparison: string;
-  metrics?: RacketMetrics[];
+  comparison: ComparisonResult;
 }
 
 export interface SavedComparison {
   id: string;
   user_id: string;
   racket_ids: number[];
-  comparison_text: string;
+  comparison_text: string; // Legacy format (markdown string) or JSON string of ComparisonResult
   metrics?: RacketMetrics[];
   share_token?: string;
   is_public?: boolean;
@@ -68,7 +68,7 @@ export const ComparisonService = {
     return response.json();
   },
 
-  saveComparison: async (racketIds: number[], comparisonText: string, metrics?: RacketMetrics[]): Promise<SavedComparison> => {
+  saveComparison: async (racketIds: number[], comparison: ComparisonResult): Promise<SavedComparison> => {
     const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
     const url = `${baseUrl}/api/v1/comparison/save`;
 
@@ -77,8 +77,8 @@ export const ComparisonService = {
       headers: getCommonHeaders(),
       body: JSON.stringify({
         racketIds,
-        comparisonText,
-        metrics,
+        comparisonText: JSON.stringify(comparison), // Serialize structured comparison
+        metrics: comparison.metrics,
       }),
     });
 

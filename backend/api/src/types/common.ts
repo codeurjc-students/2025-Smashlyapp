@@ -90,4 +90,9 @@ export interface ApiConfig {
   gemini?: {
     apiKey: string;
   };
+  openrouter?: {
+    apiKey: string;
+    appName: string;
+    appUrl: string;
+  };
 }
