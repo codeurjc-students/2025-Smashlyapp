@@ -56,7 +56,7 @@ export class OpenRouterService {
 
   // Modelos gratuitos en orden de preferencia
   private readonly FREE_MODELS = [
-    'google/gemini-3-flash-preview',
+    'google/gemini-2.0-flash-exp:free',
     'meta-llama/llama-3.3-70b-instruct:free',
     'mistralai/mistral-nemo:free',
     'qwen/qwen-2.5-7b-instruct:free',
