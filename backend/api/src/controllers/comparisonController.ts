@@ -36,8 +36,7 @@ export class ComparisonController {
       const comparisonResult = await openRouterService.compareRackets(rackets, userProfile);
 
       return res.json({ 
-        comparison: comparisonResult.textComparison,
-        metrics: comparisonResult.metrics 
+        comparison: comparisonResult
       });
     } catch (error: any) {
       logger.error('Error in compareRackets controller:', error);

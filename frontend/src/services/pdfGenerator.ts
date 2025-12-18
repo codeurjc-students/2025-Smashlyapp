@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { Racket } from '../types/racket';
+import { Racket, ComparisonResult } from '../types/racket';
 
 // --- CONFIGURACIÓN DE DISEÑO ---
 const THEME = {
@@ -19,7 +19,7 @@ const THEME = {
 
 interface PdfOptions {
   rackets: Racket[];
-  comparisonText: string;
+  comparison: ComparisonResult;
   proxyUrlBase: string;
 }
 
@@ -43,7 +43,7 @@ export class RacketPdfGenerator {
   // --- MÉTODOS PÚBLICOS ---
 
   public async generatePDF(options: PdfOptions): Promise<void> {
-    const { rackets, comparisonText } = options;
+    const { rackets, comparison } = options;
 
     // 1. Cargar imágenes
     const images = await this.loadImages(rackets, options.proxyUrlBase);
@@ -51,16 +51,30 @@ export class RacketPdfGenerator {
     // 2. Portada (Cover Page)
     this.renderCoverPage(rackets, images);
 
-    // 3. Comparativa Técnica (Tabla Visual)
-    this.renderComparisonTable(comparisonText);
+    // 3. Resumen Ejecutivo
+    this.renderExecutiveSummary(comparison.executiveSummary);
 
-    // 4. Análisis de Texto (Eliminando sección 2 y limpiando asteriscos)
-    this.renderAnalysisContent(comparisonText);
+    // 4. Tabla Comparativa
+    if (comparison.comparisonTable) {
+      this.renderComparisonTableFromMarkdown(comparison.comparisonTable);
+    }
 
-    // 5. Pie de página y numeración
+    // 5. Análisis Técnico
+    this.renderTechnicalAnalysis(comparison.technicalAnalysis);
+
+    // 6. Perfiles Recomendados
+    this.renderRecommendedProfiles(comparison.recommendedProfiles);
+
+    // 7. Consideraciones Biomecánicas
+    this.renderBiomechanicalConsiderations(comparison.biomechanicalConsiderations);
+
+    // 8. Conclusión
+    this.renderConclusion(comparison.conclusion);
+
+    // 9. Pie de página y numeración
     this.addPageNumbers();
 
-    // 6. Guardar
+    // 10. Guardar
     this.doc.save(`Smashly-Comparativa-${new Date().toISOString().split('T')[0]}.pdf`);
   }
 
@@ -160,9 +174,11 @@ export class RacketPdfGenerator {
     this.currentY += 100;
   }
 
-  private renderComparisonTable(markdown: string) {
+  private renderComparisonTableFromMarkdown(markdown: string) {
     const tableData = this.extractTableFromMarkdown(markdown);
     if (!tableData) return;
+
+    this.checkPageBreak(60);
 
     this.doc.setFontSize(14);
     this.doc.setTextColor(
@@ -171,7 +187,7 @@ export class RacketPdfGenerator {
       THEME.colors.primary[2]
     );
     this.doc.setFont(THEME.fonts.header, 'bold');
-    this.doc.text('ESPECIFICACIONES TÉCNICAS', this.margin, this.currentY);
+    this.doc.text('TABLA COMPARATIVA', this.margin, this.currentY);
     this.currentY += 8;
 
     // Limpieza de datos de la tabla: quitar ** de las celdas
@@ -218,73 +234,113 @@ export class RacketPdfGenerator {
     this.currentY = this.doc.lastAutoTable.finalY + 15;
   }
 
-  private renderAnalysisContent(markdown: string) {
-    // 1. Eliminamos la tabla cruda del texto para que no se duplique
-    let cleanText = markdown.replace(/\|.*\|[\r\n]/g, '').replace(/-{3,}/g, '');
+  private renderExecutiveSummary(summary: string) {
+    this.checkPageBreak(40);
 
-    // 2. ELIMINAR SECCIÓN 2 (Headers y contenido vacío asociado a la tabla)
-    // Buscamos patrones como "# 2. Tabla..." o "# 2. Especificaciones..." y su contenido inmediato
-    // Esta regex busca un header que empiece por "2." y elimina hasta el siguiente header "#"
-    // Nota: Asumimos que la tabla visual reemplaza esta sección.
-    cleanText = cleanText.replace(/#+\s*2\..*?(?=\n#|\z)/gs, '');
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(
+      THEME.colors.primary[0],
+      THEME.colors.primary[1],
+      THEME.colors.primary[2]
+    );
+    this.doc.setFont(THEME.fonts.header, 'bold');
+    this.doc.text('RESUMEN EJECUTIVO', this.margin, this.currentY);
+    this.currentY += 10;
 
-    // Limpiamos saltos de línea excesivos resultantes de la eliminación
-    const lines = cleanText.split('\n').filter(l => l.trim() !== '');
+    this.printRichText(summary, 10, false);
+    this.currentY += 10;
+  }
 
-    lines.forEach(line => {
-      line = line.trim();
-      if (!line) return;
+  private renderTechnicalAnalysis(sections: any[]) {
+    if (!sections || sections.length === 0) return;
 
-      this.checkPageBreak(20);
+    this.checkPageBreak(40);
 
-      if (line.startsWith('#')) {
-        // Headers
-        const level = line.match(/^#+/)?.[0].length || 0;
-        const text = line.replace(/^#+\s*/, '').replace(/\*\*/g, '');
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(
+      THEME.colors.primary[0],
+      THEME.colors.primary[1],
+      THEME.colors.primary[2]
+    );
+    this.doc.setFont(THEME.fonts.header, 'bold');
+    this.doc.text('ANÁLISIS TÉCNICO', this.margin, this.currentY);
+    this.currentY += 10;
 
-        if (level === 1) {
-          this.doc.addPage();
-          this.currentY = this.margin;
-          this.doc.setFontSize(16);
-          this.doc.setTextColor(
-            THEME.colors.primary[0],
-            THEME.colors.primary[1],
-            THEME.colors.primary[2]
-          );
-          this.doc.setFont(THEME.fonts.header, 'bold');
-          this.doc.text(text.toUpperCase(), this.margin, this.currentY);
+    sections.forEach(section => {
+      this.checkPageBreak(30);
 
-          // Línea decorativa
-          this.doc.setDrawColor(
-            THEME.colors.primary[0],
-            THEME.colors.primary[1],
-            THEME.colors.primary[2]
-          );
-          this.doc.setLineWidth(0.5);
-          this.doc.line(this.margin, this.currentY + 2, this.margin + 20, this.currentY + 2);
+      // Section title
+      this.doc.setFontSize(12);
+      this.doc.setTextColor(
+        THEME.colors.secondary[0],
+        THEME.colors.secondary[1],
+        THEME.colors.secondary[2]
+      );
+      this.doc.setFont(THEME.fonts.header, 'bold');
+      this.doc.text(section.title, this.margin, this.currentY);
+      this.currentY += 8;
 
-          this.currentY += 15;
-        } else {
-          this.currentY += 5;
-          this.doc.setFontSize(12);
-          this.doc.setTextColor(
-            THEME.colors.secondary[0],
-            THEME.colors.secondary[1],
-            THEME.colors.secondary[2]
-          );
-          this.doc.setFont(THEME.fonts.header, 'bold');
-          this.doc.text(text, this.margin, this.currentY);
-          this.currentY += 8;
-        }
-      } else if (line.startsWith('-') || line.startsWith('*')) {
-        // Listas
-        const text = line.replace(/^[-*]\s*/, '');
-        this.printRichText(text, 10, true);
-      } else {
-        // Párrafos normales
-        this.printRichText(line, 10, false);
-      }
+      // Section content
+      this.printRichText(section.content, 10, false);
+      this.currentY += 5;
     });
+  }
+
+  private renderRecommendedProfiles(content: string) {
+    if (!content) return;
+
+    this.checkPageBreak(40);
+
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(
+      THEME.colors.primary[0],
+      THEME.colors.primary[1],
+      THEME.colors.primary[2]
+    );
+    this.doc.setFont(THEME.fonts.header, 'bold');
+    this.doc.text('PERFILES RECOMENDADOS', this.margin, this.currentY);
+    this.currentY += 10;
+
+    this.printRichText(content, 10, false);
+    this.currentY += 10;
+  }
+
+  private renderBiomechanicalConsiderations(content: string) {
+    if (!content) return;
+
+    this.checkPageBreak(40);
+
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(
+      THEME.colors.primary[0],
+      THEME.colors.primary[1],
+      THEME.colors.primary[2]
+    );
+    this.doc.setFont(THEME.fonts.header, 'bold');
+    this.doc.text('CONSIDERACIONES BIOMECÁNICAS', this.margin, this.currentY);
+    this.currentY += 10;
+
+    this.printRichText(content, 10, false);
+    this.currentY += 10;
+  }
+
+  private renderConclusion(content: string) {
+    if (!content) return;
+
+    this.checkPageBreak(40);
+
+    this.doc.setFontSize(14);
+    this.doc.setTextColor(
+      THEME.colors.primary[0],
+      THEME.colors.primary[1],
+      THEME.colors.primary[2]
+    );
+    this.doc.setFont(THEME.fonts.header, 'bold');
+    this.doc.text('CONCLUSIÓN', this.margin, this.currentY);
+    this.currentY += 10;
+
+    this.printRichText(content, 10, false);
+    this.currentY += 10;
   }
 
   // --- UTILIDADES INTERNAS MEJORADAS ---

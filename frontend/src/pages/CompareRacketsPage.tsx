@@ -7,14 +7,14 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
 import { ComparisonService } from '../services/comparisonService';
 import { ListService } from '../services/listService';
-import { Racket } from '../types/racket';
+import { Racket, ComparisonResult, RacketMetrics, ComparisonSection } from '../types/racket';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import toast from 'react-hot-toast';
 import Fuse from 'fuse.js';
 // Importamos el nuevo servicio
 import { RacketPdfGenerator } from '../services/pdfGenerator';
-import RacketRadarChart, { RacketMetrics } from '../components/features/RacketRadarChart';
+import RacketRadarChart from '../components/features/RacketRadarChart';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -509,7 +509,7 @@ const CompareRacketsPage: React.FC = () => {
   const { addTask, updateTaskProgress, completeTask, failTask, tasks } = useBackgroundTasks();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRackets, setSelectedRackets] = useState<Racket[]>([]);
-  const [comparisonResult, setComparisonResult] = useState<string | null>(null);
+  const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
   const [comparisonMetrics, setComparisonMetrics] = useState<RacketMetrics[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
@@ -564,11 +564,29 @@ const CompareRacketsPage: React.FC = () => {
       !modalManuallyClosed &&
       !comparisonResult
     ) {
-      const { comparison, metrics } = completedComparisonTask.result;
-      if (comparison) {
-        setComparisonResult(comparison);
-        setComparisonMetrics(metrics || null);
-        lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como mostrada
+      try {
+        const { comparison, metrics } = completedComparisonTask.result;
+        
+        // Verificar que comparison tenga la estructura correcta (ComparisonResult)
+        // Debe ser un objeto con las propiedades requeridas
+        if (
+          comparison &&
+          typeof comparison === 'object' &&
+          'executiveSummary' in comparison &&
+          'technicalAnalysis' in comparison &&
+          'metrics' in comparison
+        ) {
+          setComparisonResult(comparison as ComparisonResult);
+          setComparisonMetrics(comparison.metrics || metrics || null);
+          lastShownTaskIdRef.current = completedComparisonTask.id;
+        } else {
+          // Si el formato es antiguo, simplemente ignorar esta tarea
+          console.warn('Ignoring old format comparison task:', completedComparisonTask.id);
+          lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista para no intentar de nuevo
+        }
+      } catch (error) {
+        console.error('Error loading comparison from background task:', error);
+        lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista
       }
     }
   }, [tasks, comparisonResult, modalManuallyClosed]);
@@ -615,10 +633,64 @@ const CompareRacketsPage: React.FC = () => {
     loadFavorites();
   }, [isAuthenticated]);
 
-  // Memoizar el contenido de markdown para evitar re-renders
-  const memoizedMarkdownContent = useMemo(() => {
+  // Memoizar el contenido de la comparación estructurada
+  const memoizedComparisonDisplay = useMemo(() => {
     if (!comparisonResult) return null;
-    return <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult}</ReactMarkdown>;
+    return (
+      <>
+        {/* Resumen Ejecutivo */}
+        {comparisonResult.executiveSummary && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Resumen Ejecutivo</h3>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.executiveSummary}</ReactMarkdown>
+          </div>
+        )}
+
+        {/* Tabla Comparativa */}
+        {comparisonResult.comparisonTable && (
+          <div style={{ marginBottom: '2rem' }}>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.comparisonTable}</ReactMarkdown>
+          </div>
+        )}
+
+        {/* Análisis Técnico */}
+        {comparisonResult.technicalAnalysis && comparisonResult.technicalAnalysis.length > 0 && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Análisis Técnico</h3>
+            {comparisonResult.technicalAnalysis.map((section, index) => (
+              <div key={index} style={{ marginBottom: '1.5rem' }}>
+                <h4 style={{ color: '#1f2937', marginBottom: '0.5rem' }}>{section.title}</h4>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Perfiles Recomendados */}
+        {comparisonResult.recommendedProfiles && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Perfiles Recomendados</h3>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.recommendedProfiles}</ReactMarkdown>
+          </div>
+        )}
+
+        {/* Consideraciones Biomecánicas */}
+        {comparisonResult.biomechanicalConsiderations && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Consideraciones Biomecánicas</h3>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.biomechanicalConsiderations}</ReactMarkdown>
+          </div>
+        )}
+
+        {/* Conclusión */}
+        {comparisonResult.conclusion && (
+          <div style={{ marginBottom: '2rem' }}>
+            <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Conclusión</h3>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.conclusion}</ReactMarkdown>
+          </div>
+        )}
+      </>
+    );
   }, [comparisonResult]);
 
   const handleAddRacket = (racket: Racket) => {
@@ -694,10 +766,10 @@ const CompareRacketsPage: React.FC = () => {
       const response = await ComparisonService.compareRackets(racketIds, userProfile);
 
       clearInterval(progressInterval);
-      completeTask(taskId, { comparison: response.comparison, metrics: response.metrics });
+      completeTask(taskId, { comparison: response.comparison, metrics: response.comparison.metrics });
 
       setComparisonResult(response.comparison);
-      setComparisonMetrics(response.metrics || null);
+      setComparisonMetrics(response.comparison.metrics || null);
     } catch (error: any) {
       clearInterval(progressInterval);
       failTask(taskId, 'Error al realizar la comparación');
@@ -739,7 +811,7 @@ const CompareRacketsPage: React.FC = () => {
 
       await generator.generatePDF({
         rackets: selectedRackets,
-        comparisonText: comparisonResult,
+        comparison: comparisonResult,
         // Asegúrate de que esta URL base sea correcta para tu entorno
         proxyUrlBase: import.meta.env.VITE_API_URL || '',
       });
@@ -761,8 +833,7 @@ const CompareRacketsPage: React.FC = () => {
     try {
       await ComparisonService.saveComparison(
         selectedRackets.map(r => r.id!),
-        comparisonResult,
-        comparisonMetrics || undefined
+        comparisonResult
       );
       toast.success('Comparación guardada en tu perfil');
     } catch (error) {
@@ -949,7 +1020,7 @@ const CompareRacketsPage: React.FC = () => {
                   <RacketRadarChart metrics={comparisonMetrics} />
                 )}
 
-                <MarkdownContent>{memoizedMarkdownContent}</MarkdownContent>
+                <MarkdownContent>{memoizedComparisonDisplay}</MarkdownContent>
               </ResultSection>
             </ModalContent>
           </ModalOverlay>

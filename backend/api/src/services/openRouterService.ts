@@ -12,9 +12,21 @@ export interface RacketMetrics {
   puntoDulce: number;
 }
 
-// Interfaz para la respuesta de comparación completa
+// Interfaz para subsecciones de la comparación
+export interface ComparisonSection {
+  title: string;
+  content: string;
+  subsections?: ComparisonSection[];
+}
+
+// Interfaz para la respuesta de comparación completa (estructurada)
 export interface ComparisonResult {
-  textComparison: string;
+  executiveSummary: string;
+  technicalAnalysis: ComparisonSection[];
+  comparisonTable?: string; // Markdown table
+  recommendedProfiles: string;
+  biomechanicalConsiderations: string;
+  conclusion: string;
   metrics: RacketMetrics[];
 }
 
@@ -44,10 +56,10 @@ export class OpenRouterService {
 
   // Modelos gratuitos en orden de preferencia
   private readonly FREE_MODELS = [
-    'google/gemini-2.0-flash-exp:free',
+    'google/gemini-3-flash-preview',
     'meta-llama/llama-3.3-70b-instruct:free',
-    'mistralai/mistral-small-3.1:free',
-    'deepseek/deepseek-r1-distill-llama-70b:free',
+    'mistralai/mistral-nemo:free',
+    'qwen/qwen-2.5-7b-instruct:free',
   ];
 
   constructor() {
@@ -154,7 +166,7 @@ export class OpenRouterService {
   }
 
   /**
-   * Compara palas usando OpenRouter
+   * Compara palas usando OpenRouter con formato estructurado
    */
   async compareRackets(rackets: Racket[], userProfile?: UserFormData): Promise<ComparisonResult> {
     if (!this.apiKey) {
@@ -201,11 +213,11 @@ export class OpenRouterService {
           throw new Error('Empty response from model');
         }
 
-        // Separar la comparación textual de las métricas JSON
-        const { textComparison, metrics } = this.parseResponse(fullText, rackets);
+        // Parsear la respuesta estructurada
+        const comparisonResult = this.parseStructuredResponse(fullText, rackets);
 
         logger.info(`✅ Comparison generated successfully with model: ${model}`);
-        return { textComparison, metrics };
+        return comparisonResult;
       } catch (error: any) {
         lastError = error;
         const errorMessage =
@@ -304,7 +316,7 @@ PRINCIPIOS IRRENUNCIABLES:
 PALAS A COMPARAR:
 ${racketNames}
 
-NOTA IMPORTANTE: Cada pala incluye un "Enlace" que es la URL oficial del producto. Usa este enlace como referencia definitiva para identificar exactamente a qué pala te refieres. Los enlaces garantizan que estás comparando las palas correctas.
+NOTA IMPORTANTE: Cada pala incluye un "Enlace" que es la URL oficial del producto. Usa este enlace como referencia definitiva para identificar exactamente a qué pala te refieres.
 
 DATOS TÉCNICOS COMPLETOS:
 ${racketsInfo}
@@ -315,108 +327,159 @@ ${userContext}
 
 INSTRUCCIONES PARA LA COMPARACIÓN:
 
-1. **Estructura de la Comparación** (formato markdown):
-   - 📊 **Resumen Ejecutivo**: Diferencia clave entre las palas en 2-3 líneas
-   - 🔬 **Análisis Técnico por Categorías**:
-     * Potencia y Salida de Bola
-     * Control y Precisión
-     * Manejabilidad y Peso
-     * Confort y Prevención de Lesiones (CRÍTICO)
-   - 📋 **Tabla Comparativa**: Características clave lado a lado
-   - 👤 **Perfiles Recomendados**: Qué tipo de jugador se beneficia de cada pala
-   - 🛡️ **Consideraciones Biomecánicas**: Advertencias sobre lesiones para cada pala
-   - ✅ **Conclusión Final**: Recomendación basada en el perfil del usuario (si se proporcionó)
+Debes generar una respuesta en formato JSON estructurado con las siguientes secciones:
 
-2. **Consideraciones Biomecánicas OBLIGATORIAS**:
-   - Menciona si alguna pala es dura (riesgo de epicondilitis)
-   - Menciona si alguna tiene balance alto (mayor estrés en brazo/hombro)
-   - Menciona si alguna es pesada (>370g puede causar fatiga y lesiones)
-   - Destaca si alguna tiene tecnología anti-vibración
-   - Recomienda palas más seguras para jugadores con lesiones previas
+1. **executiveSummary** (string): Resumen ejecutivo de 2-3 líneas con la diferencia clave entre las palas
 
-3. **Uso de Métricas Testea**:
-   - Si una pala tiene certificación Testea, ÚSALA y menciona que es "dato certificado"
-   - Si no tiene certificación, estima basándote en especificaciones físicas y menciona que es "estimación"
-   - Diferencia claramente entre datos duros y estimaciones
+2. **technicalAnalysis** (array de objetos): Análisis técnico dividido en categorías. Cada objeto tiene:
+   - title: Nombre de la categoría
+   - content: Análisis detallado en formato markdown (sin emojis en headers)
+   - subsections: (opcional) Array de subsecciones con mismo formato
+   
+   Categorías requeridas:
+   - "Potencia y Salida de Bola"
+   - "Control y Precisión"
+   - "Manejabilidad y Peso"
+   - "Confort y Prevención de Lesiones"
 
-4. **Formato y Estilo**:
-   - Usa emojis para mejorar legibilidad
-   - Sé conciso pero informativo (máximo 600 palabras)
-   - Usa negritas para destacar puntos clave
-   - Incluye advertencias ⚠️ para riesgos biomecánicos
+3. **comparisonTable** (string): Tabla comparativa en formato markdown con características clave lado a lado
+
+4. **recommendedProfiles** (string): Descripción de qué tipo de jugador se beneficia de cada pala (formato markdown)
+
+5. **biomechanicalConsiderations** (string): Advertencias sobre lesiones y consideraciones biomecánicas para cada pala (formato markdown). OBLIGATORIO mencionar:
+   - Si alguna pala es dura (riesgo de epicondilitis)
+   - Si alguna tiene balance alto (mayor estrés en brazo/hombro)
+   - Si alguna es pesada (>370g puede causar fatiga y lesiones)
+   - Si alguna tiene tecnología anti-vibración
+   - Recomendaciones para jugadores con lesiones previas
+
+6. **conclusion** (string): Conclusión final con recomendación basada en el perfil del usuario si se proporcionó (formato markdown)
+
+7. **metrics** (array): Array de objetos con métricas numéricas para cada pala:
+   - racketName: Nombre exacto de la pala
+   - potencia: 1-10
+   - control: 1-10
+   - salidaDeBola: 1-10
+   - manejabilidad: 1-10
+   - puntoDulce: 1-10
+
+IMPORTANTE: 
+- NO uses emojis en ninguna parte de la respuesta
+- Usa formato markdown para negritas (**texto**), listas, etc.
+- Si una pala tiene certificación Testea, ÚSALA y menciona que es "dato certificado"
+- Si no tiene certificación, estima basándote en especificaciones físicas y menciona que es "estimación"
+- Sé conciso pero informativo (máximo 600 palabras en total)
 
 FORMATO DE RESPUESTA OBLIGATORIO:
-Responde con markdown seguido de un separador y luego JSON de métricas.
+Responde ÚNICAMENTE con un objeto JSON válido siguiendo esta estructura exacta:
 
-Estructura:
-[Tu comparación en markdown aquí]
+{
+  "executiveSummary": "...",
+  "technicalAnalysis": [
+    {
+      "title": "Potencia y Salida de Bola",
+      "content": "..."
+    },
+    {
+      "title": "Control y Precisión",
+      "content": "..."
+    },
+    {
+      "title": "Manejabilidad y Peso",
+      "content": "..."
+    },
+    {
+      "title": "Confort y Prevención de Lesiones",
+      "content": "..."
+    }
+  ],
+  "comparisonTable": "| Característica | Pala 1 | Pala 2 |\\n|---|---|---|\\n| ... | ... | ... |",
+  "recommendedProfiles": "...",
+  "biomechanicalConsiderations": "...",
+  "conclusion": "...",
+  "metrics": [
+    {"racketName": "Nombre pala 1", "potencia": 8, "control": 7, "salidaDeBola": 6, "manejabilidad": 9, "puntoDulce": 7},
+    {"racketName": "Nombre pala 2", "potencia": 9, "control": 6, "salidaDeBola": 5, "manejabilidad": 7, "puntoDulce": 6}
+  ]
+}
 
-===METRICS===
-[
-{"racketName": "Nombre exacto pala 1", "potencia": 8, "control": 7, "salidaDeBola": 6, "manejabilidad": 9, "puntoDulce": 7},
-{"racketName": "Nombre exacto pala 2", "potencia": 9, "control": 6, "salidaDeBola": 5, "manejabilidad": 7, "puntoDulce": 6}
-]
-
-MÉTRICAS (escala 1-10):
-- Potencia: Velocidad de bola generada
-- Control: Precisión y dominio del golpeo
-- Salida de Bola: Facilidad de impulsión (correlaciona con dureza)
-- Manejabilidad: Agilidad y facilidad de manejo
-- Punto Dulce: Tamaño del área efectiva de golpeo
-
-IMPORTANTE: Si una pala tiene métricas Testea certificadas, usa esos valores exactos. Si no, estima basándote en las especificaciones físicas.
-
-RESPONDE AHORA:`;
+RESPONDE AHORA CON EL JSON:`;
   }
 
-  private parseResponse(
-    fullText: string,
-    rackets: Racket[]
-  ): { textComparison: string; metrics: RacketMetrics[] } {
-    // Intentar separar la comparación textual de las métricas JSON
-    const metricsMarkerIndex = fullText.lastIndexOf('===METRICS===');
-    let textComparison: string;
-    let metricsText: string;
-
-    if (metricsMarkerIndex !== -1) {
-      textComparison = fullText.substring(0, metricsMarkerIndex).trim();
-      metricsText = fullText.substring(metricsMarkerIndex + '===METRICS==='.length).trim();
-    } else {
-      // Si no encuentra el marcador, buscar el último bloque JSON
-      const jsonMatch = fullText.match(/\[[\s\S]*\{[\s\S]*"racketName"[\s\S]*\}[\s\S]*\]/);
-      if (jsonMatch) {
-        const jsonStartIndex = jsonMatch.index!;
-        textComparison = fullText.substring(0, jsonStartIndex).trim();
-        metricsText = jsonMatch[0];
-      } else {
-        textComparison = fullText;
-        metricsText = '';
-      }
+  /**
+   * Parsea la respuesta estructurada en formato JSON
+   */
+  private parseStructuredResponse(fullText: string, rackets: Racket[]): ComparisonResult {
+    // Limpiar el texto de posibles bloques de código markdown
+    let cleanText = fullText.trim();
+    
+    // Remover bloques de código si existen
+    cleanText = cleanText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    
+    // Buscar el objeto JSON en el texto
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+    
+    if (!jsonMatch) {
+      logger.error('No JSON found in response');
+      logger.error('Raw response:', fullText.substring(0, 500));
+      throw new Error('Invalid response format: No JSON found');
     }
 
-    // Limpiar y parsear las métricas
-    metricsText = metricsText
-      .replace(/```json\n?/g, '')
-      .replace(/```\n?/g, '')
-      .trim();
-
-    let metrics: RacketMetrics[];
     try {
-      metrics = JSON.parse(metricsText);
-    } catch (parseError) {
-      logger.error('Error parsing metrics JSON:', parseError);
-      logger.error('Raw metrics text:', metricsText);
-      // Valores por defecto si falla el parsing
-      metrics = rackets.map((r: any) => ({
-        racketName: r.nombre || r.name || 'Pala',
-        potencia: 5,
-        control: 5,
-        salidaDeBola: 5,
-        manejabilidad: 5,
-        puntoDulce: 5,
-      }));
-    }
+      const parsed = JSON.parse(jsonMatch[0]);
+      
+      // Validar que tenga las propiedades requeridas
+      if (!parsed.executiveSummary || !parsed.technicalAnalysis || !parsed.metrics) {
+        logger.error('Missing required properties in JSON response');
+        throw new Error('Invalid response format: Missing required properties');
+      }
 
-    return { textComparison, metrics };
+      // Construir el resultado estructurado
+      const result: ComparisonResult = {
+        executiveSummary: parsed.executiveSummary || '',
+        technicalAnalysis: parsed.technicalAnalysis || [],
+        comparisonTable: parsed.comparisonTable || '',
+        recommendedProfiles: parsed.recommendedProfiles || '',
+        biomechanicalConsiderations: parsed.biomechanicalConsiderations || '',
+        conclusion: parsed.conclusion || '',
+        metrics: parsed.metrics || [],
+      };
+
+      // Validar que las métricas tengan el formato correcto
+      if (!Array.isArray(result.metrics) || result.metrics.length === 0) {
+        logger.warn('Invalid metrics format, using defaults');
+        result.metrics = rackets.map((r: any) => ({
+          racketName: r.nombre || r.name || 'Pala',
+          potencia: 5,
+          control: 5,
+          salidaDeBola: 5,
+          manejabilidad: 5,
+          puntoDulce: 5,
+        }));
+      }
+
+      return result;
+    } catch (parseError) {
+      logger.error('Error parsing structured JSON:', parseError);
+      logger.error('Raw JSON text:', jsonMatch[0].substring(0, 500));
+      
+      // Valores por defecto si falla completamente el parsing
+      return {
+        executiveSummary: 'Error al generar la comparación. Por favor, inténtalo de nuevo.',
+        technicalAnalysis: [],
+        comparisonTable: '',
+        recommendedProfiles: '',
+        biomechanicalConsiderations: '',
+        conclusion: '',
+        metrics: rackets.map((r: any) => ({
+          racketName: r.nombre || r.name || 'Pala',
+          potencia: 5,
+          control: 5,
+          salidaDeBola: 5,
+          manejabilidad: 5,
+          puntoDulce: 5,
+        })),
+      };
+    }
   }
 }

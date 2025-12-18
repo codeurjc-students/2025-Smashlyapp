@@ -109,6 +109,14 @@ export interface Racket {
   descuento_porcentaje: number;
   enlace: string;
   fuente?: string;
+
+  // Testea Pádel metrics
+  testea_potencia?: number | null;
+  testea_control?: number | null;
+  testea_manejabilidad?: number | null;
+  testea_confort?: number | null;
+  testea_iniciacion?: number | null;
+  peso?: number | null;
 }
 
 // Tipos para formularios y recomendaciones AI
@@ -141,6 +149,17 @@ export interface FormData {
   favoriteBrand?: string;
   availability?: string;
   colorPreference?: string;
+}
+
+// User form data for comparison context
+export interface UserFormData {
+  gameLevel?: string;
+  playingStyle?: string;
+  weight?: string;
+  height?: string;
+  age?: string;
+  experience?: string;
+  preferences?: string;
 }
 
 export interface RacketRecommendation {
@@ -185,4 +204,32 @@ export interface RacketComparison {
     bestForAdvanced?: string;
     reasoning: string;
   };
+}
+
+// Racket metrics for comparison charts
+export interface RacketMetrics {
+  racketName: string;
+  potencia: number;
+  control: number;
+  salidaDeBola: number;
+  manejabilidad: number;
+  puntoDulce: number;
+}
+
+// Structured comparison section
+export interface ComparisonSection {
+  title: string;
+  content: string;
+  subsections?: ComparisonSection[];
+}
+
+// Structured comparison result (new format)
+export interface ComparisonResult {
+  executiveSummary: string;
+  technicalAnalysis: ComparisonSection[];
+  comparisonTable?: string;
+  recommendedProfiles: string;
+  biomechanicalConsiderations: string;
+  conclusion: string;
+  metrics: RacketMetrics[];
 }
