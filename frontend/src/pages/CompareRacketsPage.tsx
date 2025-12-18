@@ -506,7 +506,7 @@ const EmptyFavorites = styled.div`
 const CompareRacketsPage: React.FC = () => {
   const { rackets } = useRackets();
   const { user, isAuthenticated } = useAuth();
-  const { addTask, updateTaskProgress, completeTask, failTask, tasks } = useBackgroundTasks();
+  const { addTask, updateTaskProgress, completeTask, failTask, dismissTask, tasks } = useBackgroundTasks();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRackets, setSelectedRackets] = useState<Racket[]>([]);
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
@@ -971,6 +971,12 @@ const CompareRacketsPage: React.FC = () => {
               setComparisonMetrics(null);
               setSelectedRackets([]);
               setModalManuallyClosed(true);
+              
+              // Descartar la tarea de fondo si existe
+              if (lastShownTaskIdRef.current) {
+                dismissTask(lastShownTaskIdRef.current);
+                lastShownTaskIdRef.current = null;
+              }
             }}
           >
             <ModalContent
@@ -988,6 +994,12 @@ const CompareRacketsPage: React.FC = () => {
                   setComparisonMetrics(null);
                   setSelectedRackets([]);
                   setModalManuallyClosed(true);
+                  
+                  // Descartar la tarea de fondo si existe
+                  if (lastShownTaskIdRef.current) {
+                    dismissTask(lastShownTaskIdRef.current);
+                    lastShownTaskIdRef.current = null;
+                  }
                 }}
               >
                 <FiX size={24} />
