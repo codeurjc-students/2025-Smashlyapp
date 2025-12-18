@@ -328,21 +328,6 @@ const Button = styled.button<{ $primary?: boolean }>`
   }
 `;
 
-const TransparencyNote = styled.div`
-  background: #f0fdf4;
-  border: 1px solid #16a34a;
-  border-radius: 12px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 2rem;
-  font-size: 0.85rem;
-  color: #15803d;
-  line-height: 1.6;
-
-  strong {
-    font-weight: 700;
-  }
-`;
-
 interface Props {
   result: ResultType;
   onSave?: () => void;

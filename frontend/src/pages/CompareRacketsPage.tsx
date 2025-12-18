@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
 import { ComparisonService } from '../services/comparisonService';
 import { ListService } from '../services/listService';
-import { Racket, ComparisonResult, RacketMetrics, ComparisonSection } from '../types/racket';
+import { Racket, ComparisonResult, RacketMetrics } from '../types/racket';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import toast from 'react-hot-toast';

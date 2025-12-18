@@ -1,6 +1,7 @@
 import { RecommendationService } from '../../services/recommendationService';
-import { GeminiService } from '../../services/geminiService';
+import { OpenRouterService } from '../../services/openRouterService';
 import { RacketService } from '../../services/racketService';
+import { RacketFilterService } from '../../services/racketFilterService';
 import { supabase } from '../../config/supabase';
 
 jest.mock('../../config/supabase', () => ({
@@ -9,8 +10,9 @@ jest.mock('../../config/supabase', () => ({
   },
 }));
 
-jest.mock('../../services/geminiService');
+jest.mock('../../services/openRouterService');
 jest.mock('../../services/racketService');
+jest.mock('../../services/racketFilterService');
 
 describe('RecommendationService', () => {
   beforeEach(() => {
@@ -48,19 +50,21 @@ describe('RecommendationService', () => {
         budget: 200,
       };
 
-      (GeminiService.generateContent as jest.Mock).mockResolvedValue(mockAIResponse);
+      (OpenRouterService.generateContent as jest.Mock).mockResolvedValue(mockAIResponse);
       (RacketService.getAllRackets as jest.Mock).mockResolvedValue(mockRackets);
+      (RacketFilterService.filterRackets as jest.Mock).mockReturnValue(mockRackets);
 
       const result = await RecommendationService.generateRecommendation('basic', formData);
 
-      expect(GeminiService.generateContent).toHaveBeenCalled();
+      expect(OpenRouterService.generateContent).toHaveBeenCalled();
       expect(result.rackets).toBeDefined();
       expect(result.analysis).toBe('Análisis general del perfil del jugador');
     });
 
     it('should throw error when AI response cannot be parsed', async () => {
-      (GeminiService.generateContent as jest.Mock).mockResolvedValue('Invalid response');
+      (OpenRouterService.generateContent as jest.Mock).mockResolvedValue('Invalid response');
       (RacketService.getAllRackets as jest.Mock).mockResolvedValue(mockRackets);
+      (RacketFilterService.filterRackets as jest.Mock).mockReturnValue(mockRackets);
 
       await expect(
         RecommendationService.generateRecommendation('basic', {} as any)
