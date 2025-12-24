@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import React from "react";
-import { FiTarget, FiTrendingUp, FiZap } from "react-icons/fi";
+import { FiTarget, FiTrendingUp, FiZap, FiChevronRight } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 const BannerContainer = styled(motion.div)`
@@ -134,6 +135,8 @@ const CTAButton = styled(motion.button)<{ variant?: "primary" | "secondary" }>`
 `;
 
 const AiBanner: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <BannerContainer
       initial={{ opacity: 0, y: 50 }}
@@ -169,9 +172,9 @@ const AiBanner: React.FC = () => {
         </FeaturesRow>
 
         <CTASection>
-          {/* <CTAButton
+          <CTAButton
             variant="primary"
-            onClick={() => navigate("/rackets")}
+            onClick={() => navigate("/best-racket")}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -187,10 +190,6 @@ const AiBanner: React.FC = () => {
           >
             <FiTrendingUp />
             Comparar Palas
-          </CTAButton> */}
-          <CTAButton>
-            <FiZap />
-            Pronto Disponible
           </CTAButton>
         </CTASection>
       </BannerContent>

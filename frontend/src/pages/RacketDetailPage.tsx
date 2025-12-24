@@ -19,7 +19,7 @@ import { RacketReviews } from '../components/features/RacketReviews';
 import { StorePriceComparison } from '../components/features/StorePriceComparison';
 import { RacketService } from '../services/racketService';
 import { RacketViewService } from '../services/racketViewService';
-import { getLowestPrice } from '../utils/priceUtils';
+import { getLowestPrice, getAllStorePrices } from '../utils/priceUtils';
 import { toTitleCase } from '../utils/textUtils';
 
 // Styled Components
@@ -84,9 +84,9 @@ const Content = styled.div`
   }
 `;
 
-const TopSection = styled.div`
+const TopSection = styled.div<{ $showComparison?: boolean }>`
   display: grid;
-  grid-template-columns: 1.2fr 0.8fr;
+  grid-template-columns: ${props => props.$showComparison ? '1.2fr 0.8fr' : '1fr'};
   gap: 2rem;
   align-items: start;
 
@@ -490,97 +490,107 @@ const RacketDetailPage: React.FC = () => {
 
       {/* Content */}
       <Content>
-        {/* Top Section: Main Info (left) + Price Comparison (right) */}
-        <TopSection>
-          {/* Left Column: Main Card */}
-          <MainCard
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-          >
-            <ImageSection>
-              <RacketImage
-                src={racket.imagen || '/placeholder-racket.svg'}
-                alt={racket.modelo || 'Pala de padel'}
-                onError={e => {
-                  const target = e.target as HTMLImageElement;
-                  target.src = '/placeholder-racket.svg';
-                }}
-              />
-              {racket.es_bestseller && (
-                <Badge variant='bestseller'>
-                  <FiStar size={16} />
-                  Top
-                </Badge>
-              )}
-              {racket.en_oferta && (
-                <Badge variant='offer'>
-                  <FiTag size={16} />
-                  Oferta
-                </Badge>
-              )}
-            </ImageSection>
+        {(() => {
+          // Calculate available prices count
+          const storePrices = getAllStorePrices(racket);
+          const availablePricesCount = storePrices.filter(store => store.available).length;
+          const showPriceComparison = availablePricesCount > 1;
 
-            <InfoSection>
-              <div>
-                <BrandText>{toTitleCase(racket.marca)}</BrandText>
-                <ModelText>{toTitleCase(racket.modelo)}</ModelText>
+          return (
+            <TopSection $showComparison={showPriceComparison}>
+              {/* Left Column: Main Card */}
+              <MainCard
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5 }}
+              >
+                <ImageSection>
+                  <RacketImage
+                    src={racket.imagen || '/placeholder-racket.svg'}
+                    alt={racket.modelo || 'Pala de padel'}
+                    onError={e => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/placeholder-racket.svg';
+                    }}
+                  />
+                  {racket.es_bestseller && (
+                    <Badge variant='bestseller'>
+                      <FiStar size={16} />
+                      Top
+                    </Badge>
+                  )}
+                  {racket.en_oferta && (
+                    <Badge variant='offer'>
+                      <FiTag size={16} />
+                      Oferta
+                    </Badge>
+                  )}
+                </ImageSection>
 
-                <PriceContainer>
-                  {(() => {
-                    const lowestPrice = getLowestPrice(racket);
-                    if (lowestPrice) {
-                      return (
-                        <>
-                          <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
-                          {lowestPrice.originalPrice > lowestPrice.price && (
+                <InfoSection>
+                  <div>
+                    <BrandText>{toTitleCase(racket.marca)}</BrandText>
+                    <ModelText>{toTitleCase(racket.modelo)}</ModelText>
+
+                    <PriceContainer>
+                      {(() => {
+                        const lowestPrice = getLowestPrice(racket);
+                        if (lowestPrice) {
+                          return (
                             <>
-                              <OriginalPrice>{lowestPrice.originalPrice.toFixed(2)}€</OriginalPrice>
-                              {lowestPrice.discount > 0 && (
-                                <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
+                              <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
+                              {lowestPrice.originalPrice > lowestPrice.price && (
+                                <>
+                                  <OriginalPrice>{lowestPrice.originalPrice.toFixed(2)}€</OriginalPrice>
+                                  {lowestPrice.discount > 0 && (
+                                    <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
+                                  )}
+                                </>
                               )}
+                              <StoreBadge>en {lowestPrice.store}</StoreBadge>
                             </>
-                          )}
-                          <StoreBadge>en {lowestPrice.store}</StoreBadge>
-                        </>
-                      );
-                    }
-                    return <CurrentPrice>{racket.precio_actual}€</CurrentPrice>;
-                  })()}
-                </PriceContainer>
-              </div>
+                          );
+                        }
+                        return <CurrentPrice>{racket.precio_actual}€</CurrentPrice>;
+                      })()}
+                    </PriceContainer>
+                  </div>
 
-              <ActionButtons>
-                <PrimaryButton
-                  href={getLowestPrice(racket)?.link || racket.enlace}
-                  target='_blank'
-                  rel='noopener noreferrer'
+                  <ActionButtons>
+                    <PrimaryButton
+                      href={getLowestPrice(racket)?.link || racket.enlace}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                    >
+                      <FiExternalLink />
+                      {getLowestPrice(racket)?.store
+                        ? `Ver en ${getLowestPrice(racket)?.store}`
+                        : 'Ver en tienda'}
+                    </PrimaryButton>
+
+                    {isAuthenticated && (
+                      <SecondaryButton onClick={() => setShowAddToListModal(true)}>
+                        <FiHeart />
+                        Añadir a mis listas
+                      </SecondaryButton>
+                    )}
+                  </ActionButtons>
+                </InfoSection>
+              </MainCard>
+
+              {/* Right Column: Compact Price Comparison */}
+              {showPriceComparison && (
+                <CompactPriceCard
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.1 }}
                 >
-                  <FiExternalLink />
-                  {getLowestPrice(racket)?.store
-                    ? `Ver en ${getLowestPrice(racket)?.store}`
-                    : 'Ver en tienda'}
-                </PrimaryButton>
-
-                {isAuthenticated && (
-                  <SecondaryButton onClick={() => setShowAddToListModal(true)}>
-                    <FiHeart />
-                    Añadir a mis listas
-                  </SecondaryButton>
-                )}
-              </ActionButtons>
-            </InfoSection>
-          </MainCard>
-
-          {/* Right Column: Compact Price Comparison */}
-          <CompactPriceCard
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
-            <StorePriceComparison racket={racket} isAuthenticated={isAuthenticated} compact />
-          </CompactPriceCard>
-        </TopSection>
+                  <StorePriceComparison racket={racket} isAuthenticated={isAuthenticated} compact />
+                </CompactPriceCard>
+              )}
+            </TopSection>
+          );
+        })()}
 
         {/* Características Principales */}
         <RacketFeatures

@@ -556,34 +556,41 @@ const CompareRacketsPage: React.FC = () => {
     // 1. Hay una tarea completada
     // 2. No se ha mostrado antes (diferente ID)
     // 3. El usuario no cerró manualmente el modal
-    // 4. No hay ya un resultado visible
-    if (
-      completedComparisonTask &&
-      completedComparisonTask.result &&
-      completedComparisonTask.id !== lastShownTaskIdRef.current &&
-      !modalManuallyClosed &&
-      !comparisonResult
-    ) {
-      try {
-        const { comparison, metrics } = completedComparisonTask.result;
-        
-        // Verificar que comparison tenga la estructura correcta (ComparisonResult)
-        // Debe ser un objeto con las propiedades requeridas
-        if (
-          comparison &&
-          typeof comparison === 'object' &&
-          'executiveSummary' in comparison &&
-          'technicalAnalysis' in comparison &&
-          'metrics' in comparison
-        ) {
-          setComparisonResult(comparison as ComparisonResult);
-          setComparisonMetrics(comparison.metrics || metrics || null);
-          lastShownTaskIdRef.current = completedComparisonTask.id;
-        } else {
-          // Si el formato es antiguo, simplemente ignorar esta tarea
-          console.warn('Ignoring old format comparison task:', completedComparisonTask.id);
-          lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista para no intentar de nuevo
-        }
+      // 4. No hay ya un resultado visible
+      // 5. No ha sido visto previamente (check sessionStorage)
+      const lastViewedId = sessionStorage.getItem('smashly_last_viewed_comparison_task');
+      
+      if (
+        completedComparisonTask &&
+        completedComparisonTask.result &&
+        completedComparisonTask.id !== lastShownTaskIdRef.current &&
+        completedComparisonTask.id !== lastViewedId &&
+        !modalManuallyClosed &&
+        !comparisonResult
+      ) {
+        try {
+          const { comparison, metrics } = completedComparisonTask.result;
+          
+          // Verificar que comparison tenga la estructura correcta (ComparisonResult)
+          // Debe ser un objeto con las propiedades requeridas
+          if (
+            comparison &&
+            typeof comparison === 'object' &&
+            'executiveSummary' in comparison &&
+            'technicalAnalysis' in comparison &&
+            'metrics' in comparison
+          ) {
+            setComparisonResult(comparison as ComparisonResult);
+            setComparisonMetrics(comparison.metrics || metrics || null);
+            lastShownTaskIdRef.current = completedComparisonTask.id;
+            
+            // Marcar como visto en sessionStorage para persistencia entre recargas/navegación
+            sessionStorage.setItem('smashly_last_viewed_comparison_task', completedComparisonTask.id);
+          } else {
+            // Si el formato es antiguo, simplemente ignorar esta tarea
+            console.warn('Ignoring old format comparison task:', completedComparisonTask.id);
+            lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista para no intentar de nuevo
+          }
       } catch (error) {
         console.error('Error loading comparison from background task:', error);
         lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista

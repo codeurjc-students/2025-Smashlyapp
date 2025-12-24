@@ -397,7 +397,7 @@ const HomePage: React.FC = () => {
       <StatsSection>
         <StatsGrid>
           <StatItem>
-            <h3>+1000</h3>
+            <h3>+800</h3>
             <p>Palas analizadas</p>
           </StatItem>
           <StatItem>

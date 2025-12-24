@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { FiGrid, FiList, FiSearch, FiEye, FiTag, FiX, FiHeart } from 'react-icons/fi';
+import { FiGrid, FiList, FiSearch, FiEye, FiTag, FiX, FiHeart, FiChevronDown, FiFilter } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useComparison } from '../contexts/ComparisonContext';
@@ -199,6 +199,54 @@ const FilterSelect = styled.select`
   }
 `;
 
+const AdvancedFiltersToggle = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  margin-top: 1rem;
+  width: 100%;
+  border: 2px dashed ${props => (props.$active ? '#16a34a' : '#e5e7eb')};
+  border-radius: 12px;
+  background: ${props => (props.$active ? '#f0fdf4' : 'white')};
+  color: ${props => (props.$active ? '#16a34a' : '#6b7280')};
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  &:hover {
+    border-color: #16a34a;
+    color: #16a34a;
+    background: #f0fdf4;
+  }
+
+  svg:last-child {
+    transition: transform 0.3s ease;
+    transform: ${props => (props.$active ? 'rotate(180deg)' : 'rotate(0deg)')};
+  }
+`;
+
+const AdvancedFiltersPanel = styled(motion.div)`
+  overflow: hidden;
+  margin-top: 1rem;
+`;
+
+const AdvancedFiltersGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border-radius: 12px;
+  border: 2px solid #d1fae5;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
 const ResultsHeader = styled.div`
   display: flex;
   justify-content: space-between;
@@ -349,6 +397,7 @@ const PriceContainer = styled.div<{ view: 'grid' | 'list' }>`
   margin-bottom: ${props => (props.view === 'grid' ? '0.5rem' : '0.5rem')};
   flex-wrap: wrap;
   min-height: auto;
+  margin-top: auto;
 `;
 
 const CurrentPrice = styled.div`
@@ -524,6 +573,17 @@ const CatalogPage: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [selectedRacket, setSelectedRacket] = useState<Racket | null>(null);
+  
+  // Advanced filters state
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [selectedShape, setSelectedShape] = useState('Todas');
+  const [selectedBalance, setSelectedBalance] = useState('Todos');
+  const [selectedCore, setSelectedCore] = useState('Todos');
+  const [selectedFace, setSelectedFace] = useState('Todas');
+  const [selectedLevel, setSelectedLevel] = useState('Todos');
+  const [selectedGameType, setSelectedGameType] = useState('Todos');
+  const [selectedHardness, setSelectedHardness] = useState('Todas');
+  
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const ITEMS_PER_PAGE = 9;
@@ -585,6 +645,49 @@ const CatalogPage: React.FC = () => {
       filtered = filtered.filter(racket => racket.en_oferta);
     }
 
+    // Apply advanced filters
+    if (selectedShape !== 'Todas') {
+      filtered = filtered.filter(r => 
+        (r.caracteristicas_forma || r.especificaciones?.forma) === selectedShape
+      );
+    }
+
+    if (selectedBalance !== 'Todos') {
+      filtered = filtered.filter(r => 
+        (r.caracteristicas_balance || r.especificaciones?.balance) === selectedBalance
+      );
+    }
+
+    if (selectedCore !== 'Todos') {
+      filtered = filtered.filter(r => 
+        (r.caracteristicas_nucleo || r.especificaciones?.nucleo) === selectedCore
+      );
+    }
+
+    if (selectedFace !== 'Todas') {
+      filtered = filtered.filter(r => 
+        (r.caracteristicas_cara || r.especificaciones?.cara) === selectedFace
+      );
+    }
+
+    if (selectedLevel !== 'Todos') {
+      filtered = filtered.filter(r => 
+        (r.caracteristicas_nivel_de_juego || r.especificaciones?.nivel_de_juego) === selectedLevel
+      );
+    }
+
+    if (selectedGameType !== 'Todos') {
+      filtered = filtered.filter(r => 
+        (r.caracteristicas_tipo_de_juego || r.especificaciones?.tipo_de_juego) === selectedGameType
+      );
+    }
+
+    if (selectedHardness !== 'Todas') {
+      filtered = filtered.filter(r => 
+        (r.caracteristicas_dureza || r.especificaciones?.dureza) === selectedHardness
+      );
+    }
+
     // Apply sorting
     try {
       filtered.sort((a, b) => {
@@ -622,7 +725,8 @@ const CatalogPage: React.FC = () => {
     }
 
     setFilteredRackets(filtered);
-  }, [rackets, searchQuery, selectedBrand, showMostViewed, showOffers, sortBy]);
+  }, [rackets, searchQuery, selectedBrand, showMostViewed, showOffers, sortBy, 
+      selectedShape, selectedBalance, selectedCore, selectedFace, selectedLevel, selectedGameType, selectedHardness]);
 
   // Update displayed rackets when filters change
   useEffect(() => {
@@ -636,6 +740,49 @@ const CatalogPage: React.FC = () => {
     'Todas',
     ...Array.from(new Set(rackets.map(racket => racket.marca))).sort(),
   ];
+
+  // Get unique values for advanced filters
+  const uniqueShapes = ['Todas', ...Array.from(new Set(
+    rackets
+      .map(r => r.caracteristicas_forma || r.especificaciones?.forma)
+      .filter(Boolean)
+  ))].sort();
+
+  const uniqueBalances = ['Todos', ...Array.from(new Set(
+    rackets
+      .map(r => r.caracteristicas_balance || r.especificaciones?.balance)
+      .filter(Boolean)
+  ))].sort();
+
+  const uniqueCores = ['Todos', ...Array.from(new Set(
+    rackets
+      .map(r => r.caracteristicas_nucleo || r.especificaciones?.nucleo)
+      .filter(Boolean)
+  ))].sort();
+
+  const uniqueFaces = ['Todas', ...Array.from(new Set(
+    rackets
+      .map(r => r.caracteristicas_cara || r.especificaciones?.cara)
+      .filter(Boolean)
+  ))].sort();
+
+  const uniqueLevels = ['Todos', ...Array.from(new Set(
+    rackets
+      .map(r => r.caracteristicas_nivel_de_juego || r.especificaciones?.nivel_de_juego)
+      .filter(Boolean)
+  ))].sort();
+
+  const uniqueGameTypes = ['Todos', ...Array.from(new Set(
+    rackets
+      .map(r => r.caracteristicas_tipo_de_juego || r.especificaciones?.tipo_de_juego)
+      .filter(Boolean)
+  ))].sort();
+
+  const uniqueHardness = ['Todas', ...Array.from(new Set(
+    rackets
+      .map(r => r.caracteristicas_dureza || r.especificaciones?.dureza)
+      .filter(Boolean)
+  ))].sort();
 
   // Get stats
   const totalRackets = serverTotal ?? rackets.length;
@@ -688,6 +835,15 @@ const CatalogPage: React.FC = () => {
     setShowMostViewed(false);
     setShowOffers(false);
     setSortBy('most-viewed');
+    
+    // Clear advanced filters
+    setSelectedShape('Todas');
+    setSelectedBalance('Todos');
+    setSelectedCore('Todos');
+    setSelectedFace('Todas');
+    setSelectedLevel('Todos');
+    setSelectedGameType('Todos');
+    setSelectedHardness('Todas');
   };
 
   const goToComparison = () => {
@@ -782,9 +938,88 @@ const CatalogPage: React.FC = () => {
 
             <FilterButton onClick={clearFilters}>
               <FiX />
-              Limpiar
             </FilterButton>
           </FiltersRow>
+
+          {/* Advanced Filters Toggle */}
+          <AdvancedFiltersToggle
+            $active={showAdvancedFilters}
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          >
+            <FiFilter />
+            Filtros Avanzados
+            <FiChevronDown />
+          </AdvancedFiltersToggle>
+
+          {/* Advanced Filters Panel */}
+          <AnimatePresence>
+            {showAdvancedFilters && (
+              <AdvancedFiltersPanel
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3 }}
+              >
+                <AdvancedFiltersGrid>
+                  <FilterSelect value={selectedShape} onChange={e => setSelectedShape(e.target.value)}>
+                    {uniqueShapes.map(shape => (
+                      <option key={shape} value={shape}>
+                        {shape === 'Todas' ? 'Todas las formas' : shape}
+                      </option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect value={selectedBalance} onChange={e => setSelectedBalance(e.target.value)}>
+                    {uniqueBalances.map(balance => (
+                      <option key={balance} value={balance}>
+                        {balance === 'Todos' ? 'Todos los balances' : balance}
+                      </option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect value={selectedCore} onChange={e => setSelectedCore(e.target.value)}>
+                    {uniqueCores.map(core => (
+                      <option key={core} value={core}>
+                        {core === 'Todos' ? 'Todos los núcleos' : core}
+                      </option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect value={selectedFace} onChange={e => setSelectedFace(e.target.value)}>
+                    {uniqueFaces.map(face => (
+                      <option key={face} value={face}>
+                        {face === 'Todas' ? 'Todas las caras' : face}
+                      </option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect value={selectedLevel} onChange={e => setSelectedLevel(e.target.value)}>
+                    {uniqueLevels.map(level => (
+                      <option key={level} value={level}>
+                        {level === 'Todos' ? 'Todos los niveles' : level}
+                      </option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect value={selectedGameType} onChange={e => setSelectedGameType(e.target.value)}>
+                    {uniqueGameTypes.map(type => (
+                      <option key={type} value={type}>
+                        {type === 'Todos' ? 'Todos los tipos' : type}
+                      </option>
+                    ))}
+                  </FilterSelect>
+
+                  <FilterSelect value={selectedHardness} onChange={e => setSelectedHardness(e.target.value)}>
+                    {uniqueHardness.map(hardness => (
+                      <option key={hardness} value={hardness}>
+                        {hardness === 'Todas' ? 'Todas las durezas' : hardness}
+                      </option>
+                    ))}
+                  </FilterSelect>
+                </AdvancedFiltersGrid>
+              </AdvancedFiltersPanel>
+            )}
+          </AnimatePresence>
         </FiltersSection>
 
         {/* Results Header */}
@@ -866,31 +1101,31 @@ const CatalogPage: React.FC = () => {
                       <div>
                         <RacketBrand>{racket.marca}</RacketBrand>
                         <RacketName view={viewMode}>{toTitleCase(racket.modelo)}</RacketName>
-
-                        <PriceContainer view={viewMode}>
-                          {(() => {
-                            const lowestPrice = getLowestPrice(racket);
-                            if (lowestPrice) {
-                              return (
-                                <>
-                                  <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
-                                  {lowestPrice.originalPrice > lowestPrice.price && (
-                                    <>
-                                      <OriginalPrice>
-                                        €{lowestPrice.originalPrice.toFixed(2)}
-                                      </OriginalPrice>
-                                      {lowestPrice.discount > 0 && (
-                                        <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
-                                      )}
-                                    </>
-                                  )}
-                                </>
-                              );
-                            }
-                            return <CurrentPrice>€{racket.precio_actual}</CurrentPrice>;
-                          })()}
-                        </PriceContainer>
                       </div>
+
+                      <PriceContainer view={viewMode}>
+                        {(() => {
+                          const lowestPrice = getLowestPrice(racket);
+                          if (lowestPrice) {
+                            return (
+                              <>
+                                <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
+                                {lowestPrice.originalPrice > lowestPrice.price && (
+                                  <>
+                                    <OriginalPrice>
+                                      €{lowestPrice.originalPrice.toFixed(2)}
+                                    </OriginalPrice>
+                                    {lowestPrice.discount > 0 && (
+                                      <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
+                                    )}
+                                  </>
+                                )}
+                              </>
+                            );
+                          }
+                          return <CurrentPrice>€{racket.precio_actual}</CurrentPrice>;
+                        })()}
+                      </PriceContainer>
 
                       <ActionButtons view={viewMode}>
                         <ViewDetailsButton onClick={() => handleRacketClick(racket)}>
