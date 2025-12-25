@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AdminController } from "../controllers/adminController";
+import { AdminRacketController } from "../controllers/adminRacketController";
 import { authenticateUser } from "../middleware/auth";
 import { requireAdmin } from "../middleware/requireAdmin";
 import { validatePagination } from "../middleware/validation";
@@ -45,6 +46,18 @@ router.get("/racket-requests", AdminController.getRacketRequests);
  * Gets all store requests
  */
 router.get("/store-requests", AdminController.getStoreRequests);
+
+/**
+ * GET /api/v1/admin/rackets/conflicts
+ * Gets all rackets with conflict status
+ */
+router.get("/rackets/conflicts", AdminRacketController.getConflicts);
+
+/**
+ * POST /api/v1/admin/rackets/:id/resolve
+ * Resolve a racket conflict
+ */
+router.post("/rackets/:id/resolve", AdminRacketController.resolveConflict);
 
 /**
  * POST /api/v1/admin/stores/:id/verify

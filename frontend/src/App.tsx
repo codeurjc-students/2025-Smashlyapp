@@ -14,6 +14,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import UserPage from './pages/UserPage';
 import AdminPanelPage from './pages/AdminPanelPage';
+import AdminRacketReviewPage from './pages/AdminRacketReviewPage';
 import { BestRacketPage } from './pages/BestRacketPage';
 import { PlayerDashboard } from './pages/PlayerDashboard';
 import { AuthProvider } from './contexts/AuthContext';
@@ -50,6 +51,7 @@ export default function App() {
                   <Route path='/register' element={<RegisterPage />} />
                   <Route path='/profile' element={<UserPage />} />
                   <Route path='/admin' element={<AdminPanelPage />} />
+                  <Route path='/admin/rackets/review' element={<AdminRacketReviewPage />} />
                   <Route path='*' element={<NotFoundPage />} />
                 </Routes>
               </Layout>

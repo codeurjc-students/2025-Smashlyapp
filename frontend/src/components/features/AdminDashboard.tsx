@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { FiUsers, FiShoppingBag, FiPackage, FiTrendingUp, FiActivity, FiStar, FiHeart } from "react-icons/fi";
+import { FiUsers, FiShoppingBag, FiPackage, FiTrendingUp, FiActivity, FiStar, FiHeart, FiAlertTriangle } from "react-icons/fi";
 import toast from "react-hot-toast";
+import { Link } from "react-router-dom";
 import { AdminService, AdminMetrics, Activity } from "../../services/adminService";
 
 const DashboardContainer = styled.div`
@@ -167,6 +168,7 @@ const formatRelativeTime = (dateString: string): string => {
 const AdminDashboard: React.FC = () => {
   const [metrics, setMetrics] = useState<AdminMetrics | null>(null);
   const [activities, setActivities] = useState<Activity[]>([]);
+  const [conflictsCount, setConflictsCount] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -176,13 +178,15 @@ const AdminDashboard: React.FC = () => {
   const loadDashboardData = async () => {
     try {
       // Cargar métricas y actividades en paralelo
-      const [metricsData, activitiesData] = await Promise.all([
+      const [metricsData, activitiesData, conflictsData] = await Promise.all([
         AdminService.getDashboardMetrics(),
         AdminService.getRecentActivity(10),
+        AdminService.getRacketConflicts()
       ]);
       
       setMetrics(metricsData);
       setActivities(activitiesData);
+      setConflictsCount(conflictsData.length);
     } catch (error: any) {
       console.error('Error loading dashboard data:', error);
       
@@ -248,6 +252,24 @@ const AdminDashboard: React.FC = () => {
             </MetricChange>
           </MetricInfo>
         </MetricCard>
+
+        {/* Conflicts Card - Detailed */}
+        <Link to="/admin/rackets/review" style={{ textDecoration: 'none' }}>
+          <MetricCard style={{ border: conflictsCount > 0 ? '2px solid #f59e0b' : 'none' }}>
+            <MetricIcon color="#f59e0b">
+              <FiAlertTriangle />
+            </MetricIcon>
+            <MetricInfo>
+              <MetricLabel>Conflictos / Duplicados</MetricLabel>
+              <MetricValue>{conflictsCount}</MetricValue>
+              {conflictsCount > 0 && (
+                <MetricChange positive={false} style={{ color: '#f59e0b' }}>
+                  Requiere revisión
+                </MetricChange>
+              )}
+            </MetricInfo>
+          </MetricCard>
+        </Link>
 
         <MetricCard>
           <MetricIcon color="#f59e0b">

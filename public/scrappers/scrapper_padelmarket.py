@@ -8,6 +8,28 @@ from typing import Any, Dict, List, Optional, Tuple
 import requests
 from bs4 import BeautifulSoup
 
+# Importar utilidades de matching compartidas
+try:
+    from matching_utils import (
+        normalize_name, 
+        create_comparison_key, 
+        calculate_similarity, 
+        calculate_token_similarity, 
+        check_critical_keywords
+    )
+except ImportError:
+    # Fallback si se ejecuta desde directorio diferente
+    import sys
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from matching_utils import (
+        normalize_name, 
+        create_comparison_key, 
+        calculate_similarity, 
+        calculate_token_similarity, 
+        check_critical_keywords
+    )
+
+
 
 # Configuración
 BASE_COLLECTION_URL = "https://padelmarket.com/es-eu/collections/palas"
@@ -73,90 +95,6 @@ def save_json(data: List[Dict[str, Any]]) -> None:
         logging.error(f"Error al guardar {JSON_PATH}: {e}")
 
 
-def normalize_name(name: Optional[str]) -> Optional[str]:
-    """
-    Normaliza un nombre de pala para comparación.
-    Elimina sufijos, espacios extra, y convierte a minúsculas.
-    """
-    if not name:
-        return None
-    n = name.strip()
-    # Quitar sufijo (Pala) - mejorado para capturar más variantes
-    n = re.sub(r"\s*[\(\[]Pala[\)\]]\s*$", "", n, flags=re.IGNORECASE)
-    # Normalizar espacios múltiples
-    n = re.sub(r"\s+", " ", n)
-    return n.lower()
-
-def clean_name_and_model(name: Optional[str]) -> Optional[str]:
-    """
-    Limpia el nombre/modelo eliminando el sufijo '(Pala)' con paréntesis.
-    """
-    if not name:
-        return None
-    # Eliminar " (Pala)" del final del string
-    cleaned = re.sub(r"\s*[\(\[]Pala[\)\]]\s*$", "", name.strip(), flags=re.IGNORECASE)
-    # Normalizar espacios
-    cleaned = re.sub(r"\s+", " ", cleaned)
-    return cleaned.strip()
-
-
-def create_comparison_key(name: Optional[str], brand: Optional[str] = None) -> Optional[str]:
-    """
-    Crea una clave de comparación más robusta para matching.
-    Normaliza el nombre eliminando caracteres especiales, acentos, espacios y mayúsculas.
-    """
-    if not name:
-        return None
-
-    # Normalizar nombre
-    key = normalize_name(name)
-    if not key:
-        return None
-
-    # Eliminar acentos y caracteres especiales
-    import unicodedata
-    key = unicodedata.normalize('NFKD', key).encode('ASCII', 'ignore').decode('ASCII')
-
-    # Eliminar todos los caracteres que no sean letras o números
-    key = re.sub(r'[^a-z0-9]', '', key)
-
-    return key
-
-
-def calculate_similarity(str1: str, str2: str) -> float:
-    """
-    Calcula la similitud entre dos strings usando distancia de Levenshtein simplificada.
-    Retorna un valor entre 0 (totalmente diferente) y 1 (idéntico).
-    """
-    if str1 == str2:
-        return 1.0
-
-    # Algoritmo de distancia de Levenshtein simplificado
-    len1, len2 = len(str1), len(str2)
-    if len1 == 0 or len2 == 0:
-        return 0.0
-
-    # Crear matriz de distancias
-    distances = [[0] * (len2 + 1) for _ in range(len1 + 1)]
-
-    for i in range(len1 + 1):
-        distances[i][0] = i
-    for j in range(len2 + 1):
-        distances[0][j] = j
-
-    for i in range(1, len1 + 1):
-        for j in range(1, len2 + 1):
-            cost = 0 if str1[i-1] == str2[j-1] else 1
-            distances[i][j] = min(
-                distances[i-1][j] + 1,      # deletion
-                distances[i][j-1] + 1,      # insertion
-                distances[i-1][j-1] + cost  # substitution
-            )
-
-    max_len = max(len1, len2)
-    similarity = 1 - (distances[len1][len2] / max_len)
-    return similarity
-
 
 def extract_version_numbers(text: str) -> List[str]:
     """
@@ -180,47 +118,6 @@ def extract_version_numbers(text: str) -> List[str]:
     return versions
 
 
-def tokenize_name(name: str) -> set:
-    """
-    Tokeniza un nombre en palabras/números significativos.
-    Aplica normalización antes de tokenizar.
-    """
-    # Normalizar primero (sin quitar espacios todavía)
-    normalized = normalize_name(name) or ""
-
-    # Extraer tokens: palabras de 2+ caracteres o números
-    tokens = set()
-
-    # Patrones de tokens
-    # 1. Palabras de 2+ letras
-    for word in re.findall(r'[a-z]{2,}', normalized):
-        tokens.add(word)
-
-    # 2. Números (años, versiones, etc.)
-    for num in re.findall(r'\d+', normalized):
-        if len(num) >= 2:  # Al menos 2 dígitos
-            tokens.add(num)
-
-    return tokens
-
-
-def calculate_token_similarity(name1: str, name2: str) -> float:
-    """
-    Calcula similitud basada en tokens (palabras) comunes.
-    Útil cuando el orden de las palabras puede variar.
-    """
-    tokens1 = tokenize_name(name1)
-    tokens2 = tokenize_name(name2)
-
-    if not tokens1 or not tokens2:
-        return 0.0
-
-    # Calcular similitud de Jaccard (intersección / unión)
-    intersection = len(tokens1 & tokens2)
-    union = len(tokens1 | tokens2)
-
-    return intersection / union if union > 0 else 0.0
-
 
 def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str], brand: Optional[str] = None) -> Optional[int]:
     """
@@ -240,7 +137,9 @@ def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str],
         return None
 
     # Crear clave de comparación del nombre a buscar
-    target_key = create_comparison_key(name, brand)
+    # Nota: create_comparison_key ahora no acepta 'brand' en matching_utils,
+    # pero aquí se pasaba. Ajustamos para pasar solo name.
+    target_key = create_comparison_key(name)
     if not target_key:
         return None
 
@@ -258,9 +157,14 @@ def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str],
         existing_brand = item.get("brand") or item.get("characteristics_brand")
 
         # Crear clave de comparación de la pala existente
-        existing_key = create_comparison_key(existing_name, existing_brand)
+        existing_key = create_comparison_key(existing_name)
 
         if not existing_key:
+            continue
+            
+        # 0. Verificación CRÍTICA de palabras clave
+        # Si uno tiene "Attack" y el otro no, descartar inmediatamente
+        if not check_critical_keywords(name, existing_name):
             continue
 
         # 1. Comparación exacta de claves
@@ -305,8 +209,8 @@ def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str],
             best_match_idx = idx
             best_method = method
 
-    # Umbral de similitud: 85% (reducido porque ahora usamos tokens)
-    SIMILARITY_THRESHOLD = 0.85
+    # Umbral de similitud: 90%
+    SIMILARITY_THRESHOLD = 0.90
 
     if best_similarity >= SIMILARITY_THRESHOLD and best_match_idx is not None:
         existing_name = data[best_match_idx].get("name")
@@ -418,20 +322,41 @@ def scrape_catalog_page(session: requests.Session, page_number: int) -> List[str
     if soup is None:
         return []
 
+    # Buscar contenedor principal de productos para evitar productos recomendados/footer
+    product_grid = soup.select_one("#product-grid, .product-grid, .collection-grid, #Collection")
+    
+    if not product_grid:
+        # Fallback a body si no encontramos el grid específico, 
+        # pero esto puede causar el bug detectado. 
+        # Mejor logueamos warning y probamos con selectores más estrictos.
+        logging.warning(f"No se encontró grid de productos en p{page_number}, usando soup general")
+        context = soup
+    else:
+        context = product_grid
+
     product_links: List[str] = []
 
-    # Intento 1: enlaces típicos de Shopify en cartas de producto
-    for a in soup.select("a.full-unstyled-link"):
+    # Intento 1: enlaces típicos de Shopify en cartas de producto dentro del contexto
+    for a in context.select("a.full-unstyled-link"):
         href = a.get("href")
         if href and "/products/" in href:
             product_links.append(href)
 
     # Intento 2: enlaces en tarjetas con selector alternativo
+    # Solo si el intento 1 falló, para evitar duplicados ruidosos
     if not product_links:
-        for a in soup.select("a[href*='/products/']"):
+        for a in context.select("li a[href*='/products/'], div.card a[href*='/products/']"):
             href = a.get("href")
             if href and "/products/" in href:
                 product_links.append(href)
+
+    # Intento 3: Detectar si es una página vacía explícita
+    # PadelMarket suele mostrar texto "No se encontraron productos"
+    if not product_links:
+        no_results = soup.find(string=re.compile("no se encontraron|no products found|0 productos", re.IGNORECASE))
+        if no_results:
+            logging.info(f"Detectado mensaje de 'sin resultados' en página {page_number}")
+            return []
 
     # Normalizar a URL absoluta
     abs_links = []
@@ -784,7 +709,9 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
         return None
 
     # Limpiar el nombre eliminando el sufijo "(Pala)" si existe
-    name = clean_name_and_model(name) or name
+    # clean_name_and_model ya no existe localmente, usamos normalize_name que hace algo similar
+    # pero clean_name_and_model conservaba case. Implementamos versión simple localmente o usamos normalize
+    name = re.sub(r"\s*[\(\[]Pala[\)\]]\s*$", "", name.strip(), flags=re.IGNORECASE)
 
     # Precios
     current_price = None
@@ -987,7 +914,7 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
         model = name
 
     # Limpiar el modelo también
-    model = clean_name_and_model(model) or model
+    model = re.sub(r"\s*[\(\[]Pala[\)\]]\s*$", "", model.strip(), flags=re.IGNORECASE)
 
     # Características técnicas
     features = extract_features(soup)

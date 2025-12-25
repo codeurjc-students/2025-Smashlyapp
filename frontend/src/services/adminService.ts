@@ -317,6 +317,40 @@ export class AdminService {
 
     return handleApiResponse<Activity[]>(response);
   }
+
+  /**
+   * Obtiene los conflictos de palas pendientes de revisión
+   */
+  static async getRacketConflicts(): Promise<any[]> {
+    const response = await fetch(
+      buildApiUrl(API_ENDPOINTS.ADMIN.CONFLICTS),
+      {
+        method: "GET",
+        headers: getCommonHeaders(),
+      }
+    );
+
+    return handleApiResponse<any[]>(response);
+  }
+
+  /**
+   * Resuelve un conflicto de pala
+   */
+  static async resolveRacketConflict(
+    racketId: number, 
+    action: 'replace' | 'reject' | 'keep_both'
+  ): Promise<void> {
+    const response = await fetch(
+      buildApiUrl(API_ENDPOINTS.ADMIN.RESOLVE_CONFLICT(racketId)),
+      {
+        method: "POST",
+        headers: getCommonHeaders(),
+        body: JSON.stringify({ action })
+      }
+    );
+
+    await handleApiResponse<void>(response);
+  }
 }
 
 export interface Activity {

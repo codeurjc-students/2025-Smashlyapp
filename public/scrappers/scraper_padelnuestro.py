@@ -15,6 +15,15 @@ from datetime import datetime
 import requests
 from bs4 import BeautifulSoup
 from tqdm import tqdm
+import os
+import sys
+
+# Import matching utils
+try:
+    from matching_utils import normalize_name
+except ImportError:
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from matching_utils import normalize_name
 
 
 # Configuración
@@ -119,16 +128,10 @@ class PadelNuestroScraper:
         logger.info(f"Datos guardados en {OUTPUT_FILE}: {len(data)} palas")
 
     def clean_value(self, value: Optional[str]) -> Optional[str]:
-        """Limpia y normaliza valores, convierte 'Unknow' a None"""
-        if not value:
-            return None
-
+        """Limpia y normaliza valores"""
+        if not value: return None
         value = value.strip()
-
-        # Convertir 'Unknow' a None
-        if value.lower() in ['unknow', 'unknown', '']:
-            return None
-
+        if value.lower() in ['unknow', 'unknown', '']: return None
         return value
 
     def extract_price_info(self, soup: BeautifulSoup) -> Dict[str, Any]:

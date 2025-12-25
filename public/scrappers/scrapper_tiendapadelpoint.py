@@ -31,6 +31,27 @@ from urllib.parse import urlparse
 import requests
 from bs4 import BeautifulSoup
 
+# Import matching utils
+try:
+    from matching_utils import (
+        normalize_name, 
+        create_comparison_key, 
+        calculate_similarity, 
+        calculate_token_similarity, 
+        check_critical_keywords
+    )
+except ImportError:
+    import sys
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from matching_utils import (
+        normalize_name, 
+        create_comparison_key, 
+        calculate_similarity, 
+        calculate_token_similarity, 
+        check_critical_keywords
+    )
+
+
 
 # Configuración
 BASE_URL = "https://www.tiendapadelpoint.com"
@@ -138,20 +159,7 @@ def default_racket_structure() -> Dict[str, Any]:
     }
 
 
-def normalize_name(name: Optional[str]) -> Optional[str]:
-    """
-    Normaliza un nombre de pala para comparación.
-    Elimina prefijos, espacios extra, y convierte a minúsculas.
-    """
-    if not name:
-        return None
-    n = name.strip()
-    # Eliminar prefijos como "Pala"
-    n = re.sub(r"^\s*Pala\s+", "", n, flags=re.IGNORECASE)
-    # Normalizar espacios
-    n = re.sub(r"\s+", " ", n)
-    return n.lower()
-
+# Funciones de limpieza y matching delegadas a matching_utils
 def clean_name_and_model(name: Optional[str]) -> Optional[str]:
     """
     Limpia el nombre/modelo eliminando el prefijo 'Pala' del principio.
@@ -165,14 +173,52 @@ def clean_name_and_model(name: Optional[str]) -> Optional[str]:
     return cleaned.strip()
 
 
+
 def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str]) -> Optional[int]:
+    """
+    Busca si una pala ya existe en los datos usando matching avanzado.
+    """
     if not name:
         return None
+        
     target = normalize_name(name)
+    target_key = create_comparison_key(name)
+    
+    if not target_key:
+        return None
+        
+    SIMILARITY_THRESHOLD = 0.90
+    best_match_idx = None
+    best_similarity = 0.0
+    
     for idx, item in enumerate(data):
-        existing = normalize_name(item.get("name"))
-        if existing == target:
+        existing_name = item.get("name")
+        if not existing_name: continue
+        
+        # Critical keywords check
+        if not check_critical_keywords(name, existing_name):
+            continue
+            
+        existing_key = create_comparison_key(existing_name)
+        if not existing_key: continue
+        
+        # 1. Comparación exacta de claves
+        if existing_key == target_key:
             return idx
+            
+        # 2. Similitud
+        sim = calculate_similarity(target_key, existing_key)
+        token_sim = calculate_token_similarity(name, existing_name)
+        
+        score = max(sim, token_sim)
+        
+        if score > best_similarity:
+            best_similarity = score
+            best_match_idx = idx
+            
+    if best_similarity >= SIMILARITY_THRESHOLD and best_match_idx is not None:
+        return best_match_idx
+        
     return None
 
 

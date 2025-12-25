@@ -21,6 +21,30 @@ from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
 from selenium import webdriver
+
+# Import matching utils
+try:
+    from matching_utils import (
+        normalize_name, 
+        create_comparison_key, 
+        calculate_similarity, 
+        calculate_token_similarity, 
+        check_critical_keywords
+    )
+except ImportError:
+    import sys
+    import os
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from matching_utils import (
+        normalize_name, 
+        create_comparison_key, 
+        calculate_similarity, 
+        calculate_token_similarity, 
+        calculate_token_similarity, 
+        check_critical_keywords,
+        extract_brand_from_name
+    )
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.support.ui import WebDriverWait
@@ -168,135 +192,10 @@ def save_json(path: str, data: List[Dict[str, Any]]) -> None:
         logging.error(f"Error guardando JSON: {e}")
 
 
-def normalize_name(name: Optional[str]) -> Optional[str]:
-    """
-    Normaliza un nombre de pala para comparación.
-    Elimina prefijos/sufijos, espacios extra, y convierte a minúsculas.
-    """
-    if not name:
-        return None
-    n = name.strip()
-    # Quitar prefijo "Pala " (con o sin mayúscula y espacios)
-    n = re.sub(r'^\s*Pala\s+', '', n, flags=re.IGNORECASE)
-    # Normalizar espacios múltiples
-    n = re.sub(r'\s+', ' ', n)
-    return n.lower()
-
-def clean_name_and_model(name: Optional[str]) -> Optional[str]:
-    """
-    Limpia el nombre/modelo eliminando el prefijo 'Pala' del principio.
-    """
-    if not name:
-        return None
-    # Eliminar "Pala " del principio del string
-    cleaned = re.sub(r'^\s*Pala\s+', '', name.strip(), flags=re.IGNORECASE)
-    # Normalizar espacios
-    cleaned = re.sub(r'\s+', ' ', cleaned)
-    return cleaned.strip()
-
-
-def create_comparison_key(name: Optional[str], brand: Optional[str] = None) -> Optional[str]:
-    """
-    Crea una clave de comparación más robusta para matching.
-    Normaliza el nombre eliminando caracteres especiales, acentos, espacios y mayúsculas.
-    """
-    if not name:
-        return None
-
-    # Normalizar nombre
-    key = normalize_name(name)
-    if not key:
-        return None
-
-    # Eliminar acentos y caracteres especiales
-    import unicodedata
-    key = unicodedata.normalize('NFKD', key).encode('ASCII', 'ignore').decode('ASCII')
-
-    # Eliminar todos los caracteres que no sean letras o números
-    key = re.sub(r'[^a-z0-9]', '', key)
-
-    return key
-
-
-def calculate_similarity(str1: str, str2: str) -> float:
-    """
-    Calcula la similitud entre dos strings usando distancia de Levenshtein simplificada.
-    Retorna un valor entre 0 (totalmente diferente) y 1 (idéntico).
-    """
-    if str1 == str2:
-        return 1.0
-
-    # Algoritmo de distancia de Levenshtein simplificado
-    len1, len2 = len(str1), len(str2)
-    if len1 == 0 or len2 == 0:
-        return 0.0
-
-    # Crear matriz de distancias
-    distances = [[0] * (len2 + 1) for _ in range(len1 + 1)]
-
-    for i in range(len1 + 1):
-        distances[i][0] = i
-    for j in range(len2 + 1):
-        distances[0][j] = j
-
-    for i in range(1, len1 + 1):
-        for j in range(1, len2 + 1):
-            cost = 0 if str1[i-1] == str2[j-1] else 1
-            distances[i][j] = min(
-                distances[i-1][j] + 1,      # deletion
-                distances[i][j-1] + 1,      # insertion
-                distances[i-1][j-1] + cost  # substitution
-            )
-
-    max_len = max(len1, len2)
-    similarity = 1 - (distances[len1][len2] / max_len)
-    return similarity
-
-
-def extract_version_numbers(text: str) -> List[str]:
-    """
-    Extrae números de versión del texto (ej: "3.3", "2024", "V2", etc.)
-    Returns:
-        Lista de números de versión encontrados
-    """
-    # Patrones comunes de versión: 3.3, V2, 2024, etc.
-    patterns = [
-        r'\d+\.\d+',  # 3.3, 2.1, etc.
-        r'v\d+',      # v2, V3, etc.
-        r'\b20\d{2}\b',  # 2024, 2025, etc. (años)
-        r'\b\d{2}\b$',   # 03, 23, etc. al final
-    ]
-
-    versions = []
-    for pattern in patterns:
-        matches = re.findall(pattern, text, re.IGNORECASE)
-        versions.extend(matches)
-
     return versions
 
+# Eliminadas funciones locales duplicadas: tokenize_name, normalize_name, create_comparison_key, calculate_similarity
 
-def tokenize_name(name: str) -> set:
-    """
-    Tokeniza un nombre en palabras/números significativos.
-    Aplica normalización antes de tokenizar.
-    """
-    # Normalizar primero (sin quitar espacios todavía)
-    normalized = normalize_name(name) or ""
-
-    # Extraer tokens: palabras de 2+ caracteres o números
-    tokens = set()
-
-    # Patrones de tokens
-    # 1. Palabras de 2+ letras
-    for word in re.findall(r'[a-z]{2,}', normalized):
-        tokens.add(word)
-
-    # 2. Números (años, versiones, etc.)
-    for num in re.findall(r'\d+', normalized):
-        if len(num) >= 2:  # Al menos 2 dígitos
-            tokens.add(num)
-
-    return tokens
 
 
 def calculate_token_similarity(name1: str, name2: str) -> float:
@@ -509,10 +408,16 @@ def scrape_product_detail(url: str) -> Dict[str, Any]:
             pattern = re.compile(rf'^\s*{re.escape(brand)}\s+', re.IGNORECASE)
             model = pattern.sub('', normalized).strip()
         else:
-            # Sin marca, tomar la primera palabra como marca tentativa
-            parts = normalized.split(' ', 1)
-            brand = parts[0] if parts else None
-            model = parts[1] if len(parts) > 1 else None
+            # Sin marca, intentar extraer usando la lista conocida
+            extracted_brand, extracted_model = extract_brand_from_name(name)
+            if extracted_brand:
+                brand = extracted_brand
+                model = extracted_model
+            else:
+                # Fallback final: tomar primera palabra
+                parts = normalized.split(' ', 1)
+                brand = parts[0] if parts else None
+                model = parts[1] if len(parts) > 1 else None
 
     # Precios
     current_price, original_price = _extract_prices_from_soup(soup)
@@ -878,69 +783,40 @@ def scroll_and_collect_links(driver: webdriver.Chrome) -> List[str]:
 def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str], brand: Optional[str] = None) -> Optional[int]:
     """
     Busca una pala existente en el JSON usando múltiples estrategias de matching.
-
-    Estrategia de matching:
-    1. Comparación exacta de claves normalizadas
-    2. Comparación por similitud de tokens (palabras comunes) con umbral del 85%
-    3. Comparación por similitud de secuencia (Levenshtein) con umbral del 90%
-    4. Verificación de números de versión (deben coincidir)
-    5. Comparación adicional por marca + modelo si está disponible
-
-    Returns:
-        Índice de la pala si existe, None si no existe
+    Busca si una pala ya existe en los datos usando matching avanzado.
     """
     if not name:
         return None
 
     # Crear clave de comparación del nombre a buscar
-    target_key = create_comparison_key(name, brand)
+    # Nota: create_comparison_key ajustada para no usar brand
+    target_key = create_comparison_key(name)
     if not target_key:
         return None
 
-    # Extraer versiones del nombre objetivo
-    target_versions = extract_version_numbers(normalize_name(name) or "")
+    # Threshold de similitud
+    SIMILARITY_THRESHOLD = 0.90  # 90% para ser más estricto
 
-    # Variables para tracking del mejor match
     best_match_idx = None
     best_similarity = 0.0
-    best_method = None
 
-    # Recorrer todas las palas existentes
     for idx, item in enumerate(data):
         existing_name = item.get("name")
-        existing_brand = item.get("brand") or item.get("characteristics_brand")
+        if not existing_name:
+            continue
+            
+        # Critical keywords check
+        if not check_critical_keywords(name, existing_name):
+            continue
 
-        # Crear clave de comparación de la pala existente
-        existing_key = create_comparison_key(existing_name, existing_brand)
-
+        existing_key = create_comparison_key(existing_name)
         if not existing_key:
             continue
 
         # 1. Comparación exacta de claves
         if existing_key == target_key:
-            logging.info(f"Match exacto encontrado: '{name}' == '{existing_name}'")
             return idx
 
-        # 2. Calcular similitud de tokens (independiente del orden)
-        token_similarity = calculate_token_similarity(name, existing_name)
-
-        # 3. Calcular similitud de secuencia (Levenshtein)
-        sequence_similarity = calculate_similarity(target_key, existing_key)
-
-        # Usar la mayor de las dos similitudes
-        similarity = max(token_similarity, sequence_similarity)
-        method = "tokens" if token_similarity > sequence_similarity else "secuencia"
-
-        # 4. Verificar versiones - si hay versiones diferentes, penalizar
-        existing_versions = extract_version_numbers(normalize_name(existing_name) or "")
-
-        # Si ambos tienen versiones y no coinciden, penalizar mucho la similitud
-        if target_versions and existing_versions:
-            target_v_set = set(v.lower() for v in target_versions)
-            existing_v_set = set(v.lower() for v in existing_versions)
-
-            # Si las versiones son completamente diferentes, reducir similitud
-            if target_v_set.isdisjoint(existing_v_set):
                 similarity *= 0.5  # Penalizar al 50%
 
         # 5. Si la marca coincide, dar un boost a la similitud

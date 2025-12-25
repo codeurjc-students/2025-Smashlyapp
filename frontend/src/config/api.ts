@@ -51,6 +51,8 @@ export const API_ENDPOINTS = {
     RECENT_ACTIVITY: "/api/v1/admin/recent-activity",
     VERIFY_STORE: (id: string) => `/api/v1/admin/stores/${id}/verify`,
     REJECT_STORE: (id: string) => `/api/v1/admin/stores/${id}/reject`,
+    CONFLICTS: "/api/v1/admin/rackets/conflicts",
+    RESOLVE_CONFLICT: (id: number) => `/api/v1/admin/rackets/${id}/resolve`,
   },
 
   // Racket Views
