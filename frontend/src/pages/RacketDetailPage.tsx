@@ -9,8 +9,10 @@ import {
   FiLoader,
   FiStar,
   FiTag,
+  FiEdit, // Importar icono de edición
   FiHeart,
 } from 'react-icons/fi';
+
 import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { AddToListModal } from '../components/features/AddToListModal';
@@ -21,6 +23,7 @@ import { RacketService } from '../services/racketService';
 import { RacketViewService } from '../services/racketViewService';
 import { getLowestPrice, getAllStorePrices } from '../utils/priceUtils';
 import { toTitleCase } from '../utils/textUtils';
+import { EditRacketModal } from '../components/admin/EditRacketModal'; // Importar el modal
 
 // Styled Components
 const Container = styled.div`
@@ -86,7 +89,7 @@ const Content = styled.div`
 
 const TopSection = styled.div<{ $showComparison?: boolean }>`
   display: grid;
-  grid-template-columns: ${props => props.$showComparison ? '1.2fr 0.8fr' : '1fr'};
+  grid-template-columns: ${props => (props.$showComparison ? '1.2fr 0.8fr' : '1fr')};
   gap: 2rem;
   align-items: start;
 
@@ -212,7 +215,6 @@ const DiscountBadge = styled.div`
   font-size: 0.875rem;
   font-weight: 600;
 `;
-
 
 const StoreBadge = styled.div`
   background: #f0f9ff;
@@ -366,13 +368,14 @@ const RacketDetailPage: React.FC = () => {
   // Hooks
   const [searchParams] = useSearchParams();
   const { rackets } = useRackets();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userProfile } = useAuth(); // Obtener userProfile para verificar rol
 
   // State
   const [racket, setRacket] = useState<Racket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false); // Estado para el modal de edición
 
   // Get racket ID from URL params
   const racketId = searchParams.get('id');
@@ -434,7 +437,7 @@ const RacketDetailPage: React.FC = () => {
   useEffect(() => {
     if (racket && racket.id && isAuthenticated) {
       // Record the view asynchronously without blocking the UI
-      RacketViewService.recordView(racket.id).catch((error) => {
+      RacketViewService.recordView(racket.id).catch(error => {
         // Silently fail - viewing tracking is not critical
         console.debug('Could not record racket view:', error);
       });
@@ -541,7 +544,9 @@ const RacketDetailPage: React.FC = () => {
                               <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
                               {lowestPrice.originalPrice > lowestPrice.price && (
                                 <>
-                                  <OriginalPrice>{lowestPrice.originalPrice.toFixed(2)}€</OriginalPrice>
+                                  <OriginalPrice>
+                                    {lowestPrice.originalPrice.toFixed(2)}€
+                                  </OriginalPrice>
                                   {lowestPrice.discount > 0 && (
                                     <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
                                   )}
@@ -557,6 +562,21 @@ const RacketDetailPage: React.FC = () => {
                   </div>
 
                   <ActionButtons>
+                    {/* Botón de Editar para ADMINS */}
+                    {isAuthenticated && userProfile?.role?.toLowerCase() === 'admin' && (
+                      <SecondaryButton
+                        onClick={() => setShowEditModal(true)}
+                        style={{
+                          borderColor: '#2563eb',
+                          color: '#2563eb',
+                          background: '#eff6ff',
+                        }}
+                      >
+                        <FiEdit />
+                        Editar Pala
+                      </SecondaryButton>
+                    )}
+
                     <PrimaryButton
                       href={getLowestPrice(racket)?.link || racket.enlace}
                       target='_blank'
@@ -655,6 +675,20 @@ const RacketDetailPage: React.FC = () => {
           onClose={() => setShowAddToListModal(false)}
           racketId={racket.id || 0}
           racketName={`${racket.marca} ${racket.modelo}`}
+        />
+      )}
+
+      {/* Modal de Edición de Pala (Admin) */}
+      {racket && showEditModal && (
+        <EditRacketModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          racket={racket}
+          onUpdate={updatedRacket => {
+            setRacket(updatedRacket);
+            // Opcional: Actualizar el contexto de rackets si es necesario,
+            // pero por ahora actualizamos el estado local para reflejar cambios inmediatos
+          }}
         />
       )}
     </Container>

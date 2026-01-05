@@ -1,13 +1,7 @@
-import { Request, Response } from "express";
-import { RacketService } from "../services/racketService";
-import logger from "../config/logger";
-import {
-  SearchFilters,
-  SortOptions,
-  ApiResponse,
-  PaginatedResponse,
-  Racket,
-} from "../types";
+import { Request, Response } from 'express';
+import { RacketService } from '../services/racketService';
+import logger from '../config/logger';
+import { SearchFilters, SortOptions, ApiResponse, PaginatedResponse, Racket } from '../types';
 
 // Helper function outside the class to avoid 'this' context issues
 function getErrorMessage(error: unknown): string {
@@ -18,7 +12,6 @@ function getErrorMessage(error: unknown): string {
 }
 
 export class RacketController {
-
   /**
    * GET /api/rackets
    * Gets all rackets or with pagination
@@ -28,16 +21,13 @@ export class RacketController {
       const rawPage = parseInt(req.query.page as string);
       const rawLimit = parseInt(req.query.limit as string);
       const limit = Number.isFinite(rawLimit) && rawLimit > 0 ? rawLimit : undefined;
-      const usePagination = req.query.paginated === "true";
+      const usePagination = req.query.paginated === 'true';
 
       // Page 1-based por defecto, sin remapeo
       const page = isNaN(rawPage) ? 1 : rawPage > 0 ? rawPage : 1;
 
       if (usePagination) {
-        const result = await RacketService.getRacketsWithPagination(
-          page,
-          limit ?? 10
-        );
+        const result = await RacketService.getRacketsWithPagination(page, limit ?? 10);
         res.json({
           success: true,
           data: result,
@@ -53,10 +43,10 @@ export class RacketController {
         } as ApiResponse<Racket[]>);
       }
     } catch (error: unknown) {
-      logger.error("Error in getAllRackets:", error);
+      logger.error('Error in getAllRackets:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -74,8 +64,8 @@ export class RacketController {
       if (isNaN(id)) {
         res.status(400).json({
           success: false,
-          error: "Invalid ID",
-          message: "ID must be a number",
+          error: 'Invalid ID',
+          message: 'ID must be a number',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -86,7 +76,7 @@ export class RacketController {
       if (!racket) {
         res.status(404).json({
           success: false,
-          error: "Pala no encontrada",
+          error: 'Pala no encontrada',
           message: `No se encontró una pala con ID ${id}`,
           timestamp: new Date().toISOString(),
         } as ApiResponse);
@@ -99,10 +89,50 @@ export class RacketController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<Racket>);
     } catch (error: unknown) {
-      logger.error("Error in getRacketById:", error);
+      logger.error('Error in getRacketById:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * PUT /api/rackets/:id
+   * Actualiza una pala existente
+   */
+  static async updateRacket(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id);
+      const updates = req.body;
+
+      if (isNaN(id)) {
+        res.status(400).json({
+          success: false,
+          error: 'Invalid ID',
+          message: 'ID must be a number',
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      // TODO: Here we could add deeper validations if needed
+
+      const updatedRacket = await RacketService.updateRacket(id, updates);
+
+      res.json({
+        success: true,
+        data: updatedRacket,
+        message: 'Pala actualizada correctamente',
+        timestamp: new Date().toISOString(),
+      } as ApiResponse<Racket>);
+    } catch (error: unknown) {
+      logger.error('Error in updateRacket:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -120,8 +150,8 @@ export class RacketController {
       if (!query || query.trim().length < 2) {
         res.status(400).json({
           success: false,
-          error: "Invalid query",
-          message: "Search must have at least 2 characters",
+          error: 'Invalid query',
+          message: 'Search must have at least 2 characters',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -136,10 +166,10 @@ export class RacketController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<Racket[]>);
     } catch (error: unknown) {
-      logger.error("Error in searchRackets:", error);
+      logger.error('Error in searchRackets:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -158,13 +188,8 @@ export class RacketController {
       const filters = this.buildSearchFilters(req.query);
       const sort = this.buildSortOptions(req.query);
 
-      logger.info("Applied filters:", filters);
-      const result = await RacketService.getFilteredRackets(
-        filters,
-        sort,
-        page,
-        limit
-      );
+      logger.info('Applied filters:', filters);
+      const result = await RacketService.getFilteredRackets(filters, sort, page, limit);
 
       res.json({
         success: true,
@@ -172,10 +197,10 @@ export class RacketController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<PaginatedResponse<Racket>>);
     } catch (error: unknown) {
-      logger.error("Error in getFilteredRackets:", error);
+      logger.error('Error in getFilteredRackets:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -189,22 +214,22 @@ export class RacketController {
     if (query.shape) filters.shape = query.shape as string;
     if (query.balance) filters.balance = query.balance as string;
     if (query.level) filters.game_level = query.level as string;
-    
+
     if (query.min_price) filters.min_price = parseFloat(query.min_price as string);
     if (query.max_price) filters.max_price = parseFloat(query.max_price as string);
-    
-    if (query.on_sale) filters.on_offer = query.on_sale === "true";
-    if (query.bestseller) filters.is_bestseller = query.bestseller === "true";
+
+    if (query.on_sale) filters.on_offer = query.on_sale === 'true';
+    if (query.bestseller) filters.is_bestseller = query.bestseller === 'true';
 
     return filters;
   }
 
   private static buildSortOptions(query: Record<string, unknown>): SortOptions | undefined {
     if (!query.sortBy) return undefined;
-    
+
     return {
       field: query.sortBy as string,
-      order: (query.sortOrder as string) === "desc" ? "desc" : "asc",
+      order: (query.sortOrder as string) === 'desc' ? 'desc' : 'asc',
     };
   }
 
@@ -219,8 +244,8 @@ export class RacketController {
       if (!brand) {
         res.status(400).json({
           success: false,
-          error: "Brand required",
-          message: "You must specify a brand",
+          error: 'Brand required',
+          message: 'You must specify a brand',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
@@ -235,10 +260,10 @@ export class RacketController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<Racket[]>);
     } catch (error: unknown) {
-      logger.error("Error in getRacketsByBrand:", error);
+      logger.error('Error in getRacketsByBrand:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -249,10 +274,7 @@ export class RacketController {
    * GET /api/rackets/bestsellers
    * Gets bestseller rackets
    */
-  static async getBestsellerRackets(
-    req: Request,
-    res: Response
-  ): Promise<void> {
+  static async getBestsellerRackets(req: Request, res: Response): Promise<void> {
     try {
       const rackets = await RacketService.getBestsellerRackets();
 
@@ -263,10 +285,10 @@ export class RacketController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<Racket[]>);
     } catch (error: unknown) {
-      logger.error("Error in getBestsellerRackets:", error);
+      logger.error('Error in getBestsellerRackets:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -288,10 +310,10 @@ export class RacketController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<Racket[]>);
     } catch (error: unknown) {
-      logger.error("Error in getRacketsOnSale:", error);
+      logger.error('Error in getRacketsOnSale:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -313,10 +335,10 @@ export class RacketController {
         timestamp: new Date().toISOString(),
       } as ApiResponse<string[]>);
     } catch (error: unknown) {
-      logger.error("Error in getBrands:", error);
+      logger.error('Error in getBrands:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -334,14 +356,14 @@ export class RacketController {
       res.json({
         success: true,
         data: stats,
-        message: "Statistics obtained successfully",
+        message: 'Statistics obtained successfully',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getStats:", error);
+      logger.error('Error in getStats:', error);
       res.status(500).json({
         success: false,
-        error: "Error interno del servidor",
+        error: 'Error interno del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);

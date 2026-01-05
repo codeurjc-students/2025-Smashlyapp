@@ -170,6 +170,103 @@ export function mapToFrontendFormat(racket: any): any {
   };
 }
 
+/**
+ * Maps frontend fields (Spanish) back to database fields (English)
+ */
+export function mapToBackendFormat(frontendRacket: any): any {
+  const backendData: any = {};
+
+  // Basic fields
+  if (frontendRacket.nombre !== undefined) backendData.name = frontendRacket.nombre;
+  if (frontendRacket.marca !== undefined) backendData.brand = frontendRacket.marca;
+  if (frontendRacket.modelo !== undefined) backendData.model = frontendRacket.modelo;
+  if (frontendRacket.imagen !== undefined) backendData.image = frontendRacket.imagen;
+  if (frontendRacket.en_oferta !== undefined) backendData.on_offer = frontendRacket.en_oferta;
+  if (frontendRacket.descripcion !== undefined)
+    backendData.description = frontendRacket.descripcion;
+
+  // Characteristics
+  if (frontendRacket.caracteristicas_marca !== undefined)
+    backendData.characteristics_brand = frontendRacket.caracteristicas_marca;
+  if (frontendRacket.caracteristicas_color !== undefined)
+    backendData.characteristics_color = frontendRacket.caracteristicas_color;
+  if (frontendRacket.caracteristicas_color_2 !== undefined)
+    backendData.characteristics_color_2 = frontendRacket.caracteristicas_color_2;
+  if (frontendRacket.caracteristicas_producto !== undefined)
+    backendData.characteristics_product = frontendRacket.caracteristicas_producto;
+  if (frontendRacket.caracteristicas_balance !== undefined)
+    backendData.characteristics_balance = frontendRacket.caracteristicas_balance;
+  if (frontendRacket.caracteristicas_nucleo !== undefined)
+    backendData.characteristics_core = frontendRacket.caracteristicas_nucleo;
+  if (frontendRacket.caracteristicas_cara !== undefined)
+    backendData.characteristics_face = frontendRacket.caracteristicas_face;
+  if (frontendRacket.caracteristicas_formato !== undefined)
+    backendData.characteristics_format = frontendRacket.caracteristicas_formato;
+  if (frontendRacket.caracteristicas_dureza !== undefined)
+    backendData.characteristics_hardness = frontendRacket.caracteristicas_dureza;
+  if (frontendRacket.caracteristicas_nivel_de_juego !== undefined)
+    backendData.characteristics_game_level = frontendRacket.caracteristicas_nivel_de_juego;
+  if (frontendRacket.caracteristicas_acabado !== undefined)
+    backendData.characteristics_finish = frontendRacket.caracteristicas_acabado;
+  if (frontendRacket.caracteristicas_forma !== undefined)
+    backendData.characteristics_shape = frontendRacket.caracteristicas_forma;
+  if (frontendRacket.caracteristicas_superficie !== undefined)
+    backendData.characteristics_surface = frontendRacket.caracteristicas_superficie;
+  if (frontendRacket.caracteristicas_tipo_de_juego !== undefined)
+    backendData.characteristics_game_type = frontendRacket.caracteristicas_tipo_de_juego;
+  if (frontendRacket.caracteristicas_coleccion_jugadores !== undefined)
+    backendData.characteristics_player_collection =
+      frontendRacket.caracteristicas_coleccion_jugadores;
+  if (frontendRacket.caracteristicas_jugador !== undefined)
+    backendData.characteristics_player = frontendRacket.caracteristicas_jugador;
+
+  // Specs JSONB
+  if (frontendRacket.especificaciones !== undefined)
+    backendData.specs = frontendRacket.especificaciones;
+
+  // Store Prices - PadelNuestro
+  if (frontendRacket.padelnuestro_precio_actual !== undefined)
+    backendData.padelnuestro_actual_price = frontendRacket.padelnuestro_precio_actual;
+  if (frontendRacket.padelnuestro_precio_original !== undefined)
+    backendData.padelnuestro_original_price = frontendRacket.padelnuestro_precio_original;
+  if (frontendRacket.padelnuestro_descuento_porcentaje !== undefined)
+    backendData.padelnuestro_discount_percentage = frontendRacket.padelnuestro_descuento_porcentaje;
+  if (frontendRacket.padelnuestro_enlace !== undefined)
+    backendData.padelnuestro_link = frontendRacket.padelnuestro_enlace;
+
+  // Store Prices - PadelMarket
+  if (frontendRacket.padelmarket_precio_actual !== undefined)
+    backendData.padelmarket_actual_price = frontendRacket.padelmarket_precio_actual;
+  if (frontendRacket.padelmarket_precio_original !== undefined)
+    backendData.padelmarket_original_price = frontendRacket.padelmarket_precio_original;
+  if (frontendRacket.padelmarket_descuento_porcentaje !== undefined)
+    backendData.padelmarket_discount_percentage = frontendRacket.padelmarket_descuento_porcentaje;
+  if (frontendRacket.padelmarket_enlace !== undefined)
+    backendData.padelmarket_link = frontendRacket.padelmarket_enlace;
+
+  // Store Prices - PadelPoint
+  if (frontendRacket.padelpoint_precio_actual !== undefined)
+    backendData.padelpoint_actual_price = frontendRacket.padelpoint_precio_actual;
+  if (frontendRacket.padelpoint_precio_original !== undefined)
+    backendData.padelpoint_original_price = frontendRacket.padelpoint_precio_original;
+  if (frontendRacket.padelpoint_descuento_porcentaje !== undefined)
+    backendData.padelpoint_discount_percentage = frontendRacket.padelpoint_descuento_porcentaje;
+  if (frontendRacket.padelpoint_enlace !== undefined)
+    backendData.padelpoint_link = frontendRacket.padelpoint_enlace;
+
+  // Store Prices - PadelProShop
+  if (frontendRacket.padelproshop_precio_actual !== undefined)
+    backendData.padelproshop_actual_price = frontendRacket.padelproshop_precio_actual;
+  if (frontendRacket.padelproshop_precio_original !== undefined)
+    backendData.padelproshop_original_price = frontendRacket.padelproshop_precio_original;
+  if (frontendRacket.padelproshop_descuento_porcentaje !== undefined)
+    backendData.padelproshop_discount_percentage = frontendRacket.padelproshop_descuento_porcentaje;
+  if (frontendRacket.padelproshop_enlace !== undefined)
+    backendData.padelproshop_link = frontendRacket.padelproshop_enlace;
+
+  return backendData;
+}
+
 async function fetchRemainingRackets(initialData: any[], count: number): Promise<any[]> {
   const allData = [...initialData];
   let currentOffset = initialData.length;
@@ -314,6 +411,31 @@ export class RacketService {
       }
       logger.error('Error fetching racket by ID:', error);
       throw new Error(`Error al cargar la pala: ${error.message}`);
+    }
+
+    const processedData = processRacketData([data]);
+    return mapToFrontendFormat(processedData[0]);
+  }
+
+  /**
+   * Actualiza una pala existente
+   */
+  static async updateRacket(id: number, updates: Partial<Racket>): Promise<Racket> {
+    const backendUpdates = mapToBackendFormat(updates);
+
+    // Add updated_at timestamp
+    backendUpdates.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('rackets')
+      .update(backendUpdates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) {
+      logger.error(`Error updating racket ${id}:`, error);
+      throw new Error(`Error al actualizar la pala: ${error.message}`);
     }
 
     const processedData = processRacketData([data]);
