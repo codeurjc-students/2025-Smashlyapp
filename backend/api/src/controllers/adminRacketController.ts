@@ -52,13 +52,13 @@ export class AdminRacketController {
         };
       });
 
-      res.json({
+      return res.json({
         success: true,
         data: conflictsWithRelated
       });
     } catch (error: any) {
       logger.error('Error fetching racket conflicts:', error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error al obtener conflictos',
         error: error.message
@@ -157,7 +157,7 @@ export class AdminRacketController {
 
     } catch (error: any) {
       logger.error(`Error resolving conflict ${id}:`, error);
-      res.status(500).json({
+      return res.status(500).json({
         success: false,
         message: 'Error al resolver conflicto',
         error: error.message
