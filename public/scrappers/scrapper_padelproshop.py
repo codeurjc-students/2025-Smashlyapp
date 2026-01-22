@@ -15,6 +15,7 @@ import json
 import time
 import logging
 import re
+from datetime import datetime
 from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
 
@@ -25,24 +26,26 @@ from selenium import webdriver
 # Import matching utils
 try:
     from matching_utils import (
-        normalize_name, 
-        create_comparison_key, 
-        calculate_similarity, 
-        calculate_token_similarity, 
-        check_critical_keywords
+        normalize_name,
+        create_comparison_key,
+        calculate_similarity,
+        calculate_token_similarity,
+        check_critical_keywords,
+        extract_brand_from_name,
+        calculate_composite_score,
     )
 except ImportError:
     import sys
     import os
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from matching_utils import (
-        normalize_name, 
-        create_comparison_key, 
-        calculate_similarity, 
-        calculate_token_similarity, 
-        calculate_token_similarity, 
+        normalize_name,
+        create_comparison_key,
+        calculate_similarity,
+        calculate_token_similarity,
         check_critical_keywords,
-        extract_brand_from_name
+        extract_brand_from_name,
+        calculate_composite_score,
     )
 
 from selenium.webdriver.common.by import By
@@ -139,12 +142,23 @@ def default_racket_structure() -> Dict[str, Any]:
         "characteristics_game_type": None,
         "characteristics_player_collection": None,
         "characteristics_player": None,
-        # Especificaciones
+        # Especificaciones técnicas
         "specs": {
             "tecnologias": [],
             "peso": None,
             "marco": None,
+            "grosor": None,  # Nuevo: perfil/grosor (ej: 38mm)
+            "to": None,     # Nuevo: año del modelo (ej: 2026)
         },
+        # Métricas numéricas (0-10) - scrapear de tumejorpala o calcular
+        "score_control": None,
+        "score_power": None,
+        "score_rebound": None,
+        "score_handling": None,
+        "score_sweet_spot": None,
+        "score_global": None,
+        # Meta-datos
+        "last_updated": None,
         # Campos tienda PadelNuestro (compatibilidad)
         "padelnuestro_actual_price": None,
         "padelnuestro_original_price": None,
@@ -160,6 +174,11 @@ def default_racket_structure() -> Dict[str, Any]:
         "padelproshop_original_price": None,
         "padelproshop_discount_percentage": None,
         "padelproshop_link": None,
+        # Campos tienda TiendaPadelPoint
+        "padelpoint_actual_price": None,
+        "padelpoint_original_price": None,
+        "padelpoint_discount_percentage": None,
+        "padelpoint_link": None,
     }
 
 
@@ -558,6 +577,7 @@ def scrape_product_detail(url: str) -> Dict[str, Any]:
         'padelproshop_original_price': original_price,
         'padelproshop_discount_percentage': discount_pct,
         'padelproshop_link': url,
+        'last_updated': datetime.now().isoformat(),
     }
 
     # Comentado para evitar problemas de encoding en Windows
@@ -782,67 +802,63 @@ def scroll_and_collect_links(driver: webdriver.Chrome) -> List[str]:
 
 def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str], brand: Optional[str] = None) -> Optional[int]:
     """
-    Busca una pala existente en el JSON usando múltiples estrategias de matching.
-    Busca si una pala ya existe en los datos usando matching avanzado.
+    Busca una pala existente en el JSON usando matching mejorado con especificaciones técnicas.
     """
     if not name:
         return None
 
-    # Crear clave de comparación del nombre a buscar
-    # Nota: create_comparison_key ajustada para no usar brand
+    # Crear producto temporal con el nombre
+    target_product = {'name': name}
+    if brand:
+        target_product['brand'] = brand
+
     target_key = create_comparison_key(name)
     if not target_key:
         return None
 
-    # Threshold de similitud
-    SIMILARITY_THRESHOLD = 0.90  # 90% para ser más estricto
+    # 1. Primero buscar match exacto (más rápido)
+    for idx, item in enumerate(data):
+        existing_name = item.get("name")
+        if not existing_name:
+            continue
 
-    best_match_idx = None
-    best_similarity = 0.0
+        existing_key = create_comparison_key(existing_name)
+        if existing_key and existing_key == target_key:
+            if check_critical_keywords(name, existing_name):
+                return idx
+
+    # 2. Si no hay match exacto, usar matching compuesto con specs
+    best_idx = None
+    best_score = 0.0
 
     for idx, item in enumerate(data):
         existing_name = item.get("name")
         if not existing_name:
             continue
-            
-        # Critical keywords check
+
         if not check_critical_keywords(name, existing_name):
             continue
 
-        existing_key = create_comparison_key(existing_name)
-        if not existing_key:
-            continue
+        # Calcular score compuesto (nombre + especificaciones)
+        score, _ = calculate_composite_score(target_product, item)
 
-        # 1. Comparación exacta de claves
-        if existing_key == target_key:
-            return idx
-
-                similarity *= 0.5  # Penalizar al 50%
-
-        # 5. Si la marca coincide, dar un boost a la similitud
+        # Boost si la marca coincide
+        existing_brand = item.get("brand") or item.get("characteristics_brand")
         if brand and existing_brand:
             brand_key1 = create_comparison_key(brand)
             brand_key2 = create_comparison_key(existing_brand)
             if brand_key1 == brand_key2:
-                similarity = min(1.0, similarity + 0.1)  # Boost del 10%
+                score = min(1.0, score + 0.05)
 
-        # Tracking del mejor match
-        if similarity > best_similarity:
-            best_similarity = similarity
-            best_match_idx = idx
-            best_method = method
+        if score > best_score:
+            best_score = score
+            best_idx = idx
 
     # Umbral de similitud: 85%
     SIMILARITY_THRESHOLD = 0.85
 
-    if best_similarity >= SIMILARITY_THRESHOLD and best_match_idx is not None:
-        existing_name = data[best_match_idx].get("name")
-        logging.info(f"Match por similitud {best_method} ({best_similarity*100:.1f}%): '{name}' ~= '{existing_name}'")
-        return best_match_idx
-
-    # No se encontró match
-    if best_similarity > 0.5:  # Log solo si hubo alguna similitud considerable
-        logging.info(f"No match para '{name}' (mejor similitud: {best_similarity*100:.1f}%)")
+    if best_score >= SIMILARITY_THRESHOLD and best_idx is not None:
+        return best_idx
 
     return None
 
@@ -870,6 +886,7 @@ def _create_new_entry_from_scraped(scraped: Dict[str, Any]) -> Dict[str, Any]:
     entry['padelproshop_original_price'] = scraped.get('padelproshop_original_price')
     entry['padelproshop_discount_percentage'] = scraped.get('padelproshop_discount_percentage')
     entry['padelproshop_link'] = scraped.get('padelproshop_link')
+    entry['last_updated'] = datetime.now().isoformat()
 
     return entry
 
@@ -939,6 +956,7 @@ def main():
                     entry['padelproshop_original_price'] = scraped.get('padelproshop_original_price')
                     entry['padelproshop_discount_percentage'] = scraped.get('padelproshop_discount_percentage')
                     entry['padelproshop_link'] = scraped.get('padelproshop_link')
+                    entry['last_updated'] = datetime.now().isoformat()
 
                     # Actualizar imagen solo si no existe
                     if not entry.get('image') and scraped.get('image'):

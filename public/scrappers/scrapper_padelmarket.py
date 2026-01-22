@@ -3,6 +3,7 @@ import logging
 import os
 import re
 import time
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 
 import requests
@@ -11,22 +12,24 @@ from bs4 import BeautifulSoup
 # Importar utilidades de matching compartidas
 try:
     from matching_utils import (
-        normalize_name, 
-        create_comparison_key, 
-        calculate_similarity, 
-        calculate_token_similarity, 
-        check_critical_keywords
+        normalize_name,
+        create_comparison_key,
+        calculate_similarity,
+        calculate_token_similarity,
+        check_critical_keywords,
+        calculate_composite_score,
     )
 except ImportError:
     # Fallback si se ejecuta desde directorio diferente
     import sys
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from matching_utils import (
-        normalize_name, 
-        create_comparison_key, 
-        calculate_similarity, 
-        calculate_token_similarity, 
-        check_critical_keywords
+        normalize_name,
+        create_comparison_key,
+        calculate_similarity,
+        calculate_token_similarity,
+        check_critical_keywords,
+        calculate_composite_score,
     )
 
 
@@ -121,14 +124,18 @@ def extract_version_numbers(text: str) -> List[str]:
 
 def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str], brand: Optional[str] = None) -> Optional[int]:
     """
-    Busca una pala existente en el JSON usando múltiples estrategias de matching.
+    Busca una pala existente en el JSON usando matching mejorado con especificaciones técnicas.
 
-    Estrategia de matching:
-    1. Comparación exacta de claves normalizadas
-    2. Comparación por similitud de tokens (palabras comunes) con umbral del 85%
-    3. Comparación por similitud de secuencia (Levenshtein) con umbral del 90%
-    4. Verificación de números de versión (deben coincidir)
-    5. Comparación adicional por marca + modelo si está disponible
+    Estrategia de matching mejorada:
+    1. Primero: comparación exacta de claves normalizadas (match perfecto)
+    2. Segundo: matching compuesto (nombre + especificaciones técnicas)
+       - Usa peso, forma, balance, perfil, año para confirmar matches
+       - Reduce falsos positivos cuando nombres son similares pero specs difieren
+
+    Args:
+        data: Lista de productos existentes
+        name: Nombre del producto a buscar
+        brand: Marca (opcional, para dar prioridad a matches de misma marca)
 
     Returns:
         Índice de la pala si existe, None si no existe
@@ -136,90 +143,70 @@ def find_existing_index_by_name(data: List[Dict[str, Any]], name: Optional[str],
     if not name:
         return None
 
-    # Crear clave de comparación del nombre a buscar
-    # Nota: create_comparison_key ahora no acepta 'brand' en matching_utils,
-    # pero aquí se pasaba. Ajustamos para pasar solo name.
+    # Crear producto temporal con el nombre
+    target_product = {'name': name}
+    if brand:
+        target_product['brand'] = brand
+
     target_key = create_comparison_key(name)
     if not target_key:
         return None
 
-    # Extraer versiones del nombre objetivo
-    target_versions = extract_version_numbers(normalize_name(name) or "")
-
-    # Variables para tracking del mejor match
-    best_match_idx = None
-    best_similarity = 0.0
-    best_method = None
-
-    # Recorrer todas las palas existentes
+    # 1. Primero buscar match exacto (más rápido)
     for idx, item in enumerate(data):
         existing_name = item.get("name")
-        existing_brand = item.get("brand") or item.get("characteristics_brand")
-
-        # Crear clave de comparación de la pala existente
-        existing_key = create_comparison_key(existing_name)
-
-        if not existing_key:
+        if not existing_name:
             continue
-            
-        # 0. Verificación CRÍTICA de palabras clave
-        # Si uno tiene "Attack" y el otro no, descartar inmediatamente
+
+        existing_key = create_comparison_key(existing_name)
+        if existing_key and existing_key == target_key:
+            # Verificar palabras críticas
+            if check_critical_keywords(name, existing_name):
+                logging.info(f"Match exacto: '{name}' == '{existing_name}'")
+                return idx
+
+    # 2. Si no hay match exacto, usar matching compuesto con specs
+    best_idx = None
+    best_score = 0.0
+
+    for idx, item in enumerate(data):
+        existing_name = item.get("name")
+        if not existing_name:
+            continue
+
+        # Verificar palabras críticas primero
         if not check_critical_keywords(name, existing_name):
             continue
 
-        # 1. Comparación exacta de claves
-        if existing_key == target_key:
-            logging.info(f"Match exacto encontrado: '{name}' == '{existing_name}'")
-            return idx
+        # Calcular score compuesto (nombre + especificaciones)
+        score, details = calculate_composite_score(target_product, item)
 
-        # 2. Calcular similitud de tokens (independiente del orden)
-        # Usar nombres originales, no las claves
-        token_similarity = calculate_token_similarity(name, existing_name)
-
-        # 3. Calcular similitud de secuencia (Levenshtein)
-        sequence_similarity = calculate_similarity(target_key, existing_key)
-
-        # Usar la mayor de las dos similitudes
-        similarity = max(token_similarity, sequence_similarity)
-        method = "tokens" if token_similarity > sequence_similarity else "secuencia"
-
-        # 4. Verificar versiones - si hay versiones diferentes, penalizar
-        existing_versions = extract_version_numbers(normalize_name(existing_name) or "")
-
-        # Si ambos tienen versiones y no coinciden, penalizar mucho la similitud
-        if target_versions and existing_versions:
-            # Normalizar versiones para comparación
-            target_v_set = set(v.lower() for v in target_versions)
-            existing_v_set = set(v.lower() for v in existing_versions)
-
-            # Si las versiones son completamente diferentes, reducir similitud
-            if target_v_set.isdisjoint(existing_v_set):
-                similarity *= 0.5  # Penalizar al 50%
-
-        # 5. Si la marca coincide, dar un boost a la similitud
+        # Boost si la marca coincide
+        existing_brand = item.get("brand") or item.get("characteristics_brand")
         if brand and existing_brand:
             brand_key1 = create_comparison_key(brand)
             brand_key2 = create_comparison_key(existing_brand)
             if brand_key1 == brand_key2:
-                similarity = min(1.0, similarity + 0.1)  # Boost del 10%
+                score = min(1.0, score + 0.05)  # Boost del 5% por marca
 
-        # Tracking del mejor match
-        if similarity > best_similarity:
-            best_similarity = similarity
-            best_match_idx = idx
-            best_method = method
+        if score > best_score:
+            best_score = score
+            best_idx = idx
 
-    # Umbral de similitud: 90%
-    SIMILARITY_THRESHOLD = 0.90
+    # Umbral de similitud: 85% (bajado de 90% para permitir matching con specs)
+    SIMILARITY_THRESHOLD = 0.85
 
-    if best_similarity >= SIMILARITY_THRESHOLD and best_match_idx is not None:
-        existing_name = data[best_match_idx].get("name")
-        logging.info(f"Match por similitud {best_method} ({best_similarity*100:.1f}%): '{name}' ~= '{existing_name}'")
-        return best_match_idx
+    if best_score >= SIMILARITY_THRESHOLD and best_idx is not None:
+        matched_name = data[best_idx].get("name")
+        logging.info(f"Match compuesto ({best_score*100:.1f}%): '{name}' ~= '{matched_name}'")
+        return best_idx
 
-    # No se encontró match
-    if best_similarity > 0.5:  # Log solo si hubo alguna similitud considerable
-        logging.info(f"No match para '{name}' (mejor similitud: {best_similarity*100:.1f}%)")
+    # Log informativo si hubo similitud cercana
+    if best_score > 0.7:
+        matched_name = data[best_idx].get("name") if best_idx is not None else "?"
+        logging.info(f"Match cercano rechazado ({best_score*100:.1f}% < {SIMILARITY_THRESHOLD*100:.0f}%): '{name}' ~= '{matched_name}'")
+    elif best_score > 0.5:
+        logging.info(f"No match para '{name}' (mejor similitud: {best_score*100:.1f}%)")
 
     return None
 
@@ -255,7 +242,18 @@ def default_racket_structure() -> Dict[str, Any]:
             "tecnologias": [],
             "peso": None,
             "marco": None,
+            "grosor": None,  # Nuevo: perfil/grosor (ej: 38mm)
+            "to": None,     # Nuevo: año del modelo (ej: 2026)
         },
+        # Métricas numéricas (0-10) - scrapear de tumejorpala o calcular
+        "score_control": None,
+        "score_power": None,
+        "score_rebound": None,
+        "score_handling": None,
+        "score_sweet_spot": None,
+        "score_global": None,
+        # Meta-datos
+        "last_updated": None,
         # Campos tienda PadelNuestro (rellenar con null si no aplica)
         "padelnuestro_actual_price": None,
         "padelnuestro_original_price": None,
@@ -266,6 +264,16 @@ def default_racket_structure() -> Dict[str, Any]:
         "padelmarket_original_price": None,
         "padelmarket_discount_percentage": None,
         "padelmarket_link": None,
+        # Campos tienda PadelProShop
+        "padelproshop_actual_price": None,
+        "padelproshop_original_price": None,
+        "padelproshop_discount_percentage": None,
+        "padelproshop_link": None,
+        # Campos tienda TiendaPadelPoint
+        "padelpoint_actual_price": None,
+        "padelpoint_original_price": None,
+        "padelpoint_discount_percentage": None,
+        "padelpoint_link": None,
     }
 
 
@@ -377,6 +385,84 @@ def scrape_catalog_page(session: requests.Session, page_number: int) -> List[str
 
     logging.info(f"Encontrados {len(unique_links)} enlaces de producto en página {page_number}")
     return unique_links
+
+
+def extract_json_ld(soup: BeautifulSoup) -> Dict[str, Any]:
+    """
+    Extrae datos estructurados de JSON-LD Schema.org.
+    Retorna un diccionario con los datos encontrados.
+    """
+    json_ld_data = {}
+
+    try:
+        scripts = soup.find_all('script', type='application/ld+json')
+        for script in scripts:
+            if not script.string:
+                continue
+            try:
+                data = json.loads(script.string)
+                if not isinstance(data, dict):
+                    continue
+
+                # Buscar Product en datos anidados
+                products = []
+                if data.get('@type') == 'Product':
+                    products.append(data)
+                elif isinstance(data.get('@graph'), list):
+                    products.extend([item for item in data['@graph'] if isinstance(item, dict) and item.get('@type') == 'Product'])
+
+                for product in products:
+                    # Campos básicos
+                    if product.get('name'):
+                        json_ld_data['name'] = product['name']
+                    if product.get('description'):
+                        json_ld_data['description'] = product['description']
+                    if product.get('sku'):
+                        json_ld_data['sku'] = product['sku']
+                    if product.get('gtin13'):
+                        json_ld_data['gtin13'] = product['gtin13']
+
+                    # Marca
+                    if product.get('brand') and isinstance(product['brand'], dict):
+                        json_ld_data['brand'] = product['brand'].get('name')
+
+                    # Imagen
+                    if product.get('image'):
+                        img = product['image']
+                        if isinstance(img, list) and len(img) > 0:
+                            json_ld_data['image'] = img[0]
+                        elif isinstance(img, str):
+                            json_ld_data['image'] = img
+
+                    # Ofertas y precios
+                    if product.get('offers'):
+                        offers = product['offers']
+                        if isinstance(offers, list):
+                            offers = offers[0] if offers else {}
+                        if isinstance(offers, dict):
+                            if offers.get('price'):
+                                json_ld_data['price'] = float(offers['price'])
+                            if offers.get('priceCurrency'):
+                                json_ld_data['currency'] = offers['priceCurrency']
+                            if offers.get('availability'):
+                                availability = offers['availability']
+                                json_ld_data['in_stock'] = 'InStock' in availability
+
+                    # Rating agregado
+                    if product.get('aggregateRating'):
+                        rating = product['aggregateRating']
+                        if isinstance(rating, dict):
+                            if rating.get('ratingValue'):
+                                json_ld_data['rating_value'] = float(rating['ratingValue'])
+                            if rating.get('reviewCount'):
+                                json_ld_data['review_count'] = int(rating['reviewCount'])
+
+            except json.JSONDecodeError:
+                continue
+    except Exception as e:
+        logging.debug(f"Error extrayendo JSON-LD: {e}")
+
+    return json_ld_data
 
 
 def extract_text(el) -> Optional[str]:
@@ -690,19 +776,23 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
     if soup is None:
         return None
 
-    # Nombre
-    name = None
-    for sel in [
-        "h1.product__title",
-        "h1.product-title",
-        "h1.product__heading",
-        "h1.page-title",
-        "h1",
-    ]:
-        el = soup.select_one(sel)
-        name = extract_text(el)
-        if name:
-            break
+    # Extraer datos estructurados de JSON-LD Schema.org (prioridad)
+    json_ld = extract_json_ld(soup)
+
+    # Nombre (prioridad: JSON-LD > HTML)
+    name = json_ld.get('name')
+    if not name:
+        for sel in [
+            "h1.product__title",
+            "h1.product-title",
+            "h1.product__heading",
+            "h1.page-title",
+            "h1",
+        ]:
+            el = soup.select_one(sel)
+            name = extract_text(el)
+            if name:
+                break
 
     if not name:
         logging.error(f"Nombre no encontrado en {url}; se omite el producto")
@@ -713,8 +803,8 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
     # pero clean_name_and_model conservaba case. Implementamos versión simple localmente o usamos normalize
     name = re.sub(r"\s*[\(\[]Pala[\)\]]\s*$", "", name.strip(), flags=re.IGNORECASE)
 
-    # Precios
-    current_price = None
+    # Precios (prioridad: JSON-LD > JSON scripts > HTML)
+    current_price = json_ld.get('price')
     original_price = None
 
     # Método 1: Extraer de datos JSON embebidos (Shopify Analytics, Klaviyo, etc.)
@@ -784,8 +874,12 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
 
     discount_pct = calculate_discount(original_price, current_price)
 
-    # Imagen principal
-    image_url = None
+    # Imagen principal (prioridad: JSON-LD > galería > OG > CDN)
+    image_url = json_ld.get('image')
+    if image_url:
+        # Si es una lista, tomar la primera
+        if isinstance(image_url, list):
+            image_url = image_url[0] if image_url else None
 
     # Lista de imágenes placeholder/genéricas a evitar
     placeholder_patterns = [
@@ -929,6 +1023,8 @@ def scrape_product_detail(session: requests.Session, url: str) -> Optional[Dict[
         "original_price": original_price,
         "discount_pct": discount_pct,
         "features": features,
+        "json_ld": json_ld,  # Incluir datos JSON-LD para uso posterior
+        "last_updated": datetime.now().isoformat(),
     }
 
 
@@ -954,6 +1050,7 @@ def apply_update_or_create(
         entry["padelmarket_original_price"] = pm_original
         entry["padelmarket_discount_percentage"] = pm_discount
         entry["padelmarket_link"] = pm_link
+        entry["last_updated"] = datetime.now().isoformat()
 
         # Actualizar imagen si no existe o si es un placeholder
         current_image = entry.get("image")
@@ -1032,6 +1129,8 @@ def apply_update_or_create(
     new_entry["padelnuestro_original_price"] = None
     new_entry["padelnuestro_discount_percentage"] = None
     new_entry["padelnuestro_link"] = None
+
+    new_entry["last_updated"] = datetime.now().isoformat()
 
     data.append(new_entry)
     logging.info(f"Creada nueva entrada: {new_entry['name']}")

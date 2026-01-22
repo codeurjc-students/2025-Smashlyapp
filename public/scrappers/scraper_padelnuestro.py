@@ -315,10 +315,33 @@ class PadelNuestroScraper:
                 'characteristics_player_collection': None,
                 'characteristics_player': None,
                 'specs': {},
+                # Métricas numéricas (0-10)
+                'score_control': None,
+                'score_power': None,
+                'score_rebound': None,
+                'score_handling': None,
+                'score_sweet_spot': None,
+                'score_global': None,
+                # Meta-datos
+                'last_updated': datetime.now().isoformat(),
+                # Campos tienda PadelNuestro
                 'padelnuestro_actual_price': price_info['actual_price'],
                 'padelnuestro_original_price': price_info['original_price'],
                 'padelnuestro_discount_percentage': price_info['discount_percentage'],
                 'padelnuestro_link': url,
+                # Campos otras tiendas (compatibilidad)
+                'padelmarket_actual_price': None,
+                'padelmarket_original_price': None,
+                'padelmarket_discount_percentage': None,
+                'padelmarket_link': None,
+                'padelproshop_actual_price': None,
+                'padelproshop_original_price': None,
+                'padelproshop_discount_percentage': None,
+                'padelproshop_link': None,
+                'padelpoint_actual_price': None,
+                'padelpoint_original_price': None,
+                'padelpoint_discount_percentage': None,
+                'padelpoint_link': None,
             }
 
             # Extraer características
