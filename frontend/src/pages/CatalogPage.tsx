@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { FiGrid, FiList, FiSearch, FiEye, FiTag, FiX, FiHeart, FiChevronDown, FiFilter } from 'react-icons/fi';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { FiGrid, FiList, FiSearch, FiX, FiChevronDown, FiFilter, FiTag } from 'react-icons/fi';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useComparison } from '../contexts/ComparisonContext';
@@ -9,6 +9,7 @@ import { RacketService } from '../services/racketService';
 import { useAuth } from '../contexts/AuthContext';
 import { Racket } from '../types/racket';
 import { AddToListModal } from '../components/features/AddToListModal';
+import RacketCard from '../components/features/RacketCard';
 import { getLowestPrice } from '../utils/priceUtils';
 
 // Styled Components
@@ -308,152 +309,6 @@ const RacketsGrid = styled.ul<{ view: 'grid' | 'list' }>`
   margin: 0;
 `;
 
-const RacketCard = styled(motion.li)<{ view: 'grid' | 'list' }>`
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 1px solid rgba(22, 163, 74, 0.1);
-
-  display: ${props => (props.view === 'list' ? 'flex' : 'flex')};
-  flex-direction: ${props => (props.view === 'list' ? 'row' : 'column')};
-  height: ${props => (props.view === 'grid' ? '100%' : 'auto')};
-
-  &:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
-    border-color: #16a34a;
-  }
-`;
-
-const RacketImageContainer = styled.div<{ view: 'grid' | 'list' }>`
-  position: relative;
-  height: ${props => (props.view === 'grid' ? '220px' : '120px')};
-  width: ${props => (props.view === 'list' ? '120px' : '100%')};
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem;
-  overflow: hidden;
-`;
-
-const RacketImage = styled.img`
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-`;
-
-const RacketBadge = styled.div<{ variant: 'bestseller' | 'offer' }>`
-  position: absolute;
-  top: 0.75rem;
-  ${props => (props.variant === 'bestseller' ? 'right: 0.75rem;' : 'left: 0.75rem;')}
-  background: ${props => (props.variant === 'bestseller' ? '#f59e0b' : '#ef4444')};
-  color: white;
-  padding: 0.375rem 0.75rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  z-index: 2;
-`;
-
-const RacketInfo = styled.div<{ view: 'grid' | 'list' }>`
-  padding: ${props => (props.view === 'grid' ? '1.5rem' : '1rem')};
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.75rem;
-`;
-
-const RacketBrand = styled.div`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #16a34a;
-  margin-bottom: 0.25rem;
-`;
-
-const RacketName = styled.h3<{ view: 'grid' | 'list' }>`
-  font-size: ${props => (props.view === 'grid' ? '1.125rem' : '1rem')};
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 0.75rem;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
-
-const PriceContainer = styled.div<{ view: 'grid' | 'list' }>`
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: ${props => (props.view === 'grid' ? '0.5rem' : '0.5rem')};
-  flex-wrap: wrap;
-  min-height: auto;
-  margin-top: auto;
-`;
-
-const CurrentPrice = styled.div`
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #16a34a;
-`;
-
-const OriginalPrice = styled.div`
-  font-size: 0.875rem;
-  color: #9ca3af;
-  text-decoration: line-through;
-`;
-
-const DiscountBadge = styled.div`
-  background: #ef4444;
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-`;
-
-
-const ActionButtons = styled.div<{ view: 'grid' | 'list' }>`
-  display: flex;
-  gap: 0.5rem;
-  flex-direction: ${props => (props.view === 'list' ? 'row' : 'column')};
-
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-`;
-
-const ViewDetailsButton = styled.button`
-  flex: 1;
-  background: #16a34a;
-  color: white;
-  border: none;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #15803d;
-    transform: translateY(-1px);
-  }
-`;
-
 const EmptyState = styled.div`
   text-align: center;
   padding: 4rem 2rem;
@@ -540,15 +395,6 @@ const CompareButton = styled.button`
     background: #15803d;
   }
 `;
-
-// Helper function to capitalize first letter of each word
-const toTitleCase = (str: string): string => {
-  return str
-    .toLowerCase()
-    .split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(' ');
-};
 
 // Component
 const CatalogPage: React.FC = () => {
@@ -735,54 +581,54 @@ const CatalogPage: React.FC = () => {
     setHasMore(newDisplayed.length < filteredRackets.length);
   }, [filteredRackets, displayCount]);
 
-  // Get unique brands
-  const uniqueBrands: string[] = [
+  // Get unique brands - memoized
+  const uniqueBrands = useMemo(() => [
     'Todas',
     ...Array.from(new Set(rackets.map(racket => racket.marca))).sort(),
-  ];
+  ], [rackets]);
 
-  // Get unique values for advanced filters
-  const uniqueShapes = ['Todas', ...Array.from(new Set(
+  // Get unique values for advanced filters - memoized
+  const uniqueShapes = useMemo(() => ['Todas', ...Array.from(new Set(
     rackets
       .map(r => r.caracteristicas_forma || r.especificaciones?.forma)
       .filter(Boolean)
-  ))].sort();
+  ))].sort(), [rackets]);
 
-  const uniqueBalances = ['Todos', ...Array.from(new Set(
+  const uniqueBalances = useMemo(() => ['Todos', ...Array.from(new Set(
     rackets
       .map(r => r.caracteristicas_balance || r.especificaciones?.balance)
       .filter(Boolean)
-  ))].sort();
+  ))].sort(), [rackets]);
 
-  const uniqueCores = ['Todos', ...Array.from(new Set(
+  const uniqueCores = useMemo(() => ['Todos', ...Array.from(new Set(
     rackets
       .map(r => r.caracteristicas_nucleo || r.especificaciones?.nucleo)
       .filter(Boolean)
-  ))].sort();
+  ))].sort(), [rackets]);
 
-  const uniqueFaces = ['Todas', ...Array.from(new Set(
+  const uniqueFaces = useMemo(() => ['Todas', ...Array.from(new Set(
     rackets
       .map(r => r.caracteristicas_cara || r.especificaciones?.cara)
       .filter(Boolean)
-  ))].sort();
+  ))].sort(), [rackets]);
 
-  const uniqueLevels = ['Todos', ...Array.from(new Set(
+  const uniqueLevels = useMemo(() => ['Todos', ...Array.from(new Set(
     rackets
       .map(r => r.caracteristicas_nivel_de_juego || r.especificaciones?.nivel_de_juego)
       .filter(Boolean)
-  ))].sort();
+  ))].sort(), [rackets]);
 
-  const uniqueGameTypes = ['Todos', ...Array.from(new Set(
+  const uniqueGameTypes = useMemo(() => ['Todos', ...Array.from(new Set(
     rackets
       .map(r => r.caracteristicas_tipo_de_juego || r.especificaciones?.tipo_de_juego)
       .filter(Boolean)
-  ))].sort();
+  ))].sort(), [rackets]);
 
-  const uniqueHardness = ['Todas', ...Array.from(new Set(
+  const uniqueHardness = useMemo(() => ['Todas', ...Array.from(new Set(
     rackets
       .map(r => r.caracteristicas_dureza || r.especificaciones?.dureza)
       .filter(Boolean)
-  ))].sort();
+  ))].sort(), [rackets]);
 
   // Get stats
   const totalRackets = serverTotal ?? rackets.length;
@@ -1060,111 +906,20 @@ const CatalogPage: React.FC = () => {
         ) : (
           <>
             <RacketsGrid view={viewMode}>
-              {displayedRackets.map((racket, index) => {
-                if (!racket || !racket.nombre) {
-                  console.error('Invalid racket data:', racket);
-                  return null;
-                }
-                return (
-                  <RacketCard
-                    key={`${racket.id}-${racket.nombre}-${index}`}
-                    view={viewMode}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: index * 0.05 }}
-                    onClick={() => handleRacketClick(racket)}
-                  >
-                    <RacketImageContainer view={viewMode}>
-                      <RacketImage
-                        src={racket.imagen}
-                        alt={racket.modelo}
-                        onError={e => {
-                          const target = e.target as HTMLImageElement;
-                          target.src = '/placeholder-racket.svg';
-                        }}
-                      />
-                      {racket.view_count !== undefined && racket.view_count > 10 && (
-                        <RacketBadge variant='bestseller'>
-                          <FiEye size={12} />
-                          Popular
-                        </RacketBadge>
-                      )}
-                      {racket.en_oferta && (
-                        <RacketBadge variant='offer'>
-                          <FiTag size={12} />
-                          Oferta
-                        </RacketBadge>
-                      )}
-                    </RacketImageContainer>
-
-                    <RacketInfo view={viewMode}>
-                      <div>
-                        <RacketBrand>{racket.marca}</RacketBrand>
-                        <RacketName view={viewMode}>{toTitleCase(racket.modelo)}</RacketName>
-                      </div>
-
-                      <PriceContainer view={viewMode}>
-                        {(() => {
-                          const lowestPrice = getLowestPrice(racket);
-                          if (lowestPrice) {
-                            return (
-                              <>
-                                <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
-                                {lowestPrice.originalPrice > lowestPrice.price && (
-                                  <>
-                                    <OriginalPrice>
-                                      €{lowestPrice.originalPrice.toFixed(2)}
-                                    </OriginalPrice>
-                                    {lowestPrice.discount > 0 && (
-                                      <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
-                                    )}
-                                  </>
-                                )}
-                              </>
-                            );
-                          }
-                          return <CurrentPrice>€{racket.precio_actual}</CurrentPrice>;
-                        })()}
-                      </PriceContainer>
-
-                      <ActionButtons view={viewMode}>
-                        <ViewDetailsButton onClick={() => handleRacketClick(racket)}>
-                          Ver detalles
-                        </ViewDetailsButton>
-                        {isAuthenticated && (
-                          <ViewDetailsButton
-                            onClick={e => {
-                              e.stopPropagation();
-                              setSelectedRacket(racket);
-                              setShowAddToListModal(true);
-                            }}
-                            style={{ background: '#15803d' }}
-                          >
-                            <FiHeart size={14} />
-                            Mis listas
-                          </ViewDetailsButton>
-                        )}
-                        {/* <AddToCompareButton
-                        disabled={isRacketInComparison(racket.nombre)}
-                        onClick={(e) => handleAddToComparison(racket, e)}
-                      >
-                        {isRacketInComparison(racket.nombre) ? (
-                          <>
-                            <FiCheck />
-                            En comparador
-                          </>
-                        ) : (
-                          <>
-                            <FiTrendingUp />
-                            Comparar
-                          </>
-                        )}
-                      </AddToCompareButton> */}
-                      </ActionButtons>
-                    </RacketInfo>
-                  </RacketCard>
-                );
-              })}
+              {displayedRackets.map((racket, index) => (
+                <RacketCard
+                  key={`${racket.id}-${racket.nombre}-${index}`}
+                  racket={racket}
+                  view={viewMode}
+                  index={index}
+                  onClick={handleRacketClick}
+                  onAddToList={isAuthenticated ? (racket) => {
+                    setSelectedRacket(racket);
+                    setShowAddToListModal(true);
+                  } : undefined}
+                  isAuthenticated={isAuthenticated}
+                />
+              ))}
             </RacketsGrid>
 
             {/* Counter for E2E tests - visually hidden but accessible to screen readers and Selenium */}

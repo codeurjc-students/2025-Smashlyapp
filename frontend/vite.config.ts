@@ -28,6 +28,49 @@ export default defineConfig({
       }
     }
   },
+  build: {
+    // Enable rollup output for code splitting
+    rollupOptions: {
+      output: {
+        // Manual chunks for better caching
+        manualChunks: (id) => {
+          // Vendor chunks for better caching
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom') || id.includes('react-router')) {
+              return 'react-vendor';
+            }
+            if (id.includes('styled-components') || id.includes('framer-motion')) {
+              return 'ui-vendor';
+            }
+            if (id.includes('react-hot-toast') || id.includes('@tanstack/react-query')) {
+              return 'utils-vendor';
+            }
+            if (id.includes('react-icons')) {
+              return 'icons-vendor';
+            }
+            return 'vendor';
+          }
+        },
+      },
+    },
+    // Optimize chunk size warning limit
+    chunkSizeWarningLimit: 1000,
+    // Enable source maps for production debugging
+    sourcemap: true,
+    // Minify output with esbuild (faster than terser)
+    minify: 'esbuild',
+    target: 'es2015',
+  },
+  // Optimize dependencies
+  optimizeDeps: {
+    include: [
+      'react',
+      'react-dom',
+      'react-router-dom',
+      'styled-components',
+      'framer-motion',
+    ],
+  },
   test: {
     globals: true,
     environment: "jsdom",
