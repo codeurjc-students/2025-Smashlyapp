@@ -1,7 +1,17 @@
 
 import asyncio
 import argparse
+import sys
+import os
 from typing import List, Type
+
+# Allow running as a script by setting the package if not set
+if __name__ == "__main__" and __package__ is None:
+    # Add project root to sys.path
+    project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sys.path.append(project_root)
+    __package__ = "src.scrapers"
+
 from .base_scraper import BaseScraper
 from .padelmarket_scraper import PadelMarketScraper
 from .padelnuestro_scraper import PadelNuestroScraper
@@ -53,27 +63,23 @@ async def main():
     manager = RacketManager()
     
     scrapers = {
-        'padelmarket': (PadelMarketScraper, 'https://padelmarket.com/collections/palas-padel'),
-        'padelnuestro': (PadelNuestroScraper, 'https://www.padelnuestro.com/palas-de-padel'),
-        'padelproshop': (PadelProShopScraper, 'https://padelproshop.com/collections/palas'),
-        'tiendapadelpoint': (TiendaPadelPointScraper, 'https://www.tiendapadelpoint.com/palas-padel')
+        'padelmarket': (PadelMarketScraper, 'https://padelmarket.com/collections/palas'),
+        'padelnuestro': (PadelNuestroScraper, 'https://www.padelnuestro.com/palas-padel'),
+        'padelproshop': (PadelProShopScraper, 'https://padelproshop.com/collections/palas-padel'),
+        'tiendapadelpoint': (TiendaPadelPointScraper, 'https://www.tiendapadelpoint.com/palas-de-padel')
     }
     
     target_stores = args.stores.split(',') if args.stores else scrapers.keys()
     
-    tasks = []
+    # Run sequentially
+    print("Starting sequential scrape...")
     for store_name in target_stores:
         if store_name in scrapers:
             cls, url = scrapers[store_name]
-            tasks.append(run_scraper(cls, store_name, url, manager, args.limit))
+            await run_scraper(cls, store_name, url, manager, args.limit)
         else:
             print(f"Unknown store: {store_name}")
-
-    # Run sequentially or parallel?
-    # Parallel might be too heavy on resources if using 4 browsers.
-    # But Playwright is async. Let's try gathering, but maybe with a semaphore if needed.
-    # For now, gather all.
-    await asyncio.gather(*tasks)
+    print("All scrapers finished.")
 
 if __name__ == "__main__":
     asyncio.run(main())

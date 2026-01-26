@@ -10,33 +10,64 @@ class PadelProShopScraper(BaseScraper):
     async def scrape_product(self, url: str) -> Product:
         """Scrape product data from PadelProShop using Shopify JSON endpoint."""
         # Use Shopify JSON endpoint directly
-        json_url = f"{url.split('?')[0]}.json"
-        page = await self.get_page(json_url)
+        product_data = {}
+        # We need a page object to perform requests
+        # Note: self.get_page(url) usually navigates to the URL.
+        # But here we might want to go to the JSON URL first.
+        # Let's use self.get_page() which likely handles browser context.
+        # If get_page navigates, we can just navigate again.
+        page = await self.get_page(url)
 
-        # Get JSON content from page body
-        body_element = await page.query_selector('body')
-        content = await body_element.inner_text() if body_element else '{}'
+        # Check if we've been redirected to a category page
+        current_url = page.url
+        if current_url != url:
+            # Check if URL contains category patterns (collections instead of products)
+            if '/collections/' in current_url and '/products/' not in current_url:
+                raise ValueError(f"Product URL redirected to category page: {current_url}") 
 
         try:
-            product_data = json.loads(content)
-        except json.JSONDecodeError as e:
-            print(f'Failed to parse JSON from PadelProShop: {e}')
-            raise Exception('Invalid JSON response')
+            # Try to get JSON data first
+            response = await page.goto(f"{url.split('?')[0]}.json")
+            if not response or response.status != 200:
+                raise Exception(f"JSON endpoint failed with status {response.status if response else 'None'}")
+                
+            data = await response.json()
+            product_data = data.get('product')
+        except Exception as e:
+            print(f"Error fetching/parsing JSON: {e}. Falling back to HTML scraping.")
+            # Fallback: Load the actual URL
+            await page.goto(url)
+            
+            title_el = await page.query_selector('h1')
+            title = await title_el.inner_text() if title_el else "Unknown Product"
+            
+            price_el = await page.query_selector('.price, .current-price')
+            price = await price_el.inner_text() if price_el else "0"
+            
+            description_el = await page.query_selector('.product-description, .rte, .description')
+            body_html = await description_el.inner_html() if description_el else ""
+            
+            product_data = {
+                'title': title,
+                'body_html': body_html,
+                'variants': [{'price': price.replace('€', '').replace(',', '.').strip()}]
+            }
 
-        p = product_data.get('product')
+        p = product_data
         if not p:
-            raise Exception('Product not found in JSON')
+            raise Exception('Product data could not be retrieved')
 
         # Extract basic product info
         name = p.get('title', '')
         price = 0.0
         if p.get('variants') and len(p['variants']) > 0:
-            price = float(p['variants'][0].get('price', 0))
+            price_str = str(p['variants'][0].get('price', 0))
+            price = float(price_str.replace(',', '.'))
             # Check for compare_at_price (original price)
             compare_price = p['variants'][0].get('compare_at_price')
             if compare_price:
                  try:
-                     original_price = float(compare_price)
+                     original_price = float(str(compare_price).replace(',', '.'))
                  except (ValueError, TypeError):
                      original_price = None
         else:
@@ -73,16 +104,41 @@ class PadelProShopScraper(BaseScraper):
         body_html = p.get('body_html', '')
 
         if body_html:
-            # Pattern: <li><strong>Key:</strong> Value</li>
-            pattern = r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>'
-            matches = re.finditer(pattern, body_html, re.IGNORECASE)
-
-            for match in matches:
+            # First try to clean HTML tags to get raw text
+            text_content = re.sub(r'<[^>]+>', '\n', body_html)
+            
+            # Common spec keys to look for in Spanish
+            spec_keys = [
+                'Peso', 'Weight', 'Balance', 'Forma', 'Shape', 'Nucleo', 'Núcleo', 'Core',
+                'Marco', 'Frame', 'Cara', 'Face', 'Caras', 'Faces', 'Grosor', 'Thickness',
+                'Nivel', 'Level', 'Tipo de juego', 'Game type'
+            ]
+            
+            # 1. Try list items first (existing logic but slightly more robust)
+            pattern_li = r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>'
+            matches_li = re.finditer(pattern_li, body_html, re.IGNORECASE)
+            
+            found_specs = False
+            for match in matches_li:
                 key = match.group(1).strip().replace(':', '')
                 value = match.group(2).strip()
-
                 if key and value:
                     specs[key] = value
+                    found_specs = True
+            
+            # 2. If no specs found in lists, try regex on text content
+            if not found_specs:
+                for key in spec_keys:
+                    # Pattern: Key: Value (until newline or next key-like structure)
+                    # We look for the key, optional colon, and then capture value until newline
+                    pattern = fr'(?:^|\n|[\.\>])\s*({key})\s*[:\.]?\s*([^\n\<]+)'
+                    match = re.search(pattern, text_content, re.IGNORECASE)
+                    if match:
+                        k = match.group(1).strip()
+                        v = match.group(2).strip()
+                        # Sanity check on value length
+                        if len(v) < 100:
+                             specs[k.title()] = v
 
         return Product(
             url=url,
@@ -102,7 +158,7 @@ class PadelProShopScraper(BaseScraper):
         
         while True:
             # Get product links (Shopify structure)
-            links = await page.query_selector_all('.product-card a.product-card__link, .grid-view-item__link, a.product-item__title')
+            links = await page.query_selector_all('a.js-prod-link')
             for link in links:
                 href = await link.get_attribute('href')
                 if href:

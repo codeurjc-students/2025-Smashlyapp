@@ -13,6 +13,7 @@ class RacketManager:
     def __init__(self, db_path: str = "rackets.json"):
         self.db_path = db_path
         self.data: Dict[str, Any] = self._load_db()
+        self.url_map: Dict[str, str] = self._build_url_map()
 
     def _load_db(self) -> Dict[str, Any]:
         """Load the database from disk."""
@@ -24,11 +25,22 @@ class RacketManager:
                 print(f"Error reading {self.db_path}, starting fresh.")
                 return {}
         return {}
+    
+    def _build_url_map(self) -> Dict[str, str]:
+        """Build a map of URL -> slug for fast lookups."""
+        mapping = {}
+        for slug, racket in self.data.items():
+            for price_entry in racket.get("prices", []):
+                if "url" in price_entry:
+                     mapping[price_entry["url"]] = slug
+        return mapping
 
     def save_db(self):
         """Save the database to disk."""
         with open(self.db_path, "w", encoding="utf-8") as f:
             json.dump(self.data, f, indent=4, ensure_ascii=False)
+        # Rebuild map after save to ensure sync (optional but safe)
+        self.url_map = self._build_url_map()
 
     def _slugify(self, text: str) -> str:
         """Create a slug from text."""
@@ -41,13 +53,20 @@ class RacketManager:
     def merge_product(self, product: Product, store_name: str):
         """Merge a scraped product into the database."""
         
-        # Normalize name to generate slug (ID)
-        # Try to find existing match by fuzzy name or exact slug
-        slug = self._slugify(f"{product.brand}-{product.name}")
+        slug = None
         
-        # Check if exists (could improve matching logic here)
+        # 1. Try to find by URL first (Best match)
+        if product.url in self.url_map:
+            slug = self.url_map[product.url]
+            # print(f"Found existing racket by URL: {slug}")
+        
+        # 2. If not found by URL, try slug generation (Fallback or New)
+        if not slug:
+             slug = self._slugify(f"{product.brand}-{product.name}")
+        
+        # 3. Check if exists in data (could correspond to slug generated above)
         if slug not in self.data:
-            print(f"New racket found: {product.name}")
+            print(f"New racket found: {product.name} (ID: {slug})")
             self.data[slug] = {
                 "id": slug,
                 "brand": product.brand,
@@ -60,37 +79,32 @@ class RacketManager:
         
         racket_entry = self.data[slug]
         
-        # 1. Update Specs (Merge new keys, overwrite if better? For now just fill missing)
+        # Update URL map for this product
+        self.url_map[product.url] = slug
+
+        # 4. Update Specs (Merge new keys)
         for key, value in product.specs.items():
-            # Normalize keys if needed (e.g. 'Peso' -> 'weight')
-            # For now, keep as scraped
             if key not in racket_entry["specs"] or not racket_entry["specs"][key]:
                 racket_entry["specs"][key] = value
 
-        # 2. Handle Images
-        # "Que extraiga todas las imágenes disponibles de la primera tienda que este extrayendo dicha pala por primera vez" "Si la pala ya esta extraida lo unico que tiene que hacer es actualizar los campos faltantes"
-        # Logic: If we have no images, take them all. If we have images, do nothing (preserve first store's images).
-        # Note: product.image in base_scraper is a single string. We should update base_scraper to support list of images.
-        # Check if product has 'images' attribute (list) or just 'image'
+        # 5. Handle Images (Keep existing logic: prioritize first found, but could be improved)
         new_images = getattr(product, 'images', [])
         if not new_images and product.image:
              new_images = [product.image]
              
         if not racket_entry["images"] and new_images:
             racket_entry["images"] = new_images
-            print(f"Added {len(new_images)} images for {slug}")
+            # print(f"Added {len(new_images)} images for {slug}")
 
-        # 3. Update Price / Store Info
-        # Check if store entry exists
+        # 6. Update Price / Store Info
         store_entry = next((item for item in racket_entry["prices"] if item["store"] == store_name), None)
         
         now = datetime.now().isoformat()
         
         if store_entry:
             store_entry["price"] = product.price
-            store_entry["url"] = product.url
+            store_entry["url"] = product.url # Setup/Ensure URL is current
             store_entry["last_updated"] = now
-            # Update original price if available
             if product.original_price:
                  store_entry["original_price"] = product.original_price
         else:
@@ -99,7 +113,7 @@ class RacketManager:
                 "price": product.price,
                 "original_price": product.original_price,
                 "url": product.url,
-                "currency": "EUR", # Assumption
+                "currency": "EUR",
                 "last_updated": now
             })
 

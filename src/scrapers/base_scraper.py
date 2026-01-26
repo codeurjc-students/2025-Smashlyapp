@@ -83,7 +83,7 @@ class BaseScraper(ABC):
             await self.init()
 
         if self.page.url != url:
-            await self.page.goto(url, wait_until='networkidle', timeout=30000)
+            await self.page.goto(url, wait_until='domcontentloaded', timeout=30000)
 
         return self.page
 

@@ -10,6 +10,13 @@ class PadelMarketScraper(BaseScraper):
         """Scrape product data from PadelMarket."""
         page = await self.get_page(url)
 
+        # Check if we've been redirected to a category page
+        current_url = page.url
+        if current_url != url:
+            # Check if URL contains category patterns (collections instead of products)
+            if '/collections/' in current_url and '/products/' not in current_url:
+                raise ValueError(f"Product URL redirected to category page: {current_url}")
+
         # Extract name
         name_element = await page.query_selector('h1')
         name = await name_element.inner_text() if name_element else ''
@@ -19,9 +26,10 @@ class PadelMarketScraper(BaseScraper):
         original_price = None
         try:
             # Try to find current price
-            price_element = await page.query_selector('.price__current') or \
-                           await page.query_selector('.price-item--sale') or \
-                           await page.query_selector('.price-item--regular')
+            # .price-item--sale (current sale price) or .price-item--regular (normal price)
+            price_element = await page.query_selector('.price-item--sale') or \
+                           await page.query_selector('.price-item--regular') or \
+                           await page.query_selector('.product-price')
 
             if price_element:
                 price_text = await price_element.inner_text()
@@ -29,11 +37,10 @@ class PadelMarketScraper(BaseScraper):
                 price = float(price_text)
             
             # Try to find original price (compare price)
-            compare_element = await page.query_selector('.price__compare') or \
-                             await page.query_selector('.price-item--regular')
-            # If we found a sale price above, the regular price might be the original
-            # Logic depends on specific DOM structure, keeping it simple for now:
-            if compare_element and compare_element != price_element:
+            # usually .price-item--regular inside a .price--on-sale container? 
+            # Or distinct element.
+            compare_element = await page.query_selector('.price__compare .price-item--regular')
+            if compare_element:
                  compare_text = await compare_element.inner_text()
                  compare_text = re.sub(r'[^\d.,]', '', compare_text).replace(',', '.')
                  try:
@@ -58,7 +65,7 @@ class PadelMarketScraper(BaseScraper):
         images = []
         try:
             # Look for all product media items
-            image_elements = await page.query_selector_all('.product__media img')
+            image_elements = await page.query_selector_all('.product-single__media img, .product__media img')
             seen_urls = set()
             
             for img in image_elements:
@@ -67,17 +74,12 @@ class PadelMarketScraper(BaseScraper):
                       await img.get_attribute('srcset')
                 
                 if src:
-                    # Cleanup URL
                     if src.startswith('//'):
                         src = f'https:{src}'
-                    
-                    # Remove query params for uniqueness checks if needed, but sometimes they are needed for resizing
-                    # For now, just add distinct URLs
                     if src not in seen_urls:
                         seen_urls.add(src)
                         images.append(src)
                         
-            # Fallback if list empty but single image loop above worked (unlikely)
             image = images[0] if images else ''
             
         except Exception:
@@ -86,35 +88,40 @@ class PadelMarketScraper(BaseScraper):
 
         specs: Dict[str, str] = {}
 
-        # Extract specs from custom table
+        # Extract specs
         try:
             # Click "Detalles del producto" if it's collapsed
             summary = await page.query_selector('summary:has-text("Detalles del producto")')
+            content_element = None
+            
             if summary:
                 # Check if open
-                is_open = await summary.get_attribute('aria-expanded') == 'true' or \
-                          await summary.evaluate('el => el.parentElement.hasAttribute("open")')
-                
+                is_open = await summary.evaluate('el => el.parentElement.hasAttribute("open")')
                 if not is_open:
                     await summary.click(force=True)
                     await page.wait_for_timeout(500)  # Wait for animation
 
-            rows = await page.query_selector_all('.product_custom_table .custom_row')
-            for row in rows:
-                try:
-                    title_element = await row.query_selector('.row_title')
-                    if title_element:
-                        key = await title_element.inner_text()
-                        key = key.strip()
+                # The content is usually in the sibling or child div
+                # .collapsible-content__inner
+                details_element = await summary.evaluate_handle('el => el.parentElement')
+                content_element = await details_element.query_selector('.collapsible-content__inner')
 
-                        # Get full text and remove key to get value
-                        full_text = await row.inner_text()
-                        value = full_text.replace(key, '').strip()
+            if content_element:
+                # Parse text content line by line or p by p
+                # It might be <p>Key: Value</p> or <ul><li>Key: Value</li></ul>
+                text_content = await content_element.inner_text()
+                lines = text_content.split('\n')
+                for line in lines:
+                    if ':' in line:
+                        parts = line.split(':', 1)
+                        if len(parts) == 2:
+                            key = parts[0].strip()
+                            value = parts[1].strip()
+                            # Basic cleanup
+                            key = re.sub(r'[^\w\s]', '', key)
+                            if key and value and len(key) < 30: # Avoid long text as keys
+                                specs[key] = value
 
-                        if key and value:
-                            specs[key] = value
-                except Exception:
-                    continue
         except Exception as e:
             print(f'Error extracting specs: {e}')
 
@@ -129,11 +136,44 @@ class PadelMarketScraper(BaseScraper):
             specs=specs
         )
 
-    async def scrape_category(self, url: str) -> List[str]:
+    async def scrape_category(self, url: str) -> Product:
         """Scrape product URLs from a category page."""
         product_urls = []
         page = await self.get_page(url)
         
+        # Handle potential language/region selector modal
+        try:
+            # Wait for any potential modal overlay to appear
+            await page.wait_for_timeout(2000)
+            
+            # Force remove the obstructing language selector overlay
+            await page.evaluate("""
+                () => {
+                    const selectors = [
+                        '.md-form__select__language__list-link-wrapper',
+                        '.md-app-embed',
+                        '#CybotCookiebotDialog' 
+                    ];
+                    selectors.forEach(sel => {
+                        const els = document.querySelectorAll(sel);
+                        els.forEach(el => el.remove());
+                    });
+                }
+            """)
+            print("Removed potential overlay elements.")
+            
+        except Exception as e:
+            print(f"Warning removing overlays: {e}")
+
+        # Accept Cookies (Cookiebot) - keeping this just in case, but removal above might handle it
+        try:
+             # Wait a bit for the banner if it wasn't removed
+             if await page.query_selector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll'):
+                 await page.click('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll', force=True)
+                 await page.wait_for_selector('#CybotCookiebotDialog', state='hidden', timeout=5000)
+        except Exception:
+             print("Cookie banner not found or already accepted/removed.")
+
         while True:
             # Wait for products to load
             try:
@@ -142,21 +182,19 @@ class PadelMarketScraper(BaseScraper):
                 print("Timeout waiting for products")
                 break
 
-            # Get product links (Using functional selector from analysis)
-            links = await page.query_selector_all('.product-featured-image-link')
+            # Get product links (Generic safer selector)
+            links = await page.query_selector_all('a[href*="/products/"]')
             
-            # If no image links, try title links
-            if not links:
-                 links = await page.query_selector_all('.product-card-title')
-
             for link in links:
                 href = await link.get_attribute('href')
-                if href:
+                if href and '/products/' in href:
                     if not href.startswith('http'):
                         href = f'https://padelmarket.com{href}'
+                    # clean up params
+                    href = href.split('?')[0]
                     product_urls.append(href)
             
-            print(f"Found {len(links)} products on current page. Total: {len(product_urls)}")
+            print(f"Found {len(links)} links. Total unique products: {len(set(product_urls))}")
 
             # Check for "Load more" button
             load_more = await page.query_selector('.load-more.button')

@@ -10,6 +10,13 @@ class TiendaPadelPointScraper(BaseScraper):
         """Scrape product data from TiendaPadelPoint."""
         page = await self.get_page(url)
 
+        # Check if we've been redirected to a category page
+        current_url = page.url
+        if current_url != url:
+            # Check if URL contains category patterns
+            if '/palas-de-padel/' in current_url or '/categoria/' in current_url:
+                raise ValueError(f"Product URL redirected to category page: {current_url}")
+
         # Extract name
         name_element = await page.query_selector('h1.product-title')
         name = await name_element.inner_text() if name_element else ''
@@ -123,7 +130,7 @@ class TiendaPadelPointScraper(BaseScraper):
         
         while True:
             # Get product links
-            links = await page.query_selector_all('.product-thumb .image a')
+            links = await page.query_selector_all('.product-grid-item .name a')
             for link in links:
                 href = await link.get_attribute('href')
                 if href:

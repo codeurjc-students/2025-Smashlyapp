@@ -11,6 +11,13 @@ class PadelNuestroScraper(BaseScraper):
         """Scrape product data from PadelNuestro."""
         page = await self.get_page(url)
 
+        # Check if we've been redirected to a category page
+        current_url = page.url
+        if current_url != url:
+            # Check if URL contains category patterns
+            if '/palas-padel/' in current_url or current_url.endswith('/dunlop') or current_url.endswith('/adidas') or '/palas' in current_url:
+                raise ValueError(f"Product URL redirected to category page: {current_url}")
+
         # Wait for key elements to ensure page is loaded
         await page.wait_for_selector('h1', timeout=10000)
 
@@ -100,30 +107,64 @@ class PadelNuestroScraper(BaseScraper):
         except Exception:
             pass
 
-        # Extract specs from description attributes
+        # Extract specs from description attributes with fallbacks
         try:
-            # Wait for specs to load
+            # Wait for specs to potentially load
             try:
-                await page.wait_for_selector('.description-attributes', timeout=3000)
+                await page.wait_for_selector('.description-attributes, .product-attributes, #product-attribute-specs-table', timeout=3000)
             except Exception:
                 pass
 
-            rows = await page.query_selector_all('.description-attributes .row, .attribute-row')
-            for row in rows:
-                try:
-                    label_element = await row.query_selector('.description-attributes-label, .attribute-label')
-                    value_element = await row.query_selector('.description-attributes-value, .attribute-value')
+            # List of selectors to try for specs rows
+            # 1. .description-attributes .row (Original)
+            # 2. #product-attribute-specs-table tr (Standard Magento)
+            # 3. .additional-attributes tr (Another Magento variation)
+            # 4. .data.table.additional-attributes tr
+            
+            # Method 1: Look for specific description attributes container matches
+            # Found in analysis: <div class="description-attributes"><span class="description-attributes-label">Marca</span>...
+            attributes = await page.query_selector_all('.description-attributes')
+            if attributes:
+                for attr in attributes:
+                    try:
+                        label_el = await attr.query_selector('.description-attributes-label')
+                        value_el = await attr.query_selector('.description-attributes-value')
+                        
+                        if label_el and value_el:
+                            key = await label_el.inner_text()
+                            value = await value_el.inner_text()
+                            if key and value:
+                                specs[key.strip().replace(':', '')] = value.strip()
+                    except Exception:
+                        continue
 
-                    if label_element and value_element:
-                        label = await label_element.inner_text()
-                        value = await value_element.inner_text()
-                        label = label.strip().replace(':', '')
-                        value = value.strip()
-
-                        if label and value:
-                            specs[label] = value
-                except Exception:
-                    continue
+            # Method 2: Table-based fallback (existing logic adapted)
+            if not specs:
+                rows = await page.query_selector_all('table.data.table.additional-attributes tr, #product-attribute-specs-table tr')
+                for row in rows:
+                    try:
+                        th = await row.query_selector('th')
+                        td = await row.query_selector('td')
+                        if th and td:
+                            key = await th.inner_text()
+                            value = await td.inner_text()
+                            if key and value:
+                                specs[key.strip()] = value.strip()
+                    except Exception:
+                        continue
+                        
+            # Method 3: List-based fallback (existing logic)
+            if not specs:
+                items = await page.query_selector_all('.product-attributes li, .attributes li')
+                for item in items:
+                    try:
+                        text = await item.inner_text()
+                        if ':' in text:
+                            key, value = text.split(':', 1)
+                            specs[key.strip()] = value.strip()
+                    except Exception:
+                        continue
+                    
         except Exception as e:
             print(f'Error extracting specs: {e}')
 
