@@ -8,137 +8,158 @@ class PadelProShopScraper(BaseScraper):
     """Scraper for PadelProShop online store."""
 
     async def scrape_product(self, url: str) -> Product:
-        """Scrape product data from PadelProShop using Shopify JSON endpoint."""
-        # Use Shopify JSON endpoint directly
-        product_data = {}
-        # We need a page object to perform requests
-        # Note: self.get_page(url) usually navigates to the URL.
-        # But here we might want to go to the JSON URL first.
-        # Let's use self.get_page() which likely handles browser context.
-        # If get_page navigates, we can just navigate again.
+        """Scrape product data from PadelProShop using Shopify JSON endpoint with HTML fallback."""
+        
+        # Ensure verified URL logic if needed
         page = await self.get_page(url)
 
-        # Check if we've been redirected to a category page
-        current_url = page.url
-        if current_url != url:
-            # Check if URL contains category patterns (collections instead of products)
-            if '/collections/' in current_url and '/products/' not in current_url:
-                raise ValueError(f"Product URL redirected to category page: {current_url}") 
+        # Check for category redirect
+        if page.url != url:
+            if '/collections/' in page.url and '/products/' not in page.url:
+                 # verify if it's just a param change
+                 if page.url.split('?')[0] != url.split('?')[0]:
+                     pass # raise ValueError(f"Redirected to category: {page.url}")
 
+        product_data = {}
+        
+        # Strategy 1: JSON Endpoint
         try:
-            # Try to get JSON data first
-            response = await page.goto(f"{url.split('?')[0]}.json")
-            if not response or response.status != 200:
-                raise Exception(f"JSON endpoint failed with status {response.status if response else 'None'}")
-                
-            data = await response.json()
-            product_data = data.get('product')
+            # Construct JSON URL
+            json_url = f"{url.split('?')[0]}.json"
+            response = await page.goto(json_url)
+            
+            if response and response.status == 200:
+                data = await response.json()
+                product_data = data.get('product', {})
         except Exception as e:
-            print(f"Error fetching/parsing JSON: {e}. Falling back to HTML scraping.")
-            # Fallback: Load the actual URL
-            await page.goto(url)
-            
-            title_el = await page.query_selector('h1')
-            title = await title_el.inner_text() if title_el else "Unknown Product"
-            
-            price_el = await page.query_selector('.price, .current-price')
-            price = await price_el.inner_text() if price_el else "0"
-            
-            description_el = await page.query_selector('.product-description, .rte, .description')
-            body_html = await description_el.inner_html() if description_el else ""
-            
-            product_data = {
-                'title': title,
-                'body_html': body_html,
-                'variants': [{'price': price.replace('€', '').replace(',', '.').strip()}]
-            }
+            print(f"JSON endpoint failed: {e}")
 
-        p = product_data
-        if not p:
-            raise Exception('Product data could not be retrieved')
+        # Strategy 2: HTML Scraping (Fallback or Supplement)
+        # We navigate back to product page if JSON failed or we need more data
+        await page.goto(url)
+        
+        # Extract HTML Data
+        title_el = await page.query_selector('h1.product-title')
+        html_title = await title_el.inner_text() if title_el else ""
+        
+        price_el = await page.query_selector('.price__current span.money')
+        html_price_text = await price_el.inner_text() if price_el else ""
+        
+        old_price_el = await page.query_selector('.price__was span.money')
+        html_old_price_text = await old_price_el.inner_text() if old_price_el else ""
+        
+        # Helper for price cleaning
+        def clean_price(text):
+            if not text: return 0.0
+            cleaned = text.replace('€', '').replace('EUR', '').strip()
+            cleaned = cleaned.replace('.', '').replace(',', '.') # 1.200,50 -> 1200.50
+            try:
+                return float(re.sub(r'[^\d.]', '', cleaned))
+            except:
+                return 0.0
 
-        # Extract basic product info
-        name = p.get('title', '')
+        # DATA MERGING
+        
+        # Name
+        name = product_data.get('title') or html_title
+        
+        # Price
         price = 0.0
-        if p.get('variants') and len(p['variants']) > 0:
-            price_str = str(p['variants'][0].get('price', 0))
-            price = float(price_str.replace(',', '.'))
-            # Check for compare_at_price (original price)
-            compare_price = p['variants'][0].get('compare_at_price')
-            if compare_price:
-                 try:
-                     original_price = float(str(compare_price).replace(',', '.'))
-                 except (ValueError, TypeError):
-                     original_price = None
-        else:
-             original_price = None
+        if product_data.get('variants'):
+            # JSON price is usually string "120.00"
+            try:
+                price = float(product_data['variants'][0]['price'])
+            except:
+                price = 0.0
+        
+        if price == 0.0:
+            price = clean_price(html_price_text)
+            
+        # Original Price
+        original_price = None
+        if product_data.get('variants'):
+            try:
+                op = product_data['variants'][0].get('compare_at_price')
+                if op:
+                    original_price = float(op)
+            except:
+                pass
+        
+        if not original_price and html_old_price_text:
+             original_price = clean_price(html_old_price_text)
 
-        brand = p.get('vendor', 'Unknown')
+        # Brand
+        brand = product_data.get('vendor')
+        if not brand:
+             # Try HTML fallback
+             brand_el = await page.query_selector('.product-vendor a, .product-vendor')
+             if brand_el:
+                 brand = await brand_el.inner_text()
+        if not brand:
+             brand = 'Unknown'
 
+        # Images
         image = ''
         images = []
         
-        # Shopify JSON usually has 'images' list
-        if p.get('images'):
-            for img_entry in p['images']:
-                if isinstance(img_entry, dict) and img_entry.get('src'):
-                    images.append(img_entry['src'])
-                elif isinstance(img_entry, str):
-                    images.append(img_entry)
-            
-            if images:
-                image = images[0]
+        # From JSON
+        if product_data.get('images'):
+            for img in product_data['images']:
+                src = img.get('src') if isinstance(img, dict) else img
+                if src: images.append(src)
         
-        # Fallback to single 'image'
-        if not image and p.get('image'):
-             if isinstance(p['image'], dict) and p['image'].get('src'):
-                 image = p['image']['src']
-             elif isinstance(p['image'], str):
-                 image = p['image']
-             
-             if image and image not in images:
-                 images.append(image)
+        # From HTML (Fallback/Augment)
+        # Selectors: product-media.cc-main-product__media img
+        html_images = await page.query_selector_all('.cc-main-product__media img, .product-gallery__image')
+        for img in html_images:
+             src = await img.get_attribute('src') or await img.get_attribute('data-src')
+             if src:
+                  if src.startswith('//'): src = f'https:{src}'
+                  images.append(src)
+        
+        # Deduplicate
+        images = list(dict.fromkeys(images))
+        if images:
+             image = images[0]
 
-        # Parse specs from body_html
+        # Specs extraction
         specs: Dict[str, str] = {}
-        body_html = p.get('body_html', '')
+        
+        # Method 1: HTML List parsing (ul.product-details) - verified in analysis
+        try:
+             # Check for the specific specs list structure first
+             spec_rows = await page.query_selector_all('ul.product-details li, .product-specifications li')
+             for row in spec_rows:
+                 # Usually <p>Label</p> <span>Value</span>
+                 label_el = await row.query_selector('p, strong')
+                 value_el = await row.query_selector('span')
+                 
+                 if label_el and value_el:
+                      key = await label_el.inner_text()
+                      value = await value_el.inner_text()
+                      if key and value:
+                           specs[key.strip().replace(':', '')] = value.strip()
+        except:
+             pass
 
-        if body_html:
-            # First try to clean HTML tags to get raw text
-            text_content = re.sub(r'<[^>]+>', '\n', body_html)
-            
-            # Common spec keys to look for in Spanish
-            spec_keys = [
-                'Peso', 'Weight', 'Balance', 'Forma', 'Shape', 'Nucleo', 'Núcleo', 'Core',
-                'Marco', 'Frame', 'Cara', 'Face', 'Caras', 'Faces', 'Grosor', 'Thickness',
-                'Nivel', 'Level', 'Tipo de juego', 'Game type'
-            ]
-            
-            # 1. Try list items first (existing logic but slightly more robust)
-            pattern_li = r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>'
-            matches_li = re.finditer(pattern_li, body_html, re.IGNORECASE)
-            
-            found_specs = False
-            for match in matches_li:
-                key = match.group(1).strip().replace(':', '')
-                value = match.group(2).strip()
-                if key and value:
-                    specs[key] = value
-                    found_specs = True
-            
-            # 2. If no specs found in lists, try regex on text content
-            if not found_specs:
-                for key in spec_keys:
-                    # Pattern: Key: Value (until newline or next key-like structure)
-                    # We look for the key, optional colon, and then capture value until newline
-                    pattern = fr'(?:^|\n|[\.\>])\s*({key})\s*[:\.]?\s*([^\n\<]+)'
-                    match = re.search(pattern, text_content, re.IGNORECASE)
-                    if match:
-                        k = match.group(1).strip()
-                        v = match.group(2).strip()
-                        # Sanity check on value length
-                        if len(v) < 100:
-                             specs[k.title()] = v
+        # Method 2: Parse body_html from JSON if Method 1 failed or incomplete
+        if not specs and product_data.get('body_html'):
+             body_html = product_data['body_html']
+             # Regex for list items: <li><strong>Key:</strong> Value</li>
+             matches = re.finditer(r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>', body_html, re.IGNORECASE)
+             for match in matches:
+                 specs[match.group(1).strip()] = match.group(2).strip()
+
+        # Method 3: Description Text Regex (Existing fallback)
+        if not specs:
+            desc_el = await page.query_selector('.product-description, .rte')
+            if desc_el:
+                text = await desc_el.inner_text()
+                keys = ['Peso', 'Forma', 'Balance', 'Nivel', 'Marco', 'Núcleo', 'Cara']
+                for key in keys:
+                     match = re.search(fr'{key}\s*[:\.]?\s*([^\n]+)', text, re.IGNORECASE)
+                     if match:
+                          specs[key] = match.group(1).strip()
 
         return Product(
             url=url,
@@ -152,35 +173,58 @@ class PadelProShopScraper(BaseScraper):
         )
 
     async def scrape_category(self, url: str) -> List[str]:
-        """Scrape product URLs from a category page."""
+        """Scrape product URLs from a category page using Infinite Scroll."""
         product_urls = []
         page = await self.get_page(url)
         
+        # Handle Cookies/Popups
+        try:
+             await page.wait_for_timeout(2000)
+             await page.keyboard.press('Escape')
+        except:
+             pass
+
         while True:
-            # Get product links (Shopify structure)
-            links = await page.query_selector_all('a.js-prod-link')
+            # 1. Collect products (Verified selector: li.js-pagination-result a.js-prod-link)
+            links = await page.query_selector_all('li.js-pagination-result a.js-prod-link, .card__title a')
             for link in links:
                 href = await link.get_attribute('href')
                 if href:
-                    # Remove query params
-                    href = href.split('?')[0]
-                    if not href.startswith('http'):
-                        href = f'https://padelproshop.com{href}'
-                    product_urls.append(href)
+                     # Clean URL
+                     href = href.split('?')[0]
+                     if not href.startswith('http'):
+                          href = f'https://www.padelproshop.com{href}'
+                     if href not in product_urls:
+                          product_urls.append(href)
             
-            print(f"Found {len(links)} products on current page. Total: {len(product_urls)}")
-
-            # Check for next page
-            next_button = await page.query_selector('.pagination__next, a[rel="next"]')
-            if next_button:
-                 href = await next_button.get_attribute('href')
-                 if href:
-                      if not href.startswith('http'):
-                          href = f'https://padelproshop.com{href}'
-                      await page.goto(href)
-                 else:
-                      break
+            print(f"Products found: {len(product_urls)}")
+            
+            # Check success of scroll
+            if len(product_urls) > last_count:
+                 last_count = len(product_urls)
+                 scroll_attempts = 0
             else:
-                break
+                 scroll_attempts += 1
+            
+            # Safety checks
+            if scroll_attempts >= 3:
+                 print("No new products found after multiple scrolls.")
+                 break
+            if len(product_urls) >= 1000:
+                 break
+            
+            # 2. Scroll to bottom (Infinite Scroll)
+            await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+            await page.wait_for_timeout(2000) # Wait for load
+            
+            # 3. Check for specific Load More button (Hybrid)
+            try:
+                 load_more = await page.query_selector('.js-load-more')
+                 if load_more and await load_more.is_visible():
+                      print("Clicking Load More button...")
+                      await load_more.click()
+                      await page.wait_for_timeout(2000)
+            except:
+                 pass
         
         return list(set(product_urls))

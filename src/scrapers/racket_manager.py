@@ -87,14 +87,15 @@ class RacketManager:
             if key not in racket_entry["specs"] or not racket_entry["specs"][key]:
                 racket_entry["specs"][key] = value
 
-        # 5. Handle Images (Keep existing logic: prioritize first found, but could be improved)
+        # 5. Handle Images
+        # "First store wins" principle, BUT update if we find *more* images (repairing bad scrapes)
         new_images = getattr(product, 'images', [])
         if not new_images and product.image:
              new_images = [product.image]
              
-        if not racket_entry["images"] and new_images:
+        if new_images and len(new_images) > len(racket_entry["images"]):
             racket_entry["images"] = new_images
-            # print(f"Added {len(new_images)} images for {slug}")
+            print(f"Updated images for {slug}: {len(new_images)} found (was {len(racket_entry['images'])})")
 
         # 6. Update Price / Store Info
         store_entry = next((item for item in racket_entry["prices"] if item["store"] == store_name), None)

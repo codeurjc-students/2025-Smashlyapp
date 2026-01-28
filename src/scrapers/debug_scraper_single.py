@@ -40,6 +40,7 @@ async def run_debug(scraper_name: str, url: str):
         print(f"Price: {product.price}")
         print(f"Original Price: {product.original_price}")
         print(f"Specs: {product.specs}")
+        print(f"Images: {product.images}")
         print("-----------------------")
         
     except Exception as e:
