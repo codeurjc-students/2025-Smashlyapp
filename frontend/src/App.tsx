@@ -12,6 +12,8 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import PageSkeleton from './components/common/PageSkeleton';
 import { FloatingCompareButton } from './components/common/FloatingCompareButton';
 import { AuthProvider } from './contexts/AuthContext';
+import { AuthModalProvider } from './contexts/AuthModalContext';
+import AuthModal from './components/auth/AuthModal';
 
 // Code split routes - load on demand
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -24,8 +26,6 @@ const MyComparisonsPage = lazy(() => import('./pages/MyComparisonsPage'));
 const SharedComparisonPage = lazy(() => import('./pages/SharedComparisonPage'));
 const BestRacketPage = lazy(() => import('./pages/BestRacketPage').then(m => ({ default: m.BestRacketPage })));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
-const LoginPage = lazy(() => import('./pages/LoginPage'));
-const RegisterPage = lazy(() => import('./pages/RegisterPage'));
 const UserPage = lazy(() => import('./pages/UserPage'));
 const AdminPanelPage = lazy(() => import('./pages/AdminPanelPage'));
 const AdminRacketReviewPage = lazy(() => import('./pages/AdminRacketReviewPage'));
@@ -54,11 +54,13 @@ export default function App() {
             <ComparisonProvider>
               <ListsProvider>
                 <BackgroundTasksProvider>
-                  <ScrollToTop />
-                  <Layout>
-                    <FloatingCompareButton />
-                    <BackgroundTaskPopup />
-                    <Routes>
+                  <AuthModalProvider>
+                    <ScrollToTop />
+                    <AuthModal />
+                    <Layout>
+                      <FloatingCompareButton />
+                      <BackgroundTaskPopup />
+                      <Routes>
                       {/* Critical routes - prioritized */}
                       <Route
                         path='/'
@@ -148,22 +150,7 @@ export default function App() {
                           </Suspense>
                         }
                       />
-                      <Route
-                        path='/login'
-                        element={
-                          <Suspense fallback={<RouteLoadingFallback />}>
-                            <LoginPage />
-                          </Suspense>
-                        }
-                      />
-                      <Route
-                        path='/register'
-                        element={
-                          <Suspense fallback={<RouteLoadingFallback />}>
-                            <RegisterPage />
-                          </Suspense>
-                        }
-                      />
+
                       <Route
                         path='/profile'
                         element={
@@ -202,6 +189,7 @@ export default function App() {
                       />
                     </Routes>
                   </Layout>
+                  </AuthModalProvider>
                 </BackgroundTasksProvider>
               </ListsProvider>
             </ComparisonProvider>

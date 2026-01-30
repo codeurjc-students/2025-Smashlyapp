@@ -5,16 +5,11 @@ import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
-import { useAuth } from '../contexts/AuthContext.tsx';
-import storeService from '../services/storeService';
-import OnboardingPromptModal from '../components/features/OnboardingPromptModal';
-import StoreRequestModal from '../components/features/StoreRequestModal';
-import AuthPageLayout from '../components/auth/AuthPageLayout';
+import { useAuth } from '../../contexts/AuthContext.tsx';
+import storeService from '../../services/storeService';
+import OnboardingPromptModal from '../features/OnboardingPromptModal';
+import StoreRequestModal from '../features/StoreRequestModal';
 import {
-  FormTitle,
-  FormSubtitle,
-  TabContainer,
-  Tab,
   Form,
   FormGroup,
   Label,
@@ -28,7 +23,7 @@ import {
   SocialButtons,
   SocialButton,
   FooterText
-} from '../components/auth/AuthStyles';
+} from './AuthStyles';
 
 // Local styles for Register specific components
 const RegistrationTypeSelector = styled.div`
@@ -124,7 +119,12 @@ interface FormErrors {
   location?: string;
 }
 
-const RegisterPage: React.FC = () => {
+interface RegisterFormProps {
+  onSuccess?: () => void;
+  onLoginClick?: () => void;
+}
+
+const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signUp } = useAuth();
@@ -237,7 +237,10 @@ const RegisterPage: React.FC = () => {
           setShowStoreModal(true);
         } catch (storeError: any) {
           toast.error(`Account created but store registration failed: ${storeError.message}`);
-          setTimeout(() => navigate('/login'), 3000);
+          setTimeout(() => {
+             if (onSuccess) onSuccess();
+             else navigate('/login');
+          }, 3000);
         }
       } else {
         toast.success('Account created successfully! Check your email.');
@@ -252,31 +255,20 @@ const RegisterPage: React.FC = () => {
 
   const handleModalClose = () => {
     setShowStoreModal(false);
-    navigate(redirectTo);
+    if (onSuccess) onSuccess();
+    else navigate(redirectTo);
   };
 
   const handleOnboardingClose = () => {
     setShowOnboardingModal(false);
-    navigate('/');
+    if (onSuccess) onSuccess();
+    else navigate('/');
   };
 
   return (
-    <AuthPageLayout
-        title="Únete a la"
-        highlightedWord="Comunidad"
-        description="Crea tu cuenta hoy y lleva tu juego de pádel al siguiente nivel."
-        bgImage="/images/login_register_images/register_image.jpg"
-    >
+    <>
       <OnboardingPromptModal isOpen={showOnboardingModal} onClose={handleOnboardingClose} />
       
-      <FormTitle>Crear Cuenta</FormTitle>
-      <FormSubtitle>Rellena tus datos para comenzar.</FormSubtitle>
-
-      <TabContainer>
-        <Tab to={`/login?redirect=${encodeURIComponent(redirectTo)}`}>Iniciar Sesión</Tab>
-        <Tab to="#" $active>Registrarse</Tab>
-      </TabContainer>
-
       <Form onSubmit={handleSubmit}>
         <RegistrationTypeSelector>
           <TypeCard type='button' $isSelected={formData.registrationType === 'player'} onClick={() => setFormData(p => ({...p, registrationType: 'player'}))}>
@@ -424,6 +416,10 @@ const RegisterPage: React.FC = () => {
         <SubmitButton type="submit" disabled={loading}>
           {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
         </SubmitButton>
+
+        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem', color: '#6b7280' }}>
+           ¿Ya tienes cuenta? <button type="button" onClick={onLoginClick} style={{ color: '#16a34a', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>Inicia sesión</button>
+        </div>
       </Form>
 
       <Divider>O continúa con</Divider>
@@ -440,7 +436,7 @@ const RegisterPage: React.FC = () => {
       </SocialButtons>
 
       <FooterText>
-        Al continuar, aceptas nuestros <Link to="/terms">Términos de Servicio</Link> y <Link to="/privacy">Política de Privacidad</Link>.
+        Al continuar, aceptas nuestros <Link to="/terms" onClick={onSuccess}>Términos de Servicio</Link> y <Link to="/privacy" onClick={onSuccess}>Política de Privacidad</Link>.
       </FooterText>
       
       <StoreRequestModal
@@ -449,8 +445,8 @@ const RegisterPage: React.FC = () => {
         onContinue={handleModalClose}
         storeName={formData.storeName || 'tu tienda'}
       />
-    </AuthPageLayout>
+    </>
   );
 };
 
-export default RegisterPage;
+export default RegisterForm;

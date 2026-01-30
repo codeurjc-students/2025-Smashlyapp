@@ -1,176 +1,142 @@
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
 from .base_scraper import BaseScraper, Product
-
 
 class TiendaPadelPointScraper(BaseScraper):
     """Scraper for TiendaPadelPoint online store."""
 
-    async def scrape_product(self, url: str) -> Product:
+    async def scrape_product(self, url: str) -> Optional[Product]:
         """Scrape product data from TiendaPadelPoint."""
+        # Force Spanish/ES if needed? Not enforced here, just scrape what's given.
         page = await self.get_page(url)
 
-        # Check if we've been redirected to a category page
-        current_url = page.url
-        if current_url != url:
-            # Check if URL contains category patterns
-            if '/palas-de-padel/' in current_url or '/categoria/' in current_url:
-                raise ValueError(f"Product URL redirected to category page: {current_url}")
+        # Check category redirect
+        if '/palas-de-padel/' in page.url or '/categoria/' in page.url:
+             if page.url != url: return None
 
-        # Extract name
-        # Selector: h1.journal-header-center (Verified) or h1.heading-title
-        name_element = await page.query_selector('h1.journal-header-center, h1.heading-title, h1')
-        name = await name_element.inner_text() if name_element else ''
+        # Extract name (Verified)
+        # h1.journal-header-center or h1.heading-title
+        name = await self.safe_get_text('h1.journal-header-center, h1.heading-title, h1')
+        if not name: return None
+        
+        # Clean name
+        clean_match = re.match(r'^(?:Pala|Pack)\s+(.*)', name, re.IGNORECASE)
+        if clean_match:
+             name = clean_match.group(1).strip()
 
-        # Clean name: Remove "Pala" or "Pack" from the start
-        # Case insensitive
-        clean_name_match = re.match(r'^(?:Pala|Pack)\s+(.*)', name, re.IGNORECASE)
-        if clean_name_match:
-             name = clean_name_match.group(1).strip()
+        # Helper to clean price
+        def clean_price(text):
+            if not text: return 0.0
+            # Often "119.95€ Ex Tax: ..."
+            # We want the first number found usually.
+            # Or remove everything after Ex Tax
+            if 'Ex Tax' in text:
+                 text = text.split('Ex Tax')[0]
+            
+            text = text.replace('€', '').replace('&nbsp;', '').strip()
+            # 1.234,56 -> 1234.56
+            text = text.replace('.', '').replace(',', '.')
+            try:
+                # Use regex to find first float-like pattern
+                match = re.search(r'[\d.]+', text)
+                if match:
+                    return float(match.group(0))
+                return 0.0
+            except ValueError:
+                return 0.0
 
-        # Extract price with special price handling
-        # Selector analysis: .product-info .price-new (current), .product-info .price-old (original)
         price = 0.0
         original_price = None
 
-        try:
-             # Scope to product info to avoid related products
-             product_info = await page.query_selector('.product-info') or await page.query_selector('#content')
-             
-             if product_info:
-                 # Try new/old structure first
-                 new_price_el = await product_info.query_selector('.price-new')
-                 if new_price_el:
-                     price_text = await new_price_el.inner_text()
-                     price = float(re.sub(r'[^\d.,]', '', price_text).replace(',', '.'))
-                     
-                     old_price_el = await product_info.query_selector('.price-old')
-                     if old_price_el:
-                          old_price_text = await old_price_el.inner_text()
-                          original_price = float(re.sub(r'[^\d.,]', '', old_price_text).replace(',', '.'))
-                 else:
-                     # Fallback to standard .price or .product-price within scoped area
-                     # Avoid generic .price if possible, stick to .product-price or look for h2/span structure
-                     price_element = await product_info.query_selector('.product-price') or await product_info.query_selector('li h2, div.price')
-                     if price_element:
-                         text = await price_element.inner_text()
-                         # Clean and parse (extract first number found)
-                         # Often "119.95€ Ex Tax: ..."
-                         matches = re.search(r'([\d.,]+)', text)
-                         if matches:
-                            price = float(matches.group(1).replace(',', '.'))
-        except Exception:
-            pass
+        # Price Extraction
+        # Try .price-new / .price-old
+        new_p_text = await self.safe_get_text('.product-info .price-new')
+        if new_p_text:
+             price = clean_price(new_p_text)
+             old_p_text = await self.safe_get_text('.product-info .price-old')
+             if old_p_text: original_price = clean_price(old_p_text)
+        else:
+             # Standard price
+             p_text = await self.safe_get_text('.product-info .product-price, .product-info li h2, .product-info .price')
+             if p_text:
+                  price = clean_price(p_text)
 
-        # Extract brand
+        # Brand
         brand = 'Unknown'
-        try:
-            # Look for specific brand link in list
-            # Selector: ul.list-unstyled li a (text contains Marca)
-            brand_el = await page.query_selector("ul.list-unstyled li a[href*='manufacturer']")
-            if brand_el:
-                 brand = await brand_el.inner_text()
-            
-            if brand == 'Unknown':
-                 # Fallback text search in body or metadata
+        # 1. From link
+        brand_el = await page.query_selector("ul.list-unstyled li a[href*='manufacturer']")
+        if brand_el:
+             brand = await brand_el.inner_text()
+        
+        if brand == 'Unknown':
+             # Fallback regex in content
+             try:
                  content = await page.content()
-                 # Try JSON-LD
-                 match_json = re.search(r'"brand"\s*:\s*\{[^}]*"name"\s*:\s*"([^"]+)"', content)
-                 if match_json:
-                      brand = match_json.group(1)
-                 else:
-                      match = re.search(r'Marca:\s*<a[^>]*>([^<]+)</a>', content)
-                      if match:
-                          brand = match.group(1)
-            
-            # Fallback: Infer from original title (before cleaning or check cleaned name)
-            # Typically "Pala [Brand] Model..."
-            if brand == 'Unknown':
-                 # Re-fetch raw name for safety
-                 raw_name = await name_element.inner_text() if name_element else ''
-                 match_brand_title = re.search(r'Pala\s+([\w\.]+)', raw_name, re.IGNORECASE)
-                 if match_brand_title:
-                      possible_brand = match_brand_title.group(1)
-                      # Filter out common non-brand words just in case
-                      if possible_brand.lower() not in ['de', 'en', 'para']:
-                           brand = possible_brand
-        except Exception:
-            pass
+                 match = re.search(r'Marca:\s*<a[^>]*>([^<]+)</a>', content)
+                 if match: brand = match.group(1)
+             except: pass
+        
+        # Fallback Name inference
+        if brand == 'Unknown':
+             match_b = re.search(r'Pala\s+([\w\.]+)', name, re.IGNORECASE)
+             if match_b:
+                  b = match_b.group(1)
+                  if b.lower() not in ['de', 'en', 'para']: brand = b
 
-        # Extract images
+        # Images
         image = ''
         images = []
         try:
-            # Method 1: Get high-res links from anchors
-            # Verified: .image-additional a (Gallery), #image (Main)
-            
-            # Main Image
-            main_img = await page.query_selector('#image')
-            if main_img:
-                 src = await main_img.get_attribute('src') or await main_img.get_attribute('data-src')
-                 if src: images.append(src)
+             # Main
+             main_img = await page.query_selector('#image')
+             if main_img:
+                  src = await main_img.get_attribute('src') or await main_img.get_attribute('data-src')
+                  if src: images.append(src)
+             
+             # Gallery
+             g_links = await page.query_selector_all('.image-additional a')
+             for l in g_links:
+                  href = await l.get_attribute('href')
+                  if href and any(x in href.lower() for x in ['.jpg', 'png', 'webp']):
+                       images.append(href)
+        except:
+             pass
+        
+        images = list(dict.fromkeys(images))
+        if images: image = images[0]
 
-            # Gallery
-            image_links = await page.query_selector_all('.image-additional a')
-            for link in image_links:
-                href = await link.get_attribute('href')
-                if href and any(ext in href.lower() for ext in ['.jpg', '.jpeg', '.png', '.webp']):
-                     images.append(href)
-            
-            # Deduplicate
-            images = list(dict.fromkeys(images))
-            if images:
-                image = images[0]
-
-        except Exception:
-            pass
-
+        # Specs
         specs: Dict[str, str] = {}
-
-        # Extract specs from description (Regex approach)
-        try:
-            description_element = await page.query_selector('#tab-description')
-            if description_element:
-                description_text = await description_element.inner_text()
-                
-                # Regex patterns for common specs
-                patterns = {
-                    'Peso': [r'(?:Peso|Talla-Peso)[:\s]+([-]?[\d\s-]+g?)', r'Peso\s*approx\.?[:\s]*([\d-]+)'],
-                    'Forma': [r'(?:Forma|Formato)[:\s]+([^.\n]+)', r'Forma\s*Geométrica[:\s]+([^.\n]+)'],
-                    'Balance': [r'Balance[:\s]+([^.\n]+)'],
-                    'Perfil': [r'Perfil[:\s]+([\d\s]+mm)'],
-                    'Núcleo': [r'(?:Núcleo|Goma)[:\s]+([^.\n]+)'],
-                    'Cara': [r'(?:Cara|Caras|Material|Fibra)[:\s]+([^.\n]+)'],
-                    'Nivel': [r'Nivel[:\s]+([^.\n]+)'],
-                    'Potencia/Control': [r'Potencia/Control[:\s]+([^.\n]+)']
-                }
-
-                for key, regex_list in patterns.items():
-                    for regex in regex_list:
-                        match = re.search(regex, description_text, re.IGNORECASE)
-                        if match:
-                            value = match.group(1).strip()
-                            # Cleanup value
-                            value = re.sub(r'\s+', ' ', value) # Remove extra spaces
-                            if len(value) < 50: # Sanity check for length
-                                specs[key] = value
-                                break
-        except Exception as e:
-            print(f'Error extracting specs: {e}')
-            
-        # Fallback to table if description failed or empty
+        # 1. Description Regex
+        desc_text = await self.safe_get_text('#tab-description')
+        if desc_text:
+            patterns = {
+                'Peso': [r'(?:Peso|Talla-Peso)[:\s]+([-]?[\d\s-]+g?)'],
+                'Forma': [r'(?:Forma|Formato)[:\s]+([^.\n]+)'],
+                'Balance': [r'Balance[:\s]+([^.\n]+)'],
+                'Perfil': [r'Perfil[:\s]+([\d\s]+mm)'],
+                'Núcleo': [r'(?:Núcleo|Goma)[:\s]+([^.\n]+)'],
+                'Cara': [r'(?:Cara|Caras|Material|Fibra)[:\s]+([^.\n]+)'],
+                'Nivel': [r'Nivel[:\s]+([^.\n]+)']
+            }
+            for k, regexes in patterns.items():
+                for r in regexes:
+                    m = re.search(r, desc_text, re.IGNORECASE)
+                    if m:
+                        val = m.group(1).strip()
+                        if len(val) < 50: specs[k] = val; break
+        
+        # 2. Table Fallback
         if not specs:
              try:
                 rows = await page.query_selector_all('table.attribute tbody tr')
                 for row in rows:
                     tds = await row.query_selector_all('td')
                     if len(tds) >= 2:
-                        key = await tds[0].inner_text()
-                        value = await tds[1].inner_text()
-                        if key and value:
-                            specs[key.strip()] = value.strip()
-             except:
-                 pass
+                        k = await tds[0].inner_text()
+                        v = await tds[1].inner_text()
+                        if k and v: specs[k.strip()] = v.strip()
+             except: pass
 
         return Product(
             url=url,
@@ -188,80 +154,59 @@ class TiendaPadelPointScraper(BaseScraper):
         product_urls = []
         visited_pages = set()
         
-        # Ensure we start with the base URL
-        current_page_url = url
-        
-        page = await self.get_page(current_page_url)
-        
+        page = await self.get_page(url)
+
         while True:
-            # Track current page to detect loops
-            normalized_url = page.url.split('?')[0] + '?' + (page.url.split('?')[1] if '?' in page.url else '')
-            # Remove potential random parameters if any, but usually page param is key
-            # For simplicity, check if we've seen this exact URL before
-            if page.url in visited_pages:
-                print(f"DEBUG: Detected loop or duplicate page {page.url}. Stopping.")
-                break
+            if page.url in visited_pages: break
             visited_pages.add(page.url)
 
-            # Get product links (Verified: .product-grid-item .name a)
+            # Collect products
+            # .product-grid-item .name a
             links = await page.query_selector_all('.product-grid-item .name a')
+            count = 0
             for link in links:
-                href = await link.get_attribute('href')
-                name_text = await link.inner_text()
-                
-                # Strict Filter: Must contain "pala" (case-insensitive) as per user observation
-                # Also exclude common non-racket items explicitly
-                exclusion_terms = [
-                    'zapatillas', 'paletero', 'camiseta', 'protector', 'mochila', 'falda', 
-                    'pantalon', 'calcetines', 'grips', 'overgrips', 'muñequera', 
-                    'vestido', 'chaqueta', 'gorra', 'visera', 'toalla', 'bote', 'cajon'
-                ]
-                
-                is_pala = 'pala' in name_text.lower()
-                has_exclusion = any(term in name_text.lower() for term in exclusion_terms)
-                
-                if href and is_pala and not has_exclusion:
-                     # Remove query params
-                    href = href.split('?')[0]
-                    if href not in product_urls:
-                         product_urls.append(href)
-            
-            print(f"Found {len(links)} products on current page. Total: {len(product_urls)}")
+                 href = await link.get_attribute('href')
+                 name_text = await link.inner_text()
+                 
+                 # Strict 'pala' filter + exclusion
+                 if 'pala' not in name_text.lower(): continue
+                 exclusion = ['zapatillas', 'paletero', 'camiseta', 'protector', 'mochila', 'falda']
+                 if any(e in name_text.lower() for e in exclusion): continue
 
-            # Check for next page (Verified: div.pagination .links)
-            # Look for active page, then the next li
+                 if href:
+                      href = href.split('?')[0]
+                      if not href.startswith('http'): href = f'https://www.tiendapadelpoint.com{href}'
+                      if href not in product_urls:
+                           product_urls.append(href)
+                           count += 1
+            
+            print(f"Products found: {len(product_urls)} (+{count})")
+            if count == 0 and len(product_urls) > 0:
+                 # No new products on this page? check if empty
+                 pass
+            
+            # Next Page via Pagination
+            # .pagination .links a containing '>'
             next_link = None
             
-            # Method 1: '>', '&gt;' text inside div.pagination
-            # Use exact match for '>' to avoid capturing '>|' (Last)
-            next_link = await page.query_selector('.pagination .links a:text-is(">")')
-            
-            if not next_link:
-                 # Fallback: Check if there is an anchor with has-text(">") but ensure it's not the last page double arrow
-                 # Sometimes text-is might be strict about whitespace. 
-                 # Let's try finding all 'a' in links and checking text content in python for safety
-                 pagination_links = await page.query_selector_all('.pagination .links a')
-                 for pl in pagination_links:
-                     txt = await pl.inner_text()
-                     if txt.strip() == '>':
-                         next_link = pl
-                         break
-            
-            if not next_link:
-                 # Method 2: b (current) + a (next)
-                 # In OpenCart div.pagination: <b>1</b> <a href="...">2</a>
-                 next_link = await page.query_selector('.pagination .links b + a')
-            
+            # Try finding '>' text
+            try:
+                # evaluate Xpath or loop
+                links = await page.query_selector_all('.pagination .links a')
+                for l in links:
+                    t = await l.inner_text()
+                    if t.strip() == '>':
+                        next_link = l
+                        break
+            except: pass
+
             if next_link:
                  href = await next_link.get_attribute('href')
                  if href and href not in visited_pages:
                       await page.goto(href)
-                      await page.wait_for_load_state('domcontentloaded') # Ensure load
-                 else:
-                      print("DEBUG: Next link is empty or visited. Stopping.")
-                      break
+                      await page.wait_for_load_state('domcontentloaded')
+                 else: break
             else:
-                print("DEBUG: No next link found. Stopping.")
-                break
+                 break
         
         return list(set(product_urls))

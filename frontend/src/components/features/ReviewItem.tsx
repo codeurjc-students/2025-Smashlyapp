@@ -23,12 +23,14 @@ interface ReviewItemProps {
   };
   onDelete: () => void;
   onUpdate: () => void;
+  showProductInfo?: boolean;
 }
 
 export const ReviewItem: React.FC<ReviewItemProps> = ({
   review,
   onDelete,
   onUpdate,
+  showProductInfo = true,
 }) => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -36,11 +38,16 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
   const [isLiked, setIsLiked] = useState(false); // TODO: Obtener del backend
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // ... (Keep existing handlers: handleLike, handleDelete, handleUpdateSuccess)
+  // Re-implementing them here to be safe with the replace block, or I can just target the render.
+  // Actually, I can just replace the whole file or large chunks. 
+  // Let's replace the Render + Styled Components.
+
   const isOwner = user?.id === review.user_id;
 
   const handleLike = async () => {
     if (!user) {
-      alert("Debes iniciar sesión para dar me gusta");
+      alert("Please log in to like reviews");
       return;
     }
 
@@ -50,12 +57,11 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
       setIsLiked(result.liked);
     } catch (error) {
       console.error("Error al dar like:", error);
-      alert("Error al dar me gusta");
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("¿Estás seguro de que quieres eliminar esta opinión?")) {
+    if (!confirm("Are you sure you want to delete this review?")) {
       return;
     }
 
@@ -65,7 +71,7 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
       onDelete();
     } catch (error) {
       console.error("Error al eliminar review:", error);
-      alert("Error al eliminar la opinión");
+      alert("Error deleting review");
       setIsDeleting(false);
     }
   };
@@ -86,10 +92,27 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
     );
   }
 
+  // Format date relative or absolute
+  // const dateStr = new Date(review.created_at).toLocaleDateString("en-US", { year: 'numeric', month: 'short', day: 'numeric' });
+  
+  // Calculate relative time for "2 days ago" style
+  const getRelativeTime = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) return "Just now";
+    if (diffInSeconds < 3600) return `Hace ${Math.floor(diffInSeconds / 60)} minutos`;
+    if (diffInSeconds < 86400) return `Hace ${Math.floor(diffInSeconds / 3600)} horas`;
+    if (diffInSeconds < 604800) return `Hace ${Math.floor(diffInSeconds / 86400)} días`;
+    return date.toLocaleDateString("es-ES", { day: 'numeric', month: 'short', year: 'numeric' });
+  };
+
+
   return (
     <Container>
-      {/* Sección de la pala (si está disponible) */}
-      {review.racket && (
+      {/* Sección de la pala (si está disponible y activo) */}
+      {showProductInfo && review.racket && (
         <RacketInfo to={`/rackets/${review.racket.id}`}>
           {review.racket.imagen && (
             <RacketImage
@@ -112,7 +135,7 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
             {review.user?.avatar_url ? (
               <img
                 src={review.user.avatar_url}
-                alt={review.user?.nickname || "Usuario"}
+                alt={review.user?.nickname || "User"}
               />
             ) : (
               <DefaultAvatar>
@@ -122,56 +145,37 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
               </DefaultAvatar>
             )}
           </Avatar>
-          <UserDetails>
-            <Username>{review.user?.nickname || "Usuario"}</Username>
-            <DateText>
-              {new window.Date(review.created_at).toLocaleDateString("es-ES", {
-                year: "numeric",
-                month: "long",
-                day: "numeric",
-              })}
-            </DateText>
-          </UserDetails>
+          <UserMeta>
+            <Username>{review.user?.nickname || "Anonymous"}</Username>
+            <RatingRow>
+               {[...Array(5)].map((_, i) => (
+                  <SmallStar key={i} filled={i < review.rating}>★</SmallStar>
+               ))}
+            </RatingRow>
+          </UserMeta>
         </UserInfo>
-
-        {isOwner && (
-          <Actions>
-            <ActionButton onClick={() => setIsEditing(true)}>
-              ✏️ Editar
-            </ActionButton>
-            <ActionButton danger onClick={handleDelete} disabled={isDeleting}>
-              {isDeleting ? "..." : "🗑️ Eliminar"}
-            </ActionButton>
-          </Actions>
-        )}
+        
+        <HeaderRight>
+            <DateText>{getRelativeTime(review.created_at)}</DateText>
+            {isOwner && (
+            <DropdownActions>
+                <ActionButton onClick={() => setIsEditing(true)}>Edit</ActionButton>
+                <ActionButton danger onClick={handleDelete} disabled={isDeleting}>Delete</ActionButton>
+            </DropdownActions>
+            )}
+        </HeaderRight>
       </Header>
 
-      <Rating>
-        {[...Array(5)].map((_, i) => (
-          <Star key={i} filled={i < review.rating}>
-            ⭐
-          </Star>
-        ))}
-      </Rating>
-
-      <Title>{review.title}</Title>
-      <Content>{review.content}</Content>
+      <Body>
+          {review.title && <ReviewTitle>{review.title}</ReviewTitle>}
+          <Content>{review.content}</Content>
+      </Body>
 
       <Footer>
         <LikeButton onClick={handleLike} liked={isLiked} disabled={!user}>
-          {isLiked ? "❤️" : "🤍"} {likes}
+          {isLiked ? "❤️" : "🤍"} {likes > 0 ? likes : "Te ha sido útil?"}
         </LikeButton>
-
-        {review.comments_count > 0 && (
-          <CommentsCount>
-            💬 {review.comments_count} comentario
-            {review.comments_count !== 1 ? "s" : ""}
-          </CommentsCount>
-        )}
-
-        {review.created_at !== review.updated_at && (
-          <EditedTag>(editada)</EditedTag>
-        )}
+        {/* Removed comments count if not used per reference style, but can keep if needed. Keeping simple. */}
       </Footer>
     </Container>
   );
@@ -181,58 +185,14 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
 const Container = styled.div`
   padding: 1.5rem;
   background: white;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  transition: box-shadow 0.2s;
-
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  }
-`;
-
-const RacketInfo = styled(Link)`
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 1rem;
-  margin-bottom: 1rem;
-  background: linear-gradient(135deg, #e8f5e9 0%, #a5d6a7 100%);
-  border-radius: 8px;
-  text-decoration: none;
+  border-radius: 16px;
+  border: 1px solid #F3F4F6;
   transition: all 0.2s;
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(76, 175, 80, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    border-color: #E5E7EB;
   }
-`;
-
-const RacketImage = styled.img`
-  width: 60px;
-  height: 60px;
-  object-fit: contain;
-  border-radius: 4px;
-  background: white;
-  padding: 0.25rem;
-`;
-
-const RacketDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-`;
-
-const RacketBrand = styled.span`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #666;
-  text-transform: uppercase;
-`;
-
-const RacketName = styled.span`
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1a1a1a;
 `;
 
 const Header = styled.div`
@@ -240,13 +200,25 @@ const Header = styled.div`
   justify-content: space-between;
   align-items: flex-start;
   margin-bottom: 1rem;
-  gap: 1rem;
+`;
+
+const HeaderRight = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
 `;
 
 const UserInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
+`;
+
+const UserMeta = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
 `;
 
 const Avatar = styled.div`
@@ -254,6 +226,7 @@ const Avatar = styled.div`
   height: 48px;
   border-radius: 50%;
   overflow: hidden;
+  background: #F3F4F6;
 
   img {
     width: 100%;
@@ -268,77 +241,68 @@ const DefaultAvatar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-size: 1.25rem;
+  background: #E0E7FF;
+  color: #4F46E5;
+  font-size: 1.2rem;
   font-weight: 700;
-`;
-
-const UserDetails = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
 `;
 
 const Username = styled.div`
-  font-weight: 600;
-  color: #1a1a1a;
+  font-weight: 700;
+  color: #111827;
   font-size: 1rem;
 `;
 
-const DateText = styled.div`
-  font-size: 0.875rem;
-  color: #666;
+const RatingRow = styled.div`
+    display: flex;
+    gap: 2px;
+    font-size: 1rem;
 `;
 
-const Actions = styled.div`
-  display: flex;
-  gap: 0.5rem;
+const SmallStar = styled.span<{ filled: boolean }>`
+    color: ${p => p.filled ? '#FFC107' : '#E5E7EB'};
+`;
+
+const DateText = styled.div`
+  font-size: 0.85rem;
+  color: #9CA3AF;
+`;
+
+const DropdownActions = styled.div`
+    display: flex;
+    gap: 0.5rem;
 `;
 
 const ActionButton = styled.button<{ danger?: boolean }>`
-  padding: 0.5rem 1rem;
-  background: ${(props) => (props.danger ? "#ffebee" : "#f5f5f5")};
-  color: ${(props) => (props.danger ? "#d32f2f" : "#333")};
+  background: none;
   border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
+  color: ${p => p.danger ? '#EF4444' : '#6B7280'};
   cursor: pointer;
-  transition: all 0.2s;
-
-  &:hover:not(:disabled) {
-    background: ${(props) => (props.danger ? "#ffcdd2" : "#e0e0e0")};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  text-decoration: underline;
+  padding: 0;
+  
+  &:hover {
+      color: ${p => p.danger ? '#DC2626' : '#374151'};
   }
 `;
 
-const Rating = styled.div`
-  display: flex;
-  gap: 0.25rem;
-  margin-bottom: 0.75rem;
-  font-size: 1.25rem;
+const Body = styled.div`
+    margin-bottom: 1rem;
 `;
 
-const Star = styled.span<{ filled: boolean }>`
-  opacity: ${(props) => (props.filled ? 1 : 0.3)};
-`;
-
-const Title = styled.h3`
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: #1a1a1a;
-  margin-bottom: 0.5rem;
+const ReviewTitle = styled.h4`
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1F2937;
+    margin: 0 0 0.5rem 0;
 `;
 
 const Content = styled.p`
   font-size: 1rem;
   line-height: 1.6;
-  color: #333;
-  margin-bottom: 1rem;
+  color: #4B5563;
+  margin: 0;
   white-space: pre-wrap;
 `;
 
@@ -347,40 +311,65 @@ const Footer = styled.div`
   align-items: center;
   gap: 1rem;
   padding-top: 1rem;
-  border-top: 1px solid #f0f0f0;
+//   border-top: 1px solid #F9FAFB;
 `;
 
 const LikeButton = styled.button<{ liked: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  background: ${(props) => (props.liked ? "#fff0f0" : "#f5f5f5")};
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  color: #333;
+  padding: 0.4rem 0.8rem;
+  background: ${p => p.liked ? '#FEF2F2' : 'transparent'};
+  border: 1px solid ${p => p.liked ? '#FEE2E2' : '#F3F4F6'};
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: ${p => p.liked ? '#EF4444' : '#6B7280'};
   cursor: pointer;
   transition: all 0.2s;
 
-  &:hover:not(:disabled) {
-    background: ${(props) => (props.liked ? "#ffe0e0" : "#e0e0e0")};
-  }
-
-  &:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
+  &:hover {
+    background: ${p => p.liked ? '#FEE2E2' : '#F9FAFB'};
+    border-color: ${p => p.liked ? '#FECACA' : '#E5E7EB'};
   }
 `;
 
-const CommentsCount = styled.div`
-  font-size: 0.875rem;
-  color: #666;
+// Racket Info Styles (Legacy support)
+const RacketInfo = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: #F9FAFB;
+  border-radius: 12px;
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #F3F4F6;
+  }
 `;
 
-const EditedTag = styled.div`
+const RacketImage = styled.img`
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+`;
+
+const RacketDetails = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const RacketBrand = styled.span`
   font-size: 0.75rem;
-  color: #999;
-  font-style: italic;
-  margin-left: auto;
+  font-weight: 600;
+  color: #6B7280;
+  text-transform: uppercase;
+`;
+
+const RacketName = styled.span`
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
 `;

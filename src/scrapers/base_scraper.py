@@ -87,6 +87,29 @@ class BaseScraper(ABC):
 
         return self.page
 
+    async def safe_get_text(self, selector: str, timeout: int = 1000) -> str:
+        """Safely extract text from an element."""
+        if not self.page: return ""
+        try:
+            element = await self.page.query_selector(selector)
+            if element:
+                return (await element.inner_text()).strip()
+        except:
+            pass
+        return ""
+
+    async def safe_get_attribute(self, selector: str, attr: str, timeout: int = 1000) -> str:
+        """Safely extract an attribute from an element."""
+        if not self.page: return ""
+        try:
+            element = await self.page.query_selector(selector)
+            if element:
+                val = await element.get_attribute(attr)
+                return val.strip() if val else ""
+        except:
+            pass
+        return ""
+
     @abstractmethod
     async def scrape_product(self, url: str) -> Product:
         """Scrape a product from the given URL. Must be implemented by subclasses."""

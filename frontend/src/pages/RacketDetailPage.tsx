@@ -1,430 +1,510 @@
 import { useRackets } from '@/contexts/RacketsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Racket } from '@/types/racket';
-import { motion } from 'framer-motion';
+
 import React, { useEffect, useState } from 'react';
 import {
-  FiArrowLeft,
   FiExternalLink,
   FiLoader,
   FiStar,
-  FiTag,
-  FiEdit, // Importar icono de edición
   FiHeart,
+  FiBell,
+  FiTruck,
 } from 'react-icons/fi';
 
 import { Link, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { AddToListModal } from '../components/features/AddToListModal';
-import { RacketFeatures } from '../components/features/RacketFeatures';
-import { RacketReviews } from '../components/features/RacketReviews';
-import { StorePriceComparison } from '../components/features/StorePriceComparison';
+import { ProductReviews } from '../components/features/ProductReviews';
 import { RacketService } from '../services/racketService';
 import { RacketViewService } from '../services/racketViewService';
 import { getLowestPrice, getAllStorePrices } from '../utils/priceUtils';
 import { toTitleCase } from '../utils/textUtils';
-import { EditRacketModal } from '../components/admin/EditRacketModal'; // Importar el modal
+import { EditRacketModal } from '../components/admin/EditRacketModal';
+import { PriceHistoryChart } from '../components/features/PriceHistoryChart';
 
-// Styled Components
-const Container = styled.div`
+// --- Styled Components ---
+
+const PageContainer = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fdf8 0%, #f0f9f0 100%);
+  background: #f9fafb; // Clean light background
+  padding-bottom: 4rem;
 `;
 
-const Header = styled.div`
-  background: white;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 1rem 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-`;
-
-const HeaderContent = styled.div`
-  max-width: 1600px;
+const Breadcrumbs = styled.div`
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 3rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-
-  @media (max-width: 1024px) {
-    padding: 0 2rem;
-  }
-`;
-
-const BackButton = styled(Link)`
+  padding: 1rem 2rem;
+  color: #6b7280;
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #16a34a;
-  text-decoration: none;
-  font-weight: 500;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #f0f9ff;
+  
+  a {
+    color: #6b7280;
     text-decoration: none;
+    &:hover { color: #1f2937; }
   }
 `;
 
-const HeaderTitle = styled.h1`
-  font-size: 1.5rem;
-  font-weight: 600;
-  color: #1f2937;
-  margin: 0;
-`;
-
-const Content = styled.div`
-  max-width: 1600px;
+const MainGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 3rem;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 2rem 3rem;
-  display: grid;
-  gap: 2rem;
-
+  padding: 0 2rem;
+  
   @media (max-width: 1024px) {
-    padding: 2rem;
-  }
-`;
-
-const TopSection = styled.div<{ $showComparison?: boolean }>`
-  display: grid;
-  grid-template-columns: ${props => (props.$showComparison ? '1.2fr 0.8fr' : '1fr')};
-  gap: 2rem;
-  align-items: start;
-
-  @media (max-width: 1200px) {
     grid-template-columns: 1fr;
+    gap: 2rem;
   }
 `;
 
-const MainCard = styled(motion.div)`
+// Left Column: Gallery
+const GallerySection = styled.div`
   background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  height: 100%;
-
-  @media (max-width: 768px) {
-    grid-template-columns: 1fr;
-  }
-`;
-
-const CompactPriceCard = styled(motion.div)`
-  background: white;
-  border-radius: 16px;
-  overflow: visible;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  height: 100%;
-  position: sticky;
-  top: 2rem;
-  display: flex;
-  flex-direction: column;
-
-  @media (max-width: 1200px) {
-    position: relative;
-    top: 0;
-    height: auto;
-  }
-`;
-
-const ImageSection = styled.div`
-  position: relative;
+  border-radius: 24px;
   padding: 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: white;
-  min-height: 100%;
+  position: relative;
+  min-height: 600px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    min-height: 400px;
+  }
 `;
 
-const RacketImage = styled.img`
-  width: 90%;
-  height: 90%;
-  max-width: 320px;
-  max-height: 420px;
+const MainImage = styled.img`
+  width: 100%;
+  height: 100%;
+  max-height: 500px;
   object-fit: contain;
-  object-position: center;
+  transition: transform 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
 `;
 
-const Badge = styled.div<{ variant: 'bestseller' | 'offer' }>`
+const WishlistButton = styled.button`
   position: absolute;
-  top: 1rem;
-  ${props => (props.variant === 'bestseller' ? 'right: 1rem;' : 'left: 1rem;')}
-  background: ${props => (props.variant === 'bestseller' ? '#f59e0b' : '#ef4444')};
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  font-size: 0.875rem;
-  font-weight: 600;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: white;
+  border: none;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #ef4444;
+
+  &:hover {
+    transform: scale(1.1);
+    background: #fef2f2;
+  }
 `;
 
+// Right Column: Info
 const InfoSection = styled.div`
-  padding: 2rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  gap: 1.5rem;
 `;
 
-const BrandText = styled.div`
-  font-size: 1rem;
+const ProductTag = styled.span`
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 6px;
+  align-self: flex-start;
+  letter-spacing: 0.05em;
+`;
+
+const ProductTitle = styled.h1`
+  font-size: 3rem;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.1;
+  margin: 0;
+  
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+`;
+
+const RatingRow = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #f59e0b;
   font-weight: 600;
-  color: #16a34a;
+  font-size: 0.9rem;
+  
+  span { color: #6b7280; font-weight: 400; }
+`;
+
+const PriceCard = styled.div`
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+`;
+
+const BestPriceLabel = styled.div`
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
   margin-bottom: 0.5rem;
 `;
 
-const ModelText = styled.h2`
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1f2937;
-  margin-bottom: 1.5rem;
-  line-height: 1.2;
-`;
-
-const PriceContainer = styled.div`
+const PriceRow = styled.div`
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 1rem;
-  margin-bottom: 2rem;
-  flex-wrap: wrap;
+  margin-bottom: 0.5rem;
 `;
 
-const CurrentPrice = styled.div`
+const BigPrice = styled.div`
   font-size: 2.5rem;
-  font-weight: 700;
-  color: #ef4444;
+  font-weight: 800;
+  color: #16a34a; // Green price
 `;
 
-const OriginalPrice = styled.div`
+const OldPrice = styled.div`
   font-size: 1.25rem;
   color: #9ca3af;
   text-decoration: line-through;
+  font-weight: 500;
 `;
 
-const DiscountBadge = styled.div`
-  background: #dc2626;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
+const SaveBadge = styled.div`
+  background: #fee2e2;
+  color: #dc2626;
+  font-weight: 700;
   font-size: 0.875rem;
-  font-weight: 600;
-`;
-
-const StoreBadge = styled.div`
-  background: #f0f9ff;
-  color: #16a34a;
-  padding: 0.5rem 1rem;
+  padding: 4px 10px;
   border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 600;
-  border: 1px solid #16a34a;
 `;
 
-const ActionButtons = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-top: auto;
+const UpdatedTime = styled.div`
+  font-size: 0.75rem;
+  color: #9ca3af;
+  margin-bottom: 1.5rem;
 `;
 
 const PrimaryButton = styled.a`
-  background: #16a34a;
-  color: white;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  text-decoration: none;
-  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem;
+  background: #16a34a;
+  color: white;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 1.125rem;
+  text-decoration: none;
+  transition: all 0.2s;
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 
   &:hover {
     background: #15803d;
-    text-decoration: none;
-    color: white;
     transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(22, 163, 74, 0.4);
+    color: white;
   }
 `;
 
-const SecondaryButton = styled.button<{ disabled?: boolean }>`
-  background: ${props => (props.disabled ? '#f0f9ff' : 'white')};
-  color: #16a34a;
-  border: 2px solid #16a34a;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  font-weight: 600;
+const AlertButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  cursor: ${props => (props.disabled ? 'not-allowed' : 'pointer')};
-  transition: all 0.2s ease;
-  opacity: ${props => (props.disabled ? '0.7' : '1')};
+  gap: 0.75rem;
+  width: 100%;
+  padding: 1rem;
+  background: white;
+  color: #374151;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 1rem;
 
-  &:hover:not(:disabled) {
-    background: #f0f9ff;
-    transform: translateY(-2px);
+  &:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
   }
 `;
 
-const SectionTitle = styled.h3`
-  font-size: 1.25rem;
+const Description = styled.p`
+  color: #4b5563;
+  line-height: 1.6;
+  font-size: 1rem;
+`;
+
+// Lower Section layout
+const LowerGrid = styled.div<{ $fullWidth?: boolean }>`
+  display: grid;
+  grid-template-columns: ${props => props.$fullWidth ? '1fr' : '1.2fr 0.8fr'};
+  gap: 3rem;
+  max-width: 1400px;
+  margin: 3rem auto 0;
+  padding: 0 2rem;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SpecsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); // 2 columns like in design example
+  gap: 1rem;
+  margin-top: 1rem;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+const SpecCard = styled.div`
+  background: white;
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+`;
+
+const SpecLabel = styled.span`
+  font-size: 0.75rem;
+  color: #9ca3af;
+  text-transform: uppercase;
   font-weight: 600;
+  letter-spacing: 0.5px;
+`;
+
+const SpecValue = styled.span`
+  font-size: 1rem;
   color: #1f2937;
-  margin-bottom: 1.5rem;
+  font-weight: 600;
+`;
+
+const H3 = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 1rem;
   display: flex;
   align-items: center;
   gap: 0.5rem;
 `;
 
-const RecommendationCard = styled(motion.div)`
-  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-  padding: 2rem;
-  border-radius: 16px;
-  border: 1px solid #bae6fd;
-`;
-
-const RecommendationText = styled.p`
-  color: #0f172a;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-`;
-
-const RecommendationButton = styled(Link)`
+const CompareTable = styled.div`
   background: white;
-  color: #16a34a;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  border: 1px solid #16a34a;
-  transition: all 0.2s ease;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  margin-top: 3rem;
+`;
 
-  &:hover {
-    background: #f0f9ff;
-    text-decoration: none;
-    transform: translateY(-2px);
+const CompareRow = styled.div`
+  display: grid;
+  grid-template-columns: 1.5fr 2fr 1fr 1fr;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #f3f4f6;
+  gap: 1rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
   }
 `;
 
-const LoadingContainer = styled.div`
-  min-height: 80vh;
+const StoreLogo = styled.span`
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #111827;
+`;
+
+const ShippingInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #4b5563;
+  font-size: 0.9rem;
+  svg { color: #16a34a; }
+`;
+
+const PriceText = styled.div`
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #1f2937;
+  text-align: right;
+`;
+
+const ShopButton = styled.a`
+  background: white;
+  border: 1px solid #e5e7eb;
+  color: #1f2937;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-weight: 600;
+  text-decoration: none;
+  text-align: center;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #16a34a; 
+  }
+`;
+
+const PremiumCTA = styled.div`
+  max-width: 1400px;
+  margin: 2rem auto;
+  padding: 0 2rem;
+`;
+
+const CTACard = styled.div`
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid #bbf7d0;
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 1rem;
 `;
 
-const LoadingSpinner = styled(motion.div)`
-  color: #16a34a;
-`;
-
-const LoadingText = styled.div`
-  color: #6b7280;
+const CTAText = styled.p`
   font-size: 1.125rem;
-`;
-
-const ErrorContainer = styled.div`
-  min-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  text-align: center;
-  padding: 2rem;
-`;
-
-const ErrorIcon = styled.div`
-  font-size: 4rem;
-  color: #ef4444;
-`;
-
-const ErrorText = styled.h2`
-  font-size: 1.5rem;
+  color: #166534;
   font-weight: 600;
-  color: #374151;
+  margin: 0;
 `;
 
-const ErrorDescription = styled.p`
-  color: #6b7280;
-  max-width: 500px;
+const CTAButtons = styled.div`
+  display: flex;
+  gap: 1rem;
+  
+  @media (max-width: 480px) {
+    flex-direction: column;
+    width: 100%;
+  }
 `;
 
-// Component
+const CTAButton = styled(Link)`
+  padding: 0.75rem 2rem;
+  background: #16a34a;
+  color: white;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #15803d;
+    transform: translateY(-2px);
+    color: white;
+  }
+`;
+
+const CTAButtonSecondary = styled(Link)`
+  padding: 0.75rem 2rem;
+  background: white;
+  color: #16a34a;
+  border: 2px solid #16a34a;
+  border-radius: 10px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f0fdf4;
+    color: #15803d;
+  }
+`;
+
+// --- Component ---
+
 const RacketDetailPage: React.FC = () => {
-  // Hooks
   const [searchParams] = useSearchParams();
   const { rackets } = useRackets();
-  const { isAuthenticated, userProfile } = useAuth(); // Obtener userProfile para verificar rol
-
-  // State
+  const { isAuthenticated } = useAuth();
+  
   const [racket, setRacket] = useState<Racket | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false); // Estado para el modal de edición
+  const [showEditModal, setShowEditModal] = useState(false);
 
-  // Get racket ID from URL params
   const racketId = searchParams.get('id');
 
-  // Load racket data
   useEffect(() => {
     const loadRacket = async () => {
       if (!racketId) {
-        setError('No se especificó el ID de la pala');
+        setError('ID not specified');
         setLoading(false);
         return;
       }
 
       try {
         setLoading(true);
-        setError(null);
-
-        // Try to parse as numeric ID first
         const numericId = parseInt(racketId);
         let foundRacket: Racket | null = null;
 
         if (!isNaN(numericId)) {
-          // Load by ID from API
           foundRacket = await RacketService.getRacketById(numericId);
         }
 
-        // If not found by numeric ID, try by name (backward compatibility)
         if (!foundRacket) {
           const decodedRacketId = decodeURIComponent(racketId);
-          // First check in context (already loaded rackets)
           foundRacket = rackets.find(pala => pala.nombre === decodedRacketId) || null;
-
-          // If still not found, try searching by name via API
           if (!foundRacket) {
             foundRacket = await RacketService.getRacketByName(decodedRacketId);
           }
         }
 
-        if (!foundRacket) {
-          setError('No se encontró la pala solicitada');
-          setRacket(null);
-        } else {
+        if (foundRacket) {
           setRacket(foundRacket);
-          setError(null);
+        } else {
+          setError('Racket not found');
         }
-      } catch (err: any) {
-        console.error('Error loading racket:', err);
-        setError(err.message || 'Error al cargar la información de la pala');
-        setRacket(null);
+      } catch (err) {
+        setError('Error loading racket');
       } finally {
         setLoading(false);
       }
@@ -433,266 +513,184 @@ const RacketDetailPage: React.FC = () => {
     loadRacket();
   }, [racketId, rackets]);
 
-  // Record racket view when racket is loaded and user is authenticated
   useEffect(() => {
     if (racket && racket.id && isAuthenticated) {
-      // Record the view asynchronously without blocking the UI
-      RacketViewService.recordView(racket.id).catch(error => {
-        // Silently fail - viewing tracking is not critical
-        console.debug('Could not record racket view:', error);
-      });
+      RacketViewService.recordView(racket.id).catch(console.error);
     }
   }, [racket, isAuthenticated]);
 
-  // Loading state (check if rackets are still loading from context)
-  if (loading) {
-    return (
-      <Container>
-        <LoadingContainer>
-          <LoadingSpinner
-            animate={{ rotate: 360 }}
-            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-          >
-            <FiLoader size={48} />
-          </LoadingSpinner>
-          <LoadingText>Cargando información de la pala...</LoadingText>
-        </LoadingContainer>
-      </Container>
-    );
-  }
+  if (loading) return (
+    <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <FiLoader className="animate-spin" size={40} color="#16a34a" />
+    </div>
+  );
 
-  // Error state
-  if (error || !racket) {
-    return (
-      <Container>
-        <ErrorContainer>
-          <ErrorIcon>⚠️</ErrorIcon>
-          <ErrorText>Pala no encontrada</ErrorText>
-          <ErrorDescription>
-            {error || 'No se pudo encontrar la información de esta pala.'}
-          </ErrorDescription>
-          <BackButton to='/catalog'>
-            <FiArrowLeft />
-          </BackButton>
-        </ErrorContainer>
-      </Container>
-    );
-  }
+  if (error || !racket) return <div>Error: {error}</div>;
+
+  const lowestPrice = getLowestPrice(racket);
+  const allPrices = getAllStorePrices(racket);
+  const availablePrices = allPrices.filter(p => p.available);
 
   return (
-    <Container>
-      {/* Header */}
-      <Header>
-        <HeaderContent>
-          <BackButton to='/catalog'>
-            <FiArrowLeft />
-          </BackButton>
-          <HeaderTitle>Detalles de la Pala</HeaderTitle>
-        </HeaderContent>
-      </Header>
+    <PageContainer>
+      <Breadcrumbs>
+        <Link to="/">Home</Link> / <Link to="/catalog">Palas</Link> / {toTitleCase(racket.marca)} / <span style={{color: '#111827'}}>{toTitleCase(racket.modelo)}</span>
+      </Breadcrumbs>
 
-      {/* Content */}
-      <Content>
-        {(() => {
-          // Calculate available prices count
-          const storePrices = getAllStorePrices(racket);
-          const availablePricesCount = storePrices.filter(store => store.available).length;
-          const showPriceComparison = availablePricesCount > 1;
+      <MainGrid>
+        {/* Left: Gallery */}
+        <GallerySection>
+          <WishlistButton onClick={() => setShowAddToListModal(true)}>
+             <FiHeart fill={showAddToListModal ? "#ef4444" : "none"} />
+          </WishlistButton>
+          <MainImage 
+            src={racket.imagen || '/placeholder-racket.svg'} 
+            alt={racket.modelo}
+          />
+          {/* Thumbnails could go here */}
+        </GallerySection>
 
-          return (
-            <TopSection $showComparison={showPriceComparison}>
-              {/* Left Column: Main Card */}
-              <MainCard
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-              >
-                <ImageSection>
-                  <RacketImage
-                    src={racket.imagen || '/placeholder-racket.svg'}
-                    alt={racket.modelo || 'Pala de padel'}
-                    onError={e => {
-                      const target = e.target as HTMLImageElement;
-                      target.src = '/placeholder-racket.svg';
-                    }}
-                  />
-                  {racket.es_bestseller && (
-                    <Badge variant='bestseller'>
-                      <FiStar size={16} />
-                      Top
-                    </Badge>
-                  )}
-                  {racket.en_oferta && (
-                    <Badge variant='offer'>
-                      <FiTag size={16} />
-                      Oferta
-                    </Badge>
-                  )}
-                </ImageSection>
+        {/* Right: Info */}
+        <InfoSection>
+          <ProductTag>{toTitleCase(racket.marca)}</ProductTag>
+          <ProductTitle>{toTitleCase(racket.modelo)}</ProductTitle>
+          
+          <RatingRow>
+             {[1,2,3,4,5].map(i => <FiStar key={i} fill="currentColor" />)}
+             <span>128 reviews</span>
+          </RatingRow>
 
-                <InfoSection>
-                  <div>
-                    <BrandText>{toTitleCase(racket.marca)}</BrandText>
-                    <ModelText>{toTitleCase(racket.modelo)}</ModelText>
+          <PriceCard>
+             <BestPriceLabel>Mejor Precio del Mercado</BestPriceLabel>
+             <PriceRow>
+                <BigPrice>{lowestPrice ? `${lowestPrice.price.toFixed(2)}€` : `${racket.precio_actual}€`}</BigPrice>
+                {lowestPrice && lowestPrice.originalPrice > lowestPrice.price && (
+                   <OldPrice>{lowestPrice.originalPrice.toFixed(2)}€</OldPrice>
+                )}
+                {lowestPrice && lowestPrice.discount > 0 && (
+                   <SaveBadge>Ahorra {Math.round(lowestPrice.discount)}%</SaveBadge>
+                )}
+             </PriceRow>
+             <UpdatedTime>Precio actualizado: hace un momento</UpdatedTime>
 
-                    <PriceContainer>
-                      {(() => {
-                        const lowestPrice = getLowestPrice(racket);
-                        if (lowestPrice) {
-                          return (
-                            <>
-                              <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
-                              {lowestPrice.originalPrice > lowestPrice.price && (
-                                <>
-                                  <OriginalPrice>
-                                    {lowestPrice.originalPrice.toFixed(2)}€
-                                  </OriginalPrice>
-                                  {lowestPrice.discount > 0 && (
-                                    <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
-                                  )}
-                                </>
-                              )}
-                              <StoreBadge>en {lowestPrice.store}</StoreBadge>
-                            </>
-                          );
-                        }
-                        return <CurrentPrice>{racket.precio_actual}€</CurrentPrice>;
-                      })()}
-                    </PriceContainer>
-                  </div>
+             <PrimaryButton 
+               href={lowestPrice?.link || '#'} 
+               target="_blank" 
+               rel="noopener noreferrer"
+             >
+               Ver en {lowestPrice?.store || 'Tienda'}
+               <FiExternalLink />
+             </PrimaryButton>
 
-                  <ActionButtons>
-                    {/* Botón de Editar para ADMINS */}
-                    {isAuthenticated && userProfile?.role?.toLowerCase() === 'admin' && (
-                      <SecondaryButton
-                        onClick={() => setShowEditModal(true)}
-                        style={{
-                          borderColor: '#2563eb',
-                          color: '#2563eb',
-                          background: '#eff6ff',
-                        }}
-                      >
-                        <FiEdit />
-                        Editar Pala
-                      </SecondaryButton>
-                    )}
+             <AlertButton>
+               <FiBell /> Crear Alerta de Precio
+             </AlertButton>
+          </PriceCard>
 
-                    <PrimaryButton
-                      href={getLowestPrice(racket)?.link || racket.enlace}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                    >
-                      <FiExternalLink />
-                      {getLowestPrice(racket)?.store
-                        ? `Ver en ${getLowestPrice(racket)?.store}`
-                        : 'Ver en tienda'}
-                    </PrimaryButton>
 
-                    {isAuthenticated && (
-                      <SecondaryButton onClick={() => setShowAddToListModal(true)}>
-                        <FiHeart />
-                        Añadir a mis listas
-                      </SecondaryButton>
-                    )}
-                  </ActionButtons>
-                </InfoSection>
-              </MainCard>
+        </InfoSection>
+      </MainGrid>
 
-              {/* Right Column: Compact Price Comparison */}
-              {showPriceComparison && (
-                <CompactPriceCard
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  <StorePriceComparison racket={racket} isAuthenticated={isAuthenticated} compact />
-                </CompactPriceCard>
-              )}
-            </TopSection>
-          );
-        })()}
+      <LowerGrid $fullWidth={!isAuthenticated}>
+        {/* Lower Left: Specs */}
+        <div>
+          <H3>🛠 Especificaciones Técnicas</H3>
+          <SpecsGrid>
+             <SpecCard>
+               <SpecLabel>Forma</SpecLabel>
+               <SpecValue>{toTitleCase(racket.caracteristicas_forma || racket.especificaciones?.forma || 'N/A')}</SpecValue>
+             </SpecCard>
+             <SpecCard>
+               <SpecLabel>Balance</SpecLabel>
+               <SpecValue>{toTitleCase(racket.caracteristicas_balance || racket.especificaciones?.balance || 'Media')}</SpecValue>
+             </SpecCard>
+             <SpecCard>
+               <SpecLabel>Peso</SpecLabel>
+               <SpecValue>{racket.peso ? `${racket.peso}g` : '360-375g'}</SpecValue>
+             </SpecCard>
+             <SpecCard>
+               <SpecLabel>Núcleo</SpecLabel>
+               <SpecValue>{toTitleCase(racket.caracteristicas_nucleo || racket.especificaciones?.nucleo || 'EVA')}</SpecValue>
+             </SpecCard>
+             <SpecCard>
+               <SpecLabel>Caras</SpecLabel>
+               <SpecValue>{toTitleCase(racket.caracteristicas_cara || racket.especificaciones?.cara || 'Carbon')}</SpecValue>
+             </SpecCard>
+             <SpecCard>
+               <SpecLabel>Nivel</SpecLabel>
+               <SpecValue>{toTitleCase(racket.caracteristicas_nivel_de_juego || racket.especificaciones?.nivel_de_juego || 'Avanzado')}</SpecValue>
+             </SpecCard>
+          </SpecsGrid>
+        </div>
 
-        {/* Características Principales */}
-        <RacketFeatures
-          characteristics={{
-            balance:
-              racket.especificaciones?.balance || racket.caracteristicas_balance || undefined,
-            core: racket.especificaciones?.nucleo || racket.caracteristicas_nucleo || undefined,
-            face: racket.especificaciones?.cara || racket.caracteristicas_cara || undefined,
-            hardness: racket.especificaciones?.dureza || racket.caracteristicas_dureza || undefined,
-            shape: racket.especificaciones?.forma || racket.caracteristicas_forma || undefined,
-            surface:
-              racket.especificaciones?.superficie || racket.caracteristicas_superficie || undefined,
-            game_type:
-              racket.especificaciones?.tipo_de_juego ||
-              racket.caracteristicas_tipo_de_juego ||
-              undefined,
-            game_level:
-              racket.especificaciones?.nivel_de_juego ||
-              racket.caracteristicas_nivel_de_juego ||
-              undefined,
-          }}
-          specs={racket.specs}
-        />
-
-        {/* Sección de Reviews */}
-        {racket.id && <RacketReviews racketId={racket.id} />}
-
-        {/* Recommendation Card */}
-        <RecommendationCard
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          <SectionTitle>💡 ¿Necesitas más opciones?</SectionTitle>
-
-          <RecommendationText>
-            Si esta pala no es exactamente lo que buscas, puedes explorar nuestra colección completa
-            de palas de pádel o usar nuestro sistema de recomendaciones con IA para encontrar la
-            pala perfecta según tu perfil de jugador y estilo de juego.
-          </RecommendationText>
-
-          <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-            <RecommendationButton to='/catalog'>🎾 Ver todas las palas</RecommendationButton>
-            <RecommendationButton
-              to='/best-racket'
-              style={{
-                background: '#16a34a',
-                color: 'white',
-                borderColor: '#16a34a',
-              }}
-            >
-              ✨ Buscar mi pala ideal
-            </RecommendationButton>
+        {/* Lower Right: Price History - Only show if authenticated */}
+        {isAuthenticated && (
+          <div>
+            <PriceHistoryChart currentPrice={lowestPrice?.price || racket.precio_actual || 0} />
           </div>
-        </RecommendationCard>
-      </Content>
+        )}
+      </LowerGrid>
 
-      {/* Modal para añadir a listas */}
-      {racket && (
-        <AddToListModal
-          isOpen={showAddToListModal}
-          onClose={() => setShowAddToListModal(false)}
-          racketId={racket.id || 0}
-          racketName={`${racket.marca} ${racket.modelo}`}
-        />
+      {/* Premium CTA for non-authenticated users */}
+      {!isAuthenticated && (
+        <PremiumCTA>
+          <CTACard>
+            <CTAText>🔓 Accede a comparación de precios, historial y reseñas</CTAText>
+            <CTAButtons>
+              <CTAButton to="/login">Iniciar Sesión</CTAButton>
+              <CTAButtonSecondary to="/register">Crear Cuenta</CTAButtonSecondary>
+            </CTAButtons>
+          </CTACard>
+        </PremiumCTA>
       )}
 
-      {/* Modal de Edición de Pala (Admin) */}
-      {racket && showEditModal && (
+      {/* Price Comparison - Only show if authenticated */}
+      {isAuthenticated && (
+      <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
+        <H3>Comparar Precios</H3>
+        <CompareTable>
+          {availablePrices.map((store, index) => (
+            <CompareRow key={index}>
+              <StoreLogo>{store.store}</StoreLogo>
+              <ShippingInfo>
+                <FiTruck /> Envío Gratis
+                <span style={{ fontSize: '0.8rem', color: '#9ca3af', fontWeight: 400 }}>• En Stock</span>
+              </ShippingInfo>
+              <PriceText>{store.price?.toFixed(2)}€</PriceText>
+              <ShopButton href={store.link || '#'} target="_blank">
+                Ir a la tienda <FiExternalLink size={14} />
+              </ShopButton>
+            </CompareRow>
+          ))}
+        </CompareTable>
+      </div>
+      )}
+
+      {/* Reviews - Only show if authenticated */}
+      {isAuthenticated && (
+      <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
+        <ProductReviews racketId={racket.id!} />
+      </div>
+      )}
+
+      {/* Modals */}
+      <AddToListModal
+        isOpen={showAddToListModal}
+        onClose={() => setShowAddToListModal(false)}
+        racketId={racket.id || 0}
+        racketName={`${racket.marca} ${racket.modelo}`}
+      />
+      {showEditModal && (
         <EditRacketModal
-          isOpen={showEditModal}
-          onClose={() => setShowEditModal(false)}
-          racket={racket}
-          onUpdate={updatedRacket => {
-            setRacket(updatedRacket);
-            // Opcional: Actualizar el contexto de rackets si es necesario,
-            // pero por ahora actualizamos el estado local para reflejar cambios inmediatos
-          }}
+           isOpen={showEditModal}
+           onClose={() => setShowEditModal(false)}
+           racket={racket}
+           onUpdate={setRacket}
         />
       )}
-    </Container>
+    </PageContainer>
   );
 };
 
 export default RacketDetailPage;
+

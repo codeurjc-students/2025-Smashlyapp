@@ -4,13 +4,8 @@ import { FiEye, FiEyeOff, FiLock, FiMail } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { FaApple } from 'react-icons/fa';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext.tsx';
-import AuthPageLayout from '../components/auth/AuthPageLayout';
+import { useAuth } from '../../contexts/AuthContext.tsx';
 import {
-  FormTitle,
-  FormSubtitle,
-  TabContainer,
-  Tab,
   Form,
   FormGroup,
   Label,
@@ -25,9 +20,14 @@ import {
   SocialButtons,
   SocialButton,
   FooterText
-} from '../components/auth/AuthStyles';
+} from './AuthStyles';
 
-const LoginPage: React.FC = () => {
+interface LoginFormProps {
+  onSuccess?: () => void;
+  onRegisterClick?: () => void;
+}
+
+const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -80,7 +80,12 @@ const LoginPage: React.FC = () => {
         return;
       }
       toast.success('¡Bienvenido de nuevo!');
-      navigate(redirectTo);
+      
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate(redirectTo);
+      }
     } catch (error: any) {
       console.error('Error durante el inicio de sesión:', error);
       toast.error(error?.message || 'Error inesperado');
@@ -90,20 +95,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <AuthPageLayout
-       title="Domina la Pista"
-       highlightedWord="con Datos"
-       description="Únete a la comunidad de pádel de más rápido crecimiento. Rastrea tu rendimiento, analiza tus golpes con IA y encuentra partidos que eleven tu juego."
-       bgImage="/images/login_register_images/login_image.png"
-    >
-      <FormTitle>Bienvenido de nuevo</FormTitle>
-      <FormSubtitle>Introduce tus datos para acceder a tu panel.</FormSubtitle>
-
-      <TabContainer>
-        <Tab to="#" $active>Iniciar Sesión</Tab>
-        <Tab to={`/register?redirect=${encodeURIComponent(redirectTo)}`}>Registrarse</Tab>
-      </TabContainer>
-
+    <>
       <Form onSubmit={handleSubmit}>
         <FormGroup>
           <Label htmlFor="email">Correo Electrónico</Label>
@@ -126,7 +118,7 @@ const LoginPage: React.FC = () => {
         <FormGroup>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <Label htmlFor="password">Contraseña</Label>
-            <ForgotPasswordLink to="/forgot-password">¿Has olvidado tu contraseña?</ForgotPasswordLink>
+            <ForgotPasswordLink to="/forgot-password" onClick={onSuccess}>¿Has olvidado tu contraseña?</ForgotPasswordLink>
           </div>
           <InputWrapper>
             <IconWrapper><FiLock /></IconWrapper>
@@ -150,6 +142,15 @@ const LoginPage: React.FC = () => {
         <SubmitButton type="submit" disabled={loading}>
           {loading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
         </SubmitButton>
+
+        {/* Hidden registration link for accessibility/completeness if not using tabs? 
+            Actually, the design has tabs outside. 
+            If inside modal, we might want a "No account? Register" link at bottom?
+            The current design has tabs.
+        */}
+        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem', color: '#6b7280' }}>
+           ¿No tienes cuenta? <button type="button" onClick={onRegisterClick} style={{ color: '#16a34a', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>Regístrate</button>
+        </div>
       </Form>
 
       <Divider>O continúa con</Divider>
@@ -166,10 +167,10 @@ const LoginPage: React.FC = () => {
       </SocialButtons>
 
       <FooterText>
-        Al continuar, aceptas nuestros <a href="/terms">Términos de Servicio</a> y <a href="/privacy">Política de Privacidad</a>.
+        Al continuar, aceptas nuestros <a href="/terms" onClick={onSuccess}>Términos de Servicio</a> y <a href="/privacy" onClick={onSuccess}>Política de Privacidad</a>.
       </FooterText>
-    </AuthPageLayout>
+    </>
   );
 };
 
-export default LoginPage;
+export default LoginForm;

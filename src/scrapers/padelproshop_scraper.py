@@ -1,24 +1,21 @@
 import json
 import re
-from typing import Dict, List
+from typing import Dict, List, Optional
 from .base_scraper import BaseScraper, Product
-
 
 class PadelProShopScraper(BaseScraper):
     """Scraper for PadelProShop online store."""
 
-    async def scrape_product(self, url: str) -> Product:
+    async def scrape_product(self, url: str) -> Optional[Product]:
         """Scrape product data from PadelProShop using Shopify JSON endpoint with HTML fallback."""
         
-        # Ensure verified URL logic if needed
         page = await self.get_page(url)
 
         # Check for category redirect
-        if page.url != url:
-            if '/collections/' in page.url and '/products/' not in page.url:
-                 # verify if it's just a param change
-                 if page.url.split('?')[0] != url.split('?')[0]:
-                     pass # raise ValueError(f"Redirected to category: {page.url}")
+        if '/collections/' in page.url and '/products/' not in page.url:
+             if page.url.split('?')[0] != url.split('?')[0]:
+                 # return None # Strict skip? PadelProShop often redirects out of stock
+                 pass # Let it fail gracefully or return None if title missing
 
         product_data = {}
         
@@ -26,27 +23,31 @@ class PadelProShopScraper(BaseScraper):
         try:
             # Construct JSON URL
             json_url = f"{url.split('?')[0]}.json"
-            response = await page.goto(json_url)
+            # We can't use page.goto for JSON easily if it downloads or renders raw.
+            # But Playwright can fetch it via APIRequestContext, or just navigate.
+            # Navigating to .json usually displays the JSON in browser.
+            # Let's try fetching via evaluate fetch (cleaner/faster)
+            json_str = await page.evaluate(f"""async () => {{
+                const res = await fetch('{json_url}');
+                if(res.ok) return await res.text();
+                return null;
+            }}""")
             
-            if response and response.status == 200:
-                data = await response.json()
+            if json_str:
+                data = json.loads(json_str)
                 product_data = data.get('product', {})
         except Exception as e:
-            print(f"JSON endpoint failed: {e}")
+            # print(f"JSON endpoint failed: {e}")
+            pass
 
-        # Strategy 2: HTML Scraping (Fallback or Supplement)
-        # We navigate back to product page if JSON failed or we need more data
-        await page.goto(url)
+        # Strategy 2: HTML Scraping (Fallback/Supplement)
+        # We are already on the page (or need to be)
+        if page.url != url:
+             await page.goto(url)
         
-        # Extract HTML Data
-        title_el = await page.query_selector('h1.product-title')
-        html_title = await title_el.inner_text() if title_el else ""
-        
-        price_el = await page.query_selector('.price__current span.money')
-        html_price_text = await price_el.inner_text() if price_el else ""
-        
-        old_price_el = await page.query_selector('.price__was span.money')
-        html_old_price_text = await old_price_el.inner_text() if old_price_el else ""
+        html_title = await self.safe_get_text('h1.product-title')
+        html_price_text = await self.safe_get_text('.price__current span.money')
+        html_old_price_text = await self.safe_get_text('.price__was span.money')
         
         # Helper for price cleaning
         def clean_price(text):
@@ -62,11 +63,11 @@ class PadelProShopScraper(BaseScraper):
         
         # Name
         name = product_data.get('title') or html_title
+        if not name: return None # Essential
         
         # Price
         price = 0.0
         if product_data.get('variants'):
-            # JSON price is usually string "120.00"
             try:
                 price = float(product_data['variants'][0]['price'])
             except:
@@ -80,10 +81,8 @@ class PadelProShopScraper(BaseScraper):
         if product_data.get('variants'):
             try:
                 op = product_data['variants'][0].get('compare_at_price')
-                if op:
-                    original_price = float(op)
-            except:
-                pass
+                if op: original_price = float(op)
+            except: pass
         
         if not original_price and html_old_price_text:
              original_price = clean_price(html_old_price_text)
@@ -91,10 +90,7 @@ class PadelProShopScraper(BaseScraper):
         # Brand
         brand = product_data.get('vendor')
         if not brand:
-             # Try HTML fallback
-             brand_el = await page.query_selector('.product-vendor a, .product-vendor')
-             if brand_el:
-                 brand = await brand_el.inner_text()
+             brand = await self.safe_get_text('.product-vendor a, .product-vendor')
         if not brand:
              brand = 'Unknown'
 
@@ -109,25 +105,25 @@ class PadelProShopScraper(BaseScraper):
                 if src: images.append(src)
         
         # From HTML (Fallback/Augment)
-        # Selectors: product-media.cc-main-product__media img
-        html_images = await page.query_selector_all('.cc-main-product__media img, .product-gallery__image')
-        for img in html_images:
-             src = await img.get_attribute('src') or await img.get_attribute('data-src')
-             if src:
-                  if src.startswith('//'): src = f'https:{src}'
-                  images.append(src)
+        try:
+             # Selectors: product-media.cc-main-product__media img
+             html_images = await page.query_selector_all('.cc-main-product__media img, .product-gallery__image')
+             for img in html_images:
+                  src = await img.get_attribute('src') or await img.get_attribute('data-src')
+                  if src:
+                       if src.startswith('//'): src = f'https:{src}'
+                       images.append(src)
+        except: pass
         
         # Deduplicate
         images = list(dict.fromkeys(images))
-        if images:
-             image = images[0]
+        if images: image = images[0]
 
         # Specs extraction
         specs: Dict[str, str] = {}
         
-        # Method 1: HTML List parsing (ul.product-details) - verified in analysis
+        # Method 1: HTML List parsing (ul.product-details)
         try:
-             # Check for the specific specs list structure first
              spec_rows = await page.query_selector_all('ul.product-details li, .product-specifications li')
              for row in spec_rows:
                  # Usually <p>Label</p> <span>Value</span>
@@ -139,18 +135,16 @@ class PadelProShopScraper(BaseScraper):
                       value = await value_el.inner_text()
                       if key and value:
                            specs[key.strip().replace(':', '')] = value.strip()
-        except:
-             pass
+        except: pass
 
-        # Method 2: Parse body_html from JSON if Method 1 failed or incomplete
+        # Method 2: Parse body_html from JSON
         if not specs and product_data.get('body_html'):
              body_html = product_data['body_html']
-             # Regex for list items: <li><strong>Key:</strong> Value</li>
              matches = re.finditer(r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>', body_html, re.IGNORECASE)
              for match in matches:
                  specs[match.group(1).strip()] = match.group(2).strip()
 
-        # Method 3: Description Text Regex (Existing fallback)
+        # Method 3: Description Text Regex
         if not specs:
             desc_el = await page.query_selector('.product-description, .rte')
             if desc_el:
@@ -158,8 +152,7 @@ class PadelProShopScraper(BaseScraper):
                 keys = ['Peso', 'Forma', 'Balance', 'Nivel', 'Marco', 'Núcleo', 'Cara']
                 for key in keys:
                      match = re.search(fr'{key}\s*[:\.]?\s*([^\n]+)', text, re.IGNORECASE)
-                     if match:
-                          specs[key] = match.group(1).strip()
+                     if match: specs[key] = match.group(1).strip()
 
         return Product(
             url=url,
@@ -181,8 +174,10 @@ class PadelProShopScraper(BaseScraper):
         try:
              await page.wait_for_timeout(2000)
              await page.keyboard.press('Escape')
-        except:
-             pass
+        except: pass
+
+        last_count = 0
+        scroll_attempts = 0
 
         while True:
             # 1. Collect products (Verified selector: li.js-pagination-result a.js-prod-link)
@@ -208,7 +203,7 @@ class PadelProShopScraper(BaseScraper):
             
             # Safety checks
             if scroll_attempts >= 3:
-                 print("No new products found after multiple scrolls.")
+                 # print("No new products found after multiple scrolls.")
                  break
             if len(product_urls) >= 1000:
                  break
@@ -221,10 +216,8 @@ class PadelProShopScraper(BaseScraper):
             try:
                  load_more = await page.query_selector('.js-load-more')
                  if load_more and await load_more.is_visible():
-                      print("Clicking Load More button...")
                       await load_more.click()
                       await page.wait_for_timeout(2000)
-            except:
-                 pass
+            except: pass
         
         return list(set(product_urls))
