@@ -51,7 +51,7 @@ export interface Racket {
   en_oferta: boolean;
   scrapeado_en?: string;
   descripcion?: string | null;
-  
+
   // Características individuales
   caracteristicas_marca?: string | null;
   caracteristicas_color?: string | null;
@@ -69,7 +69,7 @@ export interface Racket {
   caracteristicas_tipo_de_juego?: string | null;
   caracteristicas_coleccion_jugadores?: string | null;
   caracteristicas_jugador?: string | null;
-  
+
   // Especificaciones en formato JSONB
   especificaciones?: RacketSpecifications;
 
@@ -81,28 +81,28 @@ export interface Racket {
   padelnuestro_precio_original?: number | null;
   padelnuestro_descuento_porcentaje?: number | null;
   padelnuestro_enlace?: string | null;
-  
+
   padelmarket_precio_actual?: number | null;
   padelmarket_precio_original?: number | null;
   padelmarket_descuento_porcentaje?: number | null;
   padelmarket_enlace?: string | null;
-  
+
   padelpoint_precio_actual?: number | null;
   padelpoint_precio_original?: number | null;
   padelpoint_descuento_porcentaje?: number | null;
   padelpoint_enlace?: string | null;
-  
+
   padelproshop_precio_actual?: number | null;
   padelproshop_precio_original?: number | null;
   padelproshop_descuento_porcentaje?: number | null;
   padelproshop_enlace?: string | null;
-  
+
   created_at?: string;
   updated_at?: string;
-  
+
   // View count (popularidad)
   view_count?: number;
-  
+
   // Campos computados para compatibilidad con el código existente
   precio_actual: number;
   precio_original: number;
@@ -206,8 +206,8 @@ export interface RacketComparison {
   };
 }
 
-// Racket metrics for comparison charts
-export interface RacketMetrics {
+// Racket metrics for comparison charts (Legacy/Simple)
+export interface SimpleRacketMetrics {
   racketName: string;
   potencia: number;
   control: number;
@@ -216,20 +216,46 @@ export interface RacketMetrics {
   puntoDulce: number;
 }
 
+// New Structured Racket Metrics
+export interface RadarMetrics {
+  potencia: number;
+  control: number;
+  manejabilidad: number;
+  puntoDulce: number;
+  salidaDeBola: number;
+}
+
+export interface RacketComparisonData {
+  racketId: number;
+  racketName: string;
+  radarData: RadarMetrics;
+  isCertified: boolean;
+}
+
+// Comparison Table Item
+export interface ComparisonTableItem {
+  feature: string;
+  [key: string]: string;
+}
+
 // Structured comparison section
 export interface ComparisonSection {
   title: string;
   content: string;
-  subsections?: ComparisonSection[];
 }
 
 // Structured comparison result (new format)
 export interface ComparisonResult {
   executiveSummary: string;
   technicalAnalysis: ComparisonSection[];
-  comparisonTable?: string;
+
+  // Tabla dinámica
+  comparisonTable: ComparisonTableItem[];
+
+  // Datos para gráfico de radar
+  metrics: RacketComparisonData[];
+
   recommendedProfiles: string;
   biomechanicalConsiderations: string;
   conclusion: string;
-  metrics: RacketMetrics[];
 }

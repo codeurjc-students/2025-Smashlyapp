@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { ComparisonService, RacketMetrics, SavedComparison } from '@/services/comparisonService';
+import { ComparisonService, SavedComparison } from '@/services/comparisonService';
+import { RacketComparisonData } from '@/types/racket';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -20,9 +21,17 @@ const mockComparisonResult = {
   biomechanicalConsiderations: 'Test considerations',
   conclusion: 'Test conclusion',
   metrics: [
-    { racketName: 'Racket 1', potencia: 8, control: 7, salidaDeBola: 6, manejabilidad: 9, puntoDulce: 7 },
-    { racketName: 'Racket 2', potencia: 9, control: 6, salidaDeBola: 5, manejabilidad: 7, puntoDulce: 6 },
-  ] as RacketMetrics[],
+    {
+      racketName: 'Racket 1',
+      radarData: { potencia: 8, control: 7, salidaDeBola: 6, manejabilidad: 9, puntoDulce: 7 },
+      isCertified: false,
+    },
+    {
+      racketName: 'Racket 2',
+      radarData: { potencia: 9, control: 6, salidaDeBola: 5, manejabilidad: 7, puntoDulce: 6 },
+      isCertified: false,
+    },
+  ] as RacketComparisonData[],
 };
 
 const mockSavedComparison: SavedComparison = {
@@ -99,7 +108,9 @@ describe('ComparisonService', () => {
         },
       });
 
-      await expect(ComparisonService.compareRackets([1, 2])).rejects.toThrow('Error al comparar palas');
+      await expect(ComparisonService.compareRackets([1, 2])).rejects.toThrow(
+        'Error al comparar palas'
+      );
     });
 
     it('should handle network errors', async () => {
@@ -173,9 +184,9 @@ describe('ComparisonService', () => {
         json: async () => ({ error: 'Save failed' }),
       });
 
-      await expect(
-        ComparisonService.saveComparison([1, 2], mockComparisonResult)
-      ).rejects.toThrow('Save failed');
+      await expect(ComparisonService.saveComparison([1, 2], mockComparisonResult)).rejects.toThrow(
+        'Save failed'
+      );
     });
   });
 
@@ -365,7 +376,9 @@ describe('ComparisonService', () => {
         json: async () => ({ error: 'Unshare failed' }),
       });
 
-      await expect(ComparisonService.unshareComparison('comp-123')).rejects.toThrow('Unshare failed');
+      await expect(ComparisonService.unshareComparison('comp-123')).rejects.toThrow(
+        'Unshare failed'
+      );
     });
   });
 
@@ -410,7 +423,9 @@ describe('ComparisonService', () => {
         json: async () => ({ error: 'Not found' }),
       });
 
-      await expect(ComparisonService.getSharedComparison('invalid-token')).rejects.toThrow('Not found');
+      await expect(ComparisonService.getSharedComparison('invalid-token')).rejects.toThrow(
+        'Not found'
+      );
     });
   });
 

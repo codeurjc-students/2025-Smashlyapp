@@ -1,33 +1,51 @@
 import axios, { AxiosInstance } from 'axios';
 import { Racket, UserFormData } from '../types/racket';
 import logger from '../config/logger';
+import { freeAiService } from './freeAiService';
 
-// Interfaz para las métricas de cada pala
-export interface RacketMetrics {
-  racketName: string;
+// Interfaz para las métricas de radar (0-10)
+export interface RadarMetrics {
   potencia: number;
   control: number;
-  salidaDeBola: number;
   manejabilidad: number;
   puntoDulce: number;
+  salidaDeBola: number;
+}
+
+// Interfaz para los datos de cada pala en la comparación
+export interface RacketComparisonData {
+  racketId: number; // Mapear al ID original
+  racketName: string;
+  radarData: RadarMetrics;
+  isCertified: boolean; // Si los datos vienen de Testea Pádel
+}
+
+// Elemento de la tabla comparativa
+export interface ComparisonTableItem {
+  feature: string; // "Peso", "Balance", "Precio", etc.
+  [key: string]: string; // "Pala 1": "365g", "Pala 2": "370g"
 }
 
 // Interfaz para subsecciones de la comparación
 export interface ComparisonSection {
   title: string;
   content: string;
-  subsections?: ComparisonSection[];
 }
 
 // Interfaz para la respuesta de comparación completa (estructurada)
 export interface ComparisonResult {
   executiveSummary: string;
   technicalAnalysis: ComparisonSection[];
-  comparisonTable?: string; // Markdown table
+
+  // Tabla dinámica para frontend
+  comparisonTable: ComparisonTableItem[];
+
+  // Datos para gráfico de radar
+  metrics: RacketComparisonData[];
+
   recommendedProfiles: string;
   biomechanicalConsiderations: string;
   conclusion: string;
-  metrics: RacketMetrics[];
 }
 
 // Interfaz para la respuesta de OpenRouter
@@ -54,7 +72,7 @@ export class OpenRouterService {
   private appName: string;
   private appUrl: string;
 
-  // Modelos gratuitos en orden de preferencia
+  // Modelos gratuitos en orden de preferencia (para OpenRouter)
   private readonly FREE_MODELS = [
     'google/gemini-2.0-flash-exp:free',
     'deepseek/deepseek-r1:free',
@@ -84,17 +102,35 @@ export class OpenRouterService {
   }
 
   /**
-   * Genera contenido usando OpenRouter con sistema de fallback
+   * Genera contenido usando sistema híbrido (Free AI API -> OpenRouter Fallback)
    */
   static async generateContent(prompt: string): Promise<string> {
     const service = new OpenRouterService();
-    return service.generateContentWithFallback(prompt);
+    return service.generateContentHybrid(prompt);
   }
 
   /**
-   * Genera contenido con fallback automático entre modelos gratuitos
+   * Estrategia híbrida: Intenta API local primero, luego OpenRouter
    */
-  private async generateContentWithFallback(prompt: string): Promise<string> {
+  private async generateContentHybrid(prompt: string): Promise<string> {
+    // 1. Intentar con Free AI API (Local/Custom)
+    try {
+      const content = await freeAiService.generateContent(prompt);
+      if (content && content.length > 0) {
+        return content;
+      }
+    } catch (error) {
+      logger.warn(`⚠️ Free AI API failed, falling back to OpenRouter: ${error}`);
+    }
+
+    // 2. Fallback a OpenRouter
+    return this.generateContentOpenRouterFallback(prompt);
+  }
+
+  /**
+   * Genera contenido con fallback automático entre modelos gratuitos de OpenRouter
+   */
+  private async generateContentOpenRouterFallback(prompt: string): Promise<string> {
     if (!this.apiKey) {
       throw new Error('OPENROUTER_API_KEY no está configurada en el servidor');
     }
@@ -106,7 +142,9 @@ export class OpenRouterService {
       const model = this.FREE_MODELS[modelIndex];
 
       try {
-        logger.info(`🤖 Attempting model ${modelIndex + 1}/${this.FREE_MODELS.length}: ${model}`);
+        logger.info(
+          `🤖 [OpenRouter] Attempting model ${modelIndex + 1}/${this.FREE_MODELS.length}: ${model}`
+        );
 
         const response = await this.client.post<OpenRouterResponse>('/chat/completions', {
           model: model,
@@ -127,7 +165,7 @@ export class OpenRouterService {
         }
 
         // Log éxito y estadísticas
-        logger.info(`✅ Success with model: ${model}`);
+        logger.info(`✅ [OpenRouter] Success with model: ${model}`);
         if (response.data.usage) {
           logger.info(
             `📊 Tokens used: ${response.data.usage.total_tokens} ` +
@@ -143,7 +181,7 @@ export class OpenRouterService {
           error.response?.data?.error?.message || error.message || 'Unknown error';
 
         logger.warn(
-          `❌ Model ${model} failed: ${errorMessage}. ` +
+          `❌ [OpenRouter] Model ${model} failed: ${errorMessage}. ` +
             `Trying next model (${modelIndex + 1}/${this.FREE_MODELS.length})...`
         );
 
@@ -167,13 +205,9 @@ export class OpenRouterService {
   }
 
   /**
-   * Compara palas usando OpenRouter con formato estructurado
+   * Compara palas usando sistema híbrido con formato estructurado
    */
   async compareRackets(rackets: Racket[], userProfile?: UserFormData): Promise<ComparisonResult> {
-    if (!this.apiKey) {
-      throw new Error('OPENROUTER_API_KEY no está configurada en el servidor');
-    }
-
     if (!rackets || rackets.length < 2) {
       throw new Error('Se necesitan al menos 2 palas para comparar');
     }
@@ -185,7 +219,30 @@ export class OpenRouterService {
     // Construir un único prompt que incluya tanto la comparación textual como las métricas
     const combinedPrompt = this.buildCombinedPrompt(rackets, racketsInfo, userContext);
 
-    // Implementar reintentos con fallback entre modelos
+    // 1. Intentar con Free AI API
+    try {
+      const fullText = await freeAiService.generateContent(combinedPrompt);
+      if (fullText) {
+        const result = this.parseStructuredResponse(fullText, rackets);
+        logger.info('✅ Comparison generated successfully with Free AI API');
+        return result;
+      }
+    } catch (error) {
+      logger.warn(`⚠️ Free AI API comparison failed, falling back to OpenRouter: ${error}`);
+    }
+
+    // 2. Fallback a OpenRouter
+    return this.compareRacketsOpenRouterFallback(combinedPrompt, rackets);
+  }
+
+  private async compareRacketsOpenRouterFallback(
+    prompt: string,
+    rackets: Racket[]
+  ): Promise<ComparisonResult> {
+    if (!this.apiKey) {
+      throw new Error('OPENROUTER_API_KEY no está configurada en el servidor');
+    }
+
     let lastError: any;
 
     for (let modelIndex = 0; modelIndex < this.FREE_MODELS.length; modelIndex++) {
@@ -193,7 +250,7 @@ export class OpenRouterService {
 
       try {
         logger.info(
-          `🤖 Comparing rackets with model ${modelIndex + 1}/${this.FREE_MODELS.length}: ${model}`
+          `🤖 [OpenRouter] Comparing rackets with model ${modelIndex + 1}/${this.FREE_MODELS.length}: ${model}`
         );
 
         const response = await this.client.post<OpenRouterResponse>('/chat/completions', {
@@ -201,7 +258,7 @@ export class OpenRouterService {
           messages: [
             {
               role: 'user',
-              content: combinedPrompt,
+              content: prompt,
             },
           ],
           temperature: 0.7,
@@ -217,7 +274,7 @@ export class OpenRouterService {
         // Parsear la respuesta estructurada
         const comparisonResult = this.parseStructuredResponse(fullText, rackets);
 
-        logger.info(`✅ Comparison generated successfully with model: ${model}`);
+        logger.info(`✅ [OpenRouter] Comparison generated successfully with model: ${model}`);
         return comparisonResult;
       } catch (error: any) {
         lastError = error;
@@ -225,7 +282,7 @@ export class OpenRouterService {
           error.response?.data?.error?.message || error.message || 'Unknown error';
 
         logger.warn(
-          `❌ Model ${model} failed for comparison: ${errorMessage}. ` +
+          `❌ [OpenRouter] Model ${model} failed for comparison: ${errorMessage}. ` +
             `Trying next model (${modelIndex + 1}/${this.FREE_MODELS.length})...`
         );
 
@@ -254,7 +311,6 @@ export class OpenRouterService {
 Nombre: ${r.nombre}
 Marca: ${r.marca || r.caracteristicas_marca || 'N/A'}
 Modelo: ${r.modelo || 'N/A'}
-Enlace: ${r.enlace || r.url || 'N/A'}
 Forma: ${r.caracteristicas_forma || r.caracteristicas_formato || 'N/A'}
 Goma: ${r.caracteristicas_nucleo || 'N/A'}
 Cara/Fibra: ${r.caracteristicas_cara || 'N/A'}
@@ -262,7 +318,8 @@ Balance: ${r.caracteristicas_balance || 'N/A'}
 Dureza: ${r.caracteristicas_dureza || 'N/A'}
 Peso: ${r.peso ? `${r.peso}g` : 'N/A'}
 Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}
-Precio: ${r.precio_actual ? `€${r.precio_actual}` : 'N/A'}`
+Precio: ${r.precio_actual ? `€${r.precio_actual}` : 'N/A'}
+Testea Certificado: ${r.testea_potencia ? 'SÍ' : 'NO'}`
       )
       .join('\n\n');
   }
@@ -272,16 +329,12 @@ Precio: ${r.precio_actual ? `€${r.precio_actual}` : 'N/A'}`
 
     return `
 CONTEXTO DEL USUARIO:
-El usuario que solicita la comparación tiene las siguientes características:
-Nivel de juego: ${userProfile.gameLevel || 'No especificado'}
-Estilo de juego: ${userProfile.playingStyle || 'No especificado'}
-Peso: ${userProfile.weight || 'No especificado'}
-Altura: ${userProfile.height || 'No especificado'}
-Edad: ${userProfile.age || 'No especificado'}
-Experiencia: ${userProfile.experience || 'No especificado'}
-Preferencias: ${userProfile.preferences || 'No especificado'}
-
-Por favor, ten en cuenta estas características en la sección "Veredicto Situacional" y "Conclusión Final" para recomendar qué pala se ajusta mejor a este usuario específico.`;
+Nivel: ${userProfile.gameLevel || 'No especificado'}
+Estilo: ${userProfile.playingStyle || 'No especificado'}
+Físico: ${userProfile.weight || ''} ${userProfile.height || ''} (Edad: ${userProfile.age || ''})
+Experiencia: ${userProfile.experience || 'No especificada'}
+Preferencias: ${userProfile.preferences || 'No especificadas'}
+`;
   }
 
   private buildCombinedPrompt(rackets: Racket[], racketsInfo: string, userContext: string): string {
@@ -289,197 +342,106 @@ Por favor, ten en cuenta estas características en la sección "Veredicto Situac
       .map((r: any, i) => `${i + 1}. ${r.nombre || `Pala ${i + 1}`}`)
       .join('\n');
 
-    // Build Testea metrics info for each racket
-    const testeaInfo = rackets
-      .map((r: any, i) => {
-        const hasCertification = r.testea_potencia !== undefined && r.testea_potencia !== null;
-        if (hasCertification) {
-          return `PALA ${i + 1} - MÉTRICAS CERTIFICADAS TESTEA PÁDEL:
-- Potencia: ${r.testea_potencia}/10
-- Control: ${r.testea_control}/10
-- Manejabilidad: ${r.testea_manejabilidad}/10
-- Confort: ${r.testea_confort}/10
-- Iniciación: ${r.testea_iniciacion || 'N/A'}/10`;
-        } else {
-          return `PALA ${i + 1} - SIN CERTIFICACIÓN TESTEA (usar estimaciones basadas en especificaciones físicas)`;
-        }
-      })
-      .join('\n\n');
-
     return `CONTEXTO DEL SISTEMA:
-Eres el motor de comparación de "Smashly", una plataforma experta en palas de pádel que prioriza la salud biomecánica del jugador y la transparencia científica.
+Eres el motor de comparación "Smashly". Tu objetivo es proporcionar un análisis técnico, biomecánico y comparativo de alto nivel.
 
-PRINCIPIOS IRRENUNCIABLES:
-1. Seguridad Biomecánica Primero: Destaca riesgos potenciales de lesión (palas duras, balance alto, peso excesivo)
-2. Verdad Objetiva: Prioriza métricas certificadas de Testea Pádel sobre estimaciones
-3. Transparencia Total: Indica claramente qué datos son certificados vs estimados
-
-PALAS A COMPARAR:
-${racketNames}
-
-NOTA IMPORTANTE: Cada pala incluye un "Enlace" que es la URL oficial del producto. Usa este enlace como referencia definitiva para identificar exactamente a qué pala te refieres.
-
-DATOS TÉCNICOS COMPLETOS:
+DATOS DE ENTRADA:
 ${racketsInfo}
-
-${testeaInfo}
 
 ${userContext}
 
-INSTRUCCIONES PARA LA COMPARACIÓN:
+INSTRUCCIONES DE SALIDA:
+Genera un objeto JSON estricto con esta estructura:
 
-Debes generar una respuesta en formato JSON estructurado con las siguientes secciones:
-
-1. **executiveSummary** (string): Resumen ejecutivo de 2-3 líneas con la diferencia clave entre las palas
-
-2. **technicalAnalysis** (array de objetos): Análisis técnico dividido en categorías. Cada objeto tiene:
-   - title: Nombre de la categoría
-   - content: Análisis detallado en formato markdown (sin emojis en headers)
-   - subsections: (opcional) Array de subsecciones con mismo formato
-   
-   Categorías requeridas:
-   - "Potencia y Salida de Bola"
-   - "Control y Precisión"
-   - "Manejabilidad y Peso"
-   - "Confort y Prevención de Lesiones"
-
-3. **comparisonTable** (string): Tabla comparativa en formato markdown con características clave lado a lado
-
-4. **recommendedProfiles** (string): Descripción de qué tipo de jugador se beneficia de cada pala (formato markdown)
-
-5. **biomechanicalConsiderations** (string): Advertencias sobre lesiones y consideraciones biomecánicas para cada pala (formato markdown). OBLIGATORIO mencionar:
-   - Si alguna pala es dura (riesgo de epicondilitis)
-   - Si alguna tiene balance alto (mayor estrés en brazo/hombro)
-   - Si alguna es pesada (>370g puede causar fatiga y lesiones)
-   - Si alguna tiene tecnología anti-vibración
-   - Recomendaciones para jugadores con lesiones previas
-
-6. **conclusion** (string): Conclusión final con recomendación basada en el perfil del usuario si se proporcionó (formato markdown)
-
-7. **metrics** (array): Array de objetos con métricas numéricas para cada pala:
-   - racketName: Nombre exacto de la pala
-   - potencia: 1-10
-   - control: 1-10
-   - salidaDeBola: 1-10
-   - manejabilidad: 1-10
-   - puntoDulce: 1-10
+1. **executiveSummary**: String. 2-3 frases resumiendo la comparación.
+2. **technicalAnalysis**: Array de objetos { title, content }. Categorías: "Potencia", "Control", "Manejabilidad", "Confort". Markdown permitido en content.
+3. **comparisonTable**: Array de objetos representando filas para una tabla dinámica. Cada objeto debe tener la propiedad "feature" (ej: "Peso", "Balance", "Punto Dulce") y luego una propiedad por cada pala con su nombre EXACTO como clave y el valor como string. Incluye al menos 6 características clave.
+4. **metrics**: Array de objetos para graficar un RADAR CHART PENTAGONAL.
+   - Para cada pala, un objeto con:
+     - "racketId": (number) ID de la pala si lo tienes, o índice.
+     - "racketName": (string) Nombre exacto.
+     - "isCertified": (boolean) true si tiene datos Testea, false si son estimados.
+     - "radarData": Objeto con 5 ejes numéricos (0-10): { potencia, control, manejabilidad, puntoDulce, salidaDeBola }.
+5. **recommendedProfiles**: String (Markdown).
+6. **biomechanicalConsiderations**: String (Markdown). Avisos de salud.
+7. **conclusion**: String (Markdown). Veredicto final.
 
 IMPORTANTE: 
-- NO uses emojis en ninguna parte de la respuesta
-- Usa formato markdown para negritas (**texto**), listas, etc.
-- Si una pala tiene certificación Testea, ÚSALA y menciona que es "dato certificado"
-- Si no tiene certificación, estima basándote en especificaciones físicas y menciona que es "estimación"
-- Sé conciso pero informativo (máximo 600 palabras en total)
-
-FORMATO DE RESPUESTA OBLIGATORIO:
-Responde ÚNICAMENTE con un objeto JSON válido siguiendo esta estructura exacta:
-
-{
-  "executiveSummary": "...",
-  "technicalAnalysis": [
-    {
-      "title": "Potencia y Salida de Bola",
-      "content": "..."
-    },
-    {
-      "title": "Control y Precisión",
-      "content": "..."
-    },
-    {
-      "title": "Manejabilidad y Peso",
-      "content": "..."
-    },
-    {
-      "title": "Confort y Prevención de Lesiones",
-      "content": "..."
-    }
-  ],
-  "comparisonTable": "| Característica | Pala 1 | Pala 2 |\\n|---|---|---|\\n| ... | ... | ... |",
-  "recommendedProfiles": "...",
-  "biomechanicalConsiderations": "...",
-  "conclusion": "...",
-  "metrics": [
-    {"racketName": "Nombre pala 1", "potencia": 8, "control": 7, "salidaDeBola": 6, "manejabilidad": 9, "puntoDulce": 7},
-    {"racketName": "Nombre pala 2", "potencia": 9, "control": 6, "salidaDeBola": 5, "manejabilidad": 7, "puntoDulce": 6}
+- El campo "comparisonTable" debe ser un array de objetos, NO un string markdown. Ejemplo:
+  [
+    { "feature": "Forma", "Vertex 04": "Diamante", "Hack 03": "Híbrida" },
+    { "feature": "Tacto", "Vertex 04": "Duro", "Hack 03": "Medio" }
   ]
-}
+- El campo "metrics" alimenta un gráfico de radar. Sé preciso con los números 0-10.
 
-RESPONDE AHORA CON EL JSON:`;
+RESPONDE SOLO CON EL JSON.`;
   }
 
   /**
    * Parsea la respuesta estructurada en formato JSON
    */
   private parseStructuredResponse(fullText: string, rackets: Racket[]): ComparisonResult {
-    // Limpiar el texto de posibles bloques de código markdown
     let cleanText = fullText.trim();
-    
-    // Remover bloques de código si existen
     cleanText = cleanText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
-    
-    // Buscar el objeto JSON en el texto
+
     const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-    
+
     if (!jsonMatch) {
       logger.error('No JSON found in response');
-      logger.error('Raw response:', fullText.substring(0, 500));
       throw new Error('Invalid response format: No JSON found');
     }
 
     try {
       const parsed = JSON.parse(jsonMatch[0]);
-      
-      // Validar que tenga las propiedades requeridas
-      if (!parsed.executiveSummary || !parsed.technicalAnalysis || !parsed.metrics) {
-        logger.error('Missing required properties in JSON response');
-        throw new Error('Invalid response format: Missing required properties');
-      }
 
-      // Construir el resultado estructurado
-      const result: ComparisonResult = {
-        executiveSummary: parsed.executiveSummary || '',
-        technicalAnalysis: parsed.technicalAnalysis || [],
-        comparisonTable: parsed.comparisonTable || '',
-        recommendedProfiles: parsed.recommendedProfiles || '',
-        biomechanicalConsiderations: parsed.biomechanicalConsiderations || '',
-        conclusion: parsed.conclusion || '',
-        metrics: parsed.metrics || [],
-      };
-
-      // Validar que las métricas tengan el formato correcto
-      if (!Array.isArray(result.metrics) || result.metrics.length === 0) {
-        logger.warn('Invalid metrics format, using defaults');
-        result.metrics = rackets.map((r: any) => ({
-          racketName: r.nombre || r.name || 'Pala',
-          potencia: 5,
-          control: 5,
-          salidaDeBola: 5,
-          manejabilidad: 5,
-          puntoDulce: 5,
+      // Validar estructura básica
+      if (!parsed.metrics || !Array.isArray(parsed.metrics)) {
+        // Fallback si falla metrics
+        parsed.metrics = rackets.map((r: any) => ({
+          racketId: r.id,
+          racketName: r.nombre,
+          isCertified: !!r.testea_potencia,
+          radarData: {
+            potencia: r.testea_potencia || 5,
+            control: r.testea_control || 5,
+            manejabilidad: r.testea_manejabilidad || 5,
+            puntoDulce: 5,
+            salidaDeBola: 5,
+          },
         }));
       }
 
-      return result;
+      // Validar comparisonTable (asegurar array)
+      if (!parsed.comparisonTable || !Array.isArray(parsed.comparisonTable)) {
+        parsed.comparisonTable = [];
+      }
+
+      return {
+        executiveSummary: parsed.executiveSummary || '',
+        technicalAnalysis: parsed.technicalAnalysis || [],
+        comparisonTable: parsed.comparisonTable,
+        metrics: parsed.metrics,
+        recommendedProfiles: parsed.recommendedProfiles || '',
+        biomechanicalConsiderations: parsed.biomechanicalConsiderations || '',
+        conclusion: parsed.conclusion || '',
+      };
     } catch (parseError) {
       logger.error('Error parsing structured JSON:', parseError);
-      logger.error('Raw JSON text:', jsonMatch[0].substring(0, 500));
-      
-      // Valores por defecto si falla completamente el parsing
+
+      // Return bare minimum structure on crash
       return {
-        executiveSummary: 'Error al generar la comparación. Por favor, inténtalo de nuevo.',
+        executiveSummary: 'Error al procesar la comparación.',
         technicalAnalysis: [],
-        comparisonTable: '',
+        comparisonTable: [],
+        metrics: rackets.map((r: any) => ({
+          racketId: r.id,
+          racketName: r.nombre,
+          isCertified: false,
+          radarData: { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
+        })),
         recommendedProfiles: '',
         biomechanicalConsiderations: '',
         conclusion: '',
-        metrics: rackets.map((r: any) => ({
-          racketName: r.nombre || r.name || 'Pala',
-          potencia: 5,
-          control: 5,
-          salidaDeBola: 5,
-          manejabilidad: 5,
-          puntoDulce: 5,
-        })),
       };
     }
   }

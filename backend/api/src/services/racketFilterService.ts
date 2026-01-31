@@ -101,28 +101,36 @@ export class RacketFilterService {
       const r: any = racket;
       const discardReasons: string[] = [];
 
-      // Extract racket characteristics
+      // Extract racket characteristics with null-safe defaults
       const dureza = (r.caracteristicas_dureza || '').toLowerCase();
       const balance = (r.caracteristicas_balance || '').toLowerCase();
       const forma = (r.caracteristicas_forma || '').toLowerCase();
-      const peso = r.peso || 365;
-      const hasAntiVibration = r.tiene_antivibracion || false;
+
+      // Only use peso if it exists and is a valid number
+      const peso = typeof r.peso === 'number' && r.peso > 0 ? r.peso : null;
+
+      // Only consider anti-vibration if explicitly set
+      const hasAntiVibration = r.tiene_antivibracion === true;
+      const antiVibrationDataAvailable =
+        r.tiene_antivibracion !== null && r.tiene_antivibracion !== undefined;
+
       const confort = r.testea_confort || 0;
 
       // RULE 1: If user has injury history
       if (hasInjuries) {
-        // Discard hard rackets (transmit more vibration)
-        if (dureza.includes('dura') || dureza.includes('hard')) {
+        // Discard hard rackets ONLY if dureza data exists
+        if (dureza && (dureza.includes('dura') || dureza.includes('hard'))) {
           discardReasons.push('dureza_dura_con_lesiones');
         }
 
-        // Discard high balance rackets (more stress on arm)
-        if (balance.includes('alto') || balance.includes('high')) {
+        // Discard high balance rackets ONLY if balance data exists
+        if (balance && (balance.includes('alto') || balance.includes('high'))) {
           discardReasons.push('balance_alto_con_lesiones');
         }
 
-        // Discard rackets without anti-vibration tech
-        if (!hasAntiVibration) {
+        // Only check anti-vibration if this data is available in the database
+        // Skip this check if data is missing (null/undefined)
+        if (antiVibrationDataAvailable && !hasAntiVibration) {
           discardReasons.push('sin_antivibracion_con_lesiones');
         }
 
@@ -134,24 +142,24 @@ export class RacketFilterService {
 
       // RULE 2: If user is beginner level
       if (isBeginnerLevel) {
-        // Discard diamond shape (small sweet spot, hard to control)
-        if (forma.includes('diamante') || forma.includes('diamond')) {
+        // Discard diamond shape ONLY if forma data exists
+        if (forma && (forma.includes('diamante') || forma.includes('diamond'))) {
           discardReasons.push('diamante_para_principiante');
         }
 
-        // Discard high balance (hard to maneuver)
-        if (balance.includes('alto') || balance.includes('high')) {
+        // Discard high balance ONLY if balance data exists
+        if (balance && (balance.includes('alto') || balance.includes('high'))) {
           discardReasons.push('balance_alto_para_principiante');
         }
 
-        // Discard heavy rackets (>370g for beginners regardless of gender)
-        if (peso > 370) {
+        // Discard heavy rackets ONLY if peso data is available
+        if (peso !== null && peso > 370) {
           discardReasons.push('peso_excesivo_para_principiante');
         }
       }
 
-      // RULE 3: Safe weight range (adjusted by gender, condition, injuries)
-      if (peso < safeWeightRange.min || peso > safeWeightRange.max) {
+      // RULE 3: Safe weight range - ONLY apply if peso data is available
+      if (peso !== null && (peso < safeWeightRange.min || peso > safeWeightRange.max)) {
         discardReasons.push(
           `peso_fuera_rango_seguro_${safeWeightRange.min}-${safeWeightRange.max}g`
         );

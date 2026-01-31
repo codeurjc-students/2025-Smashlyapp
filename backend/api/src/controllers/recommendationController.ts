@@ -16,6 +16,12 @@ export class RecommendationController {
       return res.json(result);
     } catch (error: unknown) {
       logger.error('Error in generate recommendation controller:', error);
+
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('No rackets match') || message.includes('adjust your filters')) {
+        return res.status(404).json({ error: message });
+      }
+
       return res.status(500).json({ error: 'Internal server error' });
     }
   }

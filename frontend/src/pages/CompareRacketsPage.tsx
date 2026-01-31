@@ -7,7 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
 import { ComparisonService } from '../services/comparisonService';
 import { ListService } from '../services/listService';
-import { Racket, ComparisonResult, RacketMetrics } from '../types/racket';
+import { Racket, ComparisonResult, RacketComparisonData } from '../types/racket';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import toast from 'react-hot-toast';
@@ -15,6 +15,7 @@ import Fuse from 'fuse.js';
 // Importamos el nuevo servicio
 import { RacketPdfGenerator } from '../services/pdfGenerator';
 import RacketRadarChart from '../components/features/RacketRadarChart';
+import ComparisonTable from '../components/features/ComparisonTable';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -506,11 +507,12 @@ const EmptyFavorites = styled.div`
 const CompareRacketsPage: React.FC = () => {
   const { rackets } = useRackets();
   const { user, isAuthenticated } = useAuth();
-  const { addTask, updateTaskProgress, completeTask, failTask, dismissTask, tasks } = useBackgroundTasks();
+  const { addTask, updateTaskProgress, completeTask, failTask, dismissTask, tasks } =
+    useBackgroundTasks();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRackets, setSelectedRackets] = useState<Racket[]>([]);
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
-  const [comparisonMetrics, setComparisonMetrics] = useState<RacketMetrics[] | null>(null);
+  const [comparisonMetrics, setComparisonMetrics] = useState<RacketComparisonData[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showChart, setShowChart] = useState(false);
@@ -556,41 +558,41 @@ const CompareRacketsPage: React.FC = () => {
     // 1. Hay una tarea completada
     // 2. No se ha mostrado antes (diferente ID)
     // 3. El usuario no cerró manualmente el modal
-      // 4. No hay ya un resultado visible
-      // 5. No ha sido visto previamente (check sessionStorage)
-      const lastViewedId = sessionStorage.getItem('smashly_last_viewed_comparison_task');
-      
-      if (
-        completedComparisonTask &&
-        completedComparisonTask.result &&
-        completedComparisonTask.id !== lastShownTaskIdRef.current &&
-        completedComparisonTask.id !== lastViewedId &&
-        !modalManuallyClosed &&
-        !comparisonResult
-      ) {
-        try {
-          const { comparison, metrics } = completedComparisonTask.result;
-          
-          // Verificar que comparison tenga la estructura correcta (ComparisonResult)
-          // Debe ser un objeto con las propiedades requeridas
-          if (
-            comparison &&
-            typeof comparison === 'object' &&
-            'executiveSummary' in comparison &&
-            'technicalAnalysis' in comparison &&
-            'metrics' in comparison
-          ) {
-            setComparisonResult(comparison as ComparisonResult);
-            setComparisonMetrics(comparison.metrics || metrics || null);
-            lastShownTaskIdRef.current = completedComparisonTask.id;
-            
-            // Marcar como visto en sessionStorage para persistencia entre recargas/navegación
-            sessionStorage.setItem('smashly_last_viewed_comparison_task', completedComparisonTask.id);
-          } else {
-            // Si el formato es antiguo, simplemente ignorar esta tarea
-            console.warn('Ignoring old format comparison task:', completedComparisonTask.id);
-            lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista para no intentar de nuevo
-          }
+    // 4. No hay ya un resultado visible
+    // 5. No ha sido visto previamente (check sessionStorage)
+    const lastViewedId = sessionStorage.getItem('smashly_last_viewed_comparison_task');
+
+    if (
+      completedComparisonTask &&
+      completedComparisonTask.result &&
+      completedComparisonTask.id !== lastShownTaskIdRef.current &&
+      completedComparisonTask.id !== lastViewedId &&
+      !modalManuallyClosed &&
+      !comparisonResult
+    ) {
+      try {
+        const { comparison, metrics } = completedComparisonTask.result;
+
+        // Verificar que comparison tenga la estructura correcta (ComparisonResult)
+        // Debe ser un objeto con las propiedades requeridas
+        if (
+          comparison &&
+          typeof comparison === 'object' &&
+          'executiveSummary' in comparison &&
+          'technicalAnalysis' in comparison &&
+          'metrics' in comparison
+        ) {
+          setComparisonResult(comparison as ComparisonResult);
+          setComparisonMetrics(comparison.metrics || metrics || null);
+          lastShownTaskIdRef.current = completedComparisonTask.id;
+
+          // Marcar como visto en sessionStorage para persistencia entre recargas/navegación
+          sessionStorage.setItem('smashly_last_viewed_comparison_task', completedComparisonTask.id);
+        } else {
+          // Si el formato es antiguo, simplemente ignorar esta tarea
+          console.warn('Ignoring old format comparison task:', completedComparisonTask.id);
+          lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista para no intentar de nuevo
+        }
       } catch (error) {
         console.error('Error loading comparison from background task:', error);
         lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista
@@ -649,15 +651,26 @@ const CompareRacketsPage: React.FC = () => {
         {comparisonResult.executiveSummary && (
           <div style={{ marginBottom: '2rem' }}>
             <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Resumen Ejecutivo</h3>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.executiveSummary}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {comparisonResult.executiveSummary}
+            </ReactMarkdown>
           </div>
         )}
 
         {/* Tabla Comparativa */}
-        {comparisonResult.comparisonTable && (
-          <div style={{ marginBottom: '2rem' }}>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.comparisonTable}</ReactMarkdown>
-          </div>
+        {comparisonResult.comparisonTable && Array.isArray(comparisonResult.comparisonTable) ? (
+          <ComparisonTable
+            data={comparisonResult.comparisonTable}
+            metrics={comparisonMetrics || []}
+          />
+        ) : (
+          comparisonResult.comparisonTable && (
+            <div style={{ marginBottom: '2rem' }}>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {comparisonResult.comparisonTable as string}
+              </ReactMarkdown>
+            </div>
+          )
         )}
 
         {/* Análisis Técnico */}
@@ -677,7 +690,9 @@ const CompareRacketsPage: React.FC = () => {
         {comparisonResult.recommendedProfiles && (
           <div style={{ marginBottom: '2rem' }}>
             <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Perfiles Recomendados</h3>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.recommendedProfiles}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {comparisonResult.recommendedProfiles}
+            </ReactMarkdown>
           </div>
         )}
 
@@ -685,7 +700,9 @@ const CompareRacketsPage: React.FC = () => {
         {comparisonResult.biomechanicalConsiderations && (
           <div style={{ marginBottom: '2rem' }}>
             <h3 style={{ color: '#16a34a', marginBottom: '1rem' }}>Consideraciones Biomecánicas</h3>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparisonResult.biomechanicalConsiderations}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {comparisonResult.biomechanicalConsiderations}
+            </ReactMarkdown>
           </div>
         )}
 
@@ -773,7 +790,10 @@ const CompareRacketsPage: React.FC = () => {
       const response = await ComparisonService.compareRackets(racketIds, userProfile);
 
       clearInterval(progressInterval);
-      completeTask(taskId, { comparison: response.comparison, metrics: response.comparison.metrics });
+      completeTask(taskId, {
+        comparison: response.comparison,
+        metrics: response.comparison.metrics,
+      });
 
       setComparisonResult(response.comparison);
       setComparisonMetrics(response.comparison.metrics || null);
@@ -978,7 +998,7 @@ const CompareRacketsPage: React.FC = () => {
               setComparisonMetrics(null);
               setSelectedRackets([]);
               setModalManuallyClosed(true);
-              
+
               // Descartar la tarea de fondo si existe
               if (lastShownTaskIdRef.current) {
                 dismissTask(lastShownTaskIdRef.current);
@@ -1001,7 +1021,7 @@ const CompareRacketsPage: React.FC = () => {
                   setComparisonMetrics(null);
                   setSelectedRackets([]);
                   setModalManuallyClosed(true);
-                  
+
                   // Descartar la tarea de fondo si existe
                   if (lastShownTaskIdRef.current) {
                     dismissTask(lastShownTaskIdRef.current);

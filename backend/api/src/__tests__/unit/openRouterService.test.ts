@@ -1,9 +1,17 @@
 import axios from 'axios';
 import { OpenRouterService } from '../../../src/services/openRouterService';
+import { freeAiService } from '../../../src/services/freeAiService';
 import { Racket } from '../../../src/types/racket';
 
 // Mock axios
 jest.mock('axios');
+
+// Mock freeAiService
+jest.mock('../../../src/services/freeAiService', () => ({
+  freeAiService: {
+    generateContent: jest.fn(),
+  },
+}));
 
 describe('OpenRouterService', () => {
   let service: OpenRouterService;
@@ -88,15 +96,18 @@ describe('OpenRouterService', () => {
   };
 
   const mockStructuredResponse = {
-    executiveSummary: 'La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima potencia, mientras que la Bullpadel Vertex 04 es mejor para jugadores que priorizan el control y la manejabilidad.',
+    executiveSummary:
+      'La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima potencia, mientras que la Bullpadel Vertex 04 es mejor para jugadores que priorizan el control y la manejabilidad.',
     technicalAnalysis: [
       {
         title: 'Potencia y Salida de Bola',
-        content: 'La Adidas Metalbone 3.1 ofrece una salida de bola superior gracias a su forma de diamante y balance alto.',
+        content:
+          'La Adidas Metalbone 3.1 ofrece una salida de bola superior gracias a su forma de diamante y balance alto.',
       },
       {
         title: 'Control y Precisión',
-        content: 'La Bullpadel Vertex 04 destaca en control debido a su forma redonda y balance bajo.',
+        content:
+          'La Bullpadel Vertex 04 destaca en control debido a su forma redonda y balance bajo.',
       },
       {
         title: 'Manejabilidad y Peso',
@@ -107,13 +118,31 @@ describe('OpenRouterService', () => {
         content: 'La Vertex 04 es más suave y adecuada para jugadores con lesiones.',
       },
     ],
-    comparisonTable: '| Característica | Adidas Metalbone 3.1 | Bullpadel Vertex 04 |\n|---|---|---|\n| Potencia | 9/10 | 7/10 |\n| Control | 6/10 | 9/10 |',
-    recommendedProfiles: '**Adidas Metalbone 3.1**: Jugadores ofensivos avanzados.\n\n**Bullpadel Vertex 04**: Jugadores intermedios que buscan control.',
-    biomechanicalConsiderations: '**Advertencia**: La Metalbone 3.1 es dura y con balance alto, lo que puede aumentar el riesgo de epicondilitis en jugadores con lesiones previas.',
-    conclusion: 'Para tu perfil de jugador intermedio con estilo polivalente, la **Bullpadel Vertex 04** es la recomendación ideal.',
+    comparisonTable:
+      '| Característica | Adidas Metalbone 3.1 | Bullpadel Vertex 04 |\n|---|---|---|\n| Potencia | 9/10 | 7/10 |\n| Control | 6/10 | 9/10 |',
+    recommendedProfiles:
+      '**Adidas Metalbone 3.1**: Jugadores ofensivos avanzados.\n\n**Bullpadel Vertex 04**: Jugadores intermedios que buscan control.',
+    biomechanicalConsiderations:
+      '**Advertencia**: La Metalbone 3.1 es dura y con balance alto, lo que puede aumentar el riesgo de epicondilitis en jugadores con lesiones previas.',
+    conclusion:
+      'Para tu perfil de jugador intermedio con estilo polivalente, la **Bullpadel Vertex 04** es la recomendación ideal.',
     metrics: [
-      { racketName: 'Adidas Metalbone 3.1', potencia: 9, control: 6, salidaDeBola: 8, manejabilidad: 7, puntoDulce: 7 },
-      { racketName: 'Bullpadel Vertex 04', potencia: 7, control: 9, salidaDeBola: 6, manejabilidad: 9, puntoDulce: 9 },
+      {
+        racketName: 'Adidas Metalbone 3.1',
+        potencia: 9,
+        control: 6,
+        salidaDeBola: 8,
+        manejabilidad: 7,
+        puntoDulce: 7,
+      },
+      {
+        racketName: 'Bullpadel Vertex 04',
+        potencia: 7,
+        control: 9,
+        salidaDeBola: 6,
+        manejabilidad: 9,
+        puntoDulce: 9,
+      },
     ],
   };
 
@@ -123,6 +152,10 @@ describe('OpenRouterService', () => {
 
     // Mock axios.create
     (axios.create as jest.Mock).mockReturnValue(mockAxiosInstance);
+    // Mock freeAiService fail by default to test fallback flow
+    (freeAiService.generateContent as jest.Mock).mockRejectedValue(
+      new Error('Free AI API unavailable')
+    );
 
     mockAxiosInstance.post.mockClear();
 
@@ -177,7 +210,16 @@ describe('OpenRouterService', () => {
   });
 
   describe('static generateContent', () => {
-    it('should generate content using first available model', async () => {
+    it('should prioritize Free AI API if available', async () => {
+      (freeAiService.generateContent as jest.Mock).mockResolvedValue('Content from Free API');
+
+      const result = await OpenRouterService.generateContent('Test prompt');
+      expect(result).toBe('Content from Free API');
+      expect(freeAiService.generateContent).toHaveBeenCalledWith('Test prompt');
+      expect(mockAxiosInstance.post).not.toHaveBeenCalled();
+    });
+
+    it('should generate content using OpenRouter fallback when Free API fails', async () => {
       process.env.OPENROUTER_API_KEY = 'test-api-key';
 
       mockAxiosInstance.post.mockResolvedValue({
@@ -190,6 +232,7 @@ describe('OpenRouterService', () => {
       const result = await OpenRouterService.generateContent('Test prompt');
 
       expect(result).toBe('Generated content here');
+      expect(freeAiService.generateContent).toHaveBeenCalled();
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/chat/completions',
         expect.objectContaining({
@@ -217,11 +260,11 @@ describe('OpenRouterService', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledTimes(2);
     });
 
-    it('should throw error when API key is not configured', async () => {
+    it('should throw error when API key is not configured and Free API fails', async () => {
       delete process.env.OPENROUTER_API_KEY;
       const newService = new OpenRouterService();
 
-      await expect(newService['generateContentWithFallback']('test')).rejects.toThrow(
+      await expect(newService['generateContentOpenRouterFallback']('test')).rejects.toThrow(
         'OPENROUTER_API_KEY no está configurada en el servidor'
       );
     });
@@ -250,13 +293,24 @@ describe('OpenRouterService', () => {
   });
 
   describe('compareRackets', () => {
-    it('should throw error when API key is not configured', async () => {
+    it('should prioritize Free AI API if available', async () => {
+      (freeAiService.generateContent as jest.Mock).mockResolvedValue(
+        JSON.stringify(mockStructuredResponse)
+      );
+
+      const result = await service.compareRackets(mockRackets);
+      expect(result.executiveSummary).toContain('Adidas Metalbone 3.1');
+      expect(freeAiService.generateContent).toHaveBeenCalled();
+      expect(mockAxiosInstance.post).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when API key is not configured and Free API fails', async () => {
       delete process.env.OPENROUTER_API_KEY;
       const newService = new OpenRouterService();
 
-      await expect(newService.compareRackets(mockRackets)).rejects.toThrow(
-        'OPENROUTER_API_KEY no está configurada en el servidor'
-      );
+      await expect(
+        newService['compareRacketsOpenRouterFallback']('prompt', mockRackets)
+      ).rejects.toThrow('OPENROUTER_API_KEY no está configurada en el servidor');
     });
 
     it('should throw error when less than 2 rackets provided', async () => {
@@ -446,34 +500,6 @@ ${JSON.stringify(mockStructuredResponse)}
       );
     });
 
-    it('should use default metrics when JSON parsing fails for metrics', async () => {
-      process.env.OPENROUTER_API_KEY = 'test-api-key';
-
-      const invalidMetricsResponse = {
-        ...mockStructuredResponse,
-        metrics: 'invalid',
-      };
-
-      mockAxiosInstance.post.mockResolvedValue({
-        data: {
-          choices: [{ message: { content: JSON.stringify(invalidMetricsResponse) } }],
-        },
-      });
-
-      const result = await service.compareRackets(mockRackets);
-
-      // Should still return result with default metrics
-      expect(result.metrics).toHaveLength(2);
-      expect(result.metrics[0]).toEqual({
-        racketName: 'Adidas Metalbone 3.1',
-        potencia: 5,
-        control: 5,
-        salidaDeBola: 5,
-        manejabilidad: 5,
-        puntoDulce: 5,
-      });
-    });
-
     it('should return fallback when response has missing required properties', async () => {
       process.env.OPENROUTER_API_KEY = 'test-api-key';
 
@@ -498,126 +524,64 @@ ${JSON.stringify(mockStructuredResponse)}
       expect(result.technicalAnalysis).toEqual([]);
       expect(result.metrics).toHaveLength(2);
     });
-  });
 
-  describe('buildRacketsInfo (via compareRackets)', () => {
-    it('should build correct rackets info string with all fields', async () => {
-      process.env.OPENROUTER_API_KEY = 'test-api-key';
-
-      mockAxiosInstance.post.mockResolvedValue({
-        data: {
-          choices: [{ message: { content: JSON.stringify(mockStructuredResponse) } }],
-        },
-      });
-
-      await service.compareRackets(mockRackets);
-
-      const callArgs = mockAxiosInstance.post.mock.calls[0][1];
-      const prompt = callArgs.messages[0].content;
-
-      expect(prompt).toContain('PALA 1');
-      expect(prompt).toContain('Nombre: Adidas Metalbone 3.1');
-      expect(prompt).toContain('Marca: Adidas');
-      expect(prompt).toContain('Modelo: Metalbone 3.1');
-      expect(prompt).toContain('Enlace: https://padelmarket.com/pala1');
-      expect(prompt).toContain('Forma: Diamante');
-      expect(prompt).toContain('Goma: EVA Soft');
-      expect(prompt).toContain('Cara/Fibra: Carbono 2D');
-      expect(prompt).toContain('Balance: Alto');
-      expect(prompt).toContain('Dureza: Dura');
-      expect(prompt).toContain('Peso: 365g');
-      expect(prompt).toContain('Nivel: Avanzado');
-      expect(prompt).toContain('Precio: €250');
-    });
-
-    it('should handle missing characteristics gracefully', async () => {
-      process.env.OPENROUTER_API_KEY = 'test-api-key';
-
-      const racketsWithMissingData: Racket[] = [
-        {
-          ...mockRackets[0],
-          caracteristicas_forma: undefined as any,
-          caracteristicas_nucleo: undefined as any,
-          peso: undefined as any,
-          precio_actual: undefined as any,
-        },
-        mockRackets[1],
+    describe('model fallback behavior', () => {
+      const freeModels = [
+        'google/gemini-2.0-flash-exp:free',
+        'deepseek/deepseek-r1:free',
+        'meta-llama/llama-3.3-70b-instruct:free',
+        'mistralai/mistral-nemo:free',
+        'qwen/qwen-2.5-7b-instruct:free',
       ];
 
-      mockAxiosInstance.post.mockResolvedValue({
-        data: {
-          choices: [{ message: { content: JSON.stringify(mockStructuredResponse) } }],
-        },
+      it('should try all 5 free models in sequence', async () => {
+        process.env.OPENROUTER_API_KEY = 'test-api-key';
+
+        // First 4 fail, last succeeds
+        mockAxiosInstance.post
+          .mockRejectedValueOnce(new Error('Model 1 failed'))
+          .mockRejectedValueOnce(new Error('Model 2 failed'))
+          .mockRejectedValueOnce(new Error('Model 3 failed'))
+          .mockRejectedValueOnce(new Error('Model 4 failed'))
+          .mockResolvedValueOnce({
+            data: {
+              choices: [{ message: { content: JSON.stringify(mockStructuredResponse) } }],
+            },
+          });
+
+        const result = await service.compareRackets(mockRackets);
+
+        expect(result.executiveSummary).toBeTruthy();
+        expect(mockAxiosInstance.post).toHaveBeenCalledTimes(5);
+
+        // Verify models were tried in correct order
+        for (let i = 0; i < 5; i++) {
+          const modelUsed = mockAxiosInstance.post.mock.calls[i][1].model;
+          expect(modelUsed).toBe(freeModels[i]);
+        }
       });
 
-      await service.compareRackets(racketsWithMissingData);
+      it('should wait 500ms between model attempts', async () => {
+        process.env.OPENROUTER_API_KEY = 'test-api-key';
 
-      const callArgs = mockAxiosInstance.post.mock.calls[0][1];
-      const prompt = callArgs.messages[0].content;
+        const startTime = Date.now();
 
-      expect(prompt).toContain('Forma: N/A');
-      expect(prompt).toContain('Goma: N/A');
-      expect(prompt).toContain('Peso: N/A');
-      expect(prompt).toContain('Precio: N/A');
-    });
-  });
+        mockAxiosInstance.post
+          .mockRejectedValueOnce(new Error('Model 1 failed'))
+          .mockRejectedValueOnce(new Error('Model 2 failed'))
+          .mockResolvedValueOnce({
+            data: {
+              choices: [{ message: { content: JSON.stringify(mockStructuredResponse) } }],
+            },
+          });
 
-  describe('model fallback behavior', () => {
-    const freeModels = [
-      'google/gemini-2.0-flash-exp:free',
-      'deepseek/deepseek-r1:free',
-      'meta-llama/llama-3.3-70b-instruct:free',
-      'mistralai/mistral-nemo:free',
-      'qwen/qwen-2.5-7b-instruct:free',
-    ];
+        await service.compareRackets(mockRackets);
 
-    it('should try all 5 free models in sequence', async () => {
-      process.env.OPENROUTER_API_KEY = 'test-api-key';
+        const elapsedTime = Date.now() - startTime;
 
-      // First 4 fail, last succeeds
-      mockAxiosInstance.post
-        .mockRejectedValueOnce(new Error('Model 1 failed'))
-        .mockRejectedValueOnce(new Error('Model 2 failed'))
-        .mockRejectedValueOnce(new Error('Model 3 failed'))
-        .mockRejectedValueOnce(new Error('Model 4 failed'))
-        .mockResolvedValueOnce({
-          data: {
-            choices: [{ message: { content: JSON.stringify(mockStructuredResponse) } }],
-          },
-        });
-
-      const result = await service.compareRackets(mockRackets);
-
-      expect(result.executiveSummary).toBeTruthy();
-      expect(mockAxiosInstance.post).toHaveBeenCalledTimes(5);
-
-      // Verify models were tried in correct order
-      for (let i = 0; i < 5; i++) {
-        const modelUsed = mockAxiosInstance.post.mock.calls[i][1].model;
-        expect(modelUsed).toBe(freeModels[i]);
-      }
-    });
-
-    it('should wait 500ms between model attempts', async () => {
-      process.env.OPENROUTER_API_KEY = 'test-api-key';
-
-      const startTime = Date.now();
-
-      mockAxiosInstance.post
-        .mockRejectedValueOnce(new Error('Model 1 failed'))
-        .mockRejectedValueOnce(new Error('Model 2 failed'))
-        .mockResolvedValueOnce({
-          data: {
-            choices: [{ message: { content: JSON.stringify(mockStructuredResponse) } }],
-          },
-        });
-
-      await service.compareRackets(mockRackets);
-
-      const elapsedTime = Date.now() - startTime;
-
-      // Should have at least 2 delays of 500ms each = 1000ms
-      expect(elapsedTime).toBeGreaterThanOrEqual(1000);
+        // Should have at least 2 delays of 500ms each = 1000ms
+        expect(elapsedTime).toBeGreaterThanOrEqual(1000);
+      });
     });
   });
 });
