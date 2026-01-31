@@ -172,7 +172,6 @@ class PadelProShopScraper(BaseScraper):
         
         # Handle Cookies/Popups
         try:
-             await page.wait_for_timeout(2000)
              await page.keyboard.press('Escape')
         except: pass
 
@@ -210,14 +209,18 @@ class PadelProShopScraper(BaseScraper):
             
             # 2. Scroll to bottom (Infinite Scroll)
             await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            await page.wait_for_timeout(2000) # Wait for load
+            # Wait for network idle instead of arbitrary timeout
+            try:
+                await page.wait_for_load_state('networkidle', timeout=3000)
+            except:
+                pass  # Continue even if timeout
             
             # 3. Check for specific Load More button (Hybrid)
             try:
                  load_more = await page.query_selector('.js-load-more')
                  if load_more and await load_more.is_visible():
                       await load_more.click()
-                      await page.wait_for_timeout(2000)
+                      await page.wait_for_load_state('networkidle', timeout=3000)
             except: pass
         
         return list(set(product_urls))

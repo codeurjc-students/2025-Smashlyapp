@@ -84,7 +84,11 @@ class PadelMarketScraper(BaseScraper):
                      if(s.innerText.includes('Detalles') || s.innerText.includes('Details')) s.click();
                  });
              }""")
-             await page.wait_for_timeout(500) # Wait for animation
+             # Wait for content to appear instead of arbitrary timeout
+             try:
+                 await page.wait_for_selector('.product_custom_table .custom_row', timeout=2000)
+             except:
+                 pass  # Fallback will handle if not present
              
              # Extract from custom table rows
              rows = await page.query_selector_all('.product_custom_table .custom_row')
@@ -178,7 +182,6 @@ class PadelMarketScraper(BaseScraper):
         
         # Handle Popups
         try:
-             await page.wait_for_timeout(2000)
              await page.keyboard.press('Escape') # Close welcome popup
         except:
              pass
@@ -220,8 +223,8 @@ class PadelMarketScraper(BaseScraper):
                      await load_more.scroll_into_view_if_needed()
                      # Click
                      await load_more.click()
-                     # Wait for loading spin or new products
-                     await page.wait_for_timeout(3000)
+                     # Wait for network to be idle (more reliable than arbitrary timeout)
+                     await page.wait_for_load_state('networkidle', timeout=5000)
                 else:
                      print("No more 'Load More' button found/visible.")
                      break

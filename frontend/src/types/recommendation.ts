@@ -2,7 +2,7 @@ export interface BasicFormData {
   level: string;
   frequency: string;
   injuries: string;
-  budget: number;
+  budget: { min: number; max: number };
   current_racket?: string;
 
   // Strategic fields (Perfil Biomecánico)

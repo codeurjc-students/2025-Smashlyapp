@@ -107,24 +107,63 @@ class TiendaPadelPointScraper(BaseScraper):
 
         # Specs
         specs: Dict[str, str] = {}
-        # 1. Description Regex
+        # 1. Description Regex (Enhanced with more patterns)
         desc_text = await self.safe_get_text('#tab-description')
         if desc_text:
+            # Enhanced patterns with multiple variations
             patterns = {
-                'Peso': [r'(?:Peso|Talla-Peso)[:\s]+([-]?[\d\s-]+g?)'],
-                'Forma': [r'(?:Forma|Formato)[:\s]+([^.\n]+)'],
-                'Balance': [r'Balance[:\s]+([^.\n]+)'],
-                'Perfil': [r'Perfil[:\s]+([\d\s]+mm)'],
-                'Núcleo': [r'(?:Núcleo|Goma)[:\s]+([^.\n]+)'],
-                'Cara': [r'(?:Cara|Caras|Material|Fibra)[:\s]+([^.\n]+)'],
-                'Nivel': [r'Nivel[:\s]+([^.\n]+)']
+                'Peso': [
+                    r'(?:Peso|Weight|Talla-Peso)[:\s]+([-]?[\d\s-]+\s*(?:gr?|gramos?|g)?)',
+                    r'(\d{3})\s*[-–]\s*(\d{3})\s*(?:gr?|gramos?|g)',  # Range format: 355-365g
+                    r'(\d{3})\s*(?:gr?|gramos?|g)'  # Simple: 360g
+                ],
+                'Forma': [
+                    r'(?:Forma|Formato|Shape)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                    r'(?:Redonda|Lágrima|Diamante|Híbrida)'  # Direct match
+                ],
+                'Balance': [
+                    r'(?:Balance|Balanceo)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                    r'(?:Alto|Medio|Bajo|High|Medium|Low)'  # Direct match
+                ],
+                'Perfil': [
+                    r'(?:Perfil|Grosor|Espesor)[:\s]+([\d\s]+\s*mm)',
+                    r'(\d{2})\s*mm'  # Simple: 38mm
+                ],
+                'Núcleo': [
+                    r'(?:Núcleo|Goma|Foam|Core)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                    r'(?:EVA|FOAM|Soft|Hard|Medium)'  # Direct match
+                ],
+                'Cara': [
+                    r'(?:Cara|Caras|Material|Fibra|Surface)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                    r'(?:Carbono|Carbon|Fibra de Vidrio|Fiberglass)'  # Direct match
+                ],
+                'Nivel': [
+                    r'(?:Nivel|Level)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                    r'(?:Principiante|Iniciación|Intermedio|Avanzado|Profesional|Professional)'  # Direct match
+                ],
+                'Marco': [
+                    r'(?:Marco|Frame)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)'
+                ]
             }
+            
             for k, regexes in patterns.items():
                 for r in regexes:
                     m = re.search(r, desc_text, re.IGNORECASE)
                     if m:
-                        val = m.group(1).strip()
-                        if len(val) < 50: specs[k] = val; break
+                        # Handle different match groups
+                        if m.lastindex == 2:  # Range format (355-365)
+                            val = f"{m.group(1)}-{m.group(2)}g"
+                        else:
+                            val = m.group(1).strip() if m.lastindex else m.group(0)
+                        
+                        # Normalize value
+                        val = val.strip()
+                        # Remove trailing punctuation
+                        val = re.sub(r'[.,;:]+$', '', val)
+                        
+                        if val and len(val) < 50 and val not in ['-', '', ' ']: 
+                            specs[k] = val
+                            break
         
         # 2. Table Fallback
         if not specs:

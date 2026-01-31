@@ -1,0 +1,393 @@
+{
+  "timestamp": "2026-01-31T16:32:20.783953",
+  "stores_tested": 4,
+  "reports": [
+    {
+      "store": "padelmarket",
+      "timestamp": "2026-01-31T16:25:21.744081",
+      "category_scraping": {
+        "tested": true,
+        "errors": [],
+        "urls_found": 2
+      },
+      "product_scraping": {
+        "tested": true,
+        "results": [
+          {
+            "url": "https://padelmarket.com/es-eu/products/pala-bullpadel-hack-03-2024-paquito-navarro",
+            "store": "padelmarket",
+            "passed": true,
+            "score": 90,
+            "max_score": 100,
+            "percentage": 90.0,
+            "errors": [],
+            "warnings": [
+              "Missing critical spec: Balance"
+            ],
+            "product_data": {
+              "url": "https://padelmarket.com/es-eu/products/pala-bullpadel-hack-03-2024-paquito-navarro",
+              "name": "BULLPADEL HACK 03 2024 PAQUITO NAVARRO (PALA)",
+              "price": 149.95,
+              "originalPrice": null,
+              "brand": "Bullpadel",
+              "image": "https://padelmarket.com/cdn/shop/files/7591.jpg?v=1725950265",
+              "images": [
+                "https://padelmarket.com/cdn/shop/files/7591.jpg?v=1725950265",
+                "https://padelmarket.com/cdn/shop/files/8099.jpg?v=1753792970",
+                "https://padelmarket.com/cdn/shop/files/7388.jpg?v=1753792970",
+                "https://padelmarket.com/cdn/shop/files/7387.jpg?v=1753792970",
+                "https://padelmarket.com/cdn/shop/files/7389.jpg?v=1753792970",
+                "https://padelmarket.com/cdn/shop/files/7385.jpg?v=1753792970",
+                "https://padelmarket.com/cdn/shop/files/7384.jpg?v=1753792970"
+              ],
+              "specs": {
+                "Marca": "Bullpadel",
+                "Bestsellers": "Palas más vendidas",
+                "Sexo": "Unisex",
+                "Nivel": "Avanzado",
+                "Tipo de juego": "Potencia",
+                "Forma": "Diamante",
+                "Peso": "365-375 gr",
+                "Marco": "Carbono",
+                "Núcleo": "Multieva",
+                "Cara": "Carbono",
+                "Temporada": "2024",
+                "SKU": "471602",
+                "Ean13": "8445402483730"
+              },
+              "description": null
+            }
+          },
+          {
+            "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-12k-2025-by-agustin-tapia-pala",
+            "store": "padelmarket",
+            "passed": true,
+            "score": 90,
+            "max_score": 100,
+            "percentage": 90.0,
+            "errors": [],
+            "warnings": [
+              "Missing critical spec: Balance"
+            ],
+            "product_data": {
+              "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-12k-2025-by-agustin-tapia-pala",
+              "name": "NOX AT10 GENIUS 12K 2025 BY AGUSTIN TAPIA (PALA)",
+              "price": 189.95,
+              "originalPrice": null,
+              "brand": "Nox",
+              "image": "https://padelmarket.com/cdn/shop/files/nox_fbe3b1bf-e33b-48fc-9592-87f710a43fc4.jpg?v=1767964644",
+              "images": [
+                "https://padelmarket.com/cdn/shop/files/nox_fbe3b1bf-e33b-48fc-9592-87f710a43fc4.jpg?v=1767964644",
+                "https://padelmarket.com/cdn/shop/files/Agustin_Tapia_1.jpg?v=1767964644",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_2b.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_3.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_4.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_5.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_6.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_7.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_8.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_9.png?v=1767964625",
+                "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_10.png?v=1767964625"
+              ],
+              "specs": {
+                "Marca": "Nox",
+                "Bestsellers": "Palas más vendidas",
+                "Sexo": "Unisex",
+                "Nivel": "Avanzado",
+                "Tipo de juego": "Polivalente",
+                "Forma": "Lagrima",
+                "Peso": "360-375 g",
+                "Marco": "Carbono",
+                "Núcleo": "MLD Black EVA",
+                "Cara": "Carbono 12K",
+                "Temporada": "2025",
+                "SKU": "PAT10GENIUS25",
+                "Ean13": "8436603199940"
+              },
+              "description": null
+            }
+          }
+        ],
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "avg_score": 90.0
+      }
+    },
+    {
+      "store": "padelnuestro",
+      "timestamp": "2026-01-31T16:26:05.147154",
+      "category_scraping": {
+        "tested": true,
+        "errors": [],
+        "urls_found": 2
+      },
+      "product_scraping": {
+        "tested": true,
+        "results": [
+          {
+            "url": "https://www.padelnuestro.com/pala-adidas-neuvortx-light-black-azul-ar6ga3u12",
+            "store": "padelnuestro",
+            "passed": true,
+            "score": 90,
+            "max_score": 100,
+            "percentage": 90.0,
+            "errors": [],
+            "warnings": [
+              "Missing critical spec: Peso"
+            ],
+            "product_data": {
+              "url": "https://www.padelnuestro.com/pala-adidas-neuvortx-light-black-azul-ar6ga3u12",
+              "name": "ADIDAS NEUVORTX LIGHT AZUL",
+              "price": 79.95,
+              "originalPrice": 149.95,
+              "brand": "Adidas",
+              "image": "https://www.padelnuestro.com/media/catalog/product/1/1/117785-pala-adidas-neuvortx-light-black-azul-ar6ga3u12-1500x1500-vista1.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:",
+              "images": [
+                "https://www.padelnuestro.com/media/catalog/product/1/1/117785-pala-adidas-neuvortx-light-black-azul-ar6ga3u12-1500x1500-vista1.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:",
+                "https://www.padelnuestro.com/media/catalog/product/1/1/117785-pala-adidas-neuvortx-light-black-azul-ar6ga3u12-1500x1500-vista9.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:",
+                "https://www.padelnuestro.com/media/catalog/product/1/1/117785-pala-adidas-neuvortx-light-black-azul-ar6ga3u12-1500x1500-vista2.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:"
+              ],
+              "specs": {
+                "New product date": "1 May 2025",
+                "Marca": "Adidas",
+                "Color 2": "Azul",
+                "Producto": "Palas",
+                "Balance": "Alto, Medio",
+                "Núcleo": "Eva Soft Performance",
+                "Formato": "Normal",
+                "Nivel de Juego": "Principiante / Intermedio",
+                "Acabado": "Rugosa",
+                "Forma": "Redonda",
+                "Superfície": "Rugosa",
+                "Tipo de Juego": "Polivalente"
+              },
+              "description": null
+            }
+          },
+          {
+            "url": "https://www.padelnuestro.com/pala-babolat-alioth-mini-jr-150171-100",
+            "store": "padelnuestro",
+            "passed": true,
+            "score": 80,
+            "max_score": 100,
+            "percentage": 80.0,
+            "errors": [],
+            "warnings": [
+              "Missing critical spec: Peso",
+              "Missing critical spec: Balance"
+            ],
+            "product_data": {
+              "url": "https://www.padelnuestro.com/pala-babolat-alioth-mini-jr-150171-100",
+              "name": "BABOLAT ALIOTH MINI JÚNIOR AZUL/AMARILLO",
+              "price": 54.95,
+              "originalPrice": 79.95,
+              "brand": "Babolat",
+              "image": "https://www.padelnuestro.com/media/catalog/product/1/1/115744-pala-babolat-alioth-mini-jr-150171-100-2025-1500x1500-1.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:",
+              "images": [
+                "https://www.padelnuestro.com/media/catalog/product/1/1/115744-pala-babolat-alioth-mini-jr-150171-100-2025-1500x1500-1.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:",
+                "https://www.padelnuestro.com/media/catalog/product/1/1/115744-pala-babolat-alioth-mini-jr-150171-100-2025-1500x1500-5.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:",
+                "https://www.padelnuestro.com/media/catalog/product/1/1/115744-pala-babolat-alioth-mini-jr-150171-100-2025-1500x1500-2.jpg?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:"
+              ],
+              "specs": {
+                "New product date": "1 Sept 2025",
+                "Marca": "Babolat",
+                "Color 2": "Amarillo, Azul",
+                "Producto": "Palas",
+                "Formato": "Normal",
+                "Nivel de Juego": "Principiante / Intermedio",
+                "Forma": "Lágrima",
+                "Tipo de Juego": "Polivalente"
+              },
+              "description": null
+            }
+          }
+        ],
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "avg_score": 85.0
+      }
+    },
+    {
+      "store": "padelproshop",
+      "timestamp": "2026-01-31T16:29:23.465113",
+      "category_scraping": {
+        "tested": true,
+        "errors": [],
+        "urls_found": 2
+      },
+      "product_scraping": {
+        "tested": true,
+        "results": [
+          {
+            "url": "https://www.padelproshop.com/collections/palas-padel/products/pala-dunlop-galactica-os",
+            "store": "padelproshop",
+            "passed": true,
+            "score": 80,
+            "max_score": 100,
+            "percentage": 80.0,
+            "errors": [],
+            "warnings": [
+              "Missing critical spec: Peso",
+              "Missing critical spec: Balance"
+            ],
+            "product_data": {
+              "url": "https://www.padelproshop.com/collections/palas-padel/products/pala-dunlop-galactica-os",
+              "name": "Pala Dunlop Galactica OS 2025",
+              "price": 125.0,
+              "originalPrice": 239.99,
+              "brand": "Dunlop",
+              "image": "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaDunlopGalacticaOS2025_1.webp?v=1761042928",
+              "images": [
+                "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaDunlopGalacticaOS2025_1.webp?v=1761042928",
+                "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaDunlopGalacticaOS2025_2_85dcc692-75a5-40fe-8495-7fefde796b47.webp?v=1761042935",
+                "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaDunlopGalacticaOS2025_3.webp?v=1761042941"
+              ],
+              "specs": {
+                "Color": "Negro",
+                "Colección": "2025",
+                "Género": "Hombre, Mujer",
+                "Nivel de juego": "Avanzado",
+                "Forma": "Lagrima (Polivalente)",
+                "Marco": "Carbono",
+                "Material cara": "Carbono 3K",
+                "Superficie": "Lisa"
+              },
+              "description": null
+            }
+          },
+          {
+            "url": "https://www.padelproshop.com/collections/palas-padel/products/pala-wilson-optix-padel-kit",
+            "store": "padelproshop",
+            "passed": true,
+            "score": 80,
+            "max_score": 100,
+            "percentage": 80.0,
+            "errors": [],
+            "warnings": [
+              "Missing critical spec: Peso",
+              "Missing critical spec: Balance"
+            ],
+            "product_data": {
+              "url": "https://www.padelproshop.com/collections/palas-padel/products/pala-wilson-optix-padel-kit",
+              "name": "Pala Wilson Optix Padel Kit",
+              "price": 95.0,
+              "originalPrice": 120.0,
+              "brand": "Wilson",
+              "image": "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/wilssss.webp?v=1762341613",
+              "images": [
+                "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/wilssss.webp?v=1762341613",
+                "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/wilsss.webp?v=1762341613",
+                "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/wilss.webp?v=1762341613"
+              ],
+              "specs": {
+                "Color": "Rojo",
+                "Género": "Hombre, Mujer",
+                "Nivel de juego": "Iniciación",
+                "Forma": "Redonda (Control)",
+                "Material cara": "Fibra de vidrio",
+                "Goma": "Foam",
+                "Superficie": "Lisa"
+              },
+              "description": null
+            }
+          }
+        ],
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "avg_score": 80.0
+      }
+    },
+    {
+      "store": "tiendapadelpoint",
+      "timestamp": "2026-01-31T16:30:23.238542",
+      "category_scraping": {
+        "tested": true,
+        "errors": [],
+        "urls_found": 2
+      },
+      "product_scraping": {
+        "tested": true,
+        "results": [
+          {
+            "url": "https://www.tiendapadelpoint.com/flash-point---ofertas-palas-padel-y-ropa/pala-bullpadel-juan-martin-diaz-icon-2025-1-1",
+            "store": "tiendapadelpoint",
+            "passed": true,
+            "score": 80,
+            "max_score": 100,
+            "percentage": 80.0,
+            "errors": [],
+            "warnings": [
+              "Brand is 'Unknown' or missing",
+              "Missing critical spec: Peso"
+            ],
+            "product_data": {
+              "url": "https://www.tiendapadelpoint.com/flash-point---ofertas-palas-padel-y-ropa/pala-bullpadel-juan-martin-diaz-icon-2025-1-1",
+              "name": "Bullpadel Juan Martin Diaz Icon 2025",
+              "price": 14995.0,
+              "originalPrice": 27795.0,
+              "brand": "Unknown",
+              "image": "https://www.tiendapadelpoint.com/image/cache/data/pala-bullpadel-juan-martin-diaz-icon-2025-1-1100x1100.jpg",
+              "images": [
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-bullpadel-juan-martin-diaz-icon-2025-1-1100x1100.jpg",
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-bullpadel-juan-martin-diaz-icon-2025-1-es-1-1100x1100.jpg",
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-bullpadel-juan-martin-diaz-icon-2025-1-es-3-1100x1100.jpg",
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-bullpadel-juan-martin-diaz-icon-2025-1-es-4-1100x1100.jpg"
+              ],
+              "specs": {
+                "Forma": "diamante",
+                "Balance": "alto",
+                "Perfil": "38 mm",
+                "Núcleo": "MultiEva",
+                "Cara": "Carbon",
+                "Nivel": "con un rendimiento inigualable"
+              },
+              "description": null
+            }
+          },
+          {
+            "url": "https://www.tiendapadelpoint.com/flash-point---ofertas-palas-padel-y-ropa/pala-nox-agustin-tapia-at10-luxury-genius-18k-2023",
+            "store": "tiendapadelpoint",
+            "passed": true,
+            "score": 90,
+            "max_score": 100,
+            "percentage": 90.0,
+            "errors": [],
+            "warnings": [
+              "Brand is 'Unknown' or missing"
+            ],
+            "product_data": {
+              "url": "https://www.tiendapadelpoint.com/flash-point---ofertas-palas-padel-y-ropa/pala-nox-agustin-tapia-at10-luxury-genius-18k-2023",
+              "name": "Nox Agustin Tapia AT10 Luxury Genius 18K 2023",
+              "price": 14995.0,
+              "originalPrice": 32495.0,
+              "brand": "Unknown",
+              "image": "https://www.tiendapadelpoint.com/image/cache/data/pala-nox-agustin-tapia-at10-luxury-genius-18k-2023-1100x1100.jpg",
+              "images": [
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-nox-agustin-tapia-at10-luxury-genius-18k-2023-1100x1100.jpg",
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-nox-agustin-tapia-at10-luxury-genius-18k-2023-es-1-1100x1100.jpg",
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-nox-agustin-tapia-at10-luxury-genius-18k-2023-es-2-1100x1100.jpg",
+                "https://www.tiendapadelpoint.com/image/cache/data/pala-nox-agustin-tapia-at10-luxury-genius-18k-2023-es-3-1100x1100.jpg"
+              ],
+              "specs": {
+                "Peso": "360-375 gr",
+                "Forma": "Gota",
+                "Balance": "bajo",
+                "Núcleo": "eva",
+                "Cara": "Carbono",
+                "Marco": "100% carbono"
+              },
+              "description": null
+            }
+          }
+        ],
+        "total": 2,
+        "passed": 2,
+        "failed": 0,
+        "avg_score": 85.0
+      }
+    }
+  ]
+}

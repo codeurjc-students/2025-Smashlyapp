@@ -19,27 +19,43 @@ export class CacheService {
    * Similar profiles will have the same hash
    */
   static generateProfileHash(data: BasicFormData | AdvancedFormData): string {
-    // Extract essential fields that define the profile
-    const essentialData = {
+    // Extract ALL fields that define the profile
+    // ANY change in these fields should generate a different recommendation
+    const essentialData: any = {
       level: data.level,
       budget: data.budget,
       injuries: data.injuries,
       frequency: data.frequency,
-      // For advanced forms, include additional fields
-      ...(('play_style' in data) && {
-        play_style: data.play_style,
-        position: data.position,
-        balance_preference: data.balance_preference,
-        shape_preference: data.shape_preference,
-      }),
+      // Optional basic fields that affect recommendations
+      gender: data.gender,
+      physical_condition: data.physical_condition,
+      touch_preference: data.touch_preference,
+      aesthetic_preference: data.aesthetic_preference,
+      current_racket: data.current_racket,
     };
+
+    // For advanced forms, include additional fields
+    if ('play_style' in data) {
+      essentialData.play_style = data.play_style;
+      essentialData.position = data.position;
+      essentialData.balance_preference = data.balance_preference;
+      essentialData.shape_preference = data.shape_preference;
+      essentialData.years_playing = data.years_playing;
+      essentialData.best_shot = data.best_shot;
+      essentialData.weak_shot = data.weak_shot;
+      essentialData.weight_preference = data.weight_preference;
+      essentialData.current_racket_likes = data.current_racket_likes;
+      essentialData.current_racket_dislikes = data.current_racket_dislikes;
+      essentialData.objectives = data.objectives;
+      essentialData.characteristic_priorities = data.characteristic_priorities;
+    }
 
     // Create deterministic string from essential data
     const dataString = JSON.stringify(essentialData, Object.keys(essentialData).sort());
-    
+
     // Generate MD5 hash
     const hash = crypto.createHash('md5').update(dataString).digest('hex');
-    
+
     logger.debug(`Generated cache hash: ${hash} for profile: ${dataString}`);
     return hash;
   }
@@ -49,12 +65,12 @@ export class CacheService {
    */
   static get(hash: string): RecommendationResult | null {
     const cached = this.cache.get<RecommendationResult>(hash);
-    
+
     if (cached) {
       logger.info(`✅ Cache HIT for hash: ${hash}`);
       return cached;
     }
-    
+
     logger.info(`❌ Cache MISS for hash: ${hash}`);
     return null;
   }

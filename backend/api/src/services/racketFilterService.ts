@@ -222,21 +222,40 @@ export class RacketFilterService {
 
   /**
    * Filter by budget range
+   * Supports both:
+   * - Object: { min: number, max: number }
+   * - Legacy: number or string (e.g., "200", "100-200", "150+")
    */
-  private static filterByBudget(rackets: Racket[], budget: number): Racket[] {
+  private static filterByBudget(
+    rackets: Racket[],
+    budget: { min: number; max: number } | number | string
+  ): Racket[] {
+    // Handle object format { min, max }
+    if (typeof budget === 'object' && budget !== null && 'min' in budget && 'max' in budget) {
+      logger.info(`💰 Budget filter (range): €${budget.min} - €${budget.max}`);
+      return rackets.filter((r: any) => {
+        if (!r.precio_actual) return true; // Include rackets without price
+        return r.precio_actual >= budget.min && r.precio_actual <= budget.max;
+      });
+    }
+
+    // Legacy support: string or number
     const budgetStr = String(budget);
 
     if (budgetStr.includes('+')) {
       const minBudget = parseInt(budgetStr.replace('+', ''));
+      logger.info(`💰 Budget filter (min): €${minBudget}+`);
       return rackets.filter((r: any) => !r.precio_actual || r.precio_actual >= minBudget);
     } else if (budgetStr.includes('-')) {
       const [min, max] = budgetStr.split('-').map(Number);
+      logger.info(`💰 Budget filter (range): €${min} - €${max}`);
       return rackets.filter((r: any) => {
         if (!r.precio_actual) return true;
         return r.precio_actual >= min && r.precio_actual <= max;
       });
     } else {
       const maxBudget = parseInt(budgetStr);
+      logger.info(`💰 Budget filter (max): ≤ €${maxBudget}`);
       return rackets.filter((r: any) => !r.precio_actual || r.precio_actual <= maxBudget);
     }
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { BasicFormData } from '../../types/recommendation';
+import { PriceRangeSlider } from './PriceRangeSlider';
 
 const FormContainer = styled.div`
   max-width: 600px;
@@ -152,7 +153,7 @@ export const BasicForm: React.FC<Props> = ({ initialData, onSubmit, onCancel, is
     level: '',
     frequency: '',
     injuries: '',
-    budget: 0,
+    budget: { min: 50, max: 200 },
     current_racket: '',
     gender: undefined,
     physical_condition: undefined,
@@ -277,14 +278,16 @@ export const BasicForm: React.FC<Props> = ({ initialData, onSubmit, onCancel, is
         <SectionTitle>⚙️ Preferencias</SectionTitle>
 
         <FormGroup>
-          <Label>Presupuesto máximo (€)</Label>
-          <Input
-            type='number'
-            name='budget'
+          <Label>
+            Rango de presupuesto (€)
+            <Tooltip>(Ajusta según tu preferencia de inversión)</Tooltip>
+          </Label>
+          <PriceRangeSlider
+            min={50}
+            max={500}
+            step={10}
             value={formData.budget}
-            onChange={handleChange}
-            placeholder='Ej: 150'
-            required
+            onChange={range => setFormData(prev => ({ ...prev, budget: range }))}
           />
         </FormGroup>
 

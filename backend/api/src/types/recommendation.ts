@@ -13,7 +13,7 @@ export interface BasicFormData {
   level: string;
   frequency: string;
   injuries: string;
-  budget: number;
+  budget: { min: number; max: number } | number | string; // Support new range format + legacy
   current_racket?: string;
 
   // New strategic fields (Perfil Biomecánico)
