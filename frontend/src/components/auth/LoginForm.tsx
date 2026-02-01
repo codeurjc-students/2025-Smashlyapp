@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import toast from 'react-hot-toast';
 import { FiEye, FiEyeOff, FiLock, FiMail } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
-import { FaApple } from 'react-icons/fa';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.tsx';
+import NicknamePromptModal from './NicknamePromptModal.tsx';
+import { UserProfileService } from '../../services/userProfileService.ts';
 import {
   Form,
   FormGroup,
@@ -19,7 +20,7 @@ import {
   Divider,
   SocialButtons,
   SocialButton,
-  FooterText
+  FooterText,
 } from './AuthStyles';
 
 interface LoginFormProps {
@@ -28,7 +29,7 @@ interface LoginFormProps {
 }
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => {
-  const { signIn } = useAuth();
+  const { signIn, signInWithGoogle } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -39,6 +40,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Nickname modal state
+  const [showNicknameModal, setShowNicknameModal] = useState(false);
+  const [suggestedNickname, setSuggestedNickname] = useState('');
 
   // Get redirect path from URL params or default to home
   const redirectTo = searchParams.get('redirect') || '/';
@@ -80,7 +86,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
         return;
       }
       toast.success('¡Bienvenido de nuevo!');
-      
+
       if (onSuccess) {
         onSuccess();
       } else {
@@ -94,22 +100,73 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
     }
   };
 
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const { error, isNewUser, suggestedNickname: nickname } = await signInWithGoogle();
+
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      // If it's a new user, show nickname prompt
+      if (isNewUser && nickname) {
+        setSuggestedNickname(nickname);
+        setShowNicknameModal(true);
+      } else {
+        // Existing user, proceed normally
+        toast.success('¡Bienvenido de nuevo!');
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(redirectTo);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error during Google sign-in:', error);
+      toast.error(error?.message || 'Error inesperado con Google');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleNicknameConfirm = async (nickname: string) => {
+    try {
+      // Update the user's nickname
+      await UserProfileService.updateUserProfile({ nickname });
+
+      toast.success('¡Bienvenido a Smashlyapp!');
+      setShowNicknameModal(false);
+
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        navigate(redirectTo);
+      }
+    } catch (error: any) {
+      throw new Error(error.message || 'Error al actualizar el nickname');
+    }
+  };
+
   return (
     <>
       <Form onSubmit={handleSubmit}>
         <FormGroup>
-          <Label htmlFor="email">Correo Electrónico</Label>
+          <Label htmlFor='email'>Correo Electrónico</Label>
           <InputWrapper>
-            <IconWrapper><FiMail /></IconWrapper>
+            <IconWrapper>
+              <FiMail />
+            </IconWrapper>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="padel@ejemplo.com"
+              id='email'
+              name='email'
+              type='email'
+              placeholder='padel@ejemplo.com'
               value={formData.email}
               onChange={handleChange}
               $hasError={!!errors.email}
-              autoComplete="email"
+              autoComplete='email'
             />
           </InputWrapper>
           {errors.email && <ErrorText>{errors.email}</ErrorText>}
@@ -117,29 +174,33 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
 
         <FormGroup>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Label htmlFor="password">Contraseña</Label>
-            <ForgotPasswordLink to="/forgot-password" onClick={onSuccess}>¿Has olvidado tu contraseña?</ForgotPasswordLink>
+            <Label htmlFor='password'>Contraseña</Label>
+            <ForgotPasswordLink to='/forgot-password' onClick={onSuccess}>
+              ¿Has olvidado tu contraseña?
+            </ForgotPasswordLink>
           </div>
           <InputWrapper>
-            <IconWrapper><FiLock /></IconWrapper>
+            <IconWrapper>
+              <FiLock />
+            </IconWrapper>
             <Input
-              id="password"
-              name="password"
+              id='password'
+              name='password'
               type={showPassword ? 'text' : 'password'}
-              placeholder="Introduce tu contraseña"
+              placeholder='Introduce tu contraseña'
               value={formData.password}
               onChange={handleChange}
               $hasError={!!errors.password}
-              autoComplete="current-password"
+              autoComplete='current-password'
             />
-            <PasswordToggle type="button" onClick={() => setShowPassword(!showPassword)}>
+            <PasswordToggle type='button' onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <FiEyeOff /> : <FiEye />}
             </PasswordToggle>
           </InputWrapper>
           {errors.password && <ErrorText>{errors.password}</ErrorText>}
         </FormGroup>
 
-        <SubmitButton type="submit" disabled={loading}>
+        <SubmitButton type='submit' disabled={loading}>
           {loading ? 'Iniciando Sesión...' : 'Iniciar Sesión'}
         </SubmitButton>
 
@@ -148,26 +209,52 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
             If inside modal, we might want a "No account? Register" link at bottom?
             The current design has tabs.
         */}
-        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem', color: '#6b7280' }}>
-           ¿No tienes cuenta? <button type="button" onClick={onRegisterClick} style={{ color: '#16a34a', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>Regístrate</button>
+        <div
+          style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem', color: '#6b7280' }}
+        >
+          ¿No tienes cuenta?{' '}
+          <button
+            type='button'
+            onClick={onRegisterClick}
+            style={{
+              color: '#16a34a',
+              fontWeight: 600,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Regístrate
+          </button>
         </div>
       </Form>
 
       <Divider>O continúa con</Divider>
 
       <SocialButtons>
-        <SocialButton type="button">
+        <SocialButton type='button' onClick={handleGoogleSignIn} disabled={googleLoading}>
           <FcGoogle />
-          Google
-        </SocialButton>
-        <SocialButton type="button">
-          <FaApple />
-          Apple
+          {googleLoading ? 'Conectando...' : 'Google'}
         </SocialButton>
       </SocialButtons>
 
+      <NicknamePromptModal
+        isOpen={showNicknameModal}
+        suggestedNickname={suggestedNickname}
+        onConfirm={handleNicknameConfirm}
+        onClose={() => setShowNicknameModal(false)}
+      />
+
       <FooterText>
-        Al continuar, aceptas nuestros <a href="/terms" onClick={onSuccess}>Términos de Servicio</a> y <a href="/privacy" onClick={onSuccess}>Política de Privacidad</a>.
+        Al continuar, aceptas nuestros{' '}
+        <a href='/terms' onClick={onSuccess}>
+          Términos de Servicio
+        </a>{' '}
+        y{' '}
+        <a href='/privacy' onClick={onSuccess}>
+          Política de Privacidad
+        </a>
+        .
       </FooterText>
     </>
   );

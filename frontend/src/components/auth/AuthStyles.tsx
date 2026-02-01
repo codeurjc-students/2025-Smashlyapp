@@ -32,9 +32,9 @@ export const Tab = styled(Link)<{ $active?: boolean }>`
   text-decoration: none;
   font-size: 0.95rem;
   font-weight: 600;
-  color: ${props => props.$active ? '#111827' : '#6b7280'};
-  background: ${props => props.$active ? 'white' : 'transparent'};
-  box-shadow: ${props => props.$active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none'};
+  color: ${props => (props.$active ? '#111827' : '#6b7280')};
+  background: ${props => (props.$active ? 'white' : 'transparent')};
+  box-shadow: ${props => (props.$active ? '0 1px 3px rgba(0,0,0,0.1)' : 'none')};
   transition: all 0.2s ease;
 
   &:hover {
@@ -69,7 +69,7 @@ export const Input = styled.input<{ $hasError?: boolean }>`
   width: 100%;
   padding: 14px 16px;
   padding-left: 44px; // Check if we are using icons
-  border: 1px solid ${props => props.$hasError ? '#ef4444' : '#e5e7eb'};
+  border: 1px solid ${props => (props.$hasError ? '#ef4444' : '#e5e7eb')};
   border-radius: 12px;
   font-size: 1rem;
   transition: all 0.2s;
@@ -109,7 +109,7 @@ export const PasswordToggle = styled.button`
   padding: 4px;
   display: flex;
   align-items: center;
-  
+
   &:hover {
     color: #6b7280;
   }
@@ -161,7 +161,8 @@ export const Divider = styled.div`
   color: #9ca3af;
   font-size: 0.9rem;
 
-  &::before, &::after {
+  &::before,
+  &::after {
     content: '';
     flex: 1;
     height: 1px;
@@ -170,8 +171,8 @@ export const Divider = styled.div`
 `;
 
 export const SocialButtons = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-direction: column;
   gap: 16px;
 `;
 
@@ -181,6 +182,7 @@ export const SocialButton = styled.button`
   justify-content: center;
   gap: 10px;
   padding: 12px;
+  width: 100%;
   border: 1px solid #e5e7eb;
   border-radius: 99px; // Pill shape
   background: white;
@@ -211,7 +213,7 @@ export const FooterText = styled.p`
     color: #84cc16; /* Slightly darker for text readability on white? Image has neon green links? "Terms of Service" looks yellow/green */
     text-decoration: none;
     font-weight: 500;
-    
+
     &:hover {
       text-decoration: underline;
     }
@@ -225,7 +227,7 @@ export const ForgotPasswordLink = styled(Link)`
   font-weight: 600;
   text-decoration: none;
   align-self: flex-end;
-  
+
   &:hover {
     text-decoration: underline;
   }

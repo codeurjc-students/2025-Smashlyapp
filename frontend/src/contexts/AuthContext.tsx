@@ -8,6 +8,7 @@ import {
   getAuthToken,
 } from '../utils/authUtils';
 import { API_ENDPOINTS, buildApiUrl } from '../config/api';
+import { GoogleAuthService } from '../services/googleAuthService';
 
 // Interfaces para TypeScript
 interface AuthContextType {
@@ -25,6 +26,12 @@ interface AuthContextType {
     email: string,
     password: string
   ) => Promise<{ data: UserProfile | null; error: string | null }>;
+  signInWithGoogle: () => Promise<{
+    data: UserProfile | null;
+    error: string | null;
+    isNewUser?: boolean;
+    suggestedNickname?: string;
+  }>;
   signOut: () => Promise<{ error: string | null }>;
   refreshUserProfile: () => Promise<void>;
   isAuthenticated: boolean;
@@ -274,6 +281,43 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
+  // Función para iniciar sesión con Google
+  const signInWithGoogle = async (): Promise<{
+    data: UserProfile | null;
+    error: string | null;
+    isNewUser?: boolean;
+    suggestedNickname?: string;
+  }> => {
+    try {
+      console.log('Attempting to sign in with Google...');
+
+      // Call Google Auth Service
+      const result = await GoogleAuthService.signInWithGoogle();
+
+      const { user: googleUser, session, isNewUser, suggestedNickname } = result;
+
+      // Store the access token
+      if (session?.access_token) {
+        console.log('Google sign-in successful, storing token...');
+        setAuthToken(session.access_token);
+        await loadUserProfile();
+      }
+
+      return {
+        data: googleUser || userProfile,
+        error: null,
+        isNewUser,
+        suggestedNickname,
+      };
+    } catch (error: any) {
+      console.error('Google sign-in error:', error);
+      return {
+        data: null,
+        error: error.message || 'Error durante el inicio de sesión con Google',
+      };
+    }
+  };
+
   // Función para cerrar sesión
   const signOut = async (): Promise<{ error: string | null }> => {
     try {
@@ -322,6 +366,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     userProfile,
     signUp,
     signIn,
+    signInWithGoogle,
     signOut,
     refreshUserProfile,
     loading,

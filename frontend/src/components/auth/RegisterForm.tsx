@@ -1,14 +1,26 @@
 import React, { useState } from 'react';
 import toast from 'react-hot-toast';
-import { FiEye, FiEyeOff, FiFileText, FiGlobe, FiLock, FiMail, FiMapPin, FiPhone, FiShoppingBag, FiUser } from 'react-icons/fi';
+import {
+  FiEye,
+  FiEyeOff,
+  FiFileText,
+  FiGlobe,
+  FiLock,
+  FiMail,
+  FiMapPin,
+  FiPhone,
+  FiShoppingBag,
+  FiUser,
+} from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
-import { FaApple } from 'react-icons/fa';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import styled from 'styled-components';
 import { useAuth } from '../../contexts/AuthContext.tsx';
 import storeService from '../../services/storeService';
+import { UserProfileService } from '../../services/userProfileService.ts';
 import OnboardingPromptModal from '../features/OnboardingPromptModal';
 import StoreRequestModal from '../features/StoreRequestModal';
+import NicknamePromptModal from './NicknamePromptModal.tsx';
 import {
   Form,
   FormGroup,
@@ -22,7 +34,7 @@ import {
   Divider,
   SocialButtons,
   SocialButton,
-  FooterText
+  FooterText,
 } from './AuthStyles';
 
 // Local styles for Register specific components
@@ -127,12 +139,17 @@ interface RegisterFormProps {
 const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { signUp } = useAuth();
+  const { signUp, signInWithGoogle } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showStoreModal, setShowStoreModal] = useState(false);
   const [showOnboardingModal, setShowOnboardingModal] = useState(false);
+
+  // Nickname modal state for Google OAuth
+  const [showNicknameModal, setShowNicknameModal] = useState(false);
+  const [suggestedNickname, setSuggestedNickname] = useState('');
 
   const redirectTo = searchParams.get('redirect') || '/';
   const [formData, setFormData] = useState<FormData>({
@@ -173,14 +190,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
     // Common fields
     if (!formData.fullName.trim()) newErrors.fullName = 'Required';
     if (!formData.nickname.trim()) newErrors.nickname = 'Required';
-    
+
     if (!formData.email.trim()) newErrors.email = 'Required';
     else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = 'Invalid email';
-    
+
     if (!formData.password) newErrors.password = 'Required';
     else if (!isPasswordValid) newErrors.password = 'Password does not meet requirements';
-    
-    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = 'Passwords do not match';
+
+    if (formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = 'Passwords do not match';
 
     // Store specific
     if (formData.registrationType === 'store') {
@@ -223,23 +241,26 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
 
       if (formData.registrationType === 'store') {
         try {
-          await storeService.createStoreRequest({
-             store_name: formData.storeName!,
-             legal_name: formData.legalName!,
-             cif_nif: formData.cifNif!,
-             contact_email: formData.contactEmail!,
-             phone_number: formData.phoneNumber!,
-             website_url: formData.websiteUrl,
-             logo_url: formData.logoUrl,
-             short_description: formData.shortDescription,
-             location: formData.location!,
-          }, token!);
+          await storeService.createStoreRequest(
+            {
+              store_name: formData.storeName!,
+              legal_name: formData.legalName!,
+              cif_nif: formData.cifNif!,
+              contact_email: formData.contactEmail!,
+              phone_number: formData.phoneNumber!,
+              website_url: formData.websiteUrl,
+              logo_url: formData.logoUrl,
+              short_description: formData.shortDescription,
+              location: formData.location!,
+            },
+            token!
+          );
           setShowStoreModal(true);
         } catch (storeError: any) {
           toast.error(`Account created but store registration failed: ${storeError.message}`);
           setTimeout(() => {
-             if (onSuccess) onSuccess();
-             else navigate('/login');
+            if (onSuccess) onSuccess();
+            else navigate('/login');
           }, 3000);
         }
       } else {
@@ -259,6 +280,50 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
     else navigate(redirectTo);
   };
 
+  const handleGoogleSignIn = async () => {
+    setGoogleLoading(true);
+    try {
+      const { error, isNewUser, suggestedNickname: nickname } = await signInWithGoogle();
+
+      if (error) {
+        toast.error(error);
+        return;
+      }
+
+      // If it's a new user, show nickname prompt
+      if (isNewUser && nickname) {
+        setSuggestedNickname(nickname);
+        setShowNicknameModal(true);
+      } else {
+        // Existing user, proceed normally
+        toast.success('¡Bienvenido de nuevo!');
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          navigate(redirectTo);
+        }
+      }
+    } catch (error: any) {
+      console.error('Error during Google sign-in:', error);
+      toast.error(error?.message || 'Error inesperado con Google');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleNicknameConfirm = async (nickname: string) => {
+    try {
+      // Update the user's nickname
+      await UserProfileService.updateUserProfile({ nickname });
+
+      toast.success('¡Bienvenido a Smashlyapp!');
+      setShowNicknameModal(false);
+      setShowOnboardingModal(true); // Show onboarding for new users
+    } catch (error: any) {
+      throw new Error(error.message || 'Error al actualizar el nickname');
+    }
+  };
+
   const handleOnboardingClose = () => {
     setShowOnboardingModal(false);
     if (onSuccess) onSuccess();
@@ -268,14 +333,22 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
   return (
     <>
       <OnboardingPromptModal isOpen={showOnboardingModal} onClose={handleOnboardingClose} />
-      
+
       <Form onSubmit={handleSubmit}>
         <RegistrationTypeSelector>
-          <TypeCard type='button' $isSelected={formData.registrationType === 'player'} onClick={() => setFormData(p => ({...p, registrationType: 'player'}))}>
+          <TypeCard
+            type='button'
+            $isSelected={formData.registrationType === 'player'}
+            onClick={() => setFormData(p => ({ ...p, registrationType: 'player' }))}
+          >
             <TypeIcon>👤</TypeIcon>
             <TypeTitle>Jugador</TypeTitle>
           </TypeCard>
-          <TypeCard type='button' $isSelected={formData.registrationType === 'store'} onClick={() => setFormData(p => ({...p, registrationType: 'store'}))}>
+          <TypeCard
+            type='button'
+            $isSelected={formData.registrationType === 'store'}
+            onClick={() => setFormData(p => ({ ...p, registrationType: 'store' }))}
+          >
             <TypeIcon>🏪</TypeIcon>
             <TypeTitle>Tienda</TypeTitle>
           </TypeCard>
@@ -283,53 +356,110 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
 
         {/* Common Fields */}
         <FormGroup>
-          <Label htmlFor="fullName">Nombre Completo</Label>
+          <Label htmlFor='fullName'>Nombre Completo</Label>
           <InputWrapper>
-            <IconWrapper><FiUser /></IconWrapper>
-            <Input id="fullName" name="fullName" type="text" placeholder="Tu nombre" value={formData.fullName} onChange={handleInputChange} $hasError={!!errors.fullName} />
+            <IconWrapper>
+              <FiUser />
+            </IconWrapper>
+            <Input
+              id='fullName'
+              name='fullName'
+              type='text'
+              placeholder='Tu nombre'
+              value={formData.fullName}
+              onChange={handleInputChange}
+              $hasError={!!errors.fullName}
+            />
           </InputWrapper>
           {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
         </FormGroup>
 
         <FormGroup>
-          <Label htmlFor="nickname">Apodo</Label>
+          <Label htmlFor='nickname'>Apodo</Label>
           <InputWrapper>
-            <IconWrapper><FiUser /></IconWrapper>
-            <Input id="nickname" name="nickname" type="text" placeholder="Tu apodo" value={formData.nickname} onChange={handleInputChange} $hasError={!!errors.nickname} />
+            <IconWrapper>
+              <FiUser />
+            </IconWrapper>
+            <Input
+              id='nickname'
+              name='nickname'
+              type='text'
+              placeholder='Tu apodo'
+              value={formData.nickname}
+              onChange={handleInputChange}
+              $hasError={!!errors.nickname}
+            />
           </InputWrapper>
           {errors.nickname && <ErrorText>{errors.nickname}</ErrorText>}
         </FormGroup>
 
         <FormGroup>
-          <Label htmlFor="email">Correo Electrónico</Label>
+          <Label htmlFor='email'>Correo Electrónico</Label>
           <InputWrapper>
-            <IconWrapper><FiMail /></IconWrapper>
-            <Input id="email" name="email" type="email" placeholder="tu@email.com" value={formData.email} onChange={handleInputChange} $hasError={!!errors.email} />
+            <IconWrapper>
+              <FiMail />
+            </IconWrapper>
+            <Input
+              id='email'
+              name='email'
+              type='email'
+              placeholder='tu@email.com'
+              value={formData.email}
+              onChange={handleInputChange}
+              $hasError={!!errors.email}
+            />
           </InputWrapper>
           {errors.email && <ErrorText>{errors.email}</ErrorText>}
         </FormGroup>
 
         <FormGroup>
-          <Label htmlFor="password">Contraseña</Label>
+          <Label htmlFor='password'>Contraseña</Label>
           <InputWrapper>
-            <IconWrapper><FiLock /></IconWrapper>
-            <Input id="password" name="password" type={showPassword ? 'text' : 'password'} placeholder="Contraseña" value={formData.password} onChange={handleInputChange} $hasError={!!errors.password} />
-            <PasswordToggle type="button" onClick={() => setShowPassword(!showPassword)}>{showPassword ? <FiEyeOff /> : <FiEye />}</PasswordToggle>
+            <IconWrapper>
+              <FiLock />
+            </IconWrapper>
+            <Input
+              id='password'
+              name='password'
+              type={showPassword ? 'text' : 'password'}
+              placeholder='Contraseña'
+              value={formData.password}
+              onChange={handleInputChange}
+              $hasError={!!errors.password}
+            />
+            <PasswordToggle type='button' onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </PasswordToggle>
           </InputWrapper>
           {errors.password && <ErrorText>{errors.password}</ErrorText>}
         </FormGroup>
 
         <FormGroup>
-          <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
+          <Label htmlFor='confirmPassword'>Confirmar Contraseña</Label>
           <InputWrapper>
-            <IconWrapper><FiLock /></IconWrapper>
-            <Input id="confirmPassword" name="confirmPassword" type={showConfirmPassword ? 'text' : 'password'} placeholder="Repetir contraseña" value={formData.confirmPassword} onChange={handleInputChange} $hasError={!!errors.confirmPassword} />
-            <PasswordToggle type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}>{showConfirmPassword ? <FiEyeOff /> : <FiEye />}</PasswordToggle>
+            <IconWrapper>
+              <FiLock />
+            </IconWrapper>
+            <Input
+              id='confirmPassword'
+              name='confirmPassword'
+              type={showConfirmPassword ? 'text' : 'password'}
+              placeholder='Repetir contraseña'
+              value={formData.confirmPassword}
+              onChange={handleInputChange}
+              $hasError={!!errors.confirmPassword}
+            />
+            <PasswordToggle
+              type='button'
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+            </PasswordToggle>
           </InputWrapper>
           {errors.confirmPassword && <ErrorText>{errors.confirmPassword}</ErrorText>}
         </FormGroup>
 
-         {/* Password Requirements visualization */}
+        {/* Password Requirements visualization */}
         {formData.password && !isPasswordValid && (
           <PasswordRequirements>
             <RequirementsList>
@@ -350,95 +480,182 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
           </PasswordRequirements>
         )}
 
-
         {/* Store Specific Fields */}
         {formData.registrationType === 'store' && (
           <>
             <FormGroup>
-               <Label>Nombre Tienda</Label>
-               <InputWrapper>
-                 <IconWrapper><FiShoppingBag /></IconWrapper>
-                 <Input name="storeName" value={formData.storeName} onChange={handleInputChange} $hasError={!!errors.storeName} />
-               </InputWrapper>
-               {errors.storeName && <ErrorText>{errors.storeName}</ErrorText>}
-            </FormGroup>
-             <FormGroup>
-               <Label>CIF/NIF</Label>
-               <InputWrapper>
-                 <IconWrapper><FiFileText /></IconWrapper>
-                 <Input name="cifNif" value={formData.cifNif} onChange={handleInputChange} $hasError={!!errors.cifNif} />
-               </InputWrapper>
-               {errors.cifNif && <ErrorText>{errors.cifNif}</ErrorText>}
-            </FormGroup>
-             <FormGroup>
-               <Label>Razón Social</Label>
-               <InputWrapper>
-                 <IconWrapper><FiFileText /></IconWrapper>
-                 <Input name="legalName" value={formData.legalName} onChange={handleInputChange} $hasError={!!errors.legalName} />
-               </InputWrapper>
-               {errors.legalName && <ErrorText>{errors.legalName}</ErrorText>}
+              <Label>Nombre Tienda</Label>
+              <InputWrapper>
+                <IconWrapper>
+                  <FiShoppingBag />
+                </IconWrapper>
+                <Input
+                  name='storeName'
+                  value={formData.storeName}
+                  onChange={handleInputChange}
+                  $hasError={!!errors.storeName}
+                />
+              </InputWrapper>
+              {errors.storeName && <ErrorText>{errors.storeName}</ErrorText>}
             </FormGroup>
             <FormGroup>
-               <Label>Email Contacto</Label>
-               <InputWrapper>
-                 <IconWrapper><FiMail /></IconWrapper>
-                 <Input name="contactEmail" value={formData.contactEmail} onChange={handleInputChange} $hasError={!!errors.contactEmail} />
-               </InputWrapper>
-               {errors.contactEmail && <ErrorText>{errors.contactEmail}</ErrorText>}
+              <Label>CIF/NIF</Label>
+              <InputWrapper>
+                <IconWrapper>
+                  <FiFileText />
+                </IconWrapper>
+                <Input
+                  name='cifNif'
+                  value={formData.cifNif}
+                  onChange={handleInputChange}
+                  $hasError={!!errors.cifNif}
+                />
+              </InputWrapper>
+              {errors.cifNif && <ErrorText>{errors.cifNif}</ErrorText>}
             </FormGroup>
             <FormGroup>
-               <Label>Teléfono</Label>
-               <InputWrapper>
-                 <IconWrapper><FiPhone /></IconWrapper>
-                 <Input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} $hasError={!!errors.phoneNumber} />
-               </InputWrapper>
-               {errors.phoneNumber && <ErrorText>{errors.phoneNumber}</ErrorText>}
+              <Label>Razón Social</Label>
+              <InputWrapper>
+                <IconWrapper>
+                  <FiFileText />
+                </IconWrapper>
+                <Input
+                  name='legalName'
+                  value={formData.legalName}
+                  onChange={handleInputChange}
+                  $hasError={!!errors.legalName}
+                />
+              </InputWrapper>
+              {errors.legalName && <ErrorText>{errors.legalName}</ErrorText>}
             </FormGroup>
-             <FormGroup>
-               <Label>Ubicación</Label>
-               <InputWrapper>
-                 <IconWrapper><FiMapPin /></IconWrapper>
-                 <Input name="location" value={formData.location} onChange={handleInputChange} $hasError={!!errors.location} />
-               </InputWrapper>
-               {errors.location && <ErrorText>{errors.location}</ErrorText>}
+            <FormGroup>
+              <Label>Email Contacto</Label>
+              <InputWrapper>
+                <IconWrapper>
+                  <FiMail />
+                </IconWrapper>
+                <Input
+                  name='contactEmail'
+                  value={formData.contactEmail}
+                  onChange={handleInputChange}
+                  $hasError={!!errors.contactEmail}
+                />
+              </InputWrapper>
+              {errors.contactEmail && <ErrorText>{errors.contactEmail}</ErrorText>}
             </FormGroup>
-             <FormGroup>
-               <Label>Sitio Web</Label>
-               <InputWrapper>
-                 <IconWrapper><FiGlobe /></IconWrapper>
-                 <Input name="websiteUrl" value={formData.websiteUrl} onChange={handleInputChange} $hasError={!!errors.websiteUrl} />
-               </InputWrapper>
-               {errors.websiteUrl && <ErrorText>{errors.websiteUrl}</ErrorText>}
+            <FormGroup>
+              <Label>Teléfono</Label>
+              <InputWrapper>
+                <IconWrapper>
+                  <FiPhone />
+                </IconWrapper>
+                <Input
+                  name='phoneNumber'
+                  value={formData.phoneNumber}
+                  onChange={handleInputChange}
+                  $hasError={!!errors.phoneNumber}
+                />
+              </InputWrapper>
+              {errors.phoneNumber && <ErrorText>{errors.phoneNumber}</ErrorText>}
+            </FormGroup>
+            <FormGroup>
+              <Label>Ubicación</Label>
+              <InputWrapper>
+                <IconWrapper>
+                  <FiMapPin />
+                </IconWrapper>
+                <Input
+                  name='location'
+                  value={formData.location}
+                  onChange={handleInputChange}
+                  $hasError={!!errors.location}
+                />
+              </InputWrapper>
+              {errors.location && <ErrorText>{errors.location}</ErrorText>}
+            </FormGroup>
+            <FormGroup>
+              <Label>Sitio Web</Label>
+              <InputWrapper>
+                <IconWrapper>
+                  <FiGlobe />
+                </IconWrapper>
+                <Input
+                  name='websiteUrl'
+                  value={formData.websiteUrl}
+                  onChange={handleInputChange}
+                  $hasError={!!errors.websiteUrl}
+                />
+              </InputWrapper>
+              {errors.websiteUrl && <ErrorText>{errors.websiteUrl}</ErrorText>}
             </FormGroup>
           </>
         )}
 
-        <SubmitButton type="submit" disabled={loading}>
+        <SubmitButton type='submit' disabled={loading}>
           {loading ? 'Creando cuenta...' : 'Crear Cuenta'}
         </SubmitButton>
 
-        <div style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem', color: '#6b7280' }}>
-           ¿Ya tienes cuenta? <button type="button" onClick={onLoginClick} style={{ color: '#16a34a', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}>Inicia sesión</button>
+        <div
+          style={{ marginTop: '1rem', textAlign: 'center', fontSize: '0.9rem', color: '#6b7280' }}
+        >
+          ¿Ya tienes cuenta?{' '}
+          <button
+            type='button'
+            onClick={onLoginClick}
+            style={{
+              color: '#16a34a',
+              fontWeight: 600,
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            Inicia sesión
+          </button>
         </div>
       </Form>
 
       <Divider>O continúa con</Divider>
 
       <SocialButtons>
-        <SocialButton type="button">
+        <SocialButton type='button' onClick={handleGoogleSignIn} disabled={googleLoading}>
           <FcGoogle />
-          Google
-        </SocialButton>
-        <SocialButton type="button">
-          <FaApple />
-          Apple
+          {googleLoading ? 'Conectando...' : 'Google'}
         </SocialButton>
       </SocialButtons>
 
+      {formData.registrationType === 'store' && (
+        <p
+          style={{
+            fontSize: '0.8rem',
+            color: '#6b7280',
+            textAlign: 'center',
+            marginTop: '-0.5rem',
+          }}
+        >
+          Al registrarte con Google serás registrado como Jugador
+        </p>
+      )}
+
+      <NicknamePromptModal
+        isOpen={showNicknameModal}
+        suggestedNickname={suggestedNickname}
+        onConfirm={handleNicknameConfirm}
+        onClose={() => setShowNicknameModal(false)}
+      />
+
       <FooterText>
-        Al continuar, aceptas nuestros <Link to="/terms" onClick={onSuccess}>Términos de Servicio</Link> y <Link to="/privacy" onClick={onSuccess}>Política de Privacidad</Link>.
+        Al continuar, aceptas nuestros{' '}
+        <Link to='/terms' onClick={onSuccess}>
+          Términos de Servicio
+        </Link>{' '}
+        y{' '}
+        <Link to='/privacy' onClick={onSuccess}>
+          Política de Privacidad
+        </Link>
+        .
       </FooterText>
-      
+
       <StoreRequestModal
         isOpen={showStoreModal}
         onClose={handleModalClose}
