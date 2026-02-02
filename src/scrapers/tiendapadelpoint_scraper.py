@@ -200,8 +200,8 @@ class TiendaPadelPointScraper(BaseScraper):
             visited_pages.add(page.url)
 
             # Collect products
-            # .product-grid-item .name a
-            links = await page.query_selector_all('.product-grid-item .name a')
+            # Scope to .main-products to avoid mega-menu items
+            links = await page.query_selector_all('.main-products .product-grid-item .name a')
             count = 0
             for link in links:
                  href = await link.get_attribute('href')

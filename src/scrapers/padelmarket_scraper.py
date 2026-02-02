@@ -188,17 +188,49 @@ class PadelMarketScraper(BaseScraper):
         
         # Simple loop for 'Load More'
         while True:
-            # 1. Collect products currently visible
-            links = await page.query_selector_all('a[href*="/products/"]')
+            # Safety limit check first
+            if len(product_urls) >= 1000:
+                 print("Reached 1000 products limit.")
+                 break
+
+            # 1. Try to click Load More FIRST
+            try:
+                load_more = await page.query_selector('button.load-more.button')
+                if load_more and await load_more.is_visible():
+                     print("Clicking Load More...")
+                     await load_more.scroll_into_view_if_needed()
+                     await load_more.click()
+                     # Wait for network to be idle
+                     await page.wait_for_load_state('networkidle', timeout=5000)
+                else:
+                     print("No more 'Load More' button found. Collecting final batch...")
+                     # Collect one last time before exiting
+                     links = await page.query_selector_all('a[href*="/products/"]')
+                     for link in links:
+                         href = await link.get_attribute('href')
+                         if href and '/products/' in href:
+                             if not href.startswith('http'):
+                                  href = f'https://padelmarket.com{href}'
+                             if 'padelmarket.com/products/' in href:
+                                  href = href.replace('padelmarket.com/products/', 'padelmarket.com/es-eu/products/')
+                             clean_href = href.split('?')[0]
+                             if clean_href not in product_urls:
+                                  product_urls.append(clean_href)
+                     print(f"Final count: {len(product_urls)} products")
+                     break
+            except Exception as e:
+                 print(f"Error clicking Load More: {e}")
+                 break
+            
+            # 2. Now collect products AFTER loading more content
             current_count = len(product_urls)
+            links = await page.query_selector_all('a[href*="/products/"]')
             
             for link in links:
                 href = await link.get_attribute('href')
                 if href and '/products/' in href:
-                    # Generic cleaner
                     if not href.startswith('http'):
                          href = f'https://padelmarket.com{href}'
-                    # Ensure /es-eu/ is in URL if it's the ES store
                     if 'padelmarket.com/products/' in href:
                          href = href.replace('padelmarket.com/products/', 'padelmarket.com/es-eu/products/')
                     
@@ -207,34 +239,12 @@ class PadelMarketScraper(BaseScraper):
                          product_urls.append(clean_href)
             
             new_count = len(product_urls)
-            print(f"Products found: {new_count} (+{new_count - current_count})")
+            added = new_count - current_count
+            print(f"Products found: {new_count} (+{added})")
             
-            # Check if no new products were found
-            if new_count == current_count:
-                print("No new products found. Pagination complete.")
+            # Check if no new products were found AFTER loading more
+            if added == 0:
+                print("No new products loaded. Pagination complete.")
                 break
-            
-            # Safety limit
-            if new_count >= 1000: # Practical limit
-                 break
-
-            # 2. Click Load More
-            # Selector: button.load-more.button
-            try:
-                load_more = await page.query_selector('button.load-more.button')
-                if load_more and await load_more.is_visible():
-                     print("Clicking Load More...")
-                     # Scroll to it
-                     await load_more.scroll_into_view_if_needed()
-                     # Click
-                     await load_more.click()
-                     # Wait for network to be idle (more reliable than arbitrary timeout)
-                     await page.wait_for_load_state('networkidle', timeout=5000)
-                else:
-                     print("No more 'Load More' button found/visible.")
-                     break
-            except Exception as e:
-                 print(f"Error clicking Load More: {e}")
-                 break
         
         return list(set(product_urls))
