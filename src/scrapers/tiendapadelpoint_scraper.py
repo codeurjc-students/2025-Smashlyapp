@@ -207,9 +207,8 @@ class TiendaPadelPointScraper(BaseScraper):
                  href = await link.get_attribute('href')
                  name_text = await link.inner_text()
                  
-                 # Strict 'pala' filter + exclusion
-                 if 'pala' not in name_text.lower(): continue
-                 exclusion = ['zapatillas', 'paletero', 'camiseta', 'protector', 'mochila', 'falda']
+                 # Only exclusion filter (we're already on /palas-de-padel, no need to filter for 'pala')
+                 exclusion = ['zapatillas', 'paletero', 'camiseta', 'protector', 'mochila', 'falda', 'pantalon', 'short']
                  if any(e in name_text.lower() for e in exclusion): continue
 
                  if href:
