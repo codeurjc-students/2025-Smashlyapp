@@ -1,0 +1,219 @@
+name: Run Padel Scrapers (Split Mode)
+
+# Workflow alternativo que ejecuta cada tienda en un job paralelo
+# Útil si el scraping completo supera las 6 horas
+on:
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: "Límite de productos por tienda (vacío = sin límite)"
+        required: false
+        default: ""
+
+jobs:
+  scrape-padelmarket:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        working-directory: ./src/scrapers
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+      - name: Scrape PadelMarket
+        working-directory: ./src/scrapers
+        run: |
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            python run_scrapers.py --stores padelmarket --limit ${{ github.event.inputs.limit }}
+          else
+            python run_scrapers.py --stores padelmarket
+          fi
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: padelmarket-data
+          path: src/scrapers/rackets.json
+          retention-days: 30
+
+  scrape-padelnuestro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        working-directory: ./src/scrapers
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+      - name: Scrape PadelNuestro
+        working-directory: ./src/scrapers
+        run: |
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            python run_scrapers.py --stores padelnuestro --limit ${{ github.event.inputs.limit }}
+          else
+            python run_scrapers.py --stores padelnuestro
+          fi
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: padelnuestro-data
+          path: src/scrapers/rackets.json
+          retention-days: 30
+
+  scrape-padelproshop:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        working-directory: ./src/scrapers
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+      - name: Scrape PadelProShop
+        working-directory: ./src/scrapers
+        run: |
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            python run_scrapers.py --stores padelproshop --limit ${{ github.event.inputs.limit }}
+          else
+            python run_scrapers.py --stores padelproshop
+          fi
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: padelproshop-data
+          path: src/scrapers/rackets.json
+          retention-days: 30
+
+  scrape-tiendapadelpoint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+      - name: Install dependencies
+        working-directory: ./src/scrapers
+        run: |
+          pip install -r requirements.txt
+          playwright install chromium
+          playwright install-deps chromium
+      - name: Scrape TiendaPadelPoint
+        working-directory: ./src/scrapers
+        run: |
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            python run_scrapers.py --stores tiendapadelpoint --limit ${{ github.event.inputs.limit }}
+          else
+            python run_scrapers.py --stores tiendapadelpoint
+          fi
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: tiendapadelpoint-data
+          path: src/scrapers/rackets.json
+          retention-days: 30
+
+  merge-results:
+    needs:
+      [
+        scrape-padelmarket,
+        scrape-padelnuestro,
+        scrape-padelproshop,
+        scrape-tiendapadelpoint,
+      ]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: ./artifacts
+
+      - name: Merge JSON files
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Merge rackets data
+        run: |
+          python3 << 'EOF'
+          import json
+          import os
+          from pathlib import Path
+
+          merged_data = {}
+          artifacts_dir = Path("./artifacts")
+
+          # Buscar todos los rackets.json en los artifacts descargados
+          for json_file in artifacts_dir.rglob("rackets.json"):
+              print(f"Merging: {json_file}")
+              with open(json_file, 'r', encoding='utf-8') as f:
+                  data = json.load(f)
+                  
+                  # Merge rackets
+                  for slug, racket in data.items():
+                      if slug in merged_data:
+                          # Merge prices from different stores
+                          existing_prices = {p['store']: p for p in merged_data[slug].get('prices', [])}
+                          for price_entry in racket.get('prices', []):
+                              store = price_entry['store']
+                              if store not in existing_prices:
+                                  merged_data[slug].setdefault('prices', []).append(price_entry)
+                              # Merge specs
+                              for key, value in racket.get('specs', {}).items():
+                                  if key not in merged_data[slug]['specs'] or not merged_data[slug]['specs'][key]:
+                                      merged_data[slug]['specs'][key] = value
+                              # Merge images
+                              for img in racket.get('images', []):
+                                  if img not in merged_data[slug].get('images', []):
+                                      merged_data[slug].setdefault('images', []).append(img)
+                      else:
+                          merged_data[slug] = racket
+
+          # Save merged file
+          with open('rackets_merged.json', 'w', encoding='utf-8') as f:
+              json.dump(merged_data, f, indent=4, ensure_ascii=False)
+
+          print(f"✅ Merged {len(merged_data)} rackets total")
+          EOF
+
+      - name: Upload merged data
+        uses: actions/upload-artifact@v4
+        with:
+          name: rackets-merged-final
+          path: rackets_merged.json
+          retention-days: 90
+
+      - name: Commit merged data
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          cp rackets_merged.json src/scrapers/rackets.json
+          git add src/scrapers/rackets.json
+          git diff --staged --quiet || git commit -m "chore: update rackets data (merged from parallel scraping) [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

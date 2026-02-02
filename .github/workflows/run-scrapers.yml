@@ -1,0 +1,76 @@
+name: Run Padel Scrapers
+
+# Se ejecuta manualmente desde GitHub Actions UI
+on:
+  workflow_dispatch:
+    inputs:
+      stores:
+        description: 'Tiendas a scrapear (comma separated): padelmarket,padelnuestro,padelproshop,tiendapadelpoint o "all"'
+        required: false
+        default: "all"
+      limit:
+        description: "Límite de productos por tienda (vacío = sin límite)"
+        required: false
+        default: ""
+
+jobs:
+  scrape:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360 # 6 horas máximo (límite de GitHub Actions)
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: 📦 Install Python dependencies
+        working-directory: ./src/scrapers
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: 🎭 Install Playwright browsers
+        run: |
+          playwright install chromium
+          playwright install-deps chromium
+
+      - name: 🕷️ Run scrapers
+        working-directory: ./src/scrapers
+        run: |
+          if [ -n "${{ github.event.inputs.limit }}" ]; then
+            LIMIT_ARG="--limit ${{ github.event.inputs.limit }}"
+          else
+            LIMIT_ARG=""
+          fi
+
+          if [ "${{ github.event.inputs.stores }}" = "all" ]; then
+            python run_scrapers.py $LIMIT_ARG
+          else
+            python run_scrapers.py --stores "${{ github.event.inputs.stores }}" $LIMIT_ARG
+          fi
+
+      - name: 📊 Upload scraped data as artifact
+        uses: actions/upload-artifact@v4
+        if: always() # Sube los resultados incluso si falla el scraping
+        with:
+          name: rackets-data-${{ github.run_number }}
+          path: |
+            src/scrapers/rackets.json
+            src/scrapers/*.log
+          retention-days: 30 # Los artifacts se guardan 30 días
+
+      - name: 💾 Commit scraped data to repository (opcional)
+        if: success()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/scrapers/rackets.json
+          git diff --staged --quiet || git commit -m "chore: update rackets data [skip ci]"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
