@@ -209,6 +209,11 @@ class PadelMarketScraper(BaseScraper):
             new_count = len(product_urls)
             print(f"Products found: {new_count} (+{new_count - current_count})")
             
+            # Check if no new products were found
+            if new_count == current_count:
+                print("No new products found. Pagination complete.")
+                break
+            
             # Safety limit
             if new_count >= 1000: # Practical limit
                  break
