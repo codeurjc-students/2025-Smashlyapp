@@ -32,7 +32,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/bullpadel-vertex-02-x-red-2023-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:24.267462"
+                "last_updated": "2026-02-05T19:29:57.814673"
             }
         ]
     },
@@ -69,7 +69,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/bullpadel-hack-03-comfort-2024-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:27.664459"
+                "last_updated": "2026-02-05T19:30:12.118051"
             }
         ]
     },
@@ -156,16 +156,26 @@
             "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_7.png?v=1767964625",
             "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_8.png?v=1767964625",
             "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_9.png?v=1767964625",
-            "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_10.png?v=1767964625"
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUS25_10.png?v=1767964625",
+            "https://padelmarket.com/cdn/shop/files/nox1.jpg?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/Agustin_Tapia_2.jpg?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_2.png?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_3.png?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_4.png?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_5.png?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_6.png?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_7.png?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_9.png?v=1768378963",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT1825_10.png?v=1768378963"
         ],
         "prices": [
             {
                 "store": "padelmarket",
-                "price": 189.95,
+                "price": 214.95,
                 "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-12k-2025-by-agustin-tapia-pala",
+                "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-18k-alum-2025-by-agustin-tapia-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:38.492288"
+                "last_updated": "2026-02-05T19:30:04.009857"
             }
         ]
     },
@@ -283,16 +293,25 @@
             "https://padelmarket.com/cdn/shop/files/10636.jpg?v=1753792720",
             "https://padelmarket.com/cdn/shop/files/10617.jpg?v=1753792720",
             "https://padelmarket.com/cdn/shop/files/10618.jpg?v=1753792720",
-            "https://padelmarket.com/cdn/shop/files/10619.jpg?v=1753792720"
+            "https://padelmarket.com/cdn/shop/files/10619.jpg?v=1753792720",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD1.jpg?v=1741016354",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD2.jpg?v=1741016355",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD3.jpg?v=1741016354",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD4.jpg?v=1741016354",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD5.jpg?v=1741016355",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD6.jpg?v=1741016354",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD7.jpg?v=1741016355",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD8.jpg?v=1741016354",
+            "https://padelmarket.com/cdn/shop/files/PEARLCLOUD9.jpg?v=1741016355"
         ],
         "prices": [
             {
                 "store": "padelmarket",
-                "price": 169.95,
+                "price": 124.95,
                 "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/bullpadel-pearl-bea-gonzalez-2025-pala",
+                "url": "https://padelmarket.com/es-eu/products/bullpadel-pearl-cloud-2025-bea-gonzalez-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:43.663780"
+                "last_updated": "2026-02-05T19:30:22.237681"
             }
         ]
     },
@@ -339,11 +358,163 @@
         "prices": [
             {
                 "store": "padelmarket",
-                "price": 209.95,
+                "price": 239.95,
                 "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/adidas-metalbone-33-2024-ale-galan-pala",
+                "url": "https://padelmarket.com/es-eu/products/adidas-metalbone-hrd-3-4-2025-ale-galan-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:48.670162"
+                "last_updated": "2026-02-05T19:30:06.634115"
+            }
+        ]
+    },
+    "bullpadel-bullpadel-xplo-2025-di-nenno-pala": {
+        "id": "bullpadel-bullpadel-xplo-2025-di-nenno-pala",
+        "brand": "Bullpadel",
+        "model": "BULLPADEL XPLO 2025 DI NENNO (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Bullpadel",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Potencia",
+            "Forma": "Diamante",
+            "Peso": "365-375 gr",
+            "Marco": "Carbono",
+            "Núcleo": "Multieva",
+            "Cara": "Carbono 12K",
+            "Temporada": "2025",
+            "SKU": "448119",
+            "Ean13": "8445402691906"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/xplo25front.png?v=1727079669",
+            "https://padelmarket.com/cdn/shop/files/CARRUSEL-XPLO-1_1.png?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25_2.jpg?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25_t.jpg?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25_pjpg.jpg?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25det_1.jpg?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25det_2.jpg?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25det_3.jpg?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25det_4.jpg?v=1754312743",
+            "https://padelmarket.com/cdn/shop/files/xplo25det_5.jpg?v=1754312743"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 164.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/bullpadel-xplo-2025-di-nenno-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:30:09.422474"
+            }
+        ]
+    },
+    "adidas-adidas-metalbone-team-light-2024-pala": {
+        "id": "adidas-adidas-metalbone-team-light-2024-pala",
+        "brand": "Adidas",
+        "model": "ADIDAS METALBONE TEAM LIGHT 2024 (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Adidas",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Potencia",
+            "Forma": "Redonda",
+            "Peso": "345-360 gr",
+            "Marco": "Carbono",
+            "Núcleo": "EVA Soft Performance",
+            "Cara": "Vidrio",
+            "Temporada": "2024",
+            "SKU": "ADRK8CA0",
+            "Ean13": "8436548248963"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/8403.jpg?v=1725950458",
+            "https://padelmarket.com/cdn/shop/files/8443.jpg?v=1725950458",
+            "https://padelmarket.com/cdn/shop/files/8444.jpg?v=1725950458"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 119.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/adidas-metalbone-team-light-2024-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:30:14.716762"
+            }
+        ]
+    },
+    "adidas-adidas-rx-series-light-2024-pala": {
+        "id": "adidas-adidas-rx-series-light-2024-pala",
+        "brand": "Adidas",
+        "model": "ADIDAS RX SERIES LIGHT 2024 (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Adidas",
+            "Sexo": "Unisex",
+            "Nivel": "Medio",
+            "Tipo de juego": "Control",
+            "Forma": "Redonda",
+            "Peso": "345-360gr",
+            "Marco": "Carbono",
+            "Núcleo": "EVA Soft Performance",
+            "Cara": "Vidrio",
+            "Temporada": "2024",
+            "SKU": "ADRK8CA1",
+            "Ean13": "8436548249007"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/8405.jpg?v=1725950464",
+            "https://padelmarket.com/cdn/shop/files/8453.jpg?v=1725950464",
+            "https://padelmarket.com/cdn/shop/files/8454.jpg?v=1725950464"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 74.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/adidas-rx-series-light-2024-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:30:17.250100"
+            }
+        ]
+    },
+    "kombat-kombat-teide-2025-by-manu-martin-pala": {
+        "id": "kombat-kombat-teide-2025-by-manu-martin-pala",
+        "brand": "Kombat",
+        "model": "KOMBAT TEIDE 2025 BY MANU MARTIN (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Kombat",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Polivalente",
+            "Forma": "Diamante",
+            "Peso": "360-370 gr",
+            "Marco": "Carbono",
+            "Núcleo": "Blue EVA",
+            "Cara": "Carbono 18K",
+            "Temporada": "2025",
+            "SKU": "KMBT-TEIDE-AZ-2425",
+            "Ean13": "8436594724374"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_1.jpg?v=1739538321",
+            "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_2.jpg?v=1739538321",
+            "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_3.jpg?v=1739538321",
+            "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_4.jpg?v=1739538321",
+            "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_5.jpg?v=1739538321"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 129.0,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/kombat-teide-2025-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:30:19.774935"
             }
         ]
     }
