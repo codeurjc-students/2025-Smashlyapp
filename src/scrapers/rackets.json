@@ -32,7 +32,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/bullpadel-vertex-02-x-red-2023-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:29:57.814673"
+                "last_updated": "2026-02-05T19:32:56.483900"
             }
         ]
     },
@@ -69,7 +69,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/bullpadel-hack-03-comfort-2024-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:12.118051"
+                "last_updated": "2026-02-05T19:32:14.193368"
             }
         ]
     },
@@ -108,7 +108,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/pala-bullpadel-vertex-04-mexico-2024",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:30.395734"
+                "last_updated": "2026-02-05T19:32:36.904522"
             }
         ]
     },
@@ -171,11 +171,11 @@
         "prices": [
             {
                 "store": "padelmarket",
-                "price": 214.95,
+                "price": 194.95,
                 "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-18k-alum-2025-by-agustin-tapia-pala",
+                "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-attack-18k-alum-2025-by-agustin-tapia-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:04.009857"
+                "last_updated": "2026-02-05T19:32:51.692330"
             }
         ]
     },
@@ -220,7 +220,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/nox-ml10-quantum-3k-2025-by-miguel-lamperti-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:35.913299"
+                "last_updated": "2026-02-05T19:32:54.090384"
             }
         ]
     },
@@ -254,7 +254,16 @@
             "https://padelmarket.com/cdn/shop/files/ICON25DET3.jpg?v=1761556893",
             "https://padelmarket.com/cdn/shop/files/ICON25DET2.jpg?v=1761556893",
             "https://padelmarket.com/cdn/shop/files/ICON25DET4.jpg?v=1761556893",
-            "https://padelmarket.com/cdn/shop/files/ICON25DET5.jpg?v=1761556893"
+            "https://padelmarket.com/cdn/shop/files/ICON25DET5.jpg?v=1761556893",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD1.jpg?v=1741016375",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD2.jpg?v=1741016376",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD3.jpg?v=1741016375",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD4.jpg?v=1741016377",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD5.jpg?v=1741016375",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD6.jpg?v=1741016376",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD7.jpg?v=1741016375",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD8.jpg?v=1741016376",
+            "https://padelmarket.com/cdn/shop/files/ICONCLOUD9.jpg?v=1741016375"
         ],
         "prices": [
             {
@@ -263,7 +272,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/bullpadel-icon-2025-juan-martin-diaz-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-02T17:40:41.152018"
+                "last_updated": "2026-02-05T19:32:49.165494"
             }
         ]
     },
@@ -311,7 +320,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/bullpadel-pearl-cloud-2025-bea-gonzalez-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:22.237681"
+                "last_updated": "2026-02-05T19:33:03.943599"
             }
         ]
     },
@@ -353,16 +362,29 @@
             "https://padelmarket.com/cdn/shop/files/8374.jpg?v=1753789098",
             "https://padelmarket.com/cdn/shop/files/8362.jpg?v=1753789098",
             "https://padelmarket.com/cdn/shop/files/8375.jpg?v=1753789098",
-            "https://padelmarket.com/cdn/shop/files/8376.jpg?v=1753789098"
+            "https://padelmarket.com/cdn/shop/files/8376.jpg?v=1753789098",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0FRONT.png?v=1732883001",
+            "https://padelmarket.com/cdn/shop/files/Ale_Galan_a9d6d944-5eeb-46ef-b24f-f87a8c4b6dda.jpg?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0RIGHTSIDE.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0LEFTSIDE.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0DETAILHEART.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0DETAILSIGNATURE.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0DETAILSPINBLADE.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0DETAILWEIGHT.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0DETAILWEIGHT_BALANCE2.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0DETAILWEIGHT_BALANCE3.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0DETALWEIGHT_BALACE1.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AA0TOP.png?v=1759143867",
+            "https://padelmarket.com/cdn/shop/files/Metalbone_3.4_AR1AAODETAILWEIGHT_BALACE4.png?v=1759143867"
         ],
         "prices": [
             {
                 "store": "padelmarket",
                 "price": 239.95,
                 "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/adidas-metalbone-hrd-3-4-2025-ale-galan-pala",
+                "url": "https://padelmarket.com/es-eu/products/adidas-metalbone-3-4-2025-ale-galan-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:06.634115"
+                "last_updated": "2026-02-05T19:32:41.738683"
             }
         ]
     },
@@ -405,7 +427,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/bullpadel-xplo-2025-di-nenno-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:09.422474"
+                "last_updated": "2026-02-05T19:32:26.748054"
             }
         ]
     },
@@ -441,7 +463,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/adidas-metalbone-team-light-2024-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:14.716762"
+                "last_updated": "2026-02-05T19:32:16.685641"
             }
         ]
     },
@@ -476,7 +498,7 @@
                 "original_price": null,
                 "url": "https://padelmarket.com/es-eu/products/adidas-rx-series-light-2024-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:17.250100"
+                "last_updated": "2026-02-05T19:32:39.235000"
             }
         ]
     },
@@ -505,16 +527,320 @@
             "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_2.jpg?v=1739538321",
             "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_3.jpg?v=1739538321",
             "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_4.jpg?v=1739538321",
-            "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_5.jpg?v=1739538321"
+            "https://padelmarket.com/cdn/shop/files/KOMBATTEIDE2025_Pala_5.jpg?v=1739538321",
+            "https://padelmarket.com/cdn/shop/files/KOMBATVESUBIO2025_Pala_1.jpg?v=1739790657",
+            "https://padelmarket.com/cdn/shop/files/KOMBATVESUBIO2025_Pala_2.jpg?v=1739790658",
+            "https://padelmarket.com/cdn/shop/files/KOMBATVESUBIO2025_Pala_3.jpg?v=1739790657",
+            "https://padelmarket.com/cdn/shop/files/KOMBATVESUBIO2025_Pala_5.jpg?v=1739794972",
+            "https://padelmarket.com/cdn/shop/files/KOMBATVESUBIO2025_Pala_4.jpg?v=1739794972"
         ],
         "prices": [
             {
                 "store": "padelmarket",
                 "price": 129.0,
                 "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/kombat-teide-2025-pala",
+                "url": "https://padelmarket.com/es-eu/products/kombat-vesubio-2025-by-manu-martin-pala",
                 "currency": "EUR",
-                "last_updated": "2026-02-05T19:30:19.774935"
+                "last_updated": "2026-02-05T19:32:34.475674"
+            }
+        ]
+    },
+    "bullpadel-bullpadel-hack-04-hybrid-2025-pala": {
+        "id": "bullpadel-bullpadel-hack-04-hybrid-2025-pala",
+        "brand": "Bullpadel",
+        "model": "BULLPADEL HACK 04 HYBRID 2025 (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Bullpadel",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Polivalente",
+            "Forma": "Hibrida",
+            "Peso": "365-375 gr",
+            "Marco": "Carbono",
+            "Núcleo": "Multieva",
+            "Cara": "Fibrix",
+            "Temporada": "2025",
+            "SKU": "448114",
+            "Ean13": "8445402691845"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/hack0425.jpg?v=1728649207",
+            "https://padelmarket.com/cdn/shop/files/pala-hack-hybrid-bullpadel-1000x1000.jpg?v=1727101048",
+            "https://padelmarket.com/cdn/shop/files/pala-hack-hybrid-bullpadel-25-1000x1000.jpg?v=1727101048",
+            "https://padelmarket.com/cdn/shop/files/pala-hack-hybrid-25-bullpadel-1000x1000.jpg?v=1727101048"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 159.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/bullpadel-hack-04-hybrid-2025-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:31:56.620685"
+            }
+        ]
+    },
+    "bullpadel-bullpadel-hack-03-2024-paquito-navarro-pala": {
+        "id": "bullpadel-bullpadel-hack-03-2024-paquito-navarro-pala",
+        "brand": "Bullpadel",
+        "model": "BULLPADEL HACK 03 2024 PAQUITO NAVARRO (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Bullpadel",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Potencia",
+            "Forma": "Diamante",
+            "Peso": "365-375 gr",
+            "Marco": "Carbono",
+            "Núcleo": "Multieva",
+            "Cara": "Carbono",
+            "Temporada": "2024",
+            "SKU": "471602",
+            "Ean13": "8445402483730"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/7591.jpg?v=1725950265",
+            "https://padelmarket.com/cdn/shop/files/8099.jpg?v=1753792970",
+            "https://padelmarket.com/cdn/shop/files/7388.jpg?v=1753792970",
+            "https://padelmarket.com/cdn/shop/files/7387.jpg?v=1753792970",
+            "https://padelmarket.com/cdn/shop/files/7389.jpg?v=1753792970",
+            "https://padelmarket.com/cdn/shop/files/7385.jpg?v=1753792970",
+            "https://padelmarket.com/cdn/shop/files/7384.jpg?v=1753792970",
+            "https://padelmarket.com/cdn/shop/files/hack0425.png?v=1727079363",
+            "https://padelmarket.com/cdn/shop/files/CARRUSEL-HACK-1.png?v=1754311023",
+            "https://padelmarket.com/cdn/shop/files/hack0425_2.png?v=1754311023",
+            "https://padelmarket.com/cdn/shop/files/hack0425_t.png?v=1754311023",
+            "https://padelmarket.com/cdn/shop/files/hack0425det_1.png?v=1754311023",
+            "https://padelmarket.com/cdn/shop/files/hack0425det_5.png?v=1754311023"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 184.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/bullpadel-hack-04-2025-paquito-navarro-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:32:58.991333"
+            }
+        ]
+    },
+    "bullpadel-bullpadel-vertex-04-2025-juan-tello-pala": {
+        "id": "bullpadel-bullpadel-vertex-04-2025-juan-tello-pala",
+        "brand": "Bullpadel",
+        "model": "BULLPADEL VERTEX 04 2025 JUAN TELLO (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Bullpadel",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Potencia",
+            "Forma": "Diamante",
+            "Peso": "365-375 gr",
+            "Marco": "Carbono",
+            "Núcleo": "Multieva",
+            "Cara": "Carbono",
+            "Temporada": "2025",
+            "SKU": "448115",
+            "Ean13": "8445402691890"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/vertex0425.jpg?v=1727079473",
+            "https://padelmarket.com/cdn/shop/files/CARRUSEL-VERTEX-1.png?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex0425_2.jpg?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex0425_t.jpg?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex0425_p.jpg?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex0425det_1.jpg?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex0425det_3.jpg?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex0425det_4.jpg?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex0425det_5.jpg?v=1754312653",
+            "https://padelmarket.com/cdn/shop/files/vertex04hybrid25det_1.jpg?v=1727079473",
+            "https://padelmarket.com/cdn/shop/files/vertex04hybrid25det_2.jpg?v=1727079473",
+            "https://padelmarket.com/cdn/shop/files/vertex04hybrid25det_3.jpg?v=1727079473",
+            "https://padelmarket.com/cdn/shop/files/vertex04hybrid25det_4.jpg?v=1727079473",
+            "https://padelmarket.com/cdn/shop/files/vertex04hybrid25det_5.jpg?v=1727079473"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 184.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/bullpadel-vertex-04-2025-juan-tello-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:32:11.568082"
+            }
+        ]
+    },
+    "bullpadel-bullpadel-vertex-04-woman-2024-delfi-brea-pala": {
+        "id": "bullpadel-bullpadel-vertex-04-woman-2024-delfi-brea-pala",
+        "brand": "Bullpadel",
+        "model": "BULLPADEL VERTEX 04 WOMAN 2024 DELFI BREA (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Bullpadel",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Mujeres",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Potencia",
+            "Forma": "Diamante",
+            "Peso": "345-360 gr",
+            "Marco": "Carbono",
+            "Núcleo": "Multieva",
+            "Cara": "Fibrix",
+            "Jugadoras Pro": "Delfi Brea",
+            "Temporada": "2024",
+            "SKU": "471608",
+            "Ean13": "8445402483792"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/7597.jpg?v=1725950272",
+            "https://padelmarket.com/cdn/shop/files/8102.jpg?v=1753795201",
+            "https://padelmarket.com/cdn/shop/files/7413.jpg?v=1753795201",
+            "https://padelmarket.com/cdn/shop/files/7414.jpg?v=1753795201",
+            "https://padelmarket.com/cdn/shop/files/7415.jpg?v=1753795201"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 149.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/bullpadel-vertex-04-woman-2024-delfi-brea-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:32:21.699405"
+            }
+        ]
+    },
+    "wilson-wilson-blade-junior-v2-padel-2024-pala": {
+        "id": "wilson-wilson-blade-junior-v2-padel-2024-pala",
+        "brand": "Wilson",
+        "model": "WILSON BLADE JUNIOR V2 PADEL 2024 (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Wilson",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Junior",
+            "Nivel": "Iniciación",
+            "Tipo de juego": "Control",
+            "Forma": "Lagrima",
+            "Peso": "300-325 g",
+            "Marco": "Carbono",
+            "Núcleo": "EVA Blanda",
+            "Cara": "Vidrio",
+            "Temporada": "2024",
+            "SKU": "WR115611U0",
+            "Ean13": "0097512621335"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/8673.jpg?v=1725950549",
+            "https://padelmarket.com/cdn/shop/files/8672.jpg?v=1725950549"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 39.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/wilson-blade-junior-v2-padel-0-2024-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:32:24.089547"
+            }
+        ]
+    },
+    "bullpadel-bullpadel-neuron-cloud-2025-fede-chingotto-pala": {
+        "id": "bullpadel-bullpadel-neuron-cloud-2025-fede-chingotto-pala",
+        "brand": "Bullpadel",
+        "model": "BULLPADEL NEURON CLOUD 2025 FEDE CHINGOTTO (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Bullpadel",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Polivalente",
+            "Forma": "Hibrida",
+            "Peso": "365 gr",
+            "Marco": "Carbono",
+            "Núcleo": "Cloud EVA",
+            "Cara": "Elastic Fiber",
+            "Temporada": "2025",
+            "SKU": "448126",
+            "Ean13": "8445402691975"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD1.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD2.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD3.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD4.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD5.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD6.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD7.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD8.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/NEURONCLOUD9.jpg?v=1741016391",
+            "https://padelmarket.com/cdn/shop/files/neuron25.jpg?v=1727079778",
+            "https://padelmarket.com/cdn/shop/files/CARRUSEL_NEURON_1.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25_2_1.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25_p.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25_t_1.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25det_1.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25det_2_1.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25det_3_1.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25det_4_1.jpg?v=1759826266",
+            "https://padelmarket.com/cdn/shop/files/neuron25det_5_1.jpg?v=1759826266"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 179.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/bullpadel-neuron-2025-fede-chingotto-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:32:46.677045"
+            }
+        ]
+    },
+    "nox-nox-at10-genius-attack-12k-2025-by-agustin-tapia-pala": {
+        "id": "nox-nox-at10-genius-attack-12k-2025-by-agustin-tapia-pala",
+        "brand": "Nox",
+        "model": "NOX AT10 GENIUS ATTACK 12K 2025 BY AGUSTIN TAPIA (PALA)",
+        "description": "",
+        "specs": {
+            "Marca": "Nox",
+            "Bestsellers": "Palas más vendidas",
+            "Sexo": "Unisex",
+            "Nivel": "Avanzado",
+            "Tipo de juego": "Potencia",
+            "Forma": "Diamante",
+            "Peso": "360-375 g",
+            "Marco": "Carbono",
+            "Núcleo": "MLD Black EVA",
+            "Cara": "Carbono 12K",
+            "Temporada": "2025",
+            "SKU": "PAT10GENIUSAT25",
+            "Ean13": "8436603199933"
+        },
+        "images": [
+            "https://padelmarket.com/cdn/shop/files/nox4.jpg?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/Agustin_Tapia_3.jpg?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_2_3afa4475-3987-4a89-a4a5-e4f21ff9b4fd.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_3_3d3d5fff-a2cd-4929-be1c-937ce99545cc.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_4_84a32045-ddcb-406b-984a-e5f6df20e242.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_5_01600297-0425-43b7-83f6-ae943a428656.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_6_8e8b2a43-2175-42da-80eb-6434e8d5f474.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_7_190e255e-a866-44c2-9e94-76585efef09c.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_8_39bb69ec-e88f-4604-87d7-35f394739e9e.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_9_7f1d72b6-ef07-41df-a14b-566aa0f711c5.png?v=1768378872",
+            "https://padelmarket.com/cdn/shop/files/PAT10GENIUSAT25_10_0982126b-a512-4b86-8446-818e3aed18ac.png?v=1768378872"
+        ],
+        "prices": [
+            {
+                "store": "padelmarket",
+                "price": 199.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-attack-12k-2025-by-agustin-tapia-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-05T19:33:06.584294"
             }
         ]
     }
