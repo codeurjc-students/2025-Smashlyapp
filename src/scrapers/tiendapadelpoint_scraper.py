@@ -1,6 +1,6 @@
 import re
 from typing import Dict, List, Optional
-from .base_scraper import BaseScraper, Product
+from .base_scraper import BaseScraper, Product, clean_price, normalize_specs
 
 class TiendaPadelPointScraper(BaseScraper):
     """Scraper for TiendaPadelPoint online store."""
@@ -24,26 +24,7 @@ class TiendaPadelPointScraper(BaseScraper):
         if clean_match:
              name = clean_match.group(1).strip()
 
-        # Helper to clean price
-        def clean_price(text):
-            if not text: return 0.0
-            # Often "119.95€ Ex Tax: ..."
-            # We want the first number found usually.
-            # Or remove everything after Ex Tax
-            if 'Ex Tax' in text:
-                 text = text.split('Ex Tax')[0]
-            
-            text = text.replace('€', '').replace('&nbsp;', '').strip()
-            # 1.234,56 -> 1234.56
-            text = text.replace('.', '').replace(',', '.')
-            try:
-                # Use regex to find first float-like pattern
-                match = re.search(r'[\d.]+', text)
-                if match:
-                    return float(match.group(0))
-                return 0.0
-            except ValueError:
-                return 0.0
+        # Use shared clean_price function from base_scraper
 
         price = 0.0
         original_price = None
@@ -61,27 +42,38 @@ class TiendaPadelPointScraper(BaseScraper):
              if p_text:
                   price = clean_price(p_text)
 
-        # Brand
+        # Brand - IMPROVED extraction
         brand = 'Unknown'
-        # 1. From link
-        brand_el = await page.query_selector("ul.list-unstyled li a[href*='manufacturer']")
-        if brand_el:
-             brand = await brand_el.inner_text()
         
-        if brand == 'Unknown':
-             # Fallback regex in content
-             try:
-                 content = await page.content()
-                 match = re.search(r'Marca:\s*<a[^>]*>([^<]+)</a>', content)
-                 if match: brand = match.group(1)
-             except: pass
+        # 1. Try from attribute table (most reliable)
+        try:
+            rows = await page.query_selector_all('#tab-attribute table tr, table.attribute tbody tr')
+            for row in rows:
+                tds = await row.query_selector_all('td')
+                if len(tds) >= 2:
+                    key = await tds[0].inner_text()
+                    if 'marca' in key.lower() or 'brand' in key.lower():
+                        brand = (await tds[1].inner_text()).strip()
+                        break
+        except: pass
         
-        # Fallback Name inference
+        # 2. Fallback: known brands in product name
         if brand == 'Unknown':
-             match_b = re.search(r'Pala\s+([\w\.]+)', name, re.IGNORECASE)
-             if match_b:
-                  b = match_b.group(1)
-                  if b.lower() not in ['de', 'en', 'para']: brand = b
+            known_brands = ['Bullpadel', 'Nox', 'Head', 'Babolat', 'Adidas', 'Wilson', 
+                           'Siux', 'Dunlop', 'Varlion', 'StarVie', 'Black Crown', 'Drop Shot',
+                           'Royal Padel', 'Vibor-A', 'Enebe', 'Kuikma']
+            for b in known_brands:
+                if b.lower() in name.lower():
+                    brand = b
+                    break
+        
+        # 3. Fallback: extract first word after "Pala"
+        if brand == 'Unknown':
+            match_b = re.search(r'(?:Pala\s+)?(\w+)', name, re.IGNORECASE)
+            if match_b:
+                candidate = match_b.group(1)
+                if candidate.lower() not in ['pala', 'de', 'en', 'para', 'pack']:
+                    brand = candidate.title()
 
         # Images
         image = ''
@@ -105,77 +97,83 @@ class TiendaPadelPointScraper(BaseScraper):
         images = list(dict.fromkeys(images))
         if images: image = images[0]
 
-        # Specs
+        # Specs - IMPROVED to prioritize structured table
         specs: Dict[str, str] = {}
-        # 1. Description Regex (Enhanced with more patterns)
-        desc_text = await self.safe_get_text('#tab-description')
-        if desc_text:
-            # Enhanced patterns with multiple variations
-            patterns = {
-                'Peso': [
-                    r'(?:Peso|Weight|Talla-Peso)[:\s]+([-]?[\d\s-]+\s*(?:gr?|gramos?|g)?)',
-                    r'(\d{3})\s*[-–]\s*(\d{3})\s*(?:gr?|gramos?|g)',  # Range format: 355-365g
-                    r'(\d{3})\s*(?:gr?|gramos?|g)'  # Simple: 360g
-                ],
-                'Forma': [
-                    r'(?:Forma|Formato|Shape)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
-                    r'(?:Redonda|Lágrima|Diamante|Híbrida)'  # Direct match
-                ],
-                'Balance': [
-                    r'(?:Balance|Balanceo)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
-                    r'(?:Alto|Medio|Bajo|High|Medium|Low)'  # Direct match
-                ],
-                'Perfil': [
-                    r'(?:Perfil|Grosor|Espesor)[:\s]+([\d\s]+\s*mm)',
-                    r'(\d{2})\s*mm'  # Simple: 38mm
-                ],
-                'Núcleo': [
-                    r'(?:Núcleo|Goma|Foam|Core)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
-                    r'(?:EVA|FOAM|Soft|Hard|Medium)'  # Direct match
-                ],
-                'Cara': [
-                    r'(?:Cara|Caras|Material|Fibra|Surface)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
-                    r'(?:Carbono|Carbon|Fibra de Vidrio|Fiberglass)'  # Direct match
-                ],
-                'Nivel': [
-                    r'(?:Nivel|Level)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
-                    r'(?:Principiante|Iniciación|Intermedio|Avanzado|Profesional|Professional)'  # Direct match
-                ],
-                'Marco': [
-                    r'(?:Marco|Frame)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)'
-                ]
-            }
-            
-            for k, regexes in patterns.items():
-                for r in regexes:
-                    m = re.search(r, desc_text, re.IGNORECASE)
-                    if m:
-                        # Handle different match groups
-                        if m.lastindex == 2:  # Range format (355-365)
-                            val = f"{m.group(1)}-{m.group(2)}g"
-                        else:
-                            val = m.group(1).strip() if m.lastindex else m.group(0)
-                        
-                        # Normalize value
-                        val = val.strip()
-                        # Remove trailing punctuation
-                        val = re.sub(r'[.,;:]+$', '', val)
-                        
-                        if val and len(val) < 50 and val not in ['-', '', ' ']: 
-                            specs[k] = val
-                            break
         
-        # 2. Table Fallback
+        # 1. Try structured attribute table FIRST (most reliable)
+        try:
+            rows = await page.query_selector_all('#tab-attribute table tr, table.attribute tbody tr')
+            for row in rows:
+                tds = await row.query_selector_all('td')
+                if len(tds) >= 2:
+                    k = (await tds[0].inner_text()).strip()
+                    v = (await tds[1].inner_text()).strip()
+                    # Skip marca as we already extracted it
+                    if k and v and k.lower() not in ['marca', 'brand']:
+                        specs[k] = v
+        except: pass
+
+        # Normalize specs for consistency
+        specs = normalize_specs(specs)
+
+        # 2. Fallback to regex in description if table extraction failed
         if not specs:
-             try:
-                rows = await page.query_selector_all('table.attribute tbody tr')
-                for row in rows:
-                    tds = await row.query_selector_all('td')
-                    if len(tds) >= 2:
-                        k = await tds[0].inner_text()
-                        v = await tds[1].inner_text()
-                        if k and v: specs[k.strip()] = v.strip()
-             except: pass
+            desc_text = await self.safe_get_text('#tab-description')
+            if desc_text:
+                # Enhanced patterns with multiple variations
+                patterns = {
+                    'Peso': [
+                        r'(?:Peso|Weight|Talla-Peso)[:\s]+([-]?[\d\s-]+\s*(?:gr?|gramos?|g)?)',
+                        r'(\d{3})\s*[-–]\s*(\d{3})\s*(?:gr?|gramos?|g)',  # Range format: 355-365g
+                        r'(\d{3})\s*(?:gr?|gramos?|g)'  # Simple: 360g
+                    ],
+                    'Forma': [
+                        r'(?:Forma|Formato|Shape)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                        r'(?:Redonda|Lágrima|Diamante|Híbrida)'  # Direct match
+                    ],
+                    'Balance': [
+                        r'(?:Balance|Balanceo)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                        r'(?:Alto|Medio|Bajo|High|Medium|Low)'  # Direct match
+                    ],
+                    'Perfil': [
+                        r'(?:Perfil|Grosor|Espesor)[:\s]+([\d\s]+\s*mm)',
+                        r'(\d{2})\s*mm'  # Simple: 38mm
+                    ],
+                    'Núcleo': [
+                        r'(?:Núcleo|Goma|Foam|Core)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                        r'(?:EVA|FOAM|Soft|Hard|Medium)'  # Direct match
+                    ],
+                    'Cara': [
+                        r'(?:Cara|Caras|Material|Fibra|Surface)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                        r'(?:Carbono|Carbon|Fibra de Vidrio|Fiberglass)'  # Direct match
+                    ],
+                    'Nivel': [
+                        r'(?:Nivel|Level)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)',
+                        r'(?:Principiante|Iniciación|Intermedio|Avanzado|Profesional|Professional)'  # Direct match
+                    ],
+                    'Marco': [
+                        r'(?:Marco|Frame)[:\s]+([^.\n,]+?)(?:\.|,|\n|$)'
+                    ]
+                }
+                
+                for k, regexes in patterns.items():
+                    for r in regexes:
+                        m = re.search(r, desc_text, re.IGNORECASE)
+                        if m:
+                            # Handle different match groups
+                            if m.lastindex == 2:  # Range format (355-365)
+                                val = f"{m.group(1)}-{m.group(2)}g"
+                            else:
+                                val = m.group(1).strip() if m.lastindex else m.group(0)
+                            
+                            # Normalize value
+                            val = val.strip()
+                            # Remove trailing punctuation
+                            val = re.sub(r'[.,;:]+$', '', val)
+                            
+                            if val and len(val) < 50 and val not in ['-', '', ' ']: 
+                                specs[k] = val
+                                break
 
         return Product(
             url=url,
@@ -194,14 +192,22 @@ class TiendaPadelPointScraper(BaseScraper):
         visited_pages = set()
         
         page = await self.get_page(url)
+        # Wait for initial load, then give time for dynamic content
+        await page.wait_for_timeout(2000)  # Wait for lazy-load after initial DOM
 
         while True:
             if page.url in visited_pages: break
             visited_pages.add(page.url)
 
-            # Collect products
-            # Scope to .main-products to avoid mega-menu items
-            links = await page.query_selector_all('.main-products .product-grid-item .name a')
+            # IMPROVED: Scroll to load all products (lazy-loaded content)
+            try:
+                await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
+                await page.wait_for_timeout(1000)  # Wait for lazy-load
+            except: pass
+
+            # Collect products - Use more specific selector to avoid mega-menu
+            # Target products within #content to skip header/menu
+            links = await page.query_selector_all('#content .product-grid-item .name a, #content .main-products .product-grid-item .name a')
             count = 0
             for link in links:
                  href = await link.get_attribute('href')
@@ -243,6 +249,7 @@ class TiendaPadelPointScraper(BaseScraper):
                  if href and href not in visited_pages:
                       await page.goto(href)
                       await page.wait_for_load_state('domcontentloaded')
+                      await page.wait_for_timeout(2000)  # Wait for dynamic content
                  else: break
             else:
                  break

@@ -1,7 +1,7 @@
 import json
 import re
 from typing import Dict, List, Optional
-from .base_scraper import BaseScraper, Product
+from .base_scraper import BaseScraper, Product, normalize_specs
 
 class PadelMarketScraper(BaseScraper):
     """Scraper for PadelMarket online store."""
@@ -112,6 +112,9 @@ class PadelMarketScraper(BaseScraper):
                          if k and v: specs[k] = v
         except Exception as e:
              pass
+
+        # Normalize specs for consistency
+        specs = normalize_specs(specs)
 
         # Extract brand
         brand = specs.get('Marca') or specs.get('Brand')

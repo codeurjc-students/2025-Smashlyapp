@@ -1,7 +1,7 @@
 import json
 import re
 from typing import Dict, List, Optional
-from .base_scraper import BaseScraper, Product
+from .base_scraper import BaseScraper, Product, clean_price, normalize_specs
 
 class PadelNuestroScraper(BaseScraper):
     """Scraper for PadelNuestro online store."""
@@ -31,16 +31,7 @@ class PadelNuestroScraper(BaseScraper):
         price = 0.0
         original_price = None
 
-        # Helper to clean price
-        def clean_price(text):
-            if not text: return 0.0
-            text = text.replace('€', '').replace('&nbsp;', '').strip()
-            # 1.234,56 -> 1234.56
-            text = text.replace('.', '').replace(',', '.')
-            try:
-                return float(re.sub(r'[^\d.]', '', text))
-            except ValueError:
-                return 0.0
+        # Use shared clean_price function from base_scraper
 
         # Current Price
         price_text = await self.safe_get_text('.product-info-main .price-box .special-price .price')
@@ -135,6 +126,9 @@ class PadelNuestroScraper(BaseScraper):
 
         except:
             pass
+
+        # Normalize specs for consistency
+        specs = normalize_specs(specs)
 
         return Product(
             url=url,
