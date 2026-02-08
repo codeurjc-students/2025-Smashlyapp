@@ -51,29 +51,37 @@ class TiendaPadelPointScraper(BaseScraper):
             for row in rows:
                 tds = await row.query_selector_all('td')
                 if len(tds) >= 2:
-                    key = await tds[0].inner_text()
+                    key = (await tds[0].inner_text()).strip()
                     if 'marca' in key.lower() or 'brand' in key.lower():
                         brand = (await tds[1].inner_text()).strip()
-                        break
+                        if brand and brand != 'Unknown':
+                            break
         except: pass
         
-        # 2. Fallback: known brands in product name
+        # 2. Fallback: known brands in product name (case-insensitive)
         if brand == 'Unknown':
             known_brands = ['Bullpadel', 'Nox', 'Head', 'Babolat', 'Adidas', 'Wilson', 
                            'Siux', 'Dunlop', 'Varlion', 'StarVie', 'Black Crown', 'Drop Shot',
                            'Royal Padel', 'Vibor-A', 'Enebe', 'Kuikma']
+            name_lower = name.lower()
             for b in known_brands:
-                if b.lower() in name.lower():
+                # Use word boundaries to avoid partial matches
+                if re.search(rf'\b{re.escape(b.lower())}\b', name_lower):
                     brand = b
                     break
         
-        # 3. Fallback: extract first word after "Pala"
+        # 3. Fallback: extract first capitalized word from name
         if brand == 'Unknown':
-            match_b = re.search(r'(?:Pala\s+)?(\w+)', name, re.IGNORECASE)
-            if match_b:
-                candidate = match_b.group(1)
-                if candidate.lower() not in ['pala', 'de', 'en', 'para', 'pack']:
-                    brand = candidate.title()
+            # Split name and find first word that looks like a brand (capitalized, not common word)
+            words = name.split()
+            skip_words = {'pala', 'de', 'en', 'para', 'pack', 'y', 'el', 'la'}
+            for word in words:
+                clean_word = re.sub(r'[^\w]', '', word)  # Remove punctuation
+                if clean_word and clean_word.lower() not in skip_words:
+                    if clean_word[0].isupper() and len(clean_word) > 2:
+                        brand = clean_word
+                        break
+
 
         # Images
         image = ''

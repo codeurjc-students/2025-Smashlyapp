@@ -18,6 +18,7 @@ def clean_price(text: str) -> float:
     - 119,95 (EU format)
     - 1.234,56 (EU with thousands separator)
     - "€119.95" (with currency symbols)
+    - 14995 (cents format - will be converted to 149.95)
     
     Args:
         text: Price string to parse
@@ -43,10 +44,20 @@ def clean_price(text: str) -> float:
     try:
         match = re.search(r'[\d.]+', text)
         if match:
-            return float(match.group(0))
+            price = float(match.group(0))
+            
+            # CRITICAL FIX: Detect prices formatted as cents (e.g., "14995" = 149.95€)
+            # If price is integer >= 1000 with no decimal point in original text
+            if '.' not in text and ',' not in text:
+                # Prices like 14995, 27795 are likely in cents
+                if price >= 1000 and price < 100000:  # Reasonable range for cent-formatted prices
+                    price = price / 100.0
+            
+            return price
         return 0.0
     except ValueError:
         return 0.0
+
 
 
 # Spec name normalization mapping (Spanish standard)
