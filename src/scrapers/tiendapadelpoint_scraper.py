@@ -199,29 +199,33 @@ class TiendaPadelPointScraper(BaseScraper):
         product_urls = []
         visited_pages = set()
         
+        # FIXED: Use search endpoint with category filter instead of main category page
+        # Main /palas-de-padel shows only subcategory icons, not products
+        # This search URL returns ~966 products directly with clean layout
+        url = "https://www.tiendapadelpoint.com/index.php?route=product/search&search=pala&category_id=60&limit=100"
+        
         page = await self.get_page(url)
-        # Wait for initial load, then give time for dynamic content
-        await page.wait_for_timeout(2000)  # Wait for lazy-load after initial DOM
+        await page.wait_for_timeout(2000)
 
         while True:
             if page.url in visited_pages: break
             visited_pages.add(page.url)
 
-            # IMPROVED: Scroll to load all products (lazy-loaded content)
+            # Scroll to load lazy content
             try:
                 await page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
-                await page.wait_for_timeout(1000)  # Wait for lazy-load
+                await page.wait_for_timeout(1000)
             except: pass
 
-            # Collect products - Use more specific selector to avoid mega-menu
-            # Target products within #content to skip header/menu
-            links = await page.query_selector_all('#content .product-grid-item .name a, #content .main-products .product-grid-item .name a')
+            # Collect products - Updated selector for search results
+            # Use .product-grid-item which appears in search results
+            links = await page.query_selector_all('.product-grid-item .name a, .product-thumb .name a')
             count = 0
             for link in links:
                  href = await link.get_attribute('href')
                  name_text = await link.inner_text()
                  
-                 # Only exclusion filter (we're already on /palas-de-padel, no need to filter for 'pala')
+                 # Only exclusion filter
                  exclusion = ['zapatillas', 'paletero', 'camiseta', 'protector', 'mochila', 'falda', 'pantalon', 'short']
                  if any(e in name_text.lower() for e in exclusion): continue
 
@@ -233,18 +237,11 @@ class TiendaPadelPointScraper(BaseScraper):
                            count += 1
             
             print(f"Products found: {len(product_urls)} (+{count})")
-            if count == 0 and len(product_urls) > 0:
-                 # No new products on this page? check if empty
-                 pass
             
             # Next Page via Pagination
-            # .pagination .links a containing '>'
             next_link = None
-            
-            # Try finding '>' text
             try:
-                # evaluate Xpath or loop
-                links = await page.query_selector_all('.pagination .links a')
+                links = await page.query_selector_all('.pagination .links a, .pagination a')
                 for l in links:
                     t = await l.inner_text()
                     if t.strip() == '>':
@@ -257,9 +254,10 @@ class TiendaPadelPointScraper(BaseScraper):
                  if href and href not in visited_pages:
                       await page.goto(href)
                       await page.wait_for_load_state('domcontentloaded')
-                      await page.wait_for_timeout(2000)  # Wait for dynamic content
+                      await page.wait_for_timeout(2000)
                  else: break
             else:
                  break
         
         return list(set(product_urls))
+
