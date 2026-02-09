@@ -10,15 +10,13 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..'))
 
 from src.scrapers.padelnuestro_scraper import PadelNuestroScraper
 from src.scrapers.padelproshop_scraper import PadelProShopScraper
-from src.scrapers.tiendapadelpoint_scraper import TiendaPadelPointScraper
 from src.scrapers.padelmarket_scraper import PadelMarketScraper
 
 async def run_debug(scraper_name: str, url: str):
     scraper_classes = {
         'padelmarket': PadelMarketScraper,
         'padelnuestro': PadelNuestroScraper,
-        'padelproshop': PadelProShopScraper,
-        'tiendapadelpoint': TiendaPadelPointScraper
+        'padelproshop': PadelProShopScraper
     }
 
     scraper_class = scraper_classes.get(scraper_name.lower())
@@ -52,7 +50,7 @@ async def run_debug(scraper_name: str, url: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Debug a single scraper')
-    parser.add_argument('scraper', help='Name of the scraper (padelnuestro, padelproshop, tiendapadelpoint)')
+    parser.add_argument('scraper', help='Name of the scraper (padelmarket, padelnuestro, padelproshop)')
     parser.add_argument('url', help='URL of the product to scrape')
     
     args = parser.parse_args()

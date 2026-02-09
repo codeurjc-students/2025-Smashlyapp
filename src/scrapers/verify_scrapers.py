@@ -20,7 +20,6 @@ sys.path.insert(0, str(project_root))
 from src.scrapers.padelmarket_scraper import PadelMarketScraper
 from src.scrapers.padelnuestro_scraper import PadelNuestroScraper
 from src.scrapers.padelproshop_scraper import PadelProShopScraper
-from src.scrapers.tiendapadelpoint_scraper import TiendaPadelPointScraper
 from src.scrapers.base_scraper import BaseScraper, Product
 
 
@@ -36,10 +35,6 @@ TEST_URLS = {
     },
     'padelproshop': {
         'category': 'https://padelproshop.com/collections/palas-padel',
-        'products': []
-    },
-    'tiendapadelpoint': {
-        'category': 'https://www.tiendapadelpoint.com/palas-de-padel',
         'products': []
     }
 }
@@ -341,8 +336,7 @@ async def main():
     scrapers = {
         'padelmarket': PadelMarketScraper,
         'padelnuestro': PadelNuestroScraper,
-        'padelproshop': PadelProShopScraper,
-        'tiendapadelpoint': TiendaPadelPointScraper
+        'padelproshop': PadelProShopScraper
     }
     
     target_stores = args.stores.split(',') if args.stores else scrapers.keys()
