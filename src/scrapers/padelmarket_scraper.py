@@ -196,15 +196,51 @@ class PadelMarketScraper(BaseScraper):
                  print("Reached 1000 products limit.")
                  break
 
-            # 1. Try to click Load More FIRST
+            # 1. Count products BEFORE clicking
+            current_products = await page.query_selector_all('a[href*="/products/"]')
+            current_urls = set()
+            for p in current_products:
+                href = await p.get_attribute('href')
+                if href:
+                    current_urls.add(href.split('?')[0])
+            
+            # 2. Try to click Load More
             try:
                 load_more = await page.query_selector('button.load-more.button')
                 if load_more and await load_more.is_visible():
-                     print("Clicking Load More...")
+                     print(f"Current products: {len(current_urls)}. Clicking Load More...")
                      await load_more.scroll_into_view_if_needed()
+                     await page.wait_for_timeout(500)
                      await load_more.click()
                      # Wait for network to be idle
-                     await page.wait_for_load_state('networkidle', timeout=5000)
+                     await page.wait_for_load_state('networkidle', timeout=10000)
+                     await page.wait_for_timeout(1000)
+                     
+                     # 3. Count products AFTER clicking
+                     new_products = await page.query_selector_all('a[href*="/products/"]')
+                     new_urls = set()
+                     for p in new_products:
+                         href = await p.get_attribute('href')
+                         if href:
+                             new_urls.add(href.split('?')[0])
+                     
+                     # 4. Check if new products were loaded
+                     if len(new_urls) == len(current_urls):
+                         print(f"No new products loaded (still {len(new_urls)}). Collecting final batch...")
+                         # Collect one last time before exiting
+                         for href in new_urls:
+                             if '/products/' in href:
+                                 if not href.startswith('http'):
+                                      href = f'https://padelmarket.com{href}'
+                                 if 'padelmarket.com/products/' in href:
+                                      href = href.replace('padelmarket.com/products/', 'padelmarket.com/es-eu/products/')
+                                 clean_href = href.split('?')[0]
+                                 if clean_href not in product_urls:
+                                      product_urls.append(clean_href)
+                         print(f"Final count: {len(product_urls)} products")
+                         break
+                     else:
+                         print(f"Loaded {len(new_urls) - len(current_urls)} new products (total links: {len(new_urls)})")
                 else:
                      print("No more 'Load More' button found. Collecting final batch...")
                      # Collect one last time before exiting

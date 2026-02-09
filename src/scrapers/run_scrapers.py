@@ -16,7 +16,6 @@ from .base_scraper import BaseScraper
 from .padelmarket_scraper import PadelMarketScraper
 from .padelnuestro_scraper import PadelNuestroScraper
 from .padelproshop_scraper import PadelProShopScraper
-from .tiendapadelpoint_scraper import TiendaPadelPointScraper
 from .racket_manager import RacketManager
 
 async def run_scraper(scraper_cls: Type[BaseScraper], name: str, category_url: str, manager: RacketManager, limit: int = None):
@@ -65,8 +64,7 @@ async def main():
     scrapers = {
         'padelmarket': (PadelMarketScraper, 'https://padelmarket.com/collections/palas'),
         'padelnuestro': (PadelNuestroScraper, 'https://www.padelnuestro.com/palas-padel'),
-        'padelproshop': (PadelProShopScraper, 'https://padelproshop.com/collections/palas-padel'),
-        'tiendapadelpoint': (TiendaPadelPointScraper, 'https://www.tiendapadelpoint.com/palas-de-padel')
+        'padelproshop': (PadelProShopScraper, 'https://padelproshop.com/collections/palas-padel')
     }
     
     target_stores = args.stores.split(',') if args.stores else scrapers.keys()
