@@ -183,11 +183,28 @@ class PadelMarketScraper(BaseScraper):
         product_urls = []
         page = await self.get_page(url)
         
-        # Handle Popups
+        # Handle ALL Popups (Klaviyo, cookies, welcome popups, etc.)
         try:
-             await page.keyboard.press('Escape') # Close welcome popup
+            await page.keyboard.press('Escape')
+            await page.wait_for_timeout(500)
+            
+            # Close Klaviyo and other modal popups via JavaScript
+            await page.evaluate("""() => {
+                // Close Klaviyo popups
+                const klaviyoClose = document.querySelector('.needsclick button[aria-label="Close"]');
+                if (klaviyoClose) klaviyoClose.click();
+                
+                // Remove modal overlays that block clicks
+                const overlays = document.querySelectorAll('[role="dialog"], .klaviyo-form, .kl-private-reset-css-Xuajs1');
+                overlays.forEach(el => el.remove());
+                
+                // Cookie banners
+                const cookieClose = document.querySelector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll');
+                if (cookieClose) cookieClose.click();
+            }""")
+            await page.wait_for_timeout(500)
         except:
-             pass
+            pass
         
         # Simple loop for 'Load More'
         while True:
@@ -280,10 +297,53 @@ class PadelMarketScraper(BaseScraper):
             new_count = len(product_urls)
             added = new_count - current_count
             print(f"Products found: {new_count} (+{added})")
+
+            # Now try to click Load More to get more products
+            try:
+                # Remove any popups that appeared during scrolling
+                await page.evaluate("""() => {
+                    const overlays = document.querySelectorAll('[role="dialog"], .klaviyo-form, .kl-private-reset-css-Xuajs1');
+                    overlays.forEach(el => el.remove());
+                }""")
+                await page.wait_for_timeout(200)
+                
+                # FIXED: Use correct selector without extra '.button' class
+                load_more = await page.query_selector('button.load-more')
+                
+                if load_more and await load_more.is_visible():
+                    print("Clicking Load More...")
+                    # Scroll into view first
+                    await load_more.scroll_into_view_if_needed()
+                    await page.wait_for_timeout(300)
+                    
+                    # Use JavaScript click to bypass any remaining overlay issues
+                    await page.evaluate("document.querySelector('button.load-more').click()")
+                    
+                    # Wait for new content to load
+                    await page.wait_for_timeout(3000)
+                    
+                    # Scroll down to make sure new products are in viewport
+                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                else:
+                    print("No more 'Load More' button found. Pagination complete.")
+                    break
+                    
+            except Exception as e:
+                print(f"Error with Load More: {e}")
+                # Try scrolling down as fallback
+                await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
+                await page.wait_for_timeout(2000)
+                
+                # Check if we got any new products after scroll
+                new_links = await page.query_selector_all('a[href*="/products/"]')
+                if len(new_links) <= len(links):
+                    print("No new products after scroll. Stopping.")
+                    break
             
-            # Check if no new products were found AFTER loading more
+            # Safety check: if no new products were found in this iteration, stop
             if added == 0:
                 print("No new products loaded. Pagination complete.")
                 break
         
+        print(f"Final count: {len(product_urls)} products")
         return list(set(product_urls))
