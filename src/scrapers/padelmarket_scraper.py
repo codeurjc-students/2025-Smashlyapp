@@ -206,6 +206,9 @@ class PadelMarketScraper(BaseScraper):
         except:
             pass
         
+        # CRITICAL: Wait for products to load after popups are dismissed
+        await page.wait_for_timeout(2500)
+        
         # Simple loop for 'Load More'
         while True:
             # Safety limit check first
@@ -213,72 +216,7 @@ class PadelMarketScraper(BaseScraper):
                  print("Reached 1000 products limit.")
                  break
 
-            # 1. Count products BEFORE clicking
-            current_products = await page.query_selector_all('a[href*="/products/"]')
-            current_urls = set()
-            for p in current_products:
-                href = await p.get_attribute('href')
-                if href:
-                    current_urls.add(href.split('?')[0])
-            
-            # 2. Try to click Load More
-            try:
-                load_more = await page.query_selector('button.load-more.button')
-                if load_more and await load_more.is_visible():
-                     print(f"Current products: {len(current_urls)}. Clicking Load More...")
-                     await load_more.scroll_into_view_if_needed()
-                     await page.wait_for_timeout(500)
-                     await load_more.click()
-                     # Wait for network to be idle
-                     await page.wait_for_load_state('networkidle', timeout=10000)
-                     await page.wait_for_timeout(1000)
-                     
-                     # 3. Count products AFTER clicking
-                     new_products = await page.query_selector_all('a[href*="/products/"]')
-                     new_urls = set()
-                     for p in new_products:
-                         href = await p.get_attribute('href')
-                         if href:
-                             new_urls.add(href.split('?')[0])
-                     
-                     # 4. Check if new products were loaded
-                     if len(new_urls) == len(current_urls):
-                         print(f"No new products loaded (still {len(new_urls)}). Collecting final batch...")
-                         # Collect one last time before exiting
-                         for href in new_urls:
-                             if '/products/' in href:
-                                 if not href.startswith('http'):
-                                      href = f'https://padelmarket.com{href}'
-                                 if 'padelmarket.com/products/' in href:
-                                      href = href.replace('padelmarket.com/products/', 'padelmarket.com/es-eu/products/')
-                                 clean_href = href.split('?')[0]
-                                 if clean_href not in product_urls:
-                                      product_urls.append(clean_href)
-                         print(f"Final count: {len(product_urls)} products")
-                         break
-                     else:
-                         print(f"Loaded {len(new_urls) - len(current_urls)} new products (total links: {len(new_urls)})")
-                else:
-                     print("No more 'Load More' button found. Collecting final batch...")
-                     # Collect one last time before exiting
-                     links = await page.query_selector_all('a[href*="/products/"]')
-                     for link in links:
-                         href = await link.get_attribute('href')
-                         if href and '/products/' in href:
-                             if not href.startswith('http'):
-                                  href = f'https://padelmarket.com{href}'
-                             if 'padelmarket.com/products/' in href:
-                                  href = href.replace('padelmarket.com/products/', 'padelmarket.com/es-eu/products/')
-                             clean_href = href.split('?')[0]
-                             if clean_href not in product_urls:
-                                  product_urls.append(clean_href)
-                     print(f"Final count: {len(product_urls)} products")
-                     break
-            except Exception as e:
-                 print(f"Error clicking Load More: {e}")
-                 break
-            
-            # 2. Now collect products AFTER loading more content
+            # 1. COLLECT PRODUCTS from current page state
             current_count = len(product_urls)
             links = await page.query_selector_all('a[href*="/products/"]')
             
@@ -298,31 +236,28 @@ class PadelMarketScraper(BaseScraper):
             added = new_count - current_count
             print(f"Products found: {new_count} (+{added})")
 
-            # Now try to click Load More to get more products
+            # 2. Try to click Load More to load next page
             try:
-                # Remove any popups that appeared during scrolling
+                # Remove any popups
                 await page.evaluate("""() => {
                     const overlays = document.querySelectorAll('[role="dialog"], .klaviyo-form, .kl-private-reset-css-Xuajs1');
                     overlays.forEach(el => el.remove());
                 }""")
                 await page.wait_for_timeout(200)
                 
-                # FIXED: Use correct selector without extra '.button' class
+                # Find Load More button
                 load_more = await page.query_selector('button.load-more')
                 
                 if load_more and await load_more.is_visible():
                     print("Clicking Load More...")
-                    # Scroll into view first
                     await load_more.scroll_into_view_if_needed()
                     await page.wait_for_timeout(300)
                     
-                    # Use JavaScript click to bypass any remaining overlay issues
+                    # Use JavaScript click to bypass overlay issues
                     await page.evaluate("document.querySelector('button.load-more').click()")
                     
                     # Wait for new content to load
                     await page.wait_for_timeout(3000)
-                    
-                    # Scroll down to make sure new products are in viewport
                     await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
                 else:
                     print("No more 'Load More' button found. Pagination complete.")
@@ -330,20 +265,13 @@ class PadelMarketScraper(BaseScraper):
                     
             except Exception as e:
                 print(f"Error with Load More: {e}")
-                # Try scrolling down as fallback
-                await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                await page.wait_for_timeout(2000)
-                
-                # Check if we got any new products after scroll
-                new_links = await page.query_selector_all('a[href*="/products/"]')
-                if len(new_links) <= len(links):
-                    print("No new products after scroll. Stopping.")
-                    break
+                break
             
-            # Safety check: if no new products were found in this iteration, stop
+            # Safety check: if no new products were found, stop
             if added == 0:
                 print("No new products loaded. Pagination complete.")
                 break
         
         print(f"Final count: {len(product_urls)} products")
         return list(set(product_urls))
+
