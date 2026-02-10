@@ -1,5 +1,7 @@
 import json
 import re
+import urllib.request
+import asyncio
 from typing import Dict, List, Optional
 from .base_scraper import BaseScraper, Product, normalize_specs
 
@@ -171,107 +173,70 @@ class PadelMarketScraper(BaseScraper):
             specs=specs
         )
 
+    def _fetch_api_page(self, collection_path: str, page_num: int) -> list:
+        """Fetch a single page of products from the Shopify JSON API (sync, run in executor)."""
+        api_url = f"https://padelmarket.com{collection_path}/products.json?limit=250&page={page_num}"
+        req = urllib.request.Request(api_url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+        return data.get('products', [])
+
     async def scrape_category(self, url: str) -> List[str]:
-        """Scrape product URLs from a category page."""
+        """Scrape product URLs using the Shopify products.json API.
         
-        # Force correct collection URL if needed
-        # User requested Spain store: es-eu
-        if '/products/' not in url and '/collections/' not in url:
-             # Likely a base URL, default to palas
-             url = "https://padelmarket.com/es-eu/collections/palas"
+        Uses the public Shopify JSON API instead of Playwright-based
+        'Load More' button clicks, which were unreliable.
+        """
+        
+        # Determine the collection path from the URL
+        # e.g. https://padelmarket.com/es-eu/collections/palas -> /es-eu/collections/palas
+        if '/collections/' in url:
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            collection_path = parsed.path.rstrip('/')
+        else:
+            collection_path = '/es-eu/collections/palas'
         
         product_urls = []
-        page = await self.get_page(url)
+        page_num = 1
         
-        # Handle ALL Popups (Klaviyo, cookies, welcome popups, etc.)
-        try:
-            await page.keyboard.press('Escape')
-            await page.wait_for_timeout(500)
-            
-            # Close Klaviyo and other modal popups via JavaScript
-            await page.evaluate("""() => {
-                // Close Klaviyo popups
-                const klaviyoClose = document.querySelector('.needsclick button[aria-label="Close"]');
-                if (klaviyoClose) klaviyoClose.click();
-                
-                // Remove modal overlays that block clicks
-                const overlays = document.querySelectorAll('[role="dialog"], .klaviyo-form, .kl-private-reset-css-Xuajs1');
-                overlays.forEach(el => el.remove());
-                
-                // Cookie banners
-                const cookieClose = document.querySelector('#CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll');
-                if (cookieClose) cookieClose.click();
-            }""")
-            await page.wait_for_timeout(500)
-        except:
-            pass
+        print(f"[PadelMarket] Using Shopify API for product discovery...")
         
-        # CRITICAL: Wait for products to load after popups are dismissed
-        await page.wait_for_timeout(2500)
-        
-        # Simple loop for 'Load More'
         while True:
-            # Safety limit check first
-            if len(product_urls) >= 1000:
-                 print("Reached 1000 products limit.")
-                 break
-
-            # 1. COLLECT PRODUCTS from current page state
-            current_count = len(product_urls)
-            links = await page.query_selector_all('a[href*="/products/"]')
+            # Safety limit
+            if page_num > 20:
+                print(f"[PadelMarket] Reached page limit (20). Stopping.")
+                break
             
-            for link in links:
-                href = await link.get_attribute('href')
-                if href and '/products/' in href:
-                    if not href.startswith('http'):
-                         href = f'https://padelmarket.com{href}'
-                    if 'padelmarket.com/products/' in href:
-                         href = href.replace('padelmarket.com/products/', 'padelmarket.com/es-eu/products/')
-                    
-                    clean_href = href.split('?')[0]
-                    if clean_href not in product_urls:
-                         product_urls.append(clean_href)
+            print(f"[PadelMarket] Fetching API page {page_num}...")
             
-            new_count = len(product_urls)
-            added = new_count - current_count
-            print(f"Products found: {new_count} (+{added})")
-
-            # 2. Try to click Load More to load next page
             try:
-                # Remove any popups
-                await page.evaluate("""() => {
-                    const overlays = document.querySelectorAll('[role="dialog"], .klaviyo-form, .kl-private-reset-css-Xuajs1');
-                    overlays.forEach(el => el.remove());
-                }""")
-                await page.wait_for_timeout(200)
-                
-                # Find Load More button
-                load_more = await page.query_selector('button.load-more')
-                
-                if load_more and await load_more.is_visible():
-                    print("Clicking Load More...")
-                    await load_more.scroll_into_view_if_needed()
-                    await page.wait_for_timeout(300)
-                    
-                    # Use JavaScript click to bypass overlay issues
-                    await page.evaluate("document.querySelector('button.load-more').click()")
-                    
-                    # Wait for new content to load
-                    await page.wait_for_timeout(3000)
-                    await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                else:
-                    print("No more 'Load More' button found. Pagination complete.")
-                    break
-                    
+                # Run sync HTTP request in thread executor to keep async
+                loop = asyncio.get_event_loop()
+                products = await loop.run_in_executor(
+                    None, self._fetch_api_page, collection_path, page_num
+                )
             except Exception as e:
-                print(f"Error with Load More: {e}")
+                print(f"[PadelMarket] API error on page {page_num}: {e}")
                 break
             
-            # Safety check: if no new products were found, stop
-            if added == 0:
-                print("No new products loaded. Pagination complete.")
+            if not products:
+                print(f"[PadelMarket] No more products on page {page_num}. Done.")
                 break
+            
+            for product in products:
+                handle = product.get('handle')
+                if handle:
+                    product_url = f"https://padelmarket.com/es-eu/products/{handle}"
+                    if product_url not in product_urls:
+                        product_urls.append(product_url)
+            
+            print(f"[PadelMarket] Page {page_num}: {len(products)} products fetched. Total: {len(product_urls)}")
+            page_num += 1
         
-        print(f"Final count: {len(product_urls)} products")
-        return list(set(product_urls))
+        print(f"[PadelMarket] Final count: {len(product_urls)} products from API")
+        return product_urls
 
