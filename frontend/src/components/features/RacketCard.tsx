@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { FiEye, FiTag, FiHeart } from 'react-icons/fi';
 import styled from 'styled-components';
@@ -38,23 +38,7 @@ const RacketImageContainer = styled.div<{ view: 'grid' | 'list' }>`
   overflow: hidden;
 `;
 
-const ImageIndicator = styled.div`
-  position: absolute;
-  bottom: 0.5rem;
-  right: 0.5rem;
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  z-index: 2;
-`;
-
-const RacketImage = styled.img`
+const RacketImage = styled(motion.img)`
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
@@ -193,6 +177,31 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(({
   onAddToList,
   isAuthenticated = false
 }) => {
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  // Efecto para cambiar imágenes automáticamente en hover
+  useEffect(() => {
+    if (!isHovered || !racket.imagenes || racket.imagenes.length <= 1) {
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setCurrentImageIndex((prev) => 
+        prev + 1 >= racket.imagenes!.length ? 0 : prev + 1
+      );
+    }, 2000); // Cambia cada 2 segundos
+
+    return () => clearInterval(interval);
+  }, [isHovered, racket.imagenes]);
+
+  // Reset al índice 0 cuando se sale del hover
+  useEffect(() => {
+    if (!isHovered) {
+      setCurrentImageIndex(0);
+    }
+  }, [isHovered]);
+
   if (!racket || !racket.nombre) {
     return null;
   }
@@ -216,18 +225,23 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: index * 0.05 }}
       onClick={() => onClick(racket)}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
       <RacketImageContainer view={view}>
         <RacketImage
-          src={racket.imagenes?.[0]}
+          key={currentImageIndex}
+          src={racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0]}
           alt={racket.modelo}
           onError={handleImageError}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ 
+            duration: 0.6,
+            ease: "easeInOut"
+          }}
         />
-        {racket.imagenes && racket.imagenes.length > 1 && (
-          <ImageIndicator>
-            📷 {racket.imagenes.length}
-          </ImageIndicator>
-        )}
         {racket.view_count !== undefined && racket.view_count > 10 && (
           <RacketBadge variant='bestseller'>
             <FiEye size={12} />
