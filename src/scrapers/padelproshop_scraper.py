@@ -1,152 +1,159 @@
 import json
 import re
+import urllib.request
+import asyncio
 from typing import Dict, List, Optional
 from .base_scraper import BaseScraper, Product, clean_price, normalize_specs
 
 class PadelProShopScraper(BaseScraper):
-    """Scraper for PadelProShop online store."""
+    """Scraper for PadelProShop online store.
+    
+    Uses the Shopify JSON API for both category and product scraping,
+    eliminating the need for Playwright browser automation entirely.
+    """
+
+    def _fetch_api_page(self, collection_path: str, page_num: int) -> list:
+        """Fetch a single page of products from the Shopify JSON API (sync)."""
+        api_url = f"https://padelproshop.com{collection_path}/products.json?limit=250&page={page_num}"
+        req = urllib.request.Request(api_url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+        return data.get('products', [])
+
+    def _fetch_product_json(self, handle: str) -> dict:
+        """Fetch a single product's full data from the Shopify JSON API (sync)."""
+        api_url = f"https://padelproshop.com/products/{handle}.json"
+        req = urllib.request.Request(api_url, headers={
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+            'Accept': 'application/json',
+        })
+        with urllib.request.urlopen(req, timeout=30) as resp:
+            data = json.loads(resp.read().decode('utf-8'))
+        return data.get('product', {})
+
+    def _parse_specs_from_html(self, body_html: str) -> Dict[str, str]:
+        """Parse specs from Shopify body_html field using regex for natural language."""
+        specs: Dict[str, str] = {}
+        if not body_html:
+            return specs
+
+        # specific cleaning
+        text = body_html.replace('&nbsp;', ' ').replace('<br>', ' ').replace('</p>', ' ').replace('<p>', ' ')
+        text = re.sub(r'<[^>]+>', '', text) # Strip HTML tags
+        text = re.sub(r'\s+', ' ', text).strip() # Normalize whitespace
+
+        # 1. Forma
+        # "formato lágrima", "forma de diamante", "forma redonda"
+        match = re.search(r'(?:forma|formato)\s+(?:de\s+)?([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)', text, re.IGNORECASE)
+        if match:
+            specs['Forma'] = match.group(1).title()
+
+        # 2. Balance
+        # "balance medio", "balance alto", "balance bajo"
+        match = re.search(r'balance\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)', text, re.IGNORECASE)
+        if match:
+            specs['Balance'] = match.group(1).title()
+
+        # 3. Peso
+        # "peso entre 355 y 375 gramos", "360-375 gr"
+        match = re.search(r'(\d{3}\s*[-–]\s*\d{3})\s*(?:gr|gramos|g)', text, re.IGNORECASE)
+        if not match:
+             match = re.search(r'peso\s+(?:aproximado\s+)?(?:de\s+)?(\d{3}(?:[-–]\d{3})?)', text, re.IGNORECASE)
+        if match:
+            specs['Peso'] = match.group(1) + " g"
+
+        # 4. Goma / Núcleo
+        # "goma HR3", "goma EVA Soft", "núcleo de EVA"
+        match = re.search(r'(?:goma|núcleo)\s+(?:de\s+)?([a-zA-Z0-9\s]+?)(?:(?=\.|,)|$)', text, re.IGNORECASE)
+        if match:
+            val = match.group(1).strip()
+            if len(val) < 40 and 'contiene' not in val.lower():
+                 specs['Núcleo'] = val
+
+        # 5. Material / Caras
+        # "caras de carbono 18K", "fabricadas con carbono 12K"
+        match = re.search(r'(?:caras|superficie|fabricad[ao]s?)\s+(?:de\s+|con\s+)?(carbono\s+[0-9]+[kK]|fibra de vidrio|carbono)', text, re.IGNORECASE)
+        if match:
+            specs['Cara'] = match.group(1).title()
+
+        # 6. Nivel
+        match = re.search(r'jugador(?:es)?\s+(?:de\s+)?(?:nivel\s+)?([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)', text, re.IGNORECASE)
+        if match:
+             val = match.group(1).strip()
+             if 'avanzado' in val.lower(): specs['Nivel'] = 'Avanzado'
+             elif 'intermedio' in val.lower(): specs['Nivel'] = 'Intermedio'
+             elif 'profesional' in val.lower(): specs['Nivel'] = 'Profesional/Avanzado'
+             elif 'iniciación' in val.lower(): specs['Nivel'] = 'Iniciación'
+
+        # Fallback for structured list items if present
+        if not specs:
+             matches = re.finditer(r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>', body_html, re.IGNORECASE)
+             for m in matches:
+                 specs[m.group(1).strip().rstrip(':')] = m.group(2).strip()
+
+        return specs
 
     async def scrape_product(self, url: str) -> Optional[Product]:
-        """Scrape product data from PadelProShop using Shopify JSON endpoint with HTML fallback."""
+        """Scrape product data from PadelProShop using Shopify JSON API only."""
         
-        page = await self.get_page(url)
-
-        # Check for category redirect
-        if '/collections/' in page.url and '/products/' not in page.url:
-             if page.url.split('?')[0] != url.split('?')[0]:
-                 # return None # Strict skip? PadelProShop often redirects out of stock
-                 pass # Let it fail gracefully or return None if title missing
-
-        product_data = {}
+        # Extract handle from URL: /products/pala-xyz -> pala-xyz
+        handle = url.rstrip('/').split('/products/')[-1].split('?')[0]
+        if not handle:
+            return None
         
-        # Strategy 1: JSON Endpoint
         try:
-            # Construct JSON URL
-            json_url = f"{url.split('?')[0]}.json"
-            # We can't use page.goto for JSON easily if it downloads or renders raw.
-            # But Playwright can fetch it via APIRequestContext, or just navigate.
-            # Navigating to .json usually displays the JSON in browser.
-            # Let's try fetching via evaluate fetch (cleaner/faster)
-            json_str = await page.evaluate(f"""async () => {{
-                const res = await fetch('{json_url}');
-                if(res.ok) return await res.text();
-                return null;
-            }}""")
-            
-            if json_str:
-                data = json.loads(json_str)
-                product_data = data.get('product', {})
+            loop = asyncio.get_event_loop()
+            product_data = await loop.run_in_executor(
+                None, self._fetch_product_json, handle
+            )
         except Exception as e:
-            # print(f"JSON endpoint failed: {e}")
-            pass
+            print(f"[PadelProShop] API error for {handle}: {e}")
+            return None
 
-        # Strategy 2: HTML Scraping (Fallback/Supplement)
-        # We are already on the page (or need to be)
-        if page.url != url:
-             await page.goto(url)
-        
-        html_title = await self.safe_get_text('h1.product-title')
-        html_price_text = await self.safe_get_text('.price__current span.money')
-        html_old_price_text = await self.safe_get_text('.price__was span.money')
-        
-        # Use shared clean_price function from base_scraper
-
-        # DATA MERGING
+        if not product_data:
+            return None
         
         # Name
-        name = product_data.get('title') or html_title
-        if not name: return None # Essential
-        
+        name = product_data.get('title')
+        if not name:
+            return None
+
         # Price
         price = 0.0
         if product_data.get('variants'):
             try:
                 price = float(product_data['variants'][0]['price'])
-            except:
-                price = 0.0
-        
-        if price == 0.0:
-            price = clean_price(html_price_text)
-            
+            except (ValueError, TypeError, IndexError):
+                pass
+
         # Original Price
         original_price = None
         if product_data.get('variants'):
             try:
                 op = product_data['variants'][0].get('compare_at_price')
-                if op: original_price = float(op)
-            except: pass
-        
-        if not original_price and html_old_price_text:
-             original_price = clean_price(html_old_price_text)
+                if op:
+                    original_price = float(op)
+            except (ValueError, TypeError):
+                pass
 
         # Brand
-        brand = product_data.get('vendor')
-        if not brand:
-             brand = await self.safe_get_text('.product-vendor a, .product-vendor')
-        if not brand:
-             brand = 'Unknown'
+        brand = product_data.get('vendor') or 'Unknown'
 
         # Images
-        image = ''
         images = []
-        
-        # From JSON
         if product_data.get('images'):
             for img in product_data['images']:
                 src = img.get('src') if isinstance(img, dict) else img
-                if src: images.append(src)
+                if src:
+                    images.append(src)
         
-        # From HTML (Fallback/Augment)
-        try:
-             # Selectors: product-media.cc-main-product__media img
-             html_images = await page.query_selector_all('.cc-main-product__media img, .product-gallery__image')
-             for img in html_images:
-                  src = await img.get_attribute('src') or await img.get_attribute('data-src')
-                  if src:
-                       if src.startswith('//'): src = f'https:{src}'
-                       images.append(src)
-        except: pass
-        
-        # Deduplicate
-        images = list(dict.fromkeys(images))
-        if images: image = images[0]
+        image = images[0] if images else ''
 
-        # Specs extraction
-        specs: Dict[str, str] = {}
-        
-        # Method 1: HTML List parsing (ul.product-details)
-        try:
-             spec_rows = await page.query_selector_all('ul.product-details li, .product-specifications li')
-             for row in spec_rows:
-                 # Usually <p>Label</p> <span>Value</span>
-                 label_el = await row.query_selector('p, strong')
-                 value_el = await row.query_selector('span')
-                 
-                 if label_el and value_el:
-                      key = await label_el.inner_text()
-                      value = await value_el.inner_text()
-                      if key and value:
-                           specs[key.strip().replace(':', '')] = value.strip()
-        except: pass
-
-        # Method 2: Parse body_html from JSON
-        if not specs and product_data.get('body_html'):
-             body_html = product_data['body_html']
-             matches = re.finditer(r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>', body_html, re.IGNORECASE)
-             for match in matches:
-                 specs[match.group(1).strip()] = match.group(2).strip()
-
-        # Method 3: Description Text Regex
-        if not specs:
-            desc_el = await page.query_selector('.product-description, .rte')
-            if desc_el:
-                text = await desc_el.inner_text()
-                keys = ['Peso', 'Forma', 'Balance', 'Nivel', 'Marco', 'Núcleo', 'Cara']
-                for key in keys:
-                     match = re.search(fr'{key}\s*[:\.]?\s*([^\n]+)', text, re.IGNORECASE)
-                     if match: specs[key] = match.group(1).strip()
-
-        # Normalize specs for consistency
+        # Specs from body_html
+        specs = self._parse_specs_from_html(product_data.get('body_html', ''))
         specs = normalize_specs(specs)
 
         return Product(
@@ -161,61 +168,54 @@ class PadelProShopScraper(BaseScraper):
         )
 
     async def scrape_category(self, url: str) -> List[str]:
-        """Scrape product URLs from a category page using Infinite Scroll."""
+        """Scrape product URLs using the Shopify products.json API.
+        
+        Uses the public Shopify JSON API instead of Playwright-based
+        infinite scroll, which was unreliable.
+        """
+        
+        # Determine the collection path from the URL
+        if '/collections/' in url:
+            from urllib.parse import urlparse
+            parsed = urlparse(url)
+            collection_path = parsed.path.rstrip('/')
+        else:
+            collection_path = '/collections/palas-padel'
+        
         product_urls = []
-        page = await self.get_page(url)
+        page_num = 1
         
-        # Handle Cookies/Popups
-        try:
-             await page.keyboard.press('Escape')
-        except: pass
-
-        last_count = 0
-        scroll_attempts = 0
-
+        print(f"[PadelProShop] Using Shopify API for product discovery...")
+        
         while True:
-            # 1. Collect products (Verified selector: li.js-pagination-result a.js-prod-link)
-            links = await page.query_selector_all('li.js-pagination-result a.js-prod-link, .card__title a')
-            for link in links:
-                href = await link.get_attribute('href')
-                if href:
-                     # Clean URL
-                     href = href.split('?')[0]
-                     if not href.startswith('http'):
-                          href = f'https://www.padelproshop.com{href}'
-                     if href not in product_urls:
-                          product_urls.append(href)
+            if page_num > 20:
+                print(f"[PadelProShop] Reached page limit (20). Stopping.")
+                break
             
-            print(f"Products found: {len(product_urls)}")
+            print(f"[PadelProShop] Fetching API page {page_num}...")
             
-            # Check success of scroll
-            if len(product_urls) > last_count:
-                 last_count = len(product_urls)
-                 scroll_attempts = 0
-            else:
-                 scroll_attempts += 1
-            
-            # Safety checks
-            if scroll_attempts >= 3:
-                 # print("No new products found after multiple scrolls.")
-                 break
-            if len(product_urls) >= 1000:
-                 break
-            
-            # 2. Scroll to bottom (Infinite Scroll)
-            await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-            # Wait for network idle instead of arbitrary timeout
             try:
-                await page.wait_for_load_state('networkidle', timeout=3000)
-            except:
-                pass  # Continue even if timeout
+                loop = asyncio.get_event_loop()
+                products = await loop.run_in_executor(
+                    None, self._fetch_api_page, collection_path, page_num
+                )
+            except Exception as e:
+                print(f"[PadelProShop] API error on page {page_num}: {e}")
+                break
             
-            # 3. Check for specific Load More button (Hybrid)
-            try:
-                 load_more = await page.query_selector('.js-load-more')
-                 if load_more and await load_more.is_visible():
-                      await load_more.click()
-                      await page.wait_for_load_state('networkidle', timeout=3000)
-            except: pass
+            if not products:
+                print(f"[PadelProShop] No more products on page {page_num}. Done.")
+                break
+            
+            for product in products:
+                handle = product.get('handle')
+                if handle:
+                    product_url = f"https://padelproshop.com/products/{handle}"
+                    if product_url not in product_urls:
+                        product_urls.append(product_url)
+            
+            print(f"[PadelProShop] Page {page_num}: {len(products)} products fetched. Total: {len(product_urls)}")
+            page_num += 1
         
-        return list(set(product_urls))
+        print(f"[PadelProShop] Final count: {len(product_urls)} products from API")
+        return product_urls

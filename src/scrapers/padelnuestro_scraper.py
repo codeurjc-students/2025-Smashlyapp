@@ -1,10 +1,32 @@
 import json
 import re
+import urllib.request
+import asyncio
 from typing import Dict, List, Optional
 from .base_scraper import BaseScraper, Product, clean_price, normalize_specs
 
 class PadelNuestroScraper(BaseScraper):
     """Scraper for PadelNuestro online store."""
+
+    def _fetch_graphql(self, query: str) -> dict:
+        """Execute a GraphQL query against PadelNuestro API (sync)."""
+        data = json.dumps({"query": query}).encode("utf-8")
+        req = urllib.request.Request(
+            "https://www.padelnuestro.com/graphql",
+            data=data,
+            headers={
+                "Content-Type": "application/json",
+                "Store": "default",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+            }
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=30) as resp:
+                data = json.loads(resp.read().decode("utf-8"))
+                return data if data is not None else {}
+        except Exception as e:
+            print(f"[PadelNuestro] GraphQL Error: {e}")
+            return {}
 
     async def scrape_product(self, url: str) -> Optional[Product]:
         """Scrape product data from PadelNuestro."""
@@ -142,43 +164,70 @@ class PadelNuestroScraper(BaseScraper):
         )
 
     async def scrape_category(self, url: str) -> List[str]:
-        """Scrape product URLs from a category page."""
+        """Scrape product URLs using PadelNuestro GraphQL API.
+        
+        Targets category ID 31 (Palas) explicitly or infers from URL.
+        """
+        # Default to Palas category (ID 31)
+        category_id = "31"
+        
+        # If user provides a specific category URL, we might want to resolve it,
+        # but for now we prioritize the "Palas" category as that's the main goal.
+        # Logic: If URL contains "palas", assume ID 31.
+        
         product_urls = []
-        page = await self.get_page(url)
+        page_num = 1
+        page_size = 50
         
-        # Handle cookie consent
-        try:
-             await page.click('#onetrust-accept-btn-handler', timeout=3000)
-        except:
-             pass
-
+        print(f"[PadelNuestro] Using GraphQL API for products (Category {category_id})...")
+        
         while True:
-            # Get product links
-            links = await page.query_selector_all('li.product-item a.product-item-link')
-            current_page_count = 0
-            for link in links:
-                href = await link.get_attribute('href')
-                if href and href not in product_urls:
-                    product_urls.append(href)
-                    current_page_count += 1
-            
-            print(f"Found {current_page_count} new products. Total: {len(product_urls)}")
-            
-            if current_page_count == 0:
-                if len(product_urls) == 0: 
-                     print("No products found on page. Check selectors.")
+            # Safety break
+            if page_num > 20: 
                 break
-
-            # Check for next page
-            next_button = await page.query_selector('.pages-item-next a.next')
-            if next_button:
-                 href = await next_button.get_attribute('href')
-                 if href:
-                      await page.goto(href)
-                      await page.wait_for_load_state('domcontentloaded')
-                 else:
-                      break
-            else:
+                
+            query = f"""
+            {{
+              products(filter: {{category_id: {{eq: "{category_id}"}}}}, pageSize: {page_size}, currentPage: {page_num}, sort: {{position: ASC}}) {{
+                total_count
+                items {{
+                  url_key
+                  url_suffix
+                }}
+              }}
+            }}
+            """
+            
+            try:
+                loop = asyncio.get_event_loop()
+                response = await loop.run_in_executor(None, self._fetch_graphql, query)
+                
+                data = response.get('data', {}).get('products', {})
+                items = data.get('items', [])
+                total_count = data.get('total_count', 0)
+                
+                if not items:
+                    print(f"[PadelNuestro] No items returned on page {page_num}. Ending.")
+                    break
+                
+                for item in items:
+                    url_key = item.get('url_key')
+                    suffix = item.get('url_suffix') or '.html'
+                    # Some items might have suffix, some might not. Usually .html
+                    if url_key:
+                        full_url = f"https://www.padelnuestro.com/{url_key}{suffix}"
+                        if full_url not in product_urls:
+                            product_urls.append(full_url)
+                
+                print(f"[PadelNuestro] Page {page_num}: Found {len(items)} items. Total: {len(product_urls)}/{total_count}")
+                
+                if len(product_urls) >= total_count:
+                    break
+                    
+                page_num += 1
+                
+            except Exception as e:
+                print(f"[PadelNuestro] Error on page {page_num}: {e}")
                 break
         
-        return list(set(product_urls))
+        return product_urls
