@@ -182,22 +182,23 @@ class PadelNuestroScraper(BaseScraper):
             return None
 
     async def scrape_category(self, url: str) -> List[str]:
-        """Scrape product URLs using GraphQL search 'palas'."""
+        """Scrape product URLs using GraphQL filtered by Category ID 6 (Palas)."""
         product_urls = []
         page_num = 1
         page_size = 50
+        category_id = "6" # Palas
         
-        # We use strict filtering to avoid shoes/bags
+        # We use strict filtering to avoid shoes/bags if they appear
         exclude_terms = ['zapatilla', 'paletero', 'mochila', 'camiseta', 'pantalon', 'falda', 'gorra', 'calcetin', 'funda', 'overgrip', 'protector']
         
-        print(f"[PadelNuestro] Using GraphQL Search for 'palas'...")
+        print(f"[PadelNuestro] Using GraphQL Category {category_id} (Palas)...")
         
         while True:
-            if page_num > 20: break # Safety limit
+            if page_num > 40: break # Safety limit (40*50 = 2000 items)
             
             query = f"""
             {{
-              products(search: "palas", pageSize: {page_size}, currentPage: {page_num}) {{
+              products(filter: {{category_id: {{eq: "{category_id}"}}}}, pageSize: {page_size}, currentPage: {page_num}) {{
                 total_count
                 items {{
                   name
@@ -222,17 +223,13 @@ class PadelNuestroScraper(BaseScraper):
                 for item in items:
                     name = item.get('name', '').lower()
                     
-                    # Strict Filter: Must have 'pala' in name/url OR be a known racket brand
-                    # And must NOT be in exclude list
+                    # Strict Filter: Must NOT be in exclude list
                     if any(term in name for term in exclude_terms):
                         continue
                         
-                    # Must usually be a "Pala"
-                    if 'pala' not in name and 'racket' not in name:
-                        # Extra check: some rackets might just be "Nox AT10 Genius"
-                        # But valid rackets usually have "Pala" in title on PN.
-                        # We skip to be safe from shoes.
-                        continue
+                    # We TRUST Category 6 to contain mostly rackets.
+                    # We removed the check for 'pala'/'racket' in name because 
+                    # many valid rackets (e.g. "Nox AT10") don't have "pala" in the name field here.
                     
                     url_key = item.get('url_key')
                     suffix = item.get('url_suffix') or '.html'
@@ -241,7 +238,7 @@ class PadelNuestroScraper(BaseScraper):
                         if full_url not in product_urls:
                             product_urls.append(full_url)
                 
-                print(f"[PadelNuestro] Page {page_num}: Found {len(items)} items. Saved {len(product_urls)} (after filtering).")
+                print(f"[PadelNuestro] Page {page_num}: Found {len(items)} items. Total Saved: {len(product_urls)}/{total_count}")
                 
                 if page_num * page_size >= total_count:
                     break
