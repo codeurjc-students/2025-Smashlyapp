@@ -22,13 +22,6 @@ function createStoreData(racket: Racket) {
       link: racket.padelmarket_link,
     },
     {
-      name: 'padelpoint',
-      current_price: racket.padelpoint_actual_price,
-      original_price: racket.padelpoint_original_price,
-      discount_percentage: racket.padelpoint_discount_percentage,
-      link: racket.padelpoint_link,
-    },
-    {
       name: 'padelproshop',
       current_price: racket.padelproshop_actual_price,
       original_price: racket.padelproshop_original_price,
@@ -107,7 +100,7 @@ export function mapToFrontendFormat(racket: any): any {
     nombre: racket.name,
     marca: racket.brand,
     modelo: racket.model,
-    imagen: racket.image,
+    imagenes: typeof racket.images === 'string' ? JSON.parse(racket.images) : (racket.images || []),
     es_bestseller: false, // This field doesn't exist in current DB
     en_oferta: racket.on_offer,
     scrapeado_en: racket.created_at,
@@ -145,11 +138,6 @@ export function mapToFrontendFormat(racket: any): any {
     padelmarket_descuento_porcentaje: racket.padelmarket_discount_percentage,
     padelmarket_enlace: racket.padelmarket_link,
 
-    padelpoint_precio_actual: racket.padelpoint_actual_price,
-    padelpoint_precio_original: racket.padelpoint_original_price,
-    padelpoint_descuento_porcentaje: racket.padelpoint_discount_percentage,
-    padelpoint_enlace: racket.padelpoint_link,
-
     padelproshop_precio_actual: racket.padelproshop_actual_price,
     padelproshop_precio_original: racket.padelproshop_original_price,
     padelproshop_descuento_porcentaje: racket.padelproshop_discount_percentage,
@@ -180,7 +168,7 @@ export function mapToBackendFormat(frontendRacket: any): any {
   if (frontendRacket.nombre !== undefined) backendData.name = frontendRacket.nombre;
   if (frontendRacket.marca !== undefined) backendData.brand = frontendRacket.marca;
   if (frontendRacket.modelo !== undefined) backendData.model = frontendRacket.modelo;
-  if (frontendRacket.imagen !== undefined) backendData.image = frontendRacket.imagen;
+  if (frontendRacket.imagenes !== undefined) backendData.images = JSON.stringify(frontendRacket.imagenes);
   if (frontendRacket.en_oferta !== undefined) backendData.on_offer = frontendRacket.en_oferta;
   if (frontendRacket.descripcion !== undefined)
     backendData.description = frontendRacket.descripcion;
@@ -243,16 +231,6 @@ export function mapToBackendFormat(frontendRacket: any): any {
     backendData.padelmarket_discount_percentage = frontendRacket.padelmarket_descuento_porcentaje;
   if (frontendRacket.padelmarket_enlace !== undefined)
     backendData.padelmarket_link = frontendRacket.padelmarket_enlace;
-
-  // Store Prices - PadelPoint
-  if (frontendRacket.padelpoint_precio_actual !== undefined)
-    backendData.padelpoint_actual_price = frontendRacket.padelpoint_precio_actual;
-  if (frontendRacket.padelpoint_precio_original !== undefined)
-    backendData.padelpoint_original_price = frontendRacket.padelpoint_precio_original;
-  if (frontendRacket.padelpoint_descuento_porcentaje !== undefined)
-    backendData.padelpoint_discount_percentage = frontendRacket.padelpoint_descuento_porcentaje;
-  if (frontendRacket.padelpoint_enlace !== undefined)
-    backendData.padelpoint_link = frontendRacket.padelpoint_enlace;
 
   // Store Prices - PadelProShop
   if (frontendRacket.padelproshop_precio_actual !== undefined)

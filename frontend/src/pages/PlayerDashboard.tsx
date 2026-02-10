@@ -289,7 +289,7 @@ export const PlayerDashboard: React.FC = () => {
             <RacketsGrid>
               {favorites.map((racket) => (
                 <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
+                  {racket.imagenes?.[0] && <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
                   {racket.precio_actual && (
@@ -311,7 +311,7 @@ export const PlayerDashboard: React.FC = () => {
             <RacketsGrid>
               {recentlyViewed.slice(0, 4).map((racket) => (
                 <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
+                  {racket.imagenes?.[0] && <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
                   {racket.precio_actual && (
@@ -330,7 +330,7 @@ export const PlayerDashboard: React.FC = () => {
             <RacketsGrid>
               {offers.map((racket) => (
                 <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagen && <RacketImage src={racket.imagen} alt={racket.nombre} />}
+                  {racket.imagenes?.[0] && <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
                   {racket.precio_actual && (

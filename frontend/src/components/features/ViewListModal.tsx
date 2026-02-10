@@ -313,7 +313,7 @@ export const ViewListModal: React.FC<ViewListModalProps> = ({
                     return (
                       <RacketCard key={racket.id}>
                         <RacketImage
-                          src={racket.imagen || "/placeholder-racket.png"}
+                          src={racket.imagenes?.[0] || "/placeholder-racket.png"}
                           alt={racket.modelo || racket.nombre}
                           onError={(e) => {
                             (e.target as HTMLImageElement).src =

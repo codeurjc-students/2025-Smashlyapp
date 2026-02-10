@@ -82,10 +82,9 @@ export class RacketViewService {
             id,
             name,
             brand,
-            image,
+            images,
             padelmarket_actual_price,
             padelnuestro_actual_price,
-            padelpoint_actual_price,
             padelproshop_actual_price
           )
         `
@@ -106,7 +105,6 @@ export class RacketViewService {
           const prices = [
             item.rackets.padelmarket_actual_price,
             item.rackets.padelnuestro_actual_price,
-            item.rackets.padelpoint_actual_price,
             item.rackets.padelproshop_actual_price,
           ].filter((p) => p !== null && p !== undefined);
           
@@ -116,7 +114,7 @@ export class RacketViewService {
             id: item.rackets.id,
             nombre: item.rackets.name,
             marca: item.rackets.brand,
-            imagen: item.rackets.image,
+            imagenes: typeof item.rackets.images === 'string' ? JSON.parse(item.rackets.images) : (item.rackets.images || []),
             precio_actual,
             viewed_at: item.viewed_at,
           };

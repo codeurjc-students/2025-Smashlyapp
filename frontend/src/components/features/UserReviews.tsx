@@ -114,7 +114,7 @@ export const UserReviews: React.FC<UserReviewsProps> = ({ userId }) => {
                 <RacketImageContainer>
                   {review.racket?.imagen ? (
                     <RacketImage
-                      src={review.racket.imagen}
+                      src={review.racket.imagenes?.[0]}
                       alt={review.racket.nombre}
                     />
                   ) : (

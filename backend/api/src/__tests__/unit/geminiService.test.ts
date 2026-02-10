@@ -238,7 +238,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
           descuento_porcentaje: 8,
           en_oferta: true,
           enlace: 'https://example.com/pala3',
-          fuente: 'padelpoint',
+          fuente: 'padelproshop',
           scrapeado_en: '2025-01-01T00:00:00.000Z',
         },
       ];

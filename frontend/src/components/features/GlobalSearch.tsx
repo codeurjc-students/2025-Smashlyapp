@@ -453,7 +453,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                     onClick={() => handleRacketSelect(racket)}
                   >
                     <ResultImage
-                      src={racket.imagen || ''}
+                      src={racket.imagenes?.[0] || ''}
                       alt={racket.modelo || racket.nombre}
                       onError={e => {
                         const target = e.target as HTMLImageElement;

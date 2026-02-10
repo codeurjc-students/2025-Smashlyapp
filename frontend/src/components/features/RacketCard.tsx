@@ -38,6 +38,22 @@ const RacketImageContainer = styled.div<{ view: 'grid' | 'list' }>`
   overflow: hidden;
 `;
 
+const ImageIndicator = styled.div`
+  position: absolute;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  z-index: 2;
+`;
+
 const RacketImage = styled.img`
   max-width: 100%;
   max-height: 100%;
@@ -203,10 +219,15 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(({
     >
       <RacketImageContainer view={view}>
         <RacketImage
-          src={racket.imagen}
+          src={racket.imagenes?.[0]}
           alt={racket.modelo}
           onError={handleImageError}
         />
+        {racket.imagenes && racket.imagenes.length > 1 && (
+          <ImageIndicator>
+            📷 {racket.imagenes.length}
+          </ImageIndicator>
+        )}
         {racket.view_count !== undefined && racket.view_count > 10 && (
           <RacketBadge variant='bestseller'>
             <FiEye size={12} />

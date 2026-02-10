@@ -92,6 +92,44 @@ const MainImage = styled.img`
   }
 `;
 
+const ThumbnailsContainer = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+`;
+
+const Thumbnail = styled.img<{ isActive: boolean }>`
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  border-radius: 12px;
+  border: 2px solid ${props => props.isActive ? '#16a34a' : '#e5e7eb'};
+  background: ${props => props.isActive ? '#f0fdf4' : 'white'};
+  cursor: pointer;
+  transition: all 0.2s;
+  padding: 0.5rem;
+
+  &:hover {
+    border-color: #16a34a;
+    transform: scale(1.05);
+  }
+`;
+
+const ImageCounter = styled.div`
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+`;
+
 const WishlistButton = styled.button`
   position: absolute;
   top: 1.5rem;
@@ -469,8 +507,7 @@ const RacketDetailPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-
+  const [showEditModal, setShowEditModal] = useState(false);  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const racketId = searchParams.get('id');
 
   useEffect(() => {
@@ -544,10 +581,27 @@ const RacketDetailPage: React.FC = () => {
              <FiHeart fill={showAddToListModal ? "#ef4444" : "none"} />
           </WishlistButton>
           <MainImage 
-            src={racket.imagen || '/placeholder-racket.svg'} 
+            src={racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0] || '/placeholder-racket.svg'} 
             alt={racket.modelo}
           />
-          {/* Thumbnails could go here */}
+          {racket.imagenes && racket.imagenes.length > 1 && (
+            <>
+              <ImageCounter>
+                {selectedImageIndex + 1} / {racket.imagenes.length}
+              </ImageCounter>
+              <ThumbnailsContainer>
+                {racket.imagenes.map((img, index) => (
+                  <Thumbnail
+                    key={index}
+                    src={img}
+                    alt={`${racket.modelo} - imagen ${index + 1}`}
+                    isActive={index === selectedImageIndex}
+                    onClick={() => setSelectedImageIndex(index)}
+                  />
+                ))}
+              </ThumbnailsContainer>
+            </>
+          )}
         </GallerySection>
 
         {/* Right: Info */}

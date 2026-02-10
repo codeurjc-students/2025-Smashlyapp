@@ -897,7 +897,7 @@ const CompareRacketsPage: React.FC = () => {
             <SearchResults>
               {filteredRackets.map(racket => (
                 <SearchResultItem key={racket.id} onClick={() => handleAddRacket(racket)}>
-                  <img src={racket.imagen || '/placeholder-racket.png'} alt={racket.nombre} />
+                  <img src={racket.imagenes?.[0] || '/placeholder-racket.png'} alt={racket.nombre} />
                   <div>
                     <div style={{ fontWeight: 600 }}>{racket.nombre}</div>
                     <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>{racket.marca}</div>
@@ -930,7 +930,7 @@ const CompareRacketsPage: React.FC = () => {
                     whileHover={!isSelected ? { scale: 1.05 } : {}}
                     whileTap={!isSelected ? { scale: 0.95 } : {}}
                   >
-                    <img src={racket.imagen || '/placeholder-racket.png'} alt={racket.nombre} />
+                    <img src={racket.imagenes?.[0] || '/placeholder-racket.png'} alt={racket.nombre} />
                     <FavoriteRacketInfo>
                       <FavoriteRacketName>{racket.nombre}</FavoriteRacketName>
                       <FavoriteRacketBrand>{racket.marca}</FavoriteRacketBrand>
@@ -965,7 +965,7 @@ const CompareRacketsPage: React.FC = () => {
               <RemoveButton onClick={() => handleRemoveRacket(racket.id!)}>
                 <FiX />
               </RemoveButton>
-              <RacketImage src={racket.imagen || '/placeholder-racket.png'} alt={racket.nombre} />
+              <RacketImage src={racket.imagenes?.[0] || '/placeholder-racket.png'} alt={racket.nombre} />
               <RacketName>{racket.nombre}</RacketName>
               <RacketBrand>{racket.marca}</RacketBrand>
             </SelectedRacketCard>

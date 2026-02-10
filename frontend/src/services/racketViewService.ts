@@ -9,7 +9,7 @@ export interface RecentlyViewedRacket {
   id: number;
   nombre: string;
   marca: string;
-  imagen?: string;
+  imagenes?: string[];
   precio_actual?: number;
   viewed_at: string;
 }

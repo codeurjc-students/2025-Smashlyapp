@@ -46,7 +46,7 @@ export interface Racket {
   nombre: string;
   marca: string;
   modelo: string;
-  imagen: string;
+  imagenes: string[];
   es_bestseller: boolean;
   en_oferta: boolean;
   scrapeado_en?: string;
@@ -86,11 +86,6 @@ export interface Racket {
   padelmarket_precio_original?: number | null;
   padelmarket_descuento_porcentaje?: number | null;
   padelmarket_enlace?: string | null;
-
-  padelpoint_precio_actual?: number | null;
-  padelpoint_precio_original?: number | null;
-  padelpoint_descuento_porcentaje?: number | null;
-  padelpoint_enlace?: string | null;
 
   padelproshop_precio_actual?: number | null;
   padelproshop_precio_original?: number | null;

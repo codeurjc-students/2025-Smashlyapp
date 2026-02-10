@@ -114,9 +114,9 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
       {/* Sección de la pala (si está disponible y activo) */}
       {showProductInfo && review.racket && (
         <RacketInfo to={`/rackets/${review.racket.id}`}>
-          {review.racket.imagen && (
+          {review.racket.imagenes?.[0] && (
             <RacketImage
-              src={review.racket.imagen}
+              src={review.racket.imagenes[0]}
               alt={review.racket.nombre}
             />
           )}

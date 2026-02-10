@@ -30,13 +30,6 @@ export const getLowestPrice = (racket: Racket): LowestPriceInfo | null => {
       link: racket.padelmarket_enlace,
     },
     {
-      name: 'Padel Point',
-      price: racket.padelpoint_precio_actual,
-      originalPrice: racket.padelpoint_precio_original,
-      discount: racket.padelpoint_descuento_porcentaje,
-      link: racket.padelpoint_enlace,
-    },
-    {
       name: 'Padel Pro Shop',
       price: racket.padelproshop_precio_actual,
       originalPrice: racket.padelproshop_precio_original,
@@ -106,14 +99,6 @@ export const getAllStorePrices = (racket: Racket): StorePriceInfo[] => {
       discount: racket.padelmarket_descuento_porcentaje,
       link: racket.padelmarket_enlace,
       available: !!(racket.padelmarket_precio_actual && racket.padelmarket_enlace),
-    },
-    {
-      store: 'Padel Point',
-      price: racket.padelpoint_precio_actual,
-      originalPrice: racket.padelpoint_precio_original,
-      discount: racket.padelpoint_descuento_porcentaje,
-      link: racket.padelpoint_enlace,
-      available: !!(racket.padelpoint_precio_actual && racket.padelpoint_enlace),
     },
     {
       store: 'Padel Pro Shop',

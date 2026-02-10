@@ -488,11 +488,11 @@ export class RacketPdfGenerator {
   ): Promise<Record<number, string>> {
     const loaded: Record<number, string> = {};
     const promises = rackets.map(async r => {
-      if (!r.imagen) return;
+      if (!r.imagenes || !r.imagenes[0]) return;
       try {
-        const url = r.imagen.startsWith('http')
-          ? `${proxyUrlBase}/api/v1/proxy/image?url=${encodeURIComponent(r.imagen)}`
-          : r.imagen;
+        const url = r.imagenes[0].startsWith('http')
+          ? `${proxyUrlBase}/api/v1/proxy/image?url=${encodeURIComponent(r.imagenes[0])}`
+          : r.imagenes[0];
 
         const response = await fetch(url);
         const blob = await response.blob();
