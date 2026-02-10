@@ -4,6 +4,7 @@ import os
 import re
 import unicodedata
 from datetime import datetime
+from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from typing import Dict, List, Optional, Any
 from .base_scraper import Product
 from thefuzz import fuzz
@@ -50,6 +51,52 @@ class RacketManager:
         text = re.sub(r'[^\w\s-]', '', text)
         text = re.sub(r'[-\s]+', '-', text).strip('-')
         return text
+
+    @staticmethod
+    def _optimize_image_url(url: str) -> str:
+        """Optimize image URL for maximum quality.
+        
+        - Shopify CDN: removes size constraints (_WIDTHxHEIGHT suffixes, width/height params)
+        - PadelNuestro (Magento): removes compression/resize params
+        - Ensures https protocol
+        """
+        if not url:
+            return url
+        
+        # Ensure https
+        if url.startswith('//'):
+            url = f'https:{url}'
+        
+        parsed = urlparse(url)
+        
+        # --- Shopify CDN cleanup ---
+        if 'shopify.com' in parsed.netloc or 'cdn.shopify.com' in parsed.netloc:
+            # Remove size suffixes from filename: image_200x200.jpg -> image.jpg
+            # Also handles _200x, _x200, _200x200_crop_center patterns
+            path = re.sub(r'_(\d+x\d*|\d*x\d+)(?:_crop_center)?(?=\.)', '', parsed.path)
+            
+            # Keep only the version param 'v', remove width/height/crop params
+            params = parse_qs(parsed.query)
+            clean_params = {}
+            if 'v' in params:
+                clean_params['v'] = params['v'][0]
+            
+            return urlunparse((
+                parsed.scheme, parsed.netloc, path,
+                parsed.params, urlencode(clean_params) if clean_params else '', parsed.fragment
+            ))
+        
+        # --- PadelNuestro (Magento) cleanup ---
+        if 'padelnuestro.com' in parsed.netloc:
+            # Remove resize/compression params, keep the base image URL
+            # Typical: ?optimize=high&bg-color=255,255,255&fit=bounds&height=&width=&canvas=:
+            # Clean URL = just the path, no query params (gives original quality)
+            return urlunparse((
+                parsed.scheme, parsed.netloc, parsed.path,
+                parsed.params, '', parsed.fragment
+            ))
+        
+        return url
 
     def _normalize_name_for_comparison(self, name: str) -> str:
         """
@@ -165,13 +212,11 @@ class RacketManager:
             if not curr_val or (curr_val == "Desconocido" and value != "Desconocido"):
                 racket_entry["specs"][key] = value
 
-        # 5. Merge Images
-        # Add any new images not present
-        current_images = set(racket_entry["images"])
-        for img in p_images:
-            if img and img not in current_images:
-                racket_entry["images"].append(img)
-                current_images.add(img)
+        # 5. Images: keep only one store's images (the first to provide them)
+        # Don't mix images from different stores to avoid visual inconsistency
+        # Optimize URLs for maximum quality
+        if not racket_entry["images"] and p_images:
+            racket_entry["images"] = [self._optimize_image_url(img) for img in p_images if img]
 
         # 6. Update Price / Store Info
         store_entry = next((item for item in racket_entry["prices"] if item["store"] == store_name), None)
