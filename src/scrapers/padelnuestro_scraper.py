@@ -18,12 +18,13 @@ class PadelNuestroScraper(BaseScraper):
             data=data,
             headers={
                 "Content-Type": "application/json",
-                "Store": "default",
+                # IMPORTANTE: 'es' suele ser la tienda pública de España. 
+                # 'default' a veces devuelve URLs internas o sin prefijos correctos.
+                "Store": "es", 
                 "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             }
         )
         
-        # Create unverified context to avoid SSL issues in some envs
         ctx = ssl.create_default_context()
         ctx.check_hostname = False
         ctx.verify_mode = ssl.CERT_NONE
@@ -42,7 +43,6 @@ class PadelNuestroScraper(BaseScraper):
         if not body_html:
             return specs
             
-        # Clean text
         text = body_html.replace('&nbsp;', ' ').replace('<br>', ' ').replace('</p>', ' ').replace('<p>', ' ')
         text = re.sub(r'<[^>]+>', '', text)
         text = re.sub(r'\s+', ' ', text).strip()
@@ -83,23 +83,20 @@ class PadelNuestroScraper(BaseScraper):
         return specs
 
     async def scrape_product(self, url: str) -> Optional[Product]:
-        """Scrape product data using GraphQL (bypassing Playwright/Cloudflare)."""
-        # Extract url_key from URL
-        # Format: https://padelnuestro.com/something-c-123-p.html or /brand-model-sku.html
-        # Usually query by url_key. url_key is the last part before .html or params?
-        # Actually PadelNuestro URLs: https://www.padelnuestro.com/siux-diablo...html
-        # The url_key is the filename without .html
-        
+        """Scrape product data using GraphQL."""
         try:
+            # Estrategia de recuperación de URL KEY:
+            # 1. Parsear la URL para obtener el slug limpio
             parsed = urlparse(url)
             path = parsed.path
             if path.endswith('.html'):
                 path = path[:-5]
-            url_key = path.strip('/')
             
-            # Should handle case where URL has prefix? usually just /key
-            # But the search loop returns full URL constructed from url_key.
+            # Limpiar prefijos de idioma si existen (ej: /es/)
+            parts = path.strip('/').split('/')
+            url_key = parts[-1] # Nos quedamos con la última parte
             
+            # Query ajustada: buscamos por url_key
             query = f"""
             {{
               products(filter: {{url_key: {{eq: "{url_key}"}}}}) {{
@@ -114,15 +111,6 @@ class PadelNuestroScraper(BaseScraper):
                   }}
                   media_gallery {{ url }}
                   description {{ html }}
-                  ... on ConfigurableProduct {{
-                    variants {{
-                      attributes {{
-                        code
-                        label
-                        value_index
-                      }}
-                    }}
-                  }}
                 }}
               }}
             }}
@@ -133,9 +121,7 @@ class PadelNuestroScraper(BaseScraper):
             items = response.get('data', {}).get('products', {}).get('items', [])
             
             if not items:
-                # Fallback: maybe failed to parse key? try Playwright as last resort? 
-                # No, avoiding Playwright is the goal. Return None.
-                print(f"[PadelNuestro] API could not find product: {url_key}")
+                print(f"[PadelNuestro] API could not find product by key: {url_key}")
                 return None
                 
             item = items[0]
@@ -156,12 +142,18 @@ class PadelNuestroScraper(BaseScraper):
             description_html = item.get('description', {}).get('html', '')
             specs = self._parse_specs_from_html(description_html)
             
-            # Brand (heuristic)
+            # Brand (heuristic improved)
             brand = "Unknown"
-            # Try to extract from name
-            first_word = name.split(' ')[0]
-            if len(first_word) > 2:
-                brand = first_word.title()
+            if name:
+                # Intentar detectar marcas comunes primero
+                common_brands = ['Nox', 'Bullpadel', 'Adidas', 'Siux', 'Head', 'Babolat', 'StarVie', 'Varlion', 'Kuikma', 'Wilson']
+                name_upper = name.upper()
+                for b in common_brands:
+                    if b.upper() in name_upper:
+                        brand = b
+                        break
+                if brand == "Unknown":
+                    brand = name.split(' ')[0].title()
                 
             specs = normalize_specs(specs)
             
@@ -182,20 +174,20 @@ class PadelNuestroScraper(BaseScraper):
             return None
 
     async def scrape_category(self, url: str) -> List[str]:
-        """Scrape product URLs using GraphQL filtered by Category ID 6 (Palas)."""
+        """Scrape product URLs using GraphQL with URL REWRITES (Fixes 404s)."""
         product_urls = []
         page_num = 1
         page_size = 50
         category_id = "6" # Palas
         
-        # We use strict filtering to avoid shoes/bags if they appear
         exclude_terms = ['zapatilla', 'paletero', 'mochila', 'camiseta', 'pantalon', 'falda', 'gorra', 'calcetin', 'funda', 'overgrip', 'protector']
         
-        print(f"[PadelNuestro] Using GraphQL Category {category_id} (Palas)...")
+        print(f"[PadelNuestro] Using GraphQL Category {category_id}...")
         
         while True:
-            if page_num > 40: break # Safety limit (40*50 = 2000 items)
+            if page_num > 40: break 
             
+            # SOLUCIÓN: Pedimos 'url_rewrites' para obtener la URL pública real
             query = f"""
             {{
               products(filter: {{category_id: {{eq: "{category_id}"}}}}, pageSize: {page_size}, currentPage: {page_num}) {{
@@ -204,6 +196,9 @@ class PadelNuestroScraper(BaseScraper):
                   name
                   url_key
                   url_suffix
+                  url_rewrites {{
+                    url
+                  }}
                 }}
               }}
             }}
@@ -222,21 +217,31 @@ class PadelNuestroScraper(BaseScraper):
                 
                 for item in items:
                     name = item.get('name', '').lower()
-                    
-                    # Strict Filter: Must NOT be in exclude list
                     if any(term in name for term in exclude_terms):
                         continue
                         
-                    # We TRUST Category 6 to contain mostly rackets.
-                    # We removed the check for 'pala'/'racket' in name because 
-                    # many valid rackets (e.g. "Nox AT10") don't have "pala" in the name field here.
+                    # LÓGICA DE CONSTRUCCIÓN DE URL CORREGIDA
+                    full_url = None
                     
-                    url_key = item.get('url_key')
-                    suffix = item.get('url_suffix') or '.html'
-                    if url_key:
-                        full_url = f"https://www.padelnuestro.com/{url_key}{suffix}"
-                        if full_url not in product_urls:
-                            product_urls.append(full_url)
+                    # 1. Preferencia: Usar url_rewrites (URL pública real)
+                    rewrites = item.get('url_rewrites')
+                    if rewrites and len(rewrites) > 0:
+                        # Usamos la primera rewrite disponible
+                        slug = rewrites[0].get('url')
+                        if slug:
+                            # Aseguramos que no tenga doble .html si la API ya lo trae
+                            if not slug.endswith('.html'):
+                                slug += '.html'
+                            full_url = f"https://www.padelnuestro.com/{slug}"
+                    
+                    # 2. Fallback: Construir manualmente si no hay rewrites (menos fiable)
+                    if not full_url and item.get('url_key'):
+                        slug = item['url_key']
+                        suffix = item.get('url_suffix') or '.html'
+                        full_url = f"https://www.padelnuestro.com/{slug}{suffix}"
+
+                    if full_url and full_url not in product_urls:
+                        product_urls.append(full_url)
                 
                 print(f"[PadelNuestro] Page {page_num}: Found {len(items)} items. Total Saved: {len(product_urls)}/{total_count}")
                 

@@ -251,37 +251,40 @@ def map_json_to_db_row(racket_id, racket_data):
         
         # Mapear tiendas
         if store == 'padelnuestro':
-            row['padelnuestro_actual_price'] = price_entry.get('price')
-            row['padelnuestro_original_price'] = price_entry.get('original_price')
+            price = price_entry.get('price')
+            original = price_entry.get('original_price')
+            row['padelnuestro_actual_price'] = price if price else None
+            row['padelnuestro_original_price'] = original if original else None
             row['padelnuestro_link'] = price_entry.get('url')
             
-            if price_entry.get('original_price'):
+            if original and price and original > price:
                 has_discount = True
-                discount = ((price_entry['original_price'] - price_entry['price']) / 
-                           price_entry['original_price'] * 100)
-                row['padelnuestro_discount_percentage'] = round(discount, 2)
+                discount = ((original - price) / original * 100)
+                row['padelnuestro_discount_percentage'] = int(round(discount))
         
         elif store == 'padelmarket':
-            row['padelmarket_actual_price'] = price_entry.get('price')
-            row['padelmarket_original_price'] = price_entry.get('original_price')
+            price = price_entry.get('price')
+            original = price_entry.get('original_price')
+            row['padelmarket_actual_price'] = price if price else None
+            row['padelmarket_original_price'] = original if original else None
             row['padelmarket_link'] = price_entry.get('url')
             
-            if price_entry.get('original_price'):
+            if original and price and original > price:
                 has_discount = True
-                discount = ((price_entry['original_price'] - price_entry['price']) / 
-                           price_entry['original_price'] * 100)
-                row['padelmarket_discount_percentage'] = round(discount, 2)
+                discount = ((original - price) / original * 100)
+                row['padelmarket_discount_percentage'] = int(round(discount))
         
         elif store == 'padelproshop':
-            row['padelproshop_actual_price'] = price_entry.get('price')
-            row['padelproshop_original_price'] = price_entry.get('original_price')
+            price = price_entry.get('price')
+            original = price_entry.get('original_price')
+            row['padelproshop_actual_price'] = price if price else None
+            row['padelproshop_original_price'] = original if original else None
             row['padelproshop_link'] = price_entry.get('url')
             
-            if price_entry.get('original_price'):
+            if original and price and original > price:
                 has_discount = True
-                discount = ((price_entry['original_price'] - price_entry['price']) / 
-                           price_entry['original_price'] * 100)
-                row['padelproshop_discount_percentage'] = round(discount, 2)
+                discount = ((original - price) / original * 100)
+                row['padelproshop_discount_percentage'] = int(round(discount))
     
     # Marcar como oferta
     row['on_offer'] = has_discount

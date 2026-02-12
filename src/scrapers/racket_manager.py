@@ -46,11 +46,11 @@ class RacketManager:
 
     @staticmethod
     def _optimize_image_url(url: str) -> str:
-        """Optimize image URL for maximum quality and standard protocol."""
+        """Optimize image URL for maximum quality."""
         if not url: return url
         if url.startswith('//'): url = f'https:{url}'
-        
         parsed = urlparse(url)
+        
         # Shopify cleanup
         if 'shopify.com' in parsed.netloc or 'cdn.shopify.com' in parsed.netloc:
             path = re.sub(r'_(\d+x\d*|\d*x\d+)(?:_crop_center)?(?=\.)', '', parsed.path)
@@ -58,116 +58,156 @@ class RacketManager:
             clean_params = {'v': params['v'][0]} if 'v' in params else {}
             return urlunparse((parsed.scheme, parsed.netloc, path, parsed.params, urlencode(clean_params), parsed.fragment))
         
-        # Magento/PadelNuestro cleanup
+        # Magento cleanup
         if 'padelnuestro.com' in parsed.netloc:
             return urlunparse((parsed.scheme, parsed.netloc, parsed.path, parsed.params, '', parsed.fragment))
         
         return url
 
+    def _detect_brand_from_name(self, name: str) -> str:
+        """Helper to rescue Unknown brands."""
+        name_upper = name.upper()
+        # Lista de marcas prioritarias (primero las compuestas)
+        brands = [
+            'DROP SHOT', 'BLACK CROWN', 'ROYAL PADEL', 'STAR VIE', 'ADIDAS', 
+            'BULLPADEL', 'NOX', 'HEAD', 'BABOLAT', 'SIUX', 'WILSON', 'VARLION',
+            'KUIKMA', 'OXYDOG', 'VIBOR-A', 'LOK', 'ENEBE', 'JOMA'
+        ]
+        for brand in brands:
+            if brand in name_upper:
+                return brand.title() if brand != 'ADIDAS' else 'Adidas' # Case specific
+        return "Unknown"
+
     def _normalize_name_for_comparison(self, name: str) -> str:
-        """Deep cleaning for fuzzy comparison."""
+        """Deep cleaning removing noise like player names and punctuation."""
         name = name.lower()
-        # Remove years explicitly to compare base model names
+        
+        # 1. Remove Years
         name = re.sub(r'\b202[0-9]\b', '', name)
-        ignore = ['pala', 'padel', 'racket', 'de', 'para']
-        for word in ignore:
+        
+        # 2. Remove Common Filler Words
+        ignore_words = ['pala', 'padel', 'racket', 'de', 'para', 'la', 'el']
+        for word in ignore_words:
             name = name.replace(word, '')
+            
+        # 3. Remove Player Names (NOISE REDUCTION)
+        # Esto es crucial para que "Jon Sanz" no rompa el match
+        players = [
+            'jon sanz', 'paquito', 'navarro', 'lebron', 'galan', 'tapia', 'coello', 
+            'chingotto', 'stupa', 'di nenno', 'sanyo', 'bela', 'belasteguin', 
+            'momo', 'alex ruiz', 'tello', 'yanguas', 'garrido', 'ari sanchez', 
+            'paulita', 'josemaria', 'triay', 'salazar', 'bea gonzalez', 'martita', 'ortega'
+        ]
+        for player in players:
+            name = name.replace(player, '')
+
+        # 4. Handle Versions (1.0 -> 10, but keep consistent)
+        # remove decimals to treat 1.0 same as 1
+        name = re.sub(r'\.0\b', '', name) 
+        
+        # 5. Remove special chars
         name = re.sub(r'[^\w\s]', '', name)
+        
         return name.strip()
 
     # =========================================================================
-    # CORE DEDUPLICATION LOGIC (The "Fingerprint" Algorithm)
+    # CORE DEDUPLICATION LOGIC
     # =========================================================================
 
     def _extract_features(self, name: str) -> dict:
-        """Extracts immutable features for strict filtering."""
         name_lower = name.lower()
         
-        # 1. Year Detection (Crucial)
+        # Year
         year_match = re.search(r'\b(202[3-7])\b', name_lower)
         year = year_match.group(1) if year_match else None
 
-        # 2. Critical Suffixes (Discriminators)
+        # Suffixes
         critical_suffixes = [
             "woman", "w", "light", "lite", "air", "junior", "jr", 
             "hybrid", "ctrl", "control", "attack", "comfort", "cmf", "master",
-            "limited", "ltd", "pro", "team", "elite", "flow"
+            "limited", "ltd", "pro", "team", "elite", "flow",
+            "12k", "18k", "24k", "3k", "carbon" # Treat materials as suffixes too for safety
         ]
-        # Check as whole words or suffixes
         found_suffixes = {s for s in critical_suffixes if f" {s} " in f" {name_lower} " or f"-{s}" in name_lower}
 
-        # 3. Material/K-Factor (e.g., 12k vs 18k)
-        k_factor = re.search(r'\b(\d{1,2}[kK])\b', name_lower)
-        material_k = k_factor.group(1).lower() if k_factor else None
+        # Clean Name
+        clean_name = self._normalize_name_for_comparison(name)
 
         return {
             "year": year,
             "suffixes": found_suffixes,
-            "material_k": material_k,
-            "clean_name": self._normalize_name_for_comparison(name)
+            "clean_name": clean_name
         }
 
     def _are_compatible(self, f_a: dict, f_b: dict) -> bool:
-        """Returns False if features have hard conflicts."""
-        # Conflict 1: Different Years
+        # Conflict 1: Years
         if f_a['year'] and f_b['year'] and f_a['year'] != f_b['year']:
             return False
         
-        # Conflict 2: Different Suffixes (Symmetric Difference)
-        # Allows fuzzy match only if suffixes are identical
+        # Conflict 2: Suffixes (Must match exactly if present)
+        # Exception: If one set is empty and the other isn't, careful.
+        # But for "Woman" vs "Normal", we want them separate.
         if f_a['suffixes'] != f_b['suffixes']:
-            return False
-
-        # Conflict 3: Different Material (12k vs 18k)
-        if f_a['material_k'] and f_b['material_k'] and f_a['material_k'] != f_b['material_k']:
             return False
 
         return True
 
     def merge_product(self, product: Any, store_name: str):
-        """Merge product with rigorous checks."""
+        """Merge product with rigorous checks and auto-correction."""
         p_dict = product.model_dump() if hasattr(product, 'model_dump') else product.to_dict()
         p_name = p_dict.get('name', '')
         p_brand = p_dict.get('brand', 'Unknown')
         p_url = p_dict.get('url', '')
 
-        # 0. STRICT FILTER: Exclude Packs/Bundles
-        forbidden_terms = ['pack', 'duo', 'conjunto', 'oferta', '+', 'mochila', 'paletero', 'zapatillas']
-        if any(term in p_name.lower() for term in forbidden_terms):
-            # print(f"Skipping Bundle: {p_name}")
+        # 0. RESCUE UNKNOWN BRAND
+        if p_brand == "Unknown" or p_brand == "":
+            detected = self._detect_brand_from_name(p_name)
+            if detected != "Unknown":
+                print(f"Rescued Brand: {p_name} -> {detected}")
+                p_brand = detected
+                p_dict['brand'] = detected
+
+        # 1. STRICT FILTER: Exclude Packs
+        forbidden = ['pack', 'duo', 'conjunto', 'oferta', '+', 'mochila', 'paletero', 'zapatillas']
+        if any(term in p_name.lower() for term in forbidden):
             return
 
         slug = None
         
-        # 1. Exact URL Match (Fastest & Safest)
+        # 2. Exact URL Match
         if p_url in self.url_map:
             slug = self.url_map[p_url]
         
-        # 2. Hybrid Fingerprint + Fuzzy Match
+        # 3. Hybrid Fingerprint Match
         if not slug:
             input_features = self._extract_features(p_name)
             best_score = 0
             best_match_slug = None
             
             for existing_slug, data in self.data.items():
-                # Filter A: Brand must match exactly (normalized)
-                if data.get('brand', '').lower() != p_brand.lower():
+                # Filter A: Brand must match (normalized)
+                existing_brand = data.get('brand', 'Unknown')
+                
+                # Fix for existing bad data in DB (e.g. "Unknown" in DB but real brand now)
+                if existing_brand == "Unknown":
+                    existing_brand = self._detect_brand_from_name(data['model'])
+                
+                if existing_brand.lower() != p_brand.lower():
                     continue
                 
                 existing_features = self._extract_features(data['model'])
 
-                # Filter B: Hard Compatibility Check
+                # Filter B: Hard Compatibility
                 if not self._are_compatible(input_features, existing_features):
                     continue
 
-                # Filter C: Fuzzy Match on cleaned name
+                # Filter C: Fuzzy Match
                 score = fuzz.token_sort_ratio(input_features['clean_name'], existing_features['clean_name'])
                 
-                # Bonus: Exact year match increases confidence
                 if input_features['year'] and input_features['year'] == existing_features['year']:
                     score += 5
 
-                # Threshold: High (88) to prevent false positives
+                # Threshold
                 if score > 88:
                     if score > best_score:
                         best_score = score
@@ -175,16 +215,24 @@ class RacketManager:
             
             if best_match_slug:
                 slug = best_match_slug
-                # Update Master Name if new input has better data (e.g., has year)
-                existing_data = self.data[slug]
-                if input_features['year'] and not self._extract_features(existing_data['model'])['year']:
-                    print(f"Updating Model Name: {existing_data['model']} -> {p_name}")
-                    existing_data['model'] = p_name
+                # Update Master Model Name if incoming is cleaner (heuristic: shorter is usually cleaner for masters)
+                # But we prefer names with Year.
+                existing_entry = self.data[slug]
+                
+                # Logic: If current has no year, but new one does, take new name.
+                existing_feats = self._extract_features(existing_entry['model'])
+                if not existing_feats['year'] and input_features['year']:
+                     existing_entry['model'] = p_name
+                # Logic: If both have year (or neither), prefer the one WITHOUT player name (cleaner)
+                elif len(p_name) < len(existing_entry['model']):
+                     # Simple heuristic: shorter often means less marketing fluff
+                     pass 
 
-        # 3. Create New Entry
+        # 4. Create New Entry
         if not slug:
-            # Include year in slug if available
-            base = f"{p_brand}-{p_name}"
+            # Clean "Unknown" from slug generation
+            slug_brand = p_brand if p_brand != "Unknown" else "generic"
+            base = f"{slug_brand}-{p_name}"
             slug = self._slugify(base)
             counter = 1
             original_slug = slug
@@ -206,27 +254,29 @@ class RacketManager:
         racket_entry = self.data[slug]
         self.url_map[p_url] = slug
 
-        # 4. Merge Specs (Only fill missing)
+        # Force Brand update if it was Unknown before
+        if racket_entry.get('brand') == "Unknown" and p_brand != "Unknown":
+            racket_entry['brand'] = p_brand
+
+        # 5. Merge Specs
         for key, value in p_dict.get('specs', {}).items():
             curr_val = racket_entry["specs"].get(key)
-            # Prefer non-unknown values
             if not curr_val or (curr_val == "Desconocido" and value != "Desconocido"):
                 racket_entry["specs"][key] = value
 
-        # 5. Merge Images (Optimize)
+        # 6. Merge Images
         new_imgs = p_dict.get('images') or []
         if p_dict.get('image') and p_dict.get('image') not in new_imgs:
             new_imgs.insert(0, p_dict.get('image'))
         
-        # Add optimized images if not present
         current_imgs = set(racket_entry["images"])
         for img in new_imgs:
             opt_img = self._optimize_image_url(img)
             if opt_img and opt_img not in current_imgs:
                 racket_entry["images"].append(opt_img)
-                current_imgs.add(opt_img) # Local tracking
+                current_imgs.add(opt_img)
 
-        # 6. Update Price
+        # 7. Update Price
         store_entry = next((item for item in racket_entry["prices"] if item["store"] == store_name), None)
         now = datetime.now().isoformat()
         

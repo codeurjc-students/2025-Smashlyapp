@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Script de mantenimiento: Deduplicación rigurosa.
-Usa la misma lógica de "Fingerprinting" que el RacketManager para no fusionar años distintos.
+Script de mantenimiento: Limpieza + Deduplicación rigurosa.
+Fase 1: Filtra packs/bundles y corrige marcas incorrectas.
+Fase 2: Usa Fingerprinting (hard filter + fuzzy) para fusionar duplicados sin mezclar años/variantes.
 """
 import json
 import re
@@ -16,6 +17,28 @@ from thefuzz import fuzz
 
 RACKETS_FILE = 'rackets.json'
 BACKUP_FOLDER = '../../backups/rackets'
+
+# Marcas conocidas (ordenadas por longitud desc para matching prioritario)
+KNOWN_BRANDS = sorted([
+    'Adidas', 'Babolat', 'Black Crown', 'Bullpadel', 'Drop Shot', 'Dunlop',
+    'Enebe', 'Head', 'Joma', 'Kombat', 'LOK', 'Nox', 'Oxdog', 'Royal Padel',
+    'Siux', 'Softee', 'StarVie', 'Vibor-a', 'Wilson', 'Varlion', 'Vairo',
+    'Akkeron', 'Prince', 'Tecnifibre', 'Slazenger', 'Legend', 'Harlem',
+    'Puma', 'Mystica', 'K-Swiss', 'Just Ten', 'Orygen', 'RS',
+], key=len, reverse=True)
+
+# Correcciones de marcas parciales/incorrectas
+BRAND_CORRECTIONS = {
+    'Drop': 'Drop Shot',
+    'Black': 'Black Crown',
+    'Royal': 'Royal Padel',
+    'Star Vie': 'StarVie',
+    'Starvie': 'StarVie',
+    'Vibor-A': 'Vibor-a',
+}
+
+# Brands que indican que la entrada NO es una pala
+EXCLUDED_BRANDS = {'Pack', 'Tripack', 'Mini'}
 
 # ============================================================================
 # LÓGICA DE FINGERPRINTING (Replicada de RacketManager para consistencia)
@@ -38,6 +61,10 @@ def extract_features(name: str):
     k_factor = re.search(r'\b(\d{1,2}[kK])\b', name_lower)
     material_k = k_factor.group(1).lower() if k_factor else None
     
+    # Extraer dígitos de versión (ST2, ST3, V3, etc.) como discriminador
+    version_match = re.search(r'\b(?:st|v|ver|gen)(\d+)\b', name_lower)
+    version = version_match.group(0) if version_match else None
+    
     # Clean name for fuzzy
     clean_name = name_lower
     clean_name = re.sub(r'\b202[0-9]\b', '', clean_name)
@@ -45,19 +72,100 @@ def extract_features(name: str):
         clean_name = clean_name.replace(w, '')
     clean_name = re.sub(r'[^\w\s]', '', clean_name).strip()
 
-    # Generamos un hash string de las 'hard features' para agrupamiento inicial
-    hard_signature = f"{year}|{'-'.join(found_suffixes)}|{material_k}"
+    hard_signature = f"{year}|{'-'.join(found_suffixes)}|{material_k}|{version}"
     
     return {
         "year": year,
         "suffixes": found_suffixes,
         "material_k": material_k,
+        "version": version,
         "clean_name": clean_name,
         "hard_signature": hard_signature
     }
 
 # ============================================================================
-# FUNCIONES AUXILIARES
+# FASE 1: LIMPIEZA (Filtrado + Corrección de marcas)
+# ============================================================================
+
+def extract_brand_from_model(model_name: str) -> str:
+    """Intenta extraer la marca del nombre del modelo."""
+    model_upper = model_name.upper()
+    for brand in KNOWN_BRANDS:
+        if brand.upper() in model_upper:
+            return brand
+    return 'Unknown'
+
+def correct_brand(brand: str, model_name: str) -> str:
+    """Corrige marcas incorrectas o parciales."""
+    if brand in BRAND_CORRECTIONS:
+        return BRAND_CORRECTIONS[brand]
+    if brand in ('Unknown', 'Pala', ''):
+        return extract_brand_from_model(model_name)
+    return brand
+
+def should_exclude(key: str, entry: dict) -> bool:
+    """Determina si una entrada debe ser excluida (packs, bundles, etc.)."""
+    brand = entry.get('brand', '')
+    model = entry.get('model', '').lower()
+    
+    if brand in EXCLUDED_BRANDS:
+        return True
+    if key.startswith('pala-pala-'):
+        return True
+    # Detectar packs/bundles por nombre
+    pack_terms = ['pack ', 'tripack', ' + ', 'conjunto', 'kit ']
+    if any(term in model for term in pack_terms):
+        return True
+    return False
+
+def clean_model_name(model_name: str) -> str:
+    """Limpia prefijos/sufijos innecesarios del nombre del modelo."""
+    model = re.sub(r'^(pala\s+(de\s+)?padel\s+|pala\s+test\s+|pala\s+)', '', model_name, flags=re.IGNORECASE)
+    model = re.sub(r'\s*\(pala\)\s*$', '', model, flags=re.IGNORECASE)
+    model = re.sub(r'\s+-\s*pala\s*$', '', model, flags=re.IGNORECASE)
+    model = re.sub(r'\s+pala\s*$', '', model, flags=re.IGNORECASE)
+    model = re.sub(r'\s+', ' ', model).strip()
+    return model
+
+def phase_clean(data: dict) -> dict:
+    """Fase 1: Filtra entradas inválidas y corrige marcas."""
+    cleaned = {}
+    stats = defaultdict(int)
+    
+    for key, entry in data.items():
+        if should_exclude(key, entry):
+            stats['excluded'] += 1
+            continue
+        
+        # Corregir marca
+        original_brand = entry.get('brand', '')
+        model = entry.get('model', '')
+        corrected_brand = correct_brand(original_brand, model)
+        
+        if corrected_brand != original_brand:
+            stats[f'brand_fix:{original_brand}->{corrected_brand}'] += 1
+            entry['brand'] = corrected_brand
+        
+        # Limpiar nombre del modelo
+        entry['model'] = clean_model_name(model)
+        
+        cleaned[key] = entry
+    
+    # Reporte
+    print(f"\n--- FASE 1: LIMPIEZA ---")
+    print(f"  Entradas excluidas (packs/bundles): {stats['excluded']}")
+    brand_fixes = {k: v for k, v in stats.items() if k.startswith('brand_fix:')}
+    if brand_fixes:
+        print(f"  Marcas corregidas:")
+        for fix, count in sorted(brand_fixes.items()):
+            label = fix.replace('brand_fix:', '  ')
+            print(f"    {label}: {count}")
+    print(f"  Entradas tras limpieza: {len(cleaned)}")
+    
+    return cleaned
+
+# ============================================================================
+# FASE 2: FUNCIONES DE MERGE
 # ============================================================================
 
 def create_backup():
@@ -70,11 +178,11 @@ def create_backup():
         data = json.load(f)
     with open(backup_file, 'w', encoding='utf-8') as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
+    print(f"  Backup: {backup_file}")
     return backup_file
 
 def merge_entries(entries):
     """Fusiona entradas manteniendo la información más rica."""
-    # Ordenar por riqueza de datos (specs + imagenes)
     entries.sort(key=lambda x: (len(x[1].get('specs', {})), len(x[1].get('images', []))), reverse=True)
     
     base_id, base_data = entries[0]
@@ -95,22 +203,16 @@ def merge_entries(entries):
                 existing_imgs.add(img)
 
     # Fusionar Precios
-    prices_map = {} # store -> price_obj
-    # Cargar iniciales
+    prices_map = {}
     for p in merged.get('prices', []):
         prices_map[p['store']] = p
-    
-    # Actualizar con otros
     for _, entry in entries[1:]:
         for p in entry.get('prices', []):
             store = p['store']
             if store not in prices_map:
                 prices_map[store] = p
-            else:
-                # Si este precio es más reciente, actualizamos
-                if p.get('last_updated', '') > prices_map[store].get('last_updated', ''):
-                    prices_map[store] = p
-    
+            elif p.get('last_updated', '') > prices_map[store].get('last_updated', ''):
+                prices_map[store] = p
     merged['prices'] = list(prices_map.values())
     
     # Nombre: Preferir el que tenga año si el base no lo tiene
@@ -123,38 +225,27 @@ def merge_entries(entries):
     return merged
 
 # ============================================================================
-# MAIN
+# FASE 2: DEDUPLICACIÓN (Fingerprint + Fuzzy)
 # ============================================================================
 
-def main():
-    print("=== DEDUPLICACIÓN ESTRICTA (HARD FILTER + FUZZY) ===")
-    create_backup()
-    
-    with open(RACKETS_FILE, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-
-    # Paso 1: Agrupar por Marca + Hard Signature (Año/Sufijos/Material)
-    # Esto garantiza que NUNCA mezclaremos un 2024 con un 2025, ni una Woman con una Normal
+def phase_deduplicate(data: dict) -> dict:
+    """Fase 2: Agrupa por brand+signature y fusiona con fuzzy match."""
     buckets = defaultdict(list)
     
     for rid, entry in data.items():
         brand = entry.get('brand', 'Unknown').lower().strip()
         features = extract_features(entry.get('model', ''))
-        
-        # La clave del bucket asegura compatibilidad estricta
         bucket_key = f"{brand}|{features['hard_signature']}"
         buckets[bucket_key].append((rid, entry, features))
 
     new_data = {}
     merges_count = 0
 
-    # Paso 2: Fuzzy match DENTRO de cada bucket compatible
     for key, items in buckets.items():
         if len(items) == 1:
             new_data[items[0][0]] = items[0][1]
             continue
             
-        # Sub-agrupación por similitud de nombre limpio
         sub_groups = []
         used_indices = set()
         
@@ -167,37 +258,67 @@ def main():
             for j in range(i + 1, len(items)):
                 if j in used_indices: continue
                 
-                # Comparar clean_name
                 score = fuzz.token_sort_ratio(items[i][2]['clean_name'], items[j][2]['clean_name'])
                 
-                if score > 88: # Umbral alto
+                if score > 88:
                     current_group.append(items[j])
                     used_indices.add(j)
             
             sub_groups.append(current_group)
         
-        # Procesar grupos fusionados
         for group in sub_groups:
             if len(group) > 1:
-                # Preparar formato para merge_entries
                 entries_to_merge = [(x[0], x[1]) for x in group]
                 merged_entry = merge_entries(entries_to_merge)
-                
-                # Mantener el ID del principal
                 final_id = entries_to_merge[0][0]
                 new_data[final_id] = merged_entry
-                
                 merges_count += 1
-                print(f"Fusionados ({len(group)}): {[x[1]['model'] for x in group]} -> {merged_entry['model']}")
+                
+                stores = [s['store'] for s in merged_entry.get('prices', [])]
+                print(f"  Fusionados ({len(group)}): {[x[1]['model'] for x in group]} -> {merged_entry['model']} [{', '.join(stores)}]")
             else:
                 new_data[group[0][0]] = group[0][1]
 
+    print(f"\n--- FASE 2: DEDUPLICACIÓN ---")
+    print(f"  Grupos fusionados: {merges_count}")
+    
+    return new_data
+
+# ============================================================================
+# MAIN
+# ============================================================================
+
+def main():
+    print("=" * 60)
+    print("LIMPIEZA + DEDUPLICACIÓN ESTRICTA")
+    print("=" * 60)
+    
+    create_backup()
+    
+    with open(RACKETS_FILE, 'r', encoding='utf-8') as f:
+        data = json.load(f)
+    
+    initial_count = len(data)
+    
+    # Fase 1: Limpieza
+    cleaned_data = phase_clean(data)
+    
+    # Fase 2: Deduplicación
+    final_data = phase_deduplicate(cleaned_data)
+    
     # Guardar
     with open(RACKETS_FILE, 'w', encoding='utf-8') as f:
-        json.dump(new_data, f, ensure_ascii=False, indent=2)
+        json.dump(final_data, f, ensure_ascii=False, indent=2)
 
-    print(f"\nProceso terminado. Fusionados {merges_count} grupos.")
-    print(f"Total inicial: {len(data)} -> Final: {len(new_data)}")
+    # Reporte final
+    print(f"\n{'=' * 60}")
+    print(f"RESULTADO FINAL")
+    print(f"{'=' * 60}")
+    print(f"  Inicial:    {initial_count}")
+    print(f"  Excluidas:  {initial_count - len(cleaned_data)}")
+    print(f"  Fusionadas: {len(cleaned_data) - len(final_data)}")
+    print(f"  Final:      {len(final_data)}")
+    print(f"  Reducción:  {initial_count - len(final_data)} ({100*(initial_count - len(final_data))/initial_count:.1f}%)")
 
 if __name__ == '__main__':
     main()
