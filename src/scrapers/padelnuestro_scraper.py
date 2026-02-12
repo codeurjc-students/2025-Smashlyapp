@@ -143,7 +143,6 @@ class PadelNuestroScraper(BaseScraper):
                   }}
                   media_gallery {{ url }}
                   description {{ html }}
-                  brand_name: attribute_value(attribute_code: "manufacturer")
                 }}
               }}
             }}
@@ -151,7 +150,18 @@ class PadelNuestroScraper(BaseScraper):
 
             loop = asyncio.get_event_loop()
             response = await loop.run_in_executor(None, self._fetch_graphql, query)
+
+            # Debug logging
+            if not response:
+                print(f"[PadelNuestro] Empty response for {url_key}")
+                return None
+
+            if "errors" in response:
+                print(f"[PadelNuestro] GraphQL errors: {response.get('errors')}")
+                return None
+
             items = response.get("data", {}).get("products", {}).get("items", [])
+            print(f"[PadelNuestro] Response for {url_key}: found {len(items)} items")
 
             if not items:
                 print(f"[PadelNuestro] API could not find product by key: {url_key}")
@@ -175,13 +185,8 @@ class PadelNuestroScraper(BaseScraper):
             description_html = item.get("description", {}).get("html", "")
             specs = self._parse_specs_from_html(description_html)
 
-            # Brand
+            # Brand - Extraer de nombre del producto
             brand = "Unknown"
-            # Intento 1: Atributo fabricante si existe
-            # (Nota: 'manufacturer' suele devolver ID, no texto, en algunas configs de Magento,
-            # pero si devuelve texto es lo ideal).
-
-            # Intento 2: Heurística por nombre
             if name:
                 common_brands = [
                     "Nox",
@@ -251,8 +256,7 @@ class PadelNuestroScraper(BaseScraper):
             if page_num > 40:
                 break
 
-            # SOLUCIÓN CRÍTICA: Pedimos 'visibility' para descartar variantes huerfanas (valor 1)
-            # Visibility: 1=Not Visible, 2=Catalog, 3=Search, 4=Catalog, Search
+            # Query GraphQL para obtener productos de la categoría
             query = f"""
             {{
               products(filter: {{category_id: {{eq: "{category_id}"}}}}, pageSize: {page_size}, currentPage: {page_num}) {{
@@ -261,7 +265,6 @@ class PadelNuestroScraper(BaseScraper):
                   name
                   url_key
                   url_suffix
-                  visibility
                   url_rewrites {{
                     url
                   }}
@@ -282,10 +285,6 @@ class PadelNuestroScraper(BaseScraper):
                     break
 
                 for item in items:
-                    # FILTRO DE VISIBILIDAD: Ignorar productos ocultos individualmente (variantes)
-                    if item.get("visibility") == 1:
-                        continue
-
                     name = item.get("name", "").lower()
                     if any(term in name for term in exclude_terms):
                         continue
@@ -314,7 +313,7 @@ class PadelNuestroScraper(BaseScraper):
                         product_urls.append(full_url)
 
                 print(
-                    f"[PadelNuestro] Page {page_num}: Found {len(items)} items. Saved {len(product_urls)} (Filtered hidden variants)"
+                    f"[PadelNuestro] Page {page_num}: Found {len(items)} items. Saved {len(product_urls)}"
                 )
 
                 if page_num * page_size >= total_count:
