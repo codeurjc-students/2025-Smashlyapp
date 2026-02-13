@@ -40,6 +40,59 @@ BRAND_CORRECTIONS = {
 # Brands que indican que la entrada NO es una pala
 EXCLUDED_BRANDS = {'Pack', 'Tripack', 'Mini'}
 
+# Nombres de jugadores que son ENDORSEMENT (se eliminan del nombre del modelo)
+# Ordenados por longitud desc para evitar matches parciales ("Dal Bianco" antes que "Bianco")
+PLAYER_NAMES = sorted([
+    # Hombres
+    'Agustín Tapia', 'Agustin Tapia', 'A. Tapia', 'A Tapia',
+    'Juan Lebrón', 'Juan Lebron', 'J. Lebrón', 'J. Lebron', 'J Lebron', 'Lebrón', 'Lebron',
+    'Ale Galán', 'Ale Galan', 'Alejandro Galán', 'Alejandro Galan',
+    'Paquito Navarro',
+    'Juan Tello',
+    'Franco Stupaczuk', 'Franco Stupa', 'Stupa',
+    'Fede Chingotto', 'Federico Chingotto',
+    'Juan M. Díaz', 'Juan Martín Díaz', 'Juan Martin Diaz',
+    'Martín Di Nenno', 'Martin Di Nenno', 'Di Nenno',
+    'Álex Ruiz', 'Alex Ruiz',
+    'Maxi Arce',
+    'Seba Nerone', 'Sebastian Nerone',
+    'Tino Libaak',
+    'Álex Chozas', 'Alex Chozas',
+    'Mike Yanguas', 'Yanguas',
+    'Franco Dal Bianco', 'Dal Bianco',
+    'Leo Augsburger', 'Leo Ausburger',
+    'Edu Alonso',
+    'Jon Sanz',
+    'Pablo Lima',
+    'Miguel Lamperti',
+    'Lucas Campagnolo',
+    'Javi Garrido',
+    'Pablo Cardona',
+    'Juanlu Esbri',
+    'Sanyo Gutiérrez', 'Sanyo Gutierrez',
+    'Momo González', 'Momo Gonzalez',
+    'Javi Leal',
+    # Mujeres
+    'Martita Ortega', 'Marta Ortega',
+    'Patty Llaguno',
+    'Alejandra Salazar',
+    'Bea González', 'Bea Gonzalez',
+    'Sofía Araujo', 'Sofia Araujo',
+    'Aranzazu Osoro',
+    'Ari Sánchez', 'Ari Sanchez',
+    'Claudia Fernández', 'Claudia Fernandez',
+    'Paula Josemaría', 'Paula Josemaria',
+    'Vero Virseda',
+    'Delfi Brea',
+    'Fernando Belasteguín', 'Fernando Belasteguin',
+], key=len, reverse=True)
+
+# Jugadores cuyo nombre ES el modelo (NO se eliminan)
+MODEL_PLAYER_NAMES = {'coello', 'bela'}
+
+# Términos que indican que la entrada es para niños/junior (se excluyen)
+JUNIOR_TERMS = ['junior', ' jr ', ' jr$', ' kid ', ' kids ', ' boy ', ' girl ', ' mini ']
+
 # ============================================================================
 # LÓGICA DE FINGERPRINTING (Replicada de RacketManager para consistencia)
 # ============================================================================
@@ -104,19 +157,50 @@ def correct_brand(brand: str, model_name: str) -> str:
     return brand
 
 def should_exclude(key: str, entry: dict) -> bool:
-    """Determina si una entrada debe ser excluida (packs, bundles, etc.)."""
+    """Determina si una entrada debe ser excluida (packs, bundles, junior, etc.)."""
     brand = entry.get('brand', '')
     model = entry.get('model', '').lower()
+    padded_model = f" {model} "  # Pad para buscar palabras completas
     
     if brand in EXCLUDED_BRANDS:
         return True
     if key.startswith('pala-pala-'):
         return True
+    
     # Detectar packs/bundles por nombre
     pack_terms = ['pack ', 'tripack', ' + ', 'conjunto', 'kit ']
     if any(term in model for term in pack_terms):
         return True
+    
+    # Detectar junior/kids/boy/girl
+    junior_terms = [' junior ', ' jr ', ' kid ', ' kids ', ' boy ', ' girl ', ' mini ']
+    if any(term in padded_model for term in junior_terms):
+        return True
+    # También buscar en la key por si el model no lo tiene
+    key_lower = key.lower()
+    if any(term.strip() in key_lower.split('-') for term in [' junior', ' jr', ' kid', ' kids', ' boy', ' girl', ' mini']):
+        return True
+    
     return False
+
+def remove_player_names(model_name: str) -> str:
+    """Elimina nombres de jugadores endorsement del modelo.
+    Respeta los nombres que SON el modelo (ej: Coello, Bela)."""
+    result = model_name
+    
+    for player in PLAYER_NAMES:
+        # Crear patrón que busca el nombre del jugador como palabra completa (case insensitive)
+        # Precedido opcionalmente por "by" o "-"
+        pattern = r'(?:\s+by)?\s+' + re.escape(player) + r'\b'
+        result = re.sub(pattern, '', result, flags=re.IGNORECASE)
+    
+    # Eliminar "by" suelto que pueda quedar al final
+    result = re.sub(r'\s+by\s*$', '', result, flags=re.IGNORECASE)
+    
+    # Limpiar espacios dobles
+    result = re.sub(r'\s+', ' ', result).strip()
+    
+    return result
 
 def clean_model_name(model_name: str) -> str:
     """Limpia prefijos/sufijos innecesarios del nombre del modelo."""
@@ -124,6 +208,10 @@ def clean_model_name(model_name: str) -> str:
     model = re.sub(r'\s*\(pala\)\s*$', '', model, flags=re.IGNORECASE)
     model = re.sub(r'\s+-\s*pala\s*$', '', model, flags=re.IGNORECASE)
     model = re.sub(r'\s+pala\s*$', '', model, flags=re.IGNORECASE)
+    
+    # Eliminar nombres de jugadores endorsement
+    model = remove_player_names(model)
+    
     model = re.sub(r'\s+', ' ', model).strip()
     return model
 
@@ -147,13 +235,22 @@ def phase_clean(data: dict) -> dict:
             entry['brand'] = corrected_brand
         
         # Limpiar nombre del modelo
+        original_model = model
         entry['model'] = clean_model_name(model)
+        
+        if entry['model'] != original_model:
+            # Detectar si se eliminó un jugador
+            cleaned_lower = entry['model'].lower()
+            original_lower = original_model.lower()
+            if len(cleaned_lower) < len(original_lower) - 5:  # Cambio significativo
+                stats['player_removed'] += 1
         
         cleaned[key] = entry
     
     # Reporte
     print(f"\n--- FASE 1: LIMPIEZA ---")
-    print(f"  Entradas excluidas (packs/bundles): {stats['excluded']}")
+    print(f"  Entradas excluidas (packs/junior/bundles): {stats['excluded']}")
+    print(f"  Nombres de jugador eliminados: {stats.get('player_removed', 0)}")
     brand_fixes = {k: v for k, v in stats.items() if k.startswith('brand_fix:')}
     if brand_fixes:
         print(f"  Marcas corregidas:")
