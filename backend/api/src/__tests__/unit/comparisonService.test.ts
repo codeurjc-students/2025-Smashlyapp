@@ -50,8 +50,18 @@ describe('ComparisonService', () => {
         racket_ids: [1, 2],
         comparison_text: 'Test comparison',
         metrics: [
-          { racketName: 'Racket 1', potencia: 8, control: 7, salidaDeBola: 6, manejabilidad: 9, puntoDulce: 8 },
-          { racketName: 'Racket 2', potencia: 7, control: 8, salidaDeBola: 7, manejabilidad: 7, puntoDulce: 9 },
+          { 
+            racketId: 1,
+            racketName: 'Racket 1', 
+            radarData: { potencia: 8, control: 7, salidaDeBola: 6, manejabilidad: 9, puntoDulce: 8 },
+            isCertified: false
+          },
+          { 
+            racketId: 2,
+            racketName: 'Racket 2', 
+            radarData: { potencia: 7, control: 8, salidaDeBola: 7, manejabilidad: 7, puntoDulce: 9 },
+            isCertified: false
+          },
         ],
       };
 

@@ -1,13 +1,13 @@
 import { supabase } from '../config/supabase';
 import logger from '../config/logger';
-import { RacketMetrics } from './openRouterService';
+import { RacketComparisonData } from './openRouterService';
 
 export interface Comparison {
   id: string;
   user_id: string;
   racket_ids: number[];
   comparison_text: string;
-  metrics?: RacketMetrics[];
+  metrics?: RacketComparisonData[];
   share_token?: string;
   is_public?: boolean;
   created_at: string;
@@ -18,7 +18,7 @@ export interface CreateComparisonDto {
   user_id: string;
   racket_ids: number[];
   comparison_text: string;
-  metrics?: RacketMetrics[];
+  metrics?: RacketComparisonData[];
 }
 
 export class ComparisonService {

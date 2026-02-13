@@ -9,6 +9,8 @@ import {
   FiStar,
   FiHeart,
   FiBell,
+  FiChevronLeft,
+  FiChevronRight,
   FiTruck,
 } from 'react-icons/fi';
 
@@ -83,33 +85,79 @@ const GallerySection = styled.div`
 const MainImage = styled.img`
   width: 100%;
   height: 100%;
-  max-height: 500px;
+  max-height: 450px;
   object-fit: contain;
   transition: transform 0.3s ease;
+  margin-bottom: 2rem;
   
   &:hover {
     transform: scale(1.05);
   }
 `;
 
-const ThumbnailsContainer = styled.div`
+const CarouselWrapper = styled.div`
+  position: relative;
+  width: 100%;
+  max-width: 500px;
   display: flex;
-  gap: 0.75rem;
-  margin-top: 1.5rem;
+  align-items: center;
   justify-content: center;
-  flex-wrap: wrap;
+  gap: 0.5rem;
+`;
+
+const CarouselTrack = styled.div`
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 0.5rem;
+  width: 100%;
+  scrollbar-width: none; // Hide scrollbar Firefox
+  -ms-overflow-style: none; // Hide scrollbar IE/Edge
+  
+  &::-webkit-scrollbar {
+    display: none; // Hide scrollbar Chrome/Safari
+  }
+`;
+
+const ScrollButton = styled.button`
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #374151;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  &:hover {
+    background: #f9fafb;
+    border-color: #d1d5db;
+    color: #111827;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 `;
 
 const Thumbnail = styled.img<{ isActive: boolean }>`
-  width: 80px;
-  height: 80px;
+  width: 70px;
+  height: 70px;
   object-fit: contain;
   border-radius: 12px;
   border: 2px solid ${props => props.isActive ? '#16a34a' : '#e5e7eb'};
   background: ${props => props.isActive ? '#f0fdf4' : 'white'};
   cursor: pointer;
   transition: all 0.2s;
-  padding: 0.5rem;
+  padding: 0.25rem;
+  flex-shrink: 0;
 
   &:hover {
     border-color: #16a34a;
@@ -117,18 +165,7 @@ const Thumbnail = styled.img<{ isActive: boolean }>`
   }
 `;
 
-const ImageCounter = styled.div`
-  position: absolute;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0, 0, 0, 0.7);
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
-`;
+
 
 const WishlistButton = styled.button`
   position: absolute;
@@ -292,11 +329,7 @@ const AlertButton = styled.button`
   }
 `;
 
-const Description = styled.p`
-  color: #4b5563;
-  line-height: 1.6;
-  font-size: 1rem;
-`;
+
 
 // Lower Section layout
 const LowerGrid = styled.div<{ $fullWidth?: boolean }>`
@@ -586,20 +619,44 @@ const RacketDetailPage: React.FC = () => {
           />
           {racket.imagenes && racket.imagenes.length > 1 && (
             <>
-              <ImageCounter>
-                {selectedImageIndex + 1} / {racket.imagenes.length}
-              </ImageCounter>
-              <ThumbnailsContainer>
-                {racket.imagenes.map((img, index) => (
-                  <Thumbnail
-                    key={index}
-                    src={img}
-                    alt={`${racket.modelo} - imagen ${index + 1}`}
-                    isActive={index === selectedImageIndex}
-                    onClick={() => setSelectedImageIndex(index)}
-                  />
-                ))}
-              </ThumbnailsContainer>
+              {/* Removed ImageCounter as requested for cleaner look, or can keep if desired. 
+                  Focusing on carousel as requested. */}
+              
+              <div style={{ position: 'relative', width: '100%', display: 'flex', justifyContent: 'center' }}>
+                <CarouselWrapper>
+                  <ScrollButton 
+                    onClick={() => {
+                      const container = document.getElementById('thumbnails-track');
+                      if (container) container.scrollLeft -= 100;
+                    }}
+                    style={{ position: 'absolute', left: '-40px', zIndex: 10 }}
+                  >
+                    <FiChevronLeft size={20} />
+                  </ScrollButton>
+
+                  <CarouselTrack id="thumbnails-track">
+                    {racket.imagenes.map((img, index) => (
+                      <Thumbnail
+                        key={index}
+                        src={img}
+                        alt={`${racket.modelo} - imagen ${index + 1}`}
+                        isActive={index === selectedImageIndex}
+                        onClick={() => setSelectedImageIndex(index)}
+                      />
+                    ))}
+                  </CarouselTrack>
+
+                  <ScrollButton 
+                    onClick={() => {
+                      const container = document.getElementById('thumbnails-track');
+                      if (container) container.scrollLeft += 100;
+                    }}
+                    style={{ position: 'absolute', right: '-40px', zIndex: 10 }}
+                  >
+                    <FiChevronRight size={20} />
+                  </ScrollButton>
+                </CarouselWrapper>
+              </div>
             </>
           )}
         </GallerySection>

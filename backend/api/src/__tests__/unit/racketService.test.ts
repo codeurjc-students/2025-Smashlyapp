@@ -17,7 +17,7 @@ const baseRacketRow = () => ({
   name: "Adidas Pro",
   brand: "Adidas",
   model: "Pro",
-  image: "img.jpg",
+  images: ["img.jpg"],
   description: "desc",
   on_offer: false,
   created_at: "2025-01-01T00:00:00.000Z",
@@ -99,7 +99,7 @@ describe("racketService helpers", () => {
     expect(mapped.nombre).toBe("Adidas Pro");
     expect(mapped.marca).toBe("Adidas");
     expect(mapped.modelo).toBe("Pro");
-    expect(mapped.imagen).toBe("img.jpg");
+    expect(mapped.imagenes).toEqual(["img.jpg"]);
     expect(mapped.en_oferta).toBe(false);
     expect(mapped.precio_actual).toBe(180);
     expect(mapped.fuente).toBe("padelmarket");
