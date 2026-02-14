@@ -12,6 +12,7 @@ import {
   FiChevronLeft,
   FiChevronRight,
   FiTruck,
+  FiLock,
 } from 'react-icons/fi';
 
 import { Link, useSearchParams } from 'react-router-dom';
@@ -26,7 +27,6 @@ import { EditRacketModal } from '../components/admin/EditRacketModal';
 import { PriceHistoryChart } from '../components/features/PriceHistoryChart';
 import { RacketDetailSkeleton } from '../components/common/SkeletonLoader';
 import { ImageLightbox } from '../components/common/ImageLightbox';
-import { BlurTeaser } from '../components/common/BlurTeaser';
 import {
   FormaIcon,
   BalanceIcon,
@@ -75,6 +75,129 @@ const Breadcrumbs = styled.div`
       color: var(--color-gray-800);
     }
   }
+`;
+
+const AuthBanner = styled.div`
+  max-width: 1400px;
+  margin: 3rem auto;
+  padding: 0 2rem;
+`;
+
+const AuthCard = styled.div`
+  background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 20px;
+  padding: 2.5rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 300px;
+    height: 300px;
+    background: radial-gradient(circle, rgba(22, 163, 74, 0.05) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  @media (max-width: 768px) {
+    padding: 2rem 1.5rem;
+  }
+`;
+
+const AuthTitleWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  position: relative;
+  z-index: 1;
+`;
+
+const AuthLockIcon = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: rgba(22, 101, 52, 0.1);
+  border-radius: 8px;
+  color: #166534;
+  font-size: 1rem;
+`;
+
+const AuthTitle = styled.h3`
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #166534;
+  margin: 0;
+  letter-spacing: -0.01em;
+`;
+
+const AuthDescription = styled.p`
+  font-size: 0.9375rem;
+  color: #166534;
+  opacity: 0.8;
+  line-height: 1.6;
+  margin: 0 0 1.75rem;
+  max-width: 520px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 1;
+`;
+
+const AuthActions = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+`;
+
+const AuthButton = styled.a<{ $variant?: 'primary' | 'secondary' }>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1.75rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  text-decoration: none;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  ${props =>
+    props.$variant === 'primary'
+      ? `
+    background: var(--color-primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
+    
+    &:hover {
+      background: var(--color-primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(22, 163, 74, 0.35);
+    }
+  `
+      : `
+    background: white;
+    color: #166534;
+    border: 1px solid var(--color-gray-200);
+    
+    &:hover {
+      background: #f9fafb;
+      border-color: var(--color-primary);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  `}
 `;
 
 const MainGrid = styled.div`
@@ -1089,25 +1212,16 @@ const RacketDetailPage: React.FC = () => {
           </SpecsGrid>
         </div>
 
-        {/* Lower Right: Price History - Show with blur teaser for non-authenticated */}
-        {isAuthenticated ? (
+        {/* Lower Right: Price History - Only show for authenticated users */}
+        {isAuthenticated && (
           <div>
             <PriceHistoryChart currentPrice={lowestPrice?.price || racket.precio_actual || 0} />
           </div>
-        ) : (
-          <BlurTeaser
-            title='Historial de precios'
-            description='Visualiza la evolución del precio y encuentra el mejor momento para comprar'
-          >
-            <div>
-              <PriceHistoryChart currentPrice={lowestPrice?.price || racket.precio_actual || 0} />
-            </div>
-          </BlurTeaser>
         )}
       </LowerGrid>
 
-      {/* Price Comparison - Show with blur teaser for non-authenticated */}
-      {isAuthenticated ? (
+      {/* Price Comparison - Only show for authenticated users */}
+      {isAuthenticated && (
         <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
           <H3>Comparar Precios</H3>
           <CompareTable>
@@ -1142,56 +1256,38 @@ const RacketDetailPage: React.FC = () => {
             })}
           </CompareTable>
         </div>
-      ) : (
-        <BlurTeaser
-          title='Compara precios en tiempo real'
-          description='Accede a la comparación completa de precios entre todas las tiendas y encuentra el mejor descuento'
-        >
-          <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
-            <H3>Comparar Precios</H3>
-            <CompareTable>
-              {availablePrices.slice(0, 3).map((store, index) => {
-                return (
-                  <CompareRow key={index}>
-                    <StoreLabel storeName={store.store} variant='compact' />
-                    <ShippingInfo>
-                      <FiTruck /> Envío Gratis
-                      <span
-                        style={{
-                          fontSize: '0.8rem',
-                          color: 'var(--color-gray-400)',
-                          fontWeight: 400,
-                        }}
-                      >
-                        • En Stock
-                      </span>
-                    </ShippingInfo>
-                    <PriceText>{store.price?.toFixed(2)}€</PriceText>
-                    <ShopButton href='#' onClick={e => e.preventDefault()}>
-                      Ir a la tienda <FiExternalLink size={14} />
-                    </ShopButton>
-                  </CompareRow>
-                );
-              })}
-            </CompareTable>
-          </div>
-        </BlurTeaser>
       )}
 
-      {/* Reviews - Show with blur teaser for non-authenticated */}
-      {isAuthenticated ? (
+      {/* Reviews - Only show for authenticated users */}
+      {isAuthenticated && (
         <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
           <ProductReviews racketId={racket.id!} />
         </div>
-      ) : (
-        <BlurTeaser
-          title='Lee opiniones de jugadores reales'
-          description='Accede a cientos de reseñas verificadas y descubre qué dicen otros jugadores sobre esta pala'
-        >
-          <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
-            <ProductReviews racketId={racket.id!} />
-          </div>
-        </BlurTeaser>
+      )}
+
+      {/* Auth Banner - Show at the bottom for non-authenticated users */}
+      {!isAuthenticated && (
+        <AuthBanner>
+          <AuthCard>
+            <AuthTitleWrapper>
+              <AuthLockIcon>
+                <FiLock />
+              </AuthLockIcon>
+              <AuthTitle>Accede a todas las funcionalidades</AuthTitle>
+            </AuthTitleWrapper>
+            <AuthDescription>
+              Historial de precios, comparativas de tiendas, reseñas de jugadores y mucho más.
+            </AuthDescription>
+            <AuthActions>
+              <AuthButton href='/login' $variant='primary'>
+                Iniciar sesión
+              </AuthButton>
+              <AuthButton href='/register' $variant='secondary'>
+                Crear cuenta
+              </AuthButton>
+            </AuthActions>
+          </AuthCard>
+        </AuthBanner>
       )}
 
       {/* Modals */}
