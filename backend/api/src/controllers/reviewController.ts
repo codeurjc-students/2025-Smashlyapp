@@ -3,26 +3,28 @@
  * Maneja las peticiones HTTP relacionadas con reviews
  */
 
-import { Request, Response } from "express";
-import { ReviewService } from "../services/reviewService";
-import logger from "../config/logger";
-import {
-  CreateReviewDTO,
-  UpdateReviewDTO,
-  ReviewFilters,
-} from "../types/review";
-import { RequestWithUser } from "../types";
+import { Request, Response } from 'express';
+import { ReviewService } from '../services/reviewService';
+import logger from '../config/logger';
+import { CreateReviewDTO, UpdateReviewDTO, ReviewFilters } from '../types/review';
+import { RequestWithUser } from '../types';
 
 // Helper function outside the class to avoid 'this' context issues
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
   }
+  // Supabase errors are plain objects with message/details/hint/code
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message: unknown }).message);
+  }
+  if (error && typeof error === 'object') {
+    return JSON.stringify(error);
+  }
   return String(error);
 }
 
 export class ReviewController {
-
   /**
    * GET /api/v1/rackets/:racketId/reviews
    * Obtener reviews de una raqueta específica
@@ -33,27 +35,23 @@ export class ReviewController {
       const userId = req.user?.id; // Usuario autenticado (opcional)
 
       const sortParam = req.query.sort as string;
-      const validSorts = ["recent", "rating_high", "rating_low", "most_liked"];
-      const sort = validSorts.includes(sortParam) ? sortParam as "recent" | "rating_high" | "rating_low" | "most_liked" : "recent";
+      const validSorts = ['recent', 'rating_high', 'rating_low'];
+      const sort = validSorts.includes(sortParam)
+        ? (sortParam as 'recent' | 'rating_high' | 'rating_low')
+        : 'recent';
 
       const filters: ReviewFilters = {
-        rating: req.query.rating
-          ? parseInt(req.query.rating as string)
-          : undefined,
+        rating: req.query.rating ? parseInt(req.query.rating as string) : undefined,
         sort,
         page: req.query.page ? parseInt(req.query.page as string) : 1,
         limit: req.query.limit ? parseInt(req.query.limit as string) : 5,
       };
 
-      const result = await ReviewService.getReviewsByRacket(
-        racketId,
-        filters,
-        userId
-      );
+      const result = await ReviewService.getReviewsByRacket(racketId, filters, userId);
 
       res.json(result);
     } catch (error: unknown) {
-      logger.error("Error getting reviews:", error);
+      logger.error('Error getting reviews:', error);
       res.status(500).json({ error: getErrorMessage(error) });
     }
   }
@@ -72,7 +70,7 @@ export class ReviewController {
 
       res.json(result);
     } catch (error: unknown) {
-      logger.error("Error getting user reviews:", error);
+      logger.error('Error getting user reviews:', error);
       res.status(500).json({ error: getErrorMessage(error) });
     }
   }
@@ -89,13 +87,13 @@ export class ReviewController {
       const review = await ReviewService.getReviewById(reviewId, userId);
 
       if (!review) {
-        res.status(404).json({ error: "Review no encontrada" });
+        res.status(404).json({ error: 'Review no encontrada' });
         return;
       }
 
       res.json(review);
     } catch (error: unknown) {
-      logger.error("Error getting review:", error);
+      logger.error('Error getting review:', error);
       res.status(500).json({ error: getErrorMessage(error) });
     }
   }
@@ -109,7 +107,7 @@ export class ReviewController {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({ error: "No autenticado" });
+        res.status(401).json({ error: 'No autenticado' });
         return;
       }
 
@@ -134,44 +132,46 @@ export class ReviewController {
   }
 
   private static validateCreateReviewData(reviewData: CreateReviewDTO): string | null {
-    return ReviewController.validateRequiredFields(reviewData) ||
-           ReviewController.validateRating(reviewData.rating) ||
-           ReviewController.validateTitle(reviewData.title) ||
-           ReviewController.validateContent(reviewData.content);
+    return (
+      ReviewController.validateRequiredFields(reviewData) ||
+      ReviewController.validateRating(reviewData.rating) ||
+      ReviewController.validateTitle(reviewData.title) ||
+      ReviewController.validateContent(reviewData.content)
+    );
   }
 
   private static validateRequiredFields(reviewData: CreateReviewDTO): string | null {
     if (!reviewData.racket_id || !reviewData.title || !reviewData.content || !reviewData.rating) {
-      return "Faltan campos requeridos";
+      return 'Faltan campos requeridos';
     }
     return null;
   }
 
   private static validateRating(rating: number): string | null {
     if (rating < 1 || rating > 5) {
-      return "El rating debe estar entre 1 y 5";
+      return 'El rating debe estar entre 1 y 5';
     }
     return null;
   }
 
   private static validateTitle(title: string): string | null {
     if (title.length < 5 || title.length > 100) {
-      return "Title must be between 5 and 100 characters";
+      return 'Title must be between 5 and 100 characters';
     }
     return null;
   }
 
   private static validateContent(content: string): string | null {
     if (content.length < 20 || content.length > 2000) {
-      return "El contenido debe tener entre 20 y 2000 caracteres";
+      return 'El contenido debe tener entre 20 y 2000 caracteres';
     }
     return null;
   }
 
   private static handleCreateReviewError(error: unknown, res: Response): void {
-    logger.error("Error creating review:", error);
+    logger.error('Error creating review:', error);
 
-    if (getErrorMessage(error).includes("Ya has publicado")) {
+    if (getErrorMessage(error).includes('Ya has publicado')) {
       res.status(409).json({ error: getErrorMessage(error) });
       return;
     }
@@ -189,7 +189,7 @@ export class ReviewController {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({ error: "No autenticado" });
+        res.status(401).json({ error: 'No autenticado' });
         return;
       }
 
@@ -206,26 +206,29 @@ export class ReviewController {
     }
   }
 
-  private static validateUpdateReviewData(body: Partial<UpdateReviewDTO>): { updates: UpdateReviewDTO; validationError: string | null } {
+  private static validateUpdateReviewData(body: Partial<UpdateReviewDTO>): {
+    updates: UpdateReviewDTO;
+    validationError: string | null;
+  } {
     const updates: UpdateReviewDTO = {};
 
     if (body.title !== undefined) {
       if (body.title.length < 5 || body.title.length > 100) {
-        return { updates, validationError: "Title must be between 5 and 100 characters" };
+        return { updates, validationError: 'Title must be between 5 and 100 characters' };
       }
       updates.title = body.title;
     }
 
     if (body.content !== undefined) {
       if (body.content.length < 20 || body.content.length > 2000) {
-        return { updates, validationError: "El contenido debe tener entre 20 y 2000 caracteres" };
+        return { updates, validationError: 'El contenido debe tener entre 20 y 2000 caracteres' };
       }
       updates.content = body.content;
     }
 
     if (body.rating !== undefined) {
       if (body.rating < 1 || body.rating > 5) {
-        return { updates, validationError: "El rating debe estar entre 1 y 5" };
+        return { updates, validationError: 'El rating debe estar entre 1 y 5' };
       }
       updates.rating = body.rating;
     }
@@ -234,9 +237,9 @@ export class ReviewController {
   }
 
   private static handleUpdateReviewError(error: unknown, res: Response): void {
-    logger.error("Error updating review:", error);
+    logger.error('Error updating review:', error);
 
-    if (getErrorMessage(error).includes("permiso")) {
+    if (getErrorMessage(error).includes('permiso')) {
       res.status(403).json({ error: getErrorMessage(error) });
       return;
     }
@@ -254,7 +257,7 @@ export class ReviewController {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({ error: "No autenticado" });
+        res.status(401).json({ error: 'No autenticado' });
         return;
       }
 
@@ -262,9 +265,9 @@ export class ReviewController {
 
       res.status(204).send();
     } catch (error: unknown) {
-      logger.error("Error deleting review:", error);
+      logger.error('Error deleting review:', error);
 
-      if (getErrorMessage(error).includes("permiso")) {
+      if (getErrorMessage(error).includes('permiso')) {
         res.status(403).json({ error: getErrorMessage(error) });
         return;
       }
@@ -283,7 +286,7 @@ export class ReviewController {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({ error: "No autenticado" });
+        res.status(401).json({ error: 'No autenticado' });
         return;
       }
 
@@ -291,7 +294,7 @@ export class ReviewController {
 
       res.json({ liked });
     } catch (error: unknown) {
-      logger.error("Error toggling like:", error);
+      logger.error('Error toggling like:', error);
       res.status(500).json({ error: getErrorMessage(error) });
     }
   }
@@ -306,16 +309,14 @@ export class ReviewController {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({ error: "No autenticado" });
+        res.status(401).json({ error: 'No autenticado' });
         return;
       }
 
       const { content } = req.body;
 
       if (!content || content.length < 1 || content.length > 500) {
-        res
-          .status(400)
-          .json({ error: "El comentario debe tener entre 1 y 500 caracteres" });
+        res.status(400).json({ error: 'El comentario debe tener entre 1 y 500 caracteres' });
         return;
       }
 
@@ -325,7 +326,7 @@ export class ReviewController {
 
       res.status(201).json(comment);
     } catch (error: unknown) {
-      logger.error("Error adding comment:", error);
+      logger.error('Error adding comment:', error);
       res.status(500).json({ error: getErrorMessage(error) });
     }
   }
@@ -342,7 +343,7 @@ export class ReviewController {
 
       res.json(comments);
     } catch (error: unknown) {
-      logger.error("Error getting comments:", error);
+      logger.error('Error getting comments:', error);
       res.status(500).json({ error: getErrorMessage(error) });
     }
   }
@@ -357,7 +358,7 @@ export class ReviewController {
       const userId = req.user?.id;
 
       if (!userId) {
-        res.status(401).json({ error: "No autenticado" });
+        res.status(401).json({ error: 'No autenticado' });
         return;
       }
 
@@ -365,9 +366,9 @@ export class ReviewController {
 
       res.status(204).send();
     } catch (error: unknown) {
-      logger.error("Error deleting comment:", error);
+      logger.error('Error deleting comment:', error);
 
-      if (getErrorMessage(error).includes("permiso")) {
+      if (getErrorMessage(error).includes('permiso')) {
         res.status(403).json({ error: getErrorMessage(error) });
         return;
       }

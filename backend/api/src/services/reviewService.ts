@@ -3,7 +3,7 @@
  * Handles all business logic related to racket reviews
  */
 
-import { supabase } from "../config/supabase";
+import { supabase } from '../config/supabase';
 import {
   Review,
   ReviewWithDetails,
@@ -13,7 +13,7 @@ import {
   ReviewFilters,
   ReviewsResponse,
   ReviewComment,
-} from "../types/review";
+} from '../types/review';
 
 export class ReviewService {
   /**
@@ -30,8 +30,8 @@ export class ReviewService {
           nombre: review.racket.name,
           marca: review.racket.brand,
           modelo: review.racket.model,
-          imagen: review.racket.image,
-        }
+          imagen: review.racket.images,
+        },
       };
     }
 
@@ -51,7 +51,7 @@ export class ReviewService {
    */
   private static buildReviewsQuery(racketId: number) {
     return supabase
-      .from("reviews")
+      .from('reviews')
       .select(
         `
         *,
@@ -65,39 +65,43 @@ export class ReviewService {
           name,
           brand,
           model,
-          image
+          images
         )
       `,
-        { count: "exact" }
+        { count: 'exact' }
       )
-      .eq("racket_id", racketId);
+      .eq('racket_id', racketId);
   }
 
   /**
    * Aplica filtros y ordenamiento a la query de reviews
    */
-  private static applyReviewFilters(query: ReturnType<typeof ReviewService.buildReviewsQuery>, filters: ReviewFilters) {
-    const { rating, sort = "recent" } = filters;
+  private static applyReviewFilters(
+    query: ReturnType<typeof ReviewService.buildReviewsQuery>,
+    filters: ReviewFilters
+  ) {
+    const { rating, sort = 'recent' } = filters;
 
     // Aplicar filtro de rating si existe
     if (rating) {
-      query = query.eq("rating", rating);
+      query = query.eq('rating', rating);
     }
 
     // Aplicar ordenamiento
     switch (sort) {
-      case "rating_high":
-        query = query.order("rating", { ascending: false });
+      case 'rating_high':
+        query = query.order('rating', { ascending: false });
         break;
-      case "rating_low":
-        query = query.order("rating", { ascending: true });
+      case 'rating_low':
+        query = query.order('rating', { ascending: true });
         break;
-      case "most_liked":
-        query = query.order("likes_count", { ascending: false });
-        break;
-      case "recent":
+      // TODO: Implement likes count functionality
+      // case "most_liked":
+      //   query = query.order("likes_count", { ascending: false });
+      //   break;
+      case 'recent':
       default:
-        query = query.order("created_at", { ascending: false });
+        query = query.order('created_at', { ascending: false });
         break;
     }
 
@@ -114,22 +118,22 @@ export class ReviewService {
     if (!reviews) return [];
 
     if (userId) {
-      const reviewIds = reviews.map((r) => r.id);
+      const reviewIds = reviews.map(r => r.id);
       const { data: userLikes } = await supabase
-        .from("review_likes")
-        .select("review_id")
-        .eq("user_id", userId)
-        .in("review_id", reviewIds);
+        .from('review_likes')
+        .select('review_id')
+        .eq('user_id', userId)
+        .in('review_id', reviewIds);
 
-      const likedReviewIds = new Set(userLikes?.map((l) => l.review_id) || []);
+      const likedReviewIds = new Set(userLikes?.map(l => l.review_id) || []);
 
-      return reviews.map((review) => ({
+      return reviews.map(review => ({
         ...review,
         user_has_liked: likedReviewIds.has(review.id),
       }));
     }
 
-    return reviews.map((review) => ({
+    return reviews.map(review => ({
       ...review,
       user_has_liked: false,
     }));
@@ -143,17 +147,30 @@ export class ReviewService {
     filters: ReviewFilters = {},
     userId?: string
   ): Promise<ReviewsResponse> {
+    console.log('🔍 getReviewsByRacket called with:', { racketId, filters, userId });
+
     const { page = 1, limit = 5 } = filters;
     const offset = (page - 1) * limit;
 
+    console.log('🔍 Building query...');
     // Build and configure query
     let query = this.buildReviewsQuery(racketId);
+
+    console.log('🔍 Applying filters...');
     query = this.applyReviewFilters(query, filters);
+
+    console.log('🔍 Adding range:', { offset, limit });
     query = query.range(offset, offset + limit - 1);
 
+    console.log('🔍 Executing query...');
     const { data: reviews, error, count } = await query;
 
-    if (error) throw error;
+    console.log('🔍 Query result:', { reviewsCount: reviews?.length, error, count });
+
+    if (error) {
+      console.error('❌ Query error:', error);
+      throw error;
+    }
 
     // Map racket fields to expected frontend format
     const mappedReviews = this.mapReviews(reviews || []);
@@ -163,9 +180,9 @@ export class ReviewService {
 
     // Get statistics
     const { data: statsData } = await supabase
-      .from("reviews")
-      .select("rating")
-      .eq("racket_id", racketId);
+      .from('reviews')
+      .select('rating')
+      .eq('racket_id', racketId);
 
     const stats = this.calculateStats(statsData || []);
 
@@ -196,7 +213,7 @@ export class ReviewService {
       error,
       count,
     } = await supabase
-      .from("reviews")
+      .from('reviews')
       .select(
         `
         *,
@@ -210,13 +227,13 @@ export class ReviewService {
           name,
           brand,
           model,
-          image
+          images
         )
       `,
-        { count: "exact" }
+        { count: 'exact' }
       )
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
     if (error) throw error;
@@ -240,7 +257,7 @@ export class ReviewService {
    */
   private static async getReviewComments(reviewId: string) {
     const { data: comments } = await supabase
-      .from("review_comments")
+      .from('review_comments')
       .select(
         `
         *,
@@ -251,8 +268,8 @@ export class ReviewService {
         )
       `
       )
-      .eq("review_id", reviewId)
-      .order("created_at", { ascending: true });
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending: true });
 
     return comments || [];
   }
@@ -264,10 +281,10 @@ export class ReviewService {
     if (!userId) return false;
 
     const { data: like } = await supabase
-      .from("review_likes")
-      .select("id")
-      .eq("review_id", reviewId)
-      .eq("user_id", userId)
+      .from('review_likes')
+      .select('id')
+      .eq('review_id', reviewId)
+      .eq('user_id', userId)
       .single();
 
     return !!like;
@@ -276,12 +293,9 @@ export class ReviewService {
   /**
    * Get a specific review with all its details
    */
-  static async getReviewById(
-    reviewId: string,
-    userId?: string
-  ): Promise<ReviewWithDetails | null> {
+  static async getReviewById(reviewId: string, userId?: string): Promise<ReviewWithDetails | null> {
     const { data: review, error } = await supabase
-      .from("reviews")
+      .from('reviews')
       .select(
         `
         *,
@@ -295,11 +309,11 @@ export class ReviewService {
           name,
           brand,
           model,
-          image
+          images
         )
       `
       )
-      .eq("id", reviewId)
+      .eq('id', reviewId)
       .single();
 
     if (error || !review) return null;
@@ -323,24 +337,21 @@ export class ReviewService {
   /**
    * Crear una nueva review
    */
-  static async createReview(
-    userId: string,
-    reviewData: CreateReviewDTO
-  ): Promise<Review> {
+  static async createReview(userId: string, reviewData: CreateReviewDTO): Promise<Review> {
     // Verificar que el usuario no tenga ya una review para esta pala
     const { data: existing } = await supabase
-      .from("reviews")
-      .select("id")
-      .eq("user_id", userId)
-      .eq("racket_id", reviewData.racket_id)
+      .from('reviews')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('racket_id', reviewData.racket_id)
       .single();
 
     if (existing) {
-      throw new Error("Ya has publicado una review para esta pala");
+      throw new Error('Ya has publicado una review para esta pala');
     }
 
     const { data: review, error } = await supabase
-      .from("reviews")
+      .from('reviews')
       .insert({
         user_id: userId,
         ...reviewData,
@@ -363,19 +374,19 @@ export class ReviewService {
   ): Promise<Review> {
     // Verificar que la review pertenece al usuario
     const { data: existing } = await supabase
-      .from("reviews")
-      .select("user_id")
-      .eq("id", reviewId)
+      .from('reviews')
+      .select('user_id')
+      .eq('id', reviewId)
       .single();
 
     if (!existing || existing.user_id !== userId) {
-      throw new Error("No tienes permiso para editar esta review");
+      throw new Error('No tienes permiso para editar esta review');
     }
 
     const { data: review, error } = await supabase
-      .from("reviews")
+      .from('reviews')
       .update(updates)
-      .eq("id", reviewId)
+      .eq('id', reviewId)
       .select()
       .single();
 
@@ -390,19 +401,16 @@ export class ReviewService {
   static async deleteReview(reviewId: string, userId: string): Promise<void> {
     // Verificar que la review pertenece al usuario
     const { data: existing } = await supabase
-      .from("reviews")
-      .select("user_id")
-      .eq("id", reviewId)
+      .from('reviews')
+      .select('user_id')
+      .eq('id', reviewId)
       .single();
 
     if (!existing || existing.user_id !== userId) {
-      throw new Error("No tienes permiso para eliminar esta review");
+      throw new Error('No tienes permiso para eliminar esta review');
     }
 
-    const { error } = await supabase
-      .from("reviews")
-      .delete()
-      .eq("id", reviewId);
+    const { error } = await supabase.from('reviews').delete().eq('id', reviewId);
 
     if (error) throw error;
   }
@@ -413,24 +421,21 @@ export class ReviewService {
   static async toggleLike(reviewId: string, userId: string): Promise<boolean> {
     // Verificar si ya existe el like
     const { data: existing } = await supabase
-      .from("review_likes")
-      .select("id")
-      .eq("review_id", reviewId)
-      .eq("user_id", userId)
+      .from('review_likes')
+      .select('id')
+      .eq('review_id', reviewId)
+      .eq('user_id', userId)
       .single();
 
     if (existing) {
       // Quitar like
-      const { error } = await supabase
-        .from("review_likes")
-        .delete()
-        .eq("id", existing.id);
+      const { error } = await supabase.from('review_likes').delete().eq('id', existing.id);
 
       if (error) throw error;
       return false; // Se quitó el like
     } else {
       // Dar like
-      const { error } = await supabase.from("review_likes").insert({
+      const { error } = await supabase.from('review_likes').insert({
         review_id: reviewId,
         user_id: userId,
       });
@@ -449,7 +454,7 @@ export class ReviewService {
     commentData: CreateCommentDTO
   ): Promise<ReviewComment> {
     const { data: comment, error } = await supabase
-      .from("review_comments")
+      .from('review_comments')
       .insert({
         review_id: reviewId,
         user_id: userId,
@@ -477,7 +482,7 @@ export class ReviewService {
    */
   static async getComments(reviewId: string): Promise<ReviewComment[]> {
     const { data: comments, error } = await supabase
-      .from("review_comments")
+      .from('review_comments')
       .select(
         `
         *,
@@ -488,8 +493,8 @@ export class ReviewService {
         )
       `
       )
-      .eq("review_id", reviewId)
-      .order("created_at", { ascending: true });
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending: true });
 
     if (error) throw error;
 
@@ -502,19 +507,16 @@ export class ReviewService {
   static async deleteComment(commentId: string, userId: string): Promise<void> {
     // Verificar que el comentario pertenece al usuario
     const { data: existing } = await supabase
-      .from("review_comments")
-      .select("user_id")
-      .eq("id", commentId)
+      .from('review_comments')
+      .select('user_id')
+      .eq('id', commentId)
       .single();
 
     if (!existing || existing.user_id !== userId) {
-      throw new Error("No tienes permiso para eliminar este comentario");
+      throw new Error('No tienes permiso para eliminar este comentario');
     }
 
-    const { error } = await supabase
-      .from("review_comments")
-      .delete()
-      .eq("id", commentId);
+    const { error } = await supabase.from('review_comments').delete().eq('id', commentId);
 
     if (error) throw error;
   }
@@ -542,7 +544,7 @@ export class ReviewService {
       5: 0,
     };
 
-    reviews.forEach((r) => {
+    reviews.forEach(r => {
       distribution[r.rating] = (distribution[r.rating] || 0) + 1;
     });
 

@@ -6,7 +6,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   FiExternalLink,
   FiLoader,
-  FiStar,
   FiHeart,
   FiBell,
   FiChevronLeft,
@@ -27,6 +26,8 @@ import { EditRacketModal } from '../components/admin/EditRacketModal';
 import { PriceHistoryChart } from '../components/features/PriceHistoryChart';
 import { RacketDetailSkeleton } from '../components/common/SkeletonLoader';
 import { ImageLightbox } from '../components/common/ImageLightbox';
+import { useReviewStats } from '../hooks/useReviewStats';
+import { StarRating } from '../components/common/StarRating';
 import {
   FormaIcon,
   BalanceIcon,
@@ -416,36 +417,74 @@ const ProductTitle = styled.h1`
 const RatingRow = styled.div`
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
-  font-weight: var(--font-weight-semibold);
-  font-size: var(--font-size-sm);
-  margin-bottom: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  background: linear-gradient(135deg, rgba(255, 193, 7, 0.05) 0%, rgba(255, 193, 7, 0.1) 100%);
-  border-radius: var(--border-radius-lg);
-  border: 1px solid rgba(255, 193, 7, 0.2);
-  width: fit-content;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  gap: 12px;
 
-  svg {
-    color: var(--color-warning);
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  .rating-score-container {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
   }
 
-  &:hover {
-    border-color: var(--color-warning);
-    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.15);
-    transform: translateY(-1px);
+  .rating-score {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    line-height: 1;
+  }
 
-    svg {
-      transform: scale(1.1);
+  .rating-max {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+    line-height: 1;
+  }
+
+  .rating-details {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .rating-stars-wrapper {
+    display: flex;
+    align-items: center;
+  }
+
+  .rating-count {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+
+    .count-number {
+      color: #374151;
+      font-weight: 600;
     }
   }
 
-  span {
-    color: var(--color-gray-700);
-    font-weight: var(--font-weight-medium);
-    margin-left: var(--spacing-xs);
+  .no-rating-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .no-rating-text {
+    font-size: 0.9375rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .loading-indicator {
+    color: #9ca3af;
+    animation: spin 1s linear infinite;
+  }
+
+  @keyframes spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -906,6 +945,9 @@ const RacketDetailPage: React.FC = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const racketId = searchParams.get('id');
 
+  // Obtener estadísticas de reviews
+  const { stats: reviewStats, loading: reviewStatsLoading } = useReviewStats(racket?.id);
+
   useEffect(() => {
     const loadRacket = async () => {
       if (!racketId) {
@@ -1091,10 +1133,21 @@ const RacketDetailPage: React.FC = () => {
           <ProductTitle>{toTitleCase(racket.modelo)}</ProductTitle>
 
           <RatingRow>
-            {[1, 2, 3, 4, 5].map(i => (
-              <FiStar key={i} fill='currentColor' />
-            ))}
-            <span>128 reviews</span>
+            {reviewStatsLoading ? (
+              <FiLoader className='loading-indicator' size={20} />
+            ) : reviewStats && reviewStats.totalReviews > 0 ? (
+              <>
+                <StarRating rating={reviewStats.averageRating} size={20} />
+                <span className='rating-count'>
+                  {reviewStats.totalReviews} {reviewStats.totalReviews === 1 ? 'review' : 'reviews'}
+                </span>
+              </>
+            ) : (
+              <>
+                <StarRating rating={0} size={20} />
+                <span className='no-rating-text'>No reviews yet</span>
+              </>
+            )}
           </RatingRow>
 
           <PriceCard>
@@ -1229,7 +1282,9 @@ const RacketDetailPage: React.FC = () => {
               const isBestPrice =
                 lowestPrice &&
                 store.store === lowestPrice.store &&
-                store.price === lowestPrice.price;
+                store.price === lowestPrice.price
+                  ? true
+                  : undefined;
 
               return (
                 <CompareRow key={index} $isBestPrice={isBestPrice}>
