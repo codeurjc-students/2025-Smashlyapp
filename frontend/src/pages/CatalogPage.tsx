@@ -419,7 +419,7 @@ const CatalogPage: React.FC = () => {
   const [hasMore, setHasMore] = useState(true);
   const [showAddToListModal, setShowAddToListModal] = useState(false);
   const [selectedRacket, setSelectedRacket] = useState<Racket | null>(null);
-  
+
   // Advanced filters state
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [selectedShape, setSelectedShape] = useState('Todas');
@@ -429,7 +429,7 @@ const CatalogPage: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState('Todos');
   const [selectedGameType, setSelectedGameType] = useState('Todos');
   const [selectedHardness, setSelectedHardness] = useState('Todas');
-  
+
   const observerTarget = useRef<HTMLDivElement>(null);
 
   const ITEMS_PER_PAGE = 9;
@@ -493,44 +493,47 @@ const CatalogPage: React.FC = () => {
 
     // Apply advanced filters
     if (selectedShape !== 'Todas') {
-      filtered = filtered.filter(r => 
-        (r.caracteristicas_forma || r.especificaciones?.forma) === selectedShape
+      filtered = filtered.filter(
+        r => (r.caracteristicas_forma || r.especificaciones?.forma) === selectedShape
       );
     }
 
     if (selectedBalance !== 'Todos') {
-      filtered = filtered.filter(r => 
-        (r.caracteristicas_balance || r.especificaciones?.balance) === selectedBalance
+      filtered = filtered.filter(
+        r => (r.caracteristicas_balance || r.especificaciones?.balance) === selectedBalance
       );
     }
 
     if (selectedCore !== 'Todos') {
-      filtered = filtered.filter(r => 
-        (r.caracteristicas_nucleo || r.especificaciones?.nucleo) === selectedCore
+      filtered = filtered.filter(
+        r => (r.caracteristicas_nucleo || r.especificaciones?.nucleo) === selectedCore
       );
     }
 
     if (selectedFace !== 'Todas') {
-      filtered = filtered.filter(r => 
-        (r.caracteristicas_cara || r.especificaciones?.cara) === selectedFace
+      filtered = filtered.filter(
+        r => (r.caracteristicas_cara || r.especificaciones?.cara) === selectedFace
       );
     }
 
     if (selectedLevel !== 'Todos') {
-      filtered = filtered.filter(r => 
-        (r.caracteristicas_nivel_de_juego || r.especificaciones?.nivel_de_juego) === selectedLevel
+      filtered = filtered.filter(
+        r =>
+          (r.caracteristicas_nivel_de_juego || r.especificaciones?.nivel_de_juego) === selectedLevel
       );
     }
 
     if (selectedGameType !== 'Todos') {
-      filtered = filtered.filter(r => 
-        (r.caracteristicas_tipo_de_juego || r.especificaciones?.tipo_de_juego) === selectedGameType
+      filtered = filtered.filter(
+        r =>
+          (r.caracteristicas_tipo_de_juego || r.especificaciones?.tipo_de_juego) ===
+          selectedGameType
       );
     }
 
     if (selectedHardness !== 'Todas') {
-      filtered = filtered.filter(r => 
-        (r.caracteristicas_dureza || r.especificaciones?.dureza) === selectedHardness
+      filtered = filtered.filter(
+        r => (r.caracteristicas_dureza || r.especificaciones?.dureza) === selectedHardness
       );
     }
 
@@ -571,8 +574,21 @@ const CatalogPage: React.FC = () => {
     }
 
     setFilteredRackets(filtered);
-  }, [rackets, searchQuery, selectedBrand, showMostViewed, showOffers, sortBy, 
-      selectedShape, selectedBalance, selectedCore, selectedFace, selectedLevel, selectedGameType, selectedHardness]);
+  }, [
+    rackets,
+    searchQuery,
+    selectedBrand,
+    showMostViewed,
+    showOffers,
+    sortBy,
+    selectedShape,
+    selectedBalance,
+    selectedCore,
+    selectedFace,
+    selectedLevel,
+    selectedGameType,
+    selectedHardness,
+  ]);
 
   // Update displayed rackets when filters change
   useEffect(() => {
@@ -582,57 +598,111 @@ const CatalogPage: React.FC = () => {
   }, [filteredRackets, displayCount]);
 
   // Get unique brands - memoized
-  const uniqueBrands = useMemo(() => [
-    'Todas',
-    ...Array.from(new Set(rackets.map(racket => racket.marca))).sort(),
-  ], [rackets]);
+  const uniqueBrands = useMemo(
+    () => ['Todas', ...Array.from(new Set(rackets.map(racket => racket.marca))).sort()],
+    [rackets]
+  );
 
   // Get unique values for advanced filters - memoized
-  const uniqueShapes = useMemo(() => ['Todas', ...Array.from(new Set(
-    rackets
-      .map(r => r.caracteristicas_forma || r.especificaciones?.forma)
-      .filter(Boolean)
-  ))].sort(), [rackets]);
+  const uniqueShapes = useMemo(
+    () =>
+      [
+        'Todas',
+        ...Array.from(
+          new Set(
+            rackets.map(r => r.caracteristicas_forma || r.especificaciones?.forma).filter(Boolean)
+          )
+        ),
+      ].sort(),
+    [rackets]
+  );
 
-  const uniqueBalances = useMemo(() => ['Todos', ...Array.from(new Set(
-    rackets
-      .map(r => r.caracteristicas_balance || r.especificaciones?.balance)
-      .filter(Boolean)
-  ))].sort(), [rackets]);
+  const uniqueBalances = useMemo(
+    () =>
+      [
+        'Todos',
+        ...Array.from(
+          new Set(
+            rackets
+              .map(r => r.caracteristicas_balance || r.especificaciones?.balance)
+              .filter(Boolean)
+          )
+        ),
+      ].sort(),
+    [rackets]
+  );
 
-  const uniqueCores = useMemo(() => ['Todos', ...Array.from(new Set(
-    rackets
-      .map(r => r.caracteristicas_nucleo || r.especificaciones?.nucleo)
-      .filter(Boolean)
-  ))].sort(), [rackets]);
+  const uniqueCores = useMemo(
+    () =>
+      [
+        'Todos',
+        ...Array.from(
+          new Set(
+            rackets.map(r => r.caracteristicas_nucleo || r.especificaciones?.nucleo).filter(Boolean)
+          )
+        ),
+      ].sort(),
+    [rackets]
+  );
 
-  const uniqueFaces = useMemo(() => ['Todas', ...Array.from(new Set(
-    rackets
-      .map(r => r.caracteristicas_cara || r.especificaciones?.cara)
-      .filter(Boolean)
-  ))].sort(), [rackets]);
+  const uniqueFaces = useMemo(
+    () =>
+      [
+        'Todas',
+        ...Array.from(
+          new Set(
+            rackets.map(r => r.caracteristicas_cara || r.especificaciones?.cara).filter(Boolean)
+          )
+        ),
+      ].sort(),
+    [rackets]
+  );
 
-  const uniqueLevels = useMemo(() => ['Todos', ...Array.from(new Set(
-    rackets
-      .map(r => r.caracteristicas_nivel_de_juego || r.especificaciones?.nivel_de_juego)
-      .filter(Boolean)
-  ))].sort(), [rackets]);
+  const uniqueLevels = useMemo(
+    () =>
+      [
+        'Todos',
+        ...Array.from(
+          new Set(
+            rackets
+              .map(r => r.caracteristicas_nivel_de_juego || r.especificaciones?.nivel_de_juego)
+              .filter(Boolean)
+          )
+        ),
+      ].sort(),
+    [rackets]
+  );
 
-  const uniqueGameTypes = useMemo(() => ['Todos', ...Array.from(new Set(
-    rackets
-      .map(r => r.caracteristicas_tipo_de_juego || r.especificaciones?.tipo_de_juego)
-      .filter(Boolean)
-  ))].sort(), [rackets]);
+  const uniqueGameTypes = useMemo(
+    () =>
+      [
+        'Todos',
+        ...Array.from(
+          new Set(
+            rackets
+              .map(r => r.caracteristicas_tipo_de_juego || r.especificaciones?.tipo_de_juego)
+              .filter(Boolean)
+          )
+        ),
+      ].sort(),
+    [rackets]
+  );
 
-  const uniqueHardness = useMemo(() => ['Todas', ...Array.from(new Set(
-    rackets
-      .map(r => r.caracteristicas_dureza || r.especificaciones?.dureza)
-      .filter(Boolean)
-  ))].sort(), [rackets]);
+  const uniqueHardness = useMemo(
+    () =>
+      [
+        'Todas',
+        ...Array.from(
+          new Set(
+            rackets.map(r => r.caracteristicas_dureza || r.especificaciones?.dureza).filter(Boolean)
+          )
+        ),
+      ].sort(),
+    [rackets]
+  );
 
   // Get stats
   const totalRackets = serverTotal ?? rackets.length;
-  const bestsellersCount = rackets.filter(r => r.es_bestseller).length;
   const offersCount = rackets.filter(r => r.en_oferta).length;
 
   // Handlers
@@ -681,7 +751,7 @@ const CatalogPage: React.FC = () => {
     setShowMostViewed(false);
     setShowOffers(false);
     setSortBy('most-viewed');
-    
+
     // Clear advanced filters
     setSelectedShape('Todas');
     setSelectedBalance('Todos');
@@ -737,10 +807,6 @@ const CatalogPage: React.FC = () => {
             <StatItem>
               <StatNumber>{totalRackets}</StatNumber>
               <StatLabel>Palas</StatLabel>
-            </StatItem>
-            <StatItem>
-              <StatNumber>{bestsellersCount}</StatNumber>
-              <StatLabel>Bestsellers</StatLabel>
             </StatItem>
             <StatItem>
               <StatNumber>{offersCount}</StatNumber>
@@ -807,7 +873,10 @@ const CatalogPage: React.FC = () => {
                 transition={{ duration: 0.3 }}
               >
                 <AdvancedFiltersGrid>
-                  <FilterSelect value={selectedShape} onChange={e => setSelectedShape(e.target.value)}>
+                  <FilterSelect
+                    value={selectedShape}
+                    onChange={e => setSelectedShape(e.target.value)}
+                  >
                     {uniqueShapes.map(shape => (
                       <option key={shape} value={shape}>
                         {shape === 'Todas' ? 'Todas las formas' : shape}
@@ -815,7 +884,10 @@ const CatalogPage: React.FC = () => {
                     ))}
                   </FilterSelect>
 
-                  <FilterSelect value={selectedBalance} onChange={e => setSelectedBalance(e.target.value)}>
+                  <FilterSelect
+                    value={selectedBalance}
+                    onChange={e => setSelectedBalance(e.target.value)}
+                  >
                     {uniqueBalances.map(balance => (
                       <option key={balance} value={balance}>
                         {balance === 'Todos' ? 'Todos los balances' : balance}
@@ -823,7 +895,10 @@ const CatalogPage: React.FC = () => {
                     ))}
                   </FilterSelect>
 
-                  <FilterSelect value={selectedCore} onChange={e => setSelectedCore(e.target.value)}>
+                  <FilterSelect
+                    value={selectedCore}
+                    onChange={e => setSelectedCore(e.target.value)}
+                  >
                     {uniqueCores.map(core => (
                       <option key={core} value={core}>
                         {core === 'Todos' ? 'Todos los núcleos' : core}
@@ -831,7 +906,10 @@ const CatalogPage: React.FC = () => {
                     ))}
                   </FilterSelect>
 
-                  <FilterSelect value={selectedFace} onChange={e => setSelectedFace(e.target.value)}>
+                  <FilterSelect
+                    value={selectedFace}
+                    onChange={e => setSelectedFace(e.target.value)}
+                  >
                     {uniqueFaces.map(face => (
                       <option key={face} value={face}>
                         {face === 'Todas' ? 'Todas las caras' : face}
@@ -839,7 +917,10 @@ const CatalogPage: React.FC = () => {
                     ))}
                   </FilterSelect>
 
-                  <FilterSelect value={selectedLevel} onChange={e => setSelectedLevel(e.target.value)}>
+                  <FilterSelect
+                    value={selectedLevel}
+                    onChange={e => setSelectedLevel(e.target.value)}
+                  >
                     {uniqueLevels.map(level => (
                       <option key={level} value={level}>
                         {level === 'Todos' ? 'Todos los niveles' : level}
@@ -847,7 +928,10 @@ const CatalogPage: React.FC = () => {
                     ))}
                   </FilterSelect>
 
-                  <FilterSelect value={selectedGameType} onChange={e => setSelectedGameType(e.target.value)}>
+                  <FilterSelect
+                    value={selectedGameType}
+                    onChange={e => setSelectedGameType(e.target.value)}
+                  >
                     {uniqueGameTypes.map(type => (
                       <option key={type} value={type}>
                         {type === 'Todos' ? 'Todos los tipos' : type}
@@ -855,7 +939,10 @@ const CatalogPage: React.FC = () => {
                     ))}
                   </FilterSelect>
 
-                  <FilterSelect value={selectedHardness} onChange={e => setSelectedHardness(e.target.value)}>
+                  <FilterSelect
+                    value={selectedHardness}
+                    onChange={e => setSelectedHardness(e.target.value)}
+                  >
                     {uniqueHardness.map(hardness => (
                       <option key={hardness} value={hardness}>
                         {hardness === 'Todas' ? 'Todas las durezas' : hardness}
@@ -913,10 +1000,14 @@ const CatalogPage: React.FC = () => {
                   view={viewMode}
                   index={index}
                   onClick={handleRacketClick}
-                  onAddToList={isAuthenticated ? (racket) => {
-                    setSelectedRacket(racket);
-                    setShowAddToListModal(true);
-                  } : undefined}
+                  onAddToList={
+                    isAuthenticated
+                      ? racket => {
+                          setSelectedRacket(racket);
+                          setShowAddToListModal(true);
+                        }
+                      : undefined
+                  }
                   isAuthenticated={isAuthenticated}
                 />
               ))}

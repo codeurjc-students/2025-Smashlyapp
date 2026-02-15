@@ -297,3 +297,38 @@ class RacketManager:
             })
 
         self.save_db()
+
+    def add_price_only(self, slug: str, store_name: str, price: float, 
+                       original_price: float = None, url: str = "", currency: str = "EUR"):
+        """
+        Add or update a price entry for an existing racket.
+        Used by the price finder when we already know which racket to update.
+        Does NOT create new rackets or run matching logic.
+        """
+        if slug not in self.data:
+            print(f"Warning: slug '{slug}' not found in database, skipping price update.")
+            return
+        
+        racket_entry = self.data[slug]
+        now = datetime.now().isoformat()
+        
+        # Find existing store entry
+        store_entry = next((item for item in racket_entry["prices"] if item["store"] == store_name), None)
+        
+        price_data = {
+            "store": store_name,
+            "price": price,
+            "original_price": original_price,
+            "url": url,
+            "currency": currency,
+            "last_updated": now
+        }
+        
+        if store_entry:
+            store_entry.update(price_data)
+        else:
+            racket_entry["prices"].append(price_data)
+        
+        # Update url_map
+        if url:
+            self.url_map[url] = slug

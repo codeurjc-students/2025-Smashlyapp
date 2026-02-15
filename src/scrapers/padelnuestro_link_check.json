@@ -1,0 +1,5173 @@
+{
+  "summary": {
+    "total": 858,
+    "ok": 213,
+    "redirected": 0,
+    "broken": 645,
+    "errors": 0
+  },
+  "broken": [
+    {
+      "racket_id": "unknown-adidas-metalbone-team-2026-pala",
+      "model": "ADIDAS METALBONE TEAM 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-team-2026-ar2aa3u22.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-diablo-pro-royal-blue-2026",
+      "model": "SIUX DIABLO PRO ROYAL BLUE 2026",
+      "url": "https://www.padelnuestro.com/pala-siux-diablo-pro-2026-royal-blue-200041.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-fenix-pro-glow-purple-2026",
+      "model": "SIUX FENIX PRO GLOW PURPLE 2026",
+      "url": "https://www.padelnuestro.com/siux-fenix-pro-glow-purple-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-fenix-pro-black-2026",
+      "model": "Siux Fenix Pro Black 2026",
+      "url": "https://www.padelnuestro.com/pala-siux-fenix-pro-2026-black-200046.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-pegasus-pro-lava-orange-2026",
+      "model": "SIUX PEGASUS PRO LAVA ORANGE 2026",
+      "url": "https://www.padelnuestro.com/siux-pegasus-pro-2026-lava-orange.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-electra-pro-shadow-red-2026",
+      "model": "SIUX ELECTRA PRO SHADOW RED 2026",
+      "url": "https://www.padelnuestro.com/siux-electra-pro-shadow-red-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-adipower-multiweight-33",
+      "model": "Adidas Adipower Multiweight 3.3",
+      "url": "https://www.padelnuestro.com/adidas-adipower-multiweight-2023-32302-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-x5-ultimate-yellow",
+      "model": "ADIDAS X5 ULTIMATE YELLOW",
+      "url": "https://www.padelnuestro.com/adidas-x5-ultimate-yellow.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-cross-it-carbon-blue-by-maxi-arce",
+      "model": "ADIDAS CROSS IT CARBON BLUE",
+      "url": "https://www.padelnuestro.com/pala-adidas-cross-it-carbon-blue-by-maxi-arce-ar1aa5u12.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-velara-glass-fiber-black",
+      "model": "ADIDAS VELARA GLASS FIBER BLACK",
+      "url": "https://www.padelnuestro.com/pala-adidas-velara-glass-fiber-black-ar6ca3u10.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-superlight",
+      "model": "ADIDAS METALBONE SUPERLIGHT",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-superlight.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-drive-33-blue",
+      "model": "ADIDAS DRIVE 3.3 BLUE",
+      "url": "https://www.padelnuestro.com/pala-adidas-drive-blue-2026-ar5ca3u71.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-drive-33-vintage",
+      "model": "ADIDAS DRIVE 3.3 VINTAGE",
+      "url": "https://www.padelnuestro.com/adidas-drive-3-3-vintage-110136-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-radogar-attk",
+      "model": "ADIDAS RADOGAR ATTK",
+      "url": "https://www.padelnuestro.com/adidas-radogar-attk-22963-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-ryze-pro",
+      "model": "ADIDAS RYZE PRO",
+      "url": "https://www.padelnuestro.com/adidas-ryze-pro-23540-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-electra-st2-stupa-pro",
+      "model": "Siux Electra ST2 Pro",
+      "url": "https://www.padelnuestro.com/pala-siux-electra-st2-stupa-pro-28752-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-valkiria-pro-2025-sofia-araujo-pala",
+      "model": "SIUX VALKIRIA PRO 2025",
+      "url": "https://www.padelnuestro.com/siux-valkiria-pro-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-trilogy-pro-5-2025-pala",
+      "model": "SIUX TRILOGY PRO 5 2025",
+      "url": "https://www.padelnuestro.com/siux-trilogy-pro-5.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-cross-it-light-2026-marta-ortega-pala",
+      "model": "ADIDAS CROSS IT LIGHT 2026",
+      "url": "https://www.padelnuestro.com/adidas-cross-it-light-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-pala-nox-at10-genius-18k-by-agustin-tapia-2026",
+      "model": "NOX AT10 Genius 18K 2026",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-18k-by-agustin-tapia-23-31576-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-at10-genius-18k-alum-2026-by-agustin-tapia-pala",
+      "model": "NOX AT10 GENIUS 18K ALUM 2026",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-18k-alumby-agustin-tapia-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-rx-series-light-2026-pala",
+      "model": "ADIDAS RX SERIES LIGHT 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-rx-series-light-2026-ar3ca4u74.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-pala-babolat-technical-viper-30-2026",
+      "model": "Babolat Technical Viper 3.0 2026",
+      "url": "https://www.padelnuestro.com/pala-babolat-technical-viper-150175-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-pala-babolat-viper-30-2026-j-lebron",
+      "model": "Babolat Viper 3.0 2026",
+      "url": "https://www.padelnuestro.com/babolat-viper-juan-lebron-3-0.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-counter-vertuo-26",
+      "model": "Babolat Counter Vertuo 2026",
+      "url": "https://www.padelnuestro.com/pala-babolat-counter-veron-150181-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-viper-soft-juan-lebron-30",
+      "model": "Babolat Viper Soft 3.0 2026",
+      "url": "https://www.padelnuestro.com/pala-babolat-viper-soft-juan-lebron-150178-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-maxx-hype-yanguas-world",
+      "model": "LOK MAXX HYPE WORLD",
+      "url": "https://www.padelnuestro.com/lok-maxx-hype-yanguas-world.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-carb-on-hype-by-franco-dal-bianco",
+      "model": "LOK CARB-ON HYPE",
+      "url": "https://www.padelnuestro.com/pala-lok-carb-on-hype-by-franco-dal-bianco-lr1ha0.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-maxx-hype-gen-2",
+      "model": "LOK MAXX HYPE GEN 2",
+      "url": "https://www.padelnuestro.com/lok-maxx-hype-gen-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-maxx-flow-gen-2",
+      "model": "LOK MAXX FLOW GEN 2",
+      "url": "https://www.padelnuestro.com/pala-lok-maxx-flow-gen-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-jungle",
+      "model": "LOK JUNGLE",
+      "url": "https://www.padelnuestro.com/lok-jungle.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-easy-flow-gen-2",
+      "model": "LOK EASY FLOW GEN 2",
+      "url": "https://www.padelnuestro.com/lok-easy-flow-gen-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-carbon-hype-gen-2",
+      "model": "LOK CARBON HYPE GEN 2",
+      "url": "https://www.padelnuestro.com/lok-carbon-hype-gen-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-carbon-flow-gen-2",
+      "model": "LOK CARBON FLOW GEN 2",
+      "url": "https://www.padelnuestro.com/lok-carbon-fdb-gen-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-be-flow-yellow-gen-2",
+      "model": "LOK BE FLOW YELLOW GEN 2",
+      "url": "https://www.padelnuestro.com/pala-lok-be-flow-yellow-gen-2-lr5fa0u21.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-be-flow-pink-gen-2",
+      "model": "LOK BE FLOW PINK GEN 2",
+      "url": "https://www.padelnuestro.com/pala-lok-be-flow-pink-gen-2-lr5fa1u26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-extreme-pro-2025",
+      "model": "Head Extreme Pro 2025",
+      "url": "https://www.padelnuestro.com/head-extreme-pro-110105-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-speed-pro-x-2025",
+      "model": "Head Speed Pro X 2025",
+      "url": "https://www.padelnuestro.com/pala-head-speed-pro-x-2025-228705.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-pearl-bea-gonzalez-2026-pala",
+      "model": "BULLPADEL PEARL 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-pearl-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-neuron-02-2026",
+      "model": "Bullpadel Neuron 02 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-neuron-02-494402.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-vertex-05-2026-juan-tello-pala",
+      "model": "BULLPADEL VERTEX 05 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-05.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-hack-04-2026",
+      "model": "Bullpadel Hack 04 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-02-18913-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-vertex-05-geo-2026-pablo-cardona-pala",
+      "model": "BULLPADEL VERTEX 05 GEO 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-05-geo.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-sniper-20-blanco-2026-mujer",
+      "model": "BULLPADEL SNIPER 2.0 BLANCO 2026 MUJER",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-sniper-2-0-woman-blanco-2026-199290-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-sniper-20-azul-marino-2026-mujer",
+      "model": "BULLPADEL SNIPER 2.0 AZUL MARINO 2026 MUJER",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-sniper-2-0-woman-azul-marino-2026-199287-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-sniper-20-power-negro-2026",
+      "model": "BULLPADEL SNIPER 2.0 POWER NEGRO 2026",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-sniper-2-0-power-negro-2026-199285.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-sniper-20-power-azul-claro-2026",
+      "model": "BULLPADEL SNIPER 2.0 POWER AZUL CLARO 2026",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-sniper-2-0-power-azul-claro-2026-199288.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-indiga-ctr-26",
+      "model": "Bullpadel Indiga CTR 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-indiga-ctr-2024-32438-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-pala-lok-be-hype-gen-2-2026",
+      "model": "LOK Be Hype Gen 2 2026",
+      "url": "https://www.padelnuestro.com/pala-lok-easy-hype-gen-2-lr3ha0u23.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-drive-blue-2026",
+      "model": "Adidas Drive Blue 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-drive-blue-2026-ar5ca3u71.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-arrow-hit-attk-2026",
+      "model": "Adidas Arrow Hit Attk 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-arrow-hit-2026-ar1ab0u30.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-cross-it-carbon-2026",
+      "model": "Adidas Cross It Carbon 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-crossit-carbon-2026-ar2aa5u30.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-metalbone-carbon-2026-pala",
+      "model": "ADIDAS METALBONE CARBON 2026",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-carbon-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-match-black-lime-2026",
+      "model": "ADIDAS MATCH BLACK LIME 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-match-2026-black-green-ar5ga4u28.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-at10-genius-12k-2025-by-agustin-tapia-pala",
+      "model": "NOX AT10 GENIUS 12K 2025",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-12k-by-agustin-tapia-112574-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-arrow-hit-carbon-attk",
+      "model": "Adidas Arrow Hit Carbon 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-arrow-hit-carbon-ar2aa4u01.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-la10-quantum-12k-by-leo-augsburger-2025",
+      "model": "NOX LA10 QUANTUM 12K 2025",
+      "url": "https://www.padelnuestro.com/nox-la10-quantum-12k-by-leo-augsburger-2025-113547-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-fenix-pro-4",
+      "model": "Siux Fenix Pro 4",
+      "url": "https://www.padelnuestro.com/siux-fenix-pro-4-109479-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-tl10-quantum-12k-by-tino-libaak-2025",
+      "model": "NOX TL10 QUANTUM 12K 2025",
+      "url": "https://www.padelnuestro.com/nox-tl10-quantum-12k-by-tino-libaak-2025-113549-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-fenix-pro-5-black",
+      "model": "SIUX FENIX PRO 5 BLACK",
+      "url": "https://www.padelnuestro.com/pala-siux-fenix-pro-2026-black-200046.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-diablo-revolution-sanyo-pro-3",
+      "model": "Siux Diablo Revolution Sanyo Pro 3",
+      "url": "https://www.padelnuestro.com/siux-diablo-revolution-pro-3-109473-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-genesis-ii-lucho-capra-pro",
+      "model": "SIUX Genesis II LUCHO CAPRA PRO",
+      "url": "https://www.padelnuestro.com/siux-genesis-ii-lucho-capra-pro-28754-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-indiga-ctr-2025",
+      "model": "Bullpadel Indiga CTR 2025",
+      "url": "https://www.padelnuestro.com/bullpadel-indiga-ctr-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-bp10-evo-2025-pala",
+      "model": "BULLPADEL BP10 EVO 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-bp10-evo-25-448132.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-indiga-pwr-2025-pala",
+      "model": "BULLPADEL INDIGA PWR 2025",
+      "url": "https://www.padelnuestro.com/bullpadel-indiga-power-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-k2-power-2025-pala",
+      "model": "BULLPADEL K2 POWER 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-k2-power-25-448131.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-icon-2025-juan-martin-diaz-pala",
+      "model": "BULLPADEL ICON 2025",
+      "url": "https://www.padelnuestro.com/bullpadel-icon-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-icon-cloud-2025-juan-martin-diaz",
+      "model": "Bullpadel Icon Cloud 2025",
+      "url": "https://www.padelnuestro.com/bullpadel-icon-cloud-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-ionic-power-2025-javi-leal-pala",
+      "model": "BULLPADEL IONIC POWER 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-ionic-power-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-neuron-cloud-2025",
+      "model": "Bullpadel Neuron Cloud 2025",
+      "url": "https://www.padelnuestro.com/bullpadel-neuron-cloud-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-pearl-cloud-2025",
+      "model": "BULLPADEL PEARL CLOUD 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-pearl-cloud-25-448127-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-neuron-premier-2025",
+      "model": "BULLPADEL NEURON PREMIER 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-neuron-premier-448472.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-03-2022",
+      "model": "BULLPADEL HACK 03 2022",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-02-18913-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-xplo-premier-2025",
+      "model": "BULLPADEL XPLO PREMIER 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-xplo-premier-448471.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-neuron-25",
+      "model": "BULLPADEL NEURON 25",
+      "url": "https://www.padelnuestro.com/bullpadel-neuron-02-494402.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-hack-02-betis-pala",
+      "model": "BULLPADEL HACK 02 BETIS",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-02-betis-ex.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-legend-40",
+      "model": "BULLPADEL LEGEND 4.0",
+      "url": "https://www.padelnuestro.com/bullpadel-legend-4-0-26841-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-05-tour-final-25",
+      "model": "BULLPADEL VERTEX 05 TOUR FINAL 25",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-05-tour-final-25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-04-tour-final-25",
+      "model": "BULLPADEL HACK 04 TOUR FINAL 25",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-04-tour-final-25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-04-25-mujer",
+      "model": "BULLPADEL VERTEX 04 25 MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-04-25-mujer-113774-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-xplo-atletico-de-madrid",
+      "model": "BULLPADEL XPLO ATLÉTICO DE MADRID",
+      "url": "https://www.padelnuestro.com/bullpadel-xplo-atletico-de-madrid.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-xplo-26",
+      "model": "BULLPADEL XPLO 26",
+      "url": "https://www.padelnuestro.com/bullpadel-xplo-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-neuron-02-edge-tour-final-25",
+      "model": "BULLPADEL NEURON 02 EDGE TOUR FINAL 25",
+      "url": "https://www.padelnuestro.com/bullpadel-neuron-02-edge-tour-final-25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-wonder-mujer",
+      "model": "BULLPADEL WONDER MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-wonder-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-neuron-02-edge",
+      "model": "BULLPADEL NEURON 02 EDGE",
+      "url": "https://www.padelnuestro.com/bullpadel-neuron-02-edge.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-04-26",
+      "model": "BULLPADEL HACK 04 26",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-04-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-flow-legend-mujer",
+      "model": "BULLPADEL FLOW LEGEND MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-flow-legend-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-kitter-azul",
+      "model": "BULLPADEL KITTER AZUL",
+      "url": "https://www.padelnuestro.com/bullpadel-kitter-azul-24647-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-raider-pwr",
+      "model": "BULLPADEL RAIDER PWR",
+      "url": "https://www.padelnuestro.com/bullpadel-raider-pwr-21726-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-gold-xseries-30",
+      "model": "BULLPADEL GOLD XSERIES 3.0",
+      "url": "https://www.padelnuestro.com/bullpadel-gold-xseries-3-0-24563-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-advance",
+      "model": "BULLPADEL VERTEX ADVANCE",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-advance.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-02-atletico-de-madrid",
+      "model": "BULLPADEL VERTEX 02 ATLETICO DE MADRID",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-02-atletico-de-madrid.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-05-cloud-mujer",
+      "model": "BULLPADEL VERTEX 05 CLOUD MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-05-cloud-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-indiga-power-betis",
+      "model": "BULLPADEL INDIGA POWER BETIS",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-indiga-power-betis-448789-smu.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-02-advance",
+      "model": "BULLPADEL HACK 02 ADVANCE",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-advance.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-icon-26",
+      "model": "BULLPADEL ICON 26",
+      "url": "https://www.padelnuestro.com/bullpadel-icon-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-indiga-power-grey",
+      "model": "BULLPADEL INDIGA POWER GREY",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-indiga-power-grey-480570.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-indiga-power-black",
+      "model": "BULLPADEL INDIGA POWER BLACK",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-indiga-power-black-480613.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-air-veron-2025",
+      "model": "BABOLAT AIR VERON 2025",
+      "url": "https://www.padelnuestro.com/pala-babolat-air-veron-150180-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-pala-babolat-air-viper-2025",
+      "model": "Babolat Air Viper 2025",
+      "url": "https://www.padelnuestro.com/pala-babolat-air-viper-150176-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-wilson-defy-pro-v1-padel-2-2025-javi-garrido-pala",
+      "model": "WILSON DEFY PRO V1 PADEL 2 2025",
+      "url": "https://www.padelnuestro.com/pala-wilson-defy-pro-v1-padel-2-wr173611u2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-technical-veron-2025",
+      "model": "BABOLAT TECHNICAL VERON 2025",
+      "url": "https://www.padelnuestro.com/pala-test-b2c-babolat-technical-viper-150159-100-test-b2c.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-viper-juan-lebron-2025",
+      "model": "BABOLAT VIPER 2025",
+      "url": "https://www.padelnuestro.com/babolat-viper-juan-lebron-3-0.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-pala-babolat-counter-viper-2025",
+      "model": "Babolat Counter Viper 2025",
+      "url": "https://www.padelnuestro.com/pala-test-b2c-babolat-counter-viper-150161-100-test-b2c.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-metalbone-ctrl-33",
+      "model": "Adidas Metalbone CTRL 3.4 2025",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-ctrl-3-3-2024-110144-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-metalbone-carbon-ctrl",
+      "model": "Adidas Metalbone Carbon CTRL 3.4 2025",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-ctrl-3-4-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-cross-it-carbon-ctrl-2025",
+      "model": "ADIDAS CROSS IT CARBON CTRL 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-crossit-carbon-2026-ar2aa5u30.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-adipower-multiweight-ctrl-34-2025-alex-ruiz-pala",
+      "model": "ADIDAS ADIPOWER MULTIWEIGHT CTRL 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-adipower-multiweight-ctrl-3-4-ar1ca2u31.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-adipower-carbon-ctrl-2025",
+      "model": "ADIDAS ADIPOWER CARBON CTRL 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-adipower-carbon-light-ar1ca4u68.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-evo-extreme",
+      "model": "Head Evo Extreme 2026",
+      "url": "https://www.padelnuestro.com/head-evo-extreme-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-cross-it-ctrl-34-2025",
+      "model": "ADIDAS CROSS IT CTRL 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-crossit-ctrl-2026-ar1cb2u68.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-vibe-azul-2026",
+      "model": "HEAD VIBE AZUL 2026",
+      "url": "https://www.padelnuestro.com/pala-head-vibe-2026-blyl-226106.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-vibe-verde-2026",
+      "model": "HEAD VIBE VERDE 2026",
+      "url": "https://www.padelnuestro.com/pala-head-vibe-2026-gr-or-226116.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-bolt-2026-blancogris",
+      "model": "HEAD BOLT 2026 BLANCO/GRIS",
+      "url": "https://www.padelnuestro.com/pala-head-bolt-2026-wh-gr-226206.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-graphene-360-alpha-tour",
+      "model": "HEAD GRAPHENE 360 ALPHA TOUR",
+      "url": "https://www.padelnuestro.com/pala-head-graphene-360-alpha-power-228725-smu.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-challenge-azul-verde",
+      "model": "HEAD CHALLENGE AZUL VERDE",
+      "url": "https://www.padelnuestro.com/head-challenge-azul-verde-24991-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-calibre-rojo",
+      "model": "HEAD CALIBRE ROJO",
+      "url": "https://www.padelnuestro.com/head-calibre-rojo.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-bolt-2026-rojonegro",
+      "model": "HEAD BOLT 2026 ROJO/NEGRO",
+      "url": "https://www.padelnuestro.com/pala-head-bolt-2026-rd-bk-226206.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-zephyr-ultralight-2022",
+      "model": "HEAD ZEPHYR ULTRALIGHT 2022",
+      "url": "https://www.padelnuestro.com/head-zephyr-ultralight-2022-26438-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-ultimate-power-yellow-with-cb",
+      "model": "HEAD ULTIMATE POWER YELLOW WITH CB",
+      "url": "https://www.padelnuestro.com/head-ultimate-power-yellow-with-cb-29566-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-x-lamborghini-bl002-scandal-green",
+      "model": "BABOLAT X LAMBORGHINI BL002 SCANDAL GREEN",
+      "url": "https://www.padelnuestro.com/babolat-x-lamborghini-bl002-scandal-green.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-lamborghini-bl00325-azul",
+      "model": "BABOLAT LAMBORGHINI BL.003.25 AZUL",
+      "url": "https://www.padelnuestro.com/pala-babolat-bl-003-25-152003-136.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-bl003-white",
+      "model": "BABOLAT BL.003 WHITE",
+      "url": "https://www.padelnuestro.com/pala-babolat-bl-003-25-152003-101.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-x-lamborghini-bl002-black",
+      "model": "BABOLAT X LAMBORGHINI BL002 BLACK",
+      "url": "https://www.padelnuestro.com/babolat-bl-002-152002-105.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-veron-juan-lebron-30",
+      "model": "BABOLAT VERON 3.0",
+      "url": "https://www.padelnuestro.com/pala-test-b2c-babolat-veron-juan-lebron-3-0.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-pala-wilson-carbon-force",
+      "model": "Wilson Carbon Force",
+      "url": "https://www.padelnuestro.com/wilson-carbon-force-lt-2023-109495-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-accent-lt-padel-2-azul",
+      "model": "WILSON ACCENT LT PADEL 2 AZUL",
+      "url": "https://www.padelnuestro.com/wilson-accent-lt-padel-2-azul-109492-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-juice-2",
+      "model": "WILSON JUICE 2",
+      "url": "https://www.padelnuestro.com/pala-wilson-juice-2-wr070911u2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at10-pro-cup-comfort-by-agustin-tapia-2025",
+      "model": "NOX AT10 PRO CUP COMFORT 2025",
+      "url": "https://www.padelnuestro.com/nox-at10-pro-cup-comfort-by-agustin-tapia-2025-113543-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-pala-wilson-bela-pro-v25",
+      "model": "Wilson Bela Pro V2.5",
+      "url": "https://www.padelnuestro.com/wilson-bela-pro-v2-105138-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-blade-pro-padel-v2-2-negro-verde",
+      "model": "WILSON BLADE PRO PADEL V2 2 NEGRO VERDE",
+      "url": "https://www.padelnuestro.com/wilson-blade-pro-padel-v2-2-negro-verde-27948-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-radical-pro",
+      "model": "Head Radical Pro 2026",
+      "url": "https://www.padelnuestro.com/head-radical-pro-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-aero-star-lite",
+      "model": "DUNLOP AERO-STAR LITE",
+      "url": "https://www.padelnuestro.com/dunlop-aero-star-lite-104751-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-fx-lite-gun-metalcyanmetallic-silver",
+      "model": "DUNLOP FX LITE GUN METAL/CYAN/METALLIC SILVER",
+      "url": "https://www.padelnuestro.com/pala-dunlop-fx-lite-gun-metal-cyan-metallic-silver-10370735.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-pala-wilson-bela-ls-v3",
+      "model": "Wilson Blade LS V3 2025",
+      "url": "https://www.padelnuestro.com/pala-wilson-bela-ls-v3.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-pro-carbon-ctrl-gold",
+      "model": "ADIDAS PRO CARBON CTRL GOLD",
+      "url": "https://www.padelnuestro.com/adidas-pro-carbon-ctrl-gold-20990-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-nyra",
+      "model": "STARVIE NYRA",
+      "url": "https://www.padelnuestro.com/starvie-nyra.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-drax",
+      "model": "STARVIE DRAX +",
+      "url": "https://www.padelnuestro.com/starvie-drax-2025-114818-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-arkos",
+      "model": "STARVIE ARKOS",
+      "url": "https://www.padelnuestro.com/starvie-arkos.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-polaris",
+      "model": "STARVIE POLARIS",
+      "url": "https://www.padelnuestro.com/starvie-polaris.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-black-titan",
+      "model": "STARVIE BLACK TITAN",
+      "url": "https://www.padelnuestro.com/pala-starvie-black-titan-pstbt31000.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-basalto-2019",
+      "model": "STARVIE BASALTO 2019",
+      "url": "https://www.padelnuestro.com/pala-starvie-basalto-2019-bas19.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-spyder-lite-ctrl-3",
+      "model": "Siux Spyder Lite Ctrl 3",
+      "url": "https://www.padelnuestro.com/siux-spyder-lite-ctrl-3-hard-109483-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-electra-st3-special-edition",
+      "model": "SIUX ELECTRA ST3 SPECIAL EDITION",
+      "url": "https://www.padelnuestro.com/siux-electra-st3-special-edition.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-sonic",
+      "model": "DUNLOP SONIC",
+      "url": "https://www.padelnuestro.com/dunlop-sonic-21577-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-samurai-soft",
+      "model": "DUNLOP SAMURAI SOFT",
+      "url": "https://www.padelnuestro.com/dunlop-samurai-soft-21579-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-renegade-soft",
+      "model": "DUNLOP RENEGADE SOFT",
+      "url": "https://www.padelnuestro.com/dunlop-renegade-soft-21583-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-samurai",
+      "model": "DUNLOP SAMURAI",
+      "url": "https://www.padelnuestro.com/dunlop-samurai-21584-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-inferno-silver",
+      "model": "DUNLOP INFERNO SILVER",
+      "url": "https://www.padelnuestro.com/dunlop-inferno-silver-26378-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-gravity",
+      "model": "DUNLOP GRAVITY",
+      "url": "https://www.padelnuestro.com/dunlop-gravity-31553-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-galaxy",
+      "model": "DUNLOP GALAXY",
+      "url": "https://www.padelnuestro.com/dunlop-galaxy-31554-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-aero-star",
+      "model": "DUNLOP AERO-STAR",
+      "url": "https://www.padelnuestro.com/dunlop-aero-star-team-104753-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-inferno-carbon-extreme",
+      "model": "DUNLOP INFERNO CARBON EXTREME",
+      "url": "https://www.padelnuestro.com/dunlop-inferno-carbon-extreme-104757-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-titan-20-amarilla",
+      "model": "DUNLOP TITAN 2.0 AMARILLA",
+      "url": "https://www.padelnuestro.com/dunlop-titan-2-0-amarilla-110873-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-strike-silver-nh",
+      "model": "DUNLOP STRIKE SILVER NH",
+      "url": "https://www.padelnuestro.com/dunlop-strike-silver-nh-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-tsunami-azul",
+      "model": "DUNLOP TSUNAMI AZUL",
+      "url": "https://www.padelnuestro.com/pala-dunlop-tsunami-503541-blue.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-strike-verde",
+      "model": "DUNLOP STRIKE VERDE",
+      "url": "https://www.padelnuestro.com/pala-dunlop-strike-green-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-strike-azul-nh",
+      "model": "DUNLOP STRIKE AZUL NH",
+      "url": "https://www.padelnuestro.com/pala-dunlop-strike-blue-nh-0503538.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-megamax-negro",
+      "model": "DUNLOP MEGAMAX NEGRO",
+      "url": "https://www.padelnuestro.com/dunlop-megamax-negro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-impact-hl-yellow",
+      "model": "DUNLOP IMPACT HL YELLOW",
+      "url": "https://www.padelnuestro.com/dunlop-impact-hl-yellow-29698-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-fx-start-gun-metalcyanmetallic-silver",
+      "model": "DUNLOP FX START GUN METAL/CYAN/METALLIC SILVER",
+      "url": "https://www.padelnuestro.com/pala-dunlop-fx-start-gun-metal-cyan-metallic-silver-10370737.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-exodus-black-2025",
+      "model": "STARVIE EXODUS BLACK 2025",
+      "url": "https://www.padelnuestro.com/pala-starvie-exodus-black.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-exodus-gold-2025",
+      "model": "STARVIE EXODUS GOLD 2025",
+      "url": "https://www.padelnuestro.com/pala-starvie-exodus-gold.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-metheora-dual-2025",
+      "model": "STARVIE METHEORA DUAL 2025",
+      "url": "https://www.padelnuestro.com/starvie-metheora-dual-2025-114822-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-aquila-2025",
+      "model": "STARVIE AQUILA 2025",
+      "url": "https://www.padelnuestro.com/starvie-aquila-2025-114810-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-raptor-2025",
+      "model": "STARVIE RAPTOR 2025",
+      "url": "https://www.padelnuestro.com/pala-starvie-raptor-pstrp31000.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-astrum-2025",
+      "model": "STARVIE ASTRUM 2025",
+      "url": "https://www.padelnuestro.com/starvie-astrum-2025-114812-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-basalto-2025",
+      "model": "STARVIE BASALTO 2025",
+      "url": "https://www.padelnuestro.com/starvie-basalto-2025-114814-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-brava-2025",
+      "model": "STARVIE BRAVA 2025",
+      "url": "https://www.padelnuestro.com/starvie-brava-2025-114816-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-triton-2025",
+      "model": "STARVIE TRITÓN 2025",
+      "url": "https://www.padelnuestro.com/starvie-triton-2025-114830-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-kenta-2025",
+      "model": "STARVIE KENTA 2025",
+      "url": "https://www.padelnuestro.com/starvie-kenta-2025-114821-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-vertex-04-hybrid-2025",
+      "model": "Bullpadel VERTEX 04 Hybrid 2025",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-05-hybrid.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-hack-04-hybrid-2025-pala",
+      "model": "BULLPADEL HACK 04 HYBRID 2025",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-04-hybrid-25-113755-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-ml10-pro-cup-coorp-2025-miguel-lamperti-pala",
+      "model": "NOX ML10 PRO CUP COORP. 2025",
+      "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-coorp-23-31585-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-pro-cup-silver-by-miguel-lamperti-2025",
+      "model": "NOX ML10 PRO CUP SILVER 2025",
+      "url": "https://www.padelnuestro.com/pala-nox-ml10-pro-cup-silver-by-miguel-lamperti-pml10prcusil25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at10-pro-cup-hard-by-agustin-tapia-2025",
+      "model": "NOX AT10 PRO CUP HARD 2025",
+      "url": "https://www.padelnuestro.com/nox-at10-pro-cup-hard-by-agustin-tapia.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-equation-2025",
+      "model": "NOX EQUATION 2025",
+      "url": "https://www.padelnuestro.com/nox-equation-2025-113546-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-evo-speed-2025",
+      "model": "Head Evo Speed 2025",
+      "url": "https://www.padelnuestro.com/pala-head-evo-speed-2025-226405.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-speed-one-2025",
+      "model": "Head Speed One 2025",
+      "url": "https://www.padelnuestro.com/head-speed-one-x-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-vibe-bluered-2025",
+      "model": "HEAD VIBE BLUE/RED 2025",
+      "url": "https://www.padelnuestro.com/pala-head-vibe-2025-bl-rd-226135.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-bolt-2025-negro",
+      "model": "HEAD BOLT 2025 NEGRO",
+      "url": "https://www.padelnuestro.com/pala-head-bolt-2026-rd-bk-226206.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-extreme-motion-2025",
+      "model": "Head Extreme Motion 2025",
+      "url": "https://www.padelnuestro.com/head-extreme-motion-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-pala-head-extreme-one-x-2025",
+      "model": "Head Extreme One X 2025",
+      "url": "https://www.padelnuestro.com/pala-head-extreme-one-x-2025-223105.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-bolt-2025-azul",
+      "model": "HEAD BOLT 2025 AZUL",
+      "url": "https://www.padelnuestro.com/pala-head-bolt-2025-bl-gr-226235.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-bolt-tallblack-2025",
+      "model": "HEAD BOLT TALL/BLACK 2025",
+      "url": "https://www.padelnuestro.com/pala-head-bolt-2025-tl-bk-226225.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-vibe-greyblack-2025",
+      "model": "HEAD VIBE GREY/BLACK 2025",
+      "url": "https://www.padelnuestro.com/pala-head-vibe-2025-gr-bk-226145.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-one-ultralight-black-2025",
+      "model": "HEAD ONE ULTRALIGHT BLACK 2025",
+      "url": "https://www.padelnuestro.com/pala-head-one-ultralight-black-225024.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-vibe-blackpurple-2025",
+      "model": "HEAD VIBE BLACK/PURPLE 2025",
+      "url": "https://www.padelnuestro.com/pala-head-vibe-2025-bk-pu-226125.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-liberty-control",
+      "model": "SIUX LIBERTY CONTROL",
+      "url": "https://www.padelnuestro.com/siux-liberty-control-108572-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-astra-control",
+      "model": "SIUX ASTRA CONTROL",
+      "url": "https://www.padelnuestro.com/pala-siux-astra-control-200057.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-metalbone-carbon-34-2025",
+      "model": "Adidas Metalbone Carbon 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-carbon-3-4-ar1aa2u42.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-spyder-2-revolution-control",
+      "model": "SIUX SPYDER 2 REVOLUTION CONTROL",
+      "url": "https://www.padelnuestro.com/pala-siux-spyder-2-revolution-control-30238-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-rx-series-lime-34-2025",
+      "model": "Adidas Rx Series Lime 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-rx-series-lime-3-4-ar3ca0u29.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-cross-it-34-2025-pala",
+      "model": "ADIDAS CROSS IT 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-cross-lt-3-4-ar1aa3u23.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-drive-black-34-2025",
+      "model": "Adidas Drive Black 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-adidas-drive-black-3-4-ar5ca0u10.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-metalbone-youth-34-2025",
+      "model": "Adidas Metalbone Youth 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-youth-3-4-ar4aa0u22.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-match-black-34-2025",
+      "model": "Adidas Match Black 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-adidas-match-blue-3-4-ar5ga2u12.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-hrd-34-2025",
+      "model": "ADIDAS METALBONE HRD+ 3.4 2025",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-hrd-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-adipower-legend-2025-seba-nerone-pala",
+      "model": "ADIDAS ADIPOWER LEGEND 2025",
+      "url": "https://www.padelnuestro.com/adidas-adipower-legend-2025-ar1ab1u34.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-cross-it-light-34-2025-marta-ortega-pala",
+      "model": "ADIDAS CROSS IT LIGHT 3.4 2025",
+      "url": "https://www.padelnuestro.com/adidas-cross-it-light-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-metalbone-team-light-34-2025",
+      "model": "Adidas Metalbone Team Light 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-team-light-3-4-ar2ca0u45.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-rx-series-light-34-2025-pala",
+      "model": "ADIDAS RX SERIES LIGHT 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-rx-series-light-2026-ar3ca4u74.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-adipower-carbon-light-2025",
+      "model": "ADIDAS ADIPOWER CARBON LIGHT 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-adipower-carbon-light-ar1ca4u68.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-match-light-34-2025",
+      "model": "Adidas Match Light 3.4 2025",
+      "url": "https://www.padelnuestro.com/adidas-match-light-3-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-ionic-light-2025",
+      "model": "Bullpadel Ionic Light 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-ionic-light-25-448130-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-pala-bullpadel-ionic-control-2025",
+      "model": "Bullpadel Ionic Control 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-ionic-control-25-448129.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-indiga-control-2025",
+      "model": "BULLPADEL INDIGA CONTROL 2025",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-ionic-control-25-448129.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-megamax-green-2025",
+      "model": "DUNLOP MEGAMAX GREEN 2025",
+      "url": "https://www.padelnuestro.com/dunlop-megamax-green-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-pala-dunlop-galactica-pro-2025",
+      "model": "Dunlop Galactica Pro 2025",
+      "url": "https://www.padelnuestro.com/pala-dunlop-25-galactica-pro-10359940.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-nanomax-pro-2025",
+      "model": "DUNLOP NANOMAX PRO 2025",
+      "url": "https://www.padelnuestro.com/pala-dunlop-nanomax-pro-10359948.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-tristorm-pro-2025",
+      "model": "DUNLOP TRISTORM PRO 2025",
+      "url": "https://www.padelnuestro.com/pala-dunlop-tristorm-pro-10359946.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-electra-elite-4-2025-pala",
+      "model": "SIUX ELECTRA ELITE 4 2025",
+      "url": "https://www.padelnuestro.com/siux-electra-elite-4.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-fenix-elite-5-2025-pala",
+      "model": "SIUX FENIX ELITE 5 2025",
+      "url": "https://www.padelnuestro.com/siux-fenix-elite-5.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-diablo-elite-4-2025-pala",
+      "model": "SIUX DIABLO ELITE 4 2025",
+      "url": "https://www.padelnuestro.com/siux-diablo-elite-4.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-trilogy-elite-5-2025-pala",
+      "model": "SIUX TRILOGY ELITE 5 2025",
+      "url": "https://www.padelnuestro.com/siux-trilogy-elite-5.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-black-mamba-elite-3k-20-2025",
+      "model": "VIBOR-A BLACK MAMBA ÉLITE 3K 2.0 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-black-mamba-elite-3k-2-0-2025-115104-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-pala-vibor-a-king-cobra-xtreme-3k-2025",
+      "model": "VIBOR-A King Cobra Xtreme 3K 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-king-cobra-xtreme-3k-2-0-2025-115110-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-valkiria-elite-2025-mujer",
+      "model": "SIUX VALKIRIA ELITE 2025 MUJER",
+      "url": "https://www.padelnuestro.com/siux-valkiria-elite.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-black-mamba-xtreme-3k-20-2025",
+      "model": "VIBOR-A BLACK MAMBA XTREME 3K 2.0 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-black-mamba-xtreme-3k-2-0-2025-115106-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-pala-vibor-a-mamba-pro-black-2025",
+      "model": "VIBOR-A Mamba Pro Black 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-mamba-pro-black-2025-115111-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-yarara-pro-white-2025",
+      "model": "VIBOR-A YARARA PRO WHITE 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-yarara-pro-white-2-0.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-pala-vibor-a-black-mamba-radical-12k-20-2025",
+      "model": "VIBOR-A Black Mamba Radical 12K 2.0 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-black-mamba-radical-12k-2-0-2025-115105-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-pala-vibor-a-yarara-radical-12k-20-2025",
+      "model": "VIBOR-A Yarara Radical 12K 2.0 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-yarara-radical-12k-2-0-2025-115117-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-diablo-go-4-2025-pala",
+      "model": "SIUX DIABLO GO 4 2025",
+      "url": "https://www.padelnuestro.com/siux-diablo-go-4.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-electra-go-4-2025",
+      "model": "Siux Electra Go 4 2025",
+      "url": "https://www.padelnuestro.com/siux-electra-go-4.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-siux-trilogy-go-5-2025-pala",
+      "model": "SIUX TRILOGY GO 5 2025",
+      "url": "https://www.padelnuestro.com/siux-trilogy-go-5.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-pala-wilson-defy-ls-v1-2025",
+      "model": "Wilson Defy LS V1 2025",
+      "url": "https://www.padelnuestro.com/pala-wilson-defy-ls-v1-padel-2-wr173811u2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-beat-control-2-2025",
+      "model": "Siux Beat Control 2 2025",
+      "url": "https://www.padelnuestro.com/siux-beat-control-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-beat-hybrid-2-2025",
+      "model": "Siux Beat Hybrid 2 2025",
+      "url": "https://www.padelnuestro.com/siux-beat-hybrid-3.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "joma-joma-open-verde-fluor",
+      "model": "JOMA OPEN VERDE FLUOR",
+      "url": "https://www.padelnuestro.com/pala-joma-open-green-108794-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "joma-joma-rookie-azul",
+      "model": "JOMA ROOKIE AZUL",
+      "url": "https://www.padelnuestro.com/pala-joma-rookie-azul-400826-316.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "joma-joma-rookie-negro-naranja",
+      "model": "JOMA ROOKIE NEGRO NARANJA",
+      "url": "https://www.padelnuestro.com/pala-joma-rookie-negro-naranja-400827-158.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-pro-edt-2025",
+      "model": "ADIDAS METALBONE PRO EDT 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-pro-edt-2025-ar1aa4u11.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-galactica-lite-2025",
+      "model": "DUNLOP GALACTICA LITE 2025",
+      "url": "https://www.padelnuestro.com/pala-dunlop-25-galactica-lite-10359942.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-nanomax-lite-2025",
+      "model": "DUNLOP NANOMAX LITE 2025",
+      "url": "https://www.padelnuestro.com/pala-dunlop-nanomax-lite-10359949.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-tristorm-lite-2025",
+      "model": "DUNLOP TRISTORM LITE 2025",
+      "url": "https://www.padelnuestro.com/pala-dunlop-tristorm-lite-10359947.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-shotgun-12k-luxury-series-ex",
+      "model": "NOX ML10 SHOTGUN 12K LUXURY SERIES EX",
+      "url": "https://www.padelnuestro.com/nox-ml10-shotgun-18k-luxury-series-2024-110811-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-xplo-comfort-26",
+      "model": "Bullpadel Xplo Comfort 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-xplo-cmf-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-at10-pro-cup-hard-2026-by-agustin-tapia-pala",
+      "model": "NOX AT10 PRO CUP HARD 2026",
+      "url": "https://www.padelnuestro.com/nox-at10-pro-cup-hard-by-agustin-tapia.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-x-hero-red-2026-pala",
+      "model": "NOX X-HERO RED 2026",
+      "url": "https://www.padelnuestro.com/pala-nox-x-hero-red-pxherore.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-x-hero-blue-2026-pala",
+      "model": "NOX X-HERO BLUE 2026",
+      "url": "https://www.padelnuestro.com/pala-nox-x-hero-blue-pxherobl.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-trilogy-elite-6",
+      "model": "Siux Trilogy Elite 6 2026",
+      "url": "https://www.padelnuestro.com/siux-trilogy-elite-5.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-valkiria-elite-2",
+      "model": "Siux Valkiria Elite 2 2026",
+      "url": "https://www.padelnuestro.com/pala-siux-valkiria-elite-2-200051.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-arrow-hit-carbon-ctrl-2026-pala",
+      "model": "ADIDAS ARROW HIT CARBON CTRL 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-arrow-hit-carbon-ctrl-ar2ca4u01.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-pala-adidas-cross-it-ctrl-2026",
+      "model": "Adidas Cross It CTRL 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-crossit-carbon-ctrl-2026-ar2ca5u87.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-metalbone-ctrl-2026-pala",
+      "model": "ADIDAS METALBONE CTRL 2026",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-ctrl-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-astra-hybrid-air-2026",
+      "model": "Siux Astra Hybrid Air 2026",
+      "url": "https://www.padelnuestro.com/siux-astra-hybrid-air.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-arrow-hit-ctrl-2026-alex-ruiz-pala",
+      "model": "ADIDAS ARROW HIT CTRL 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-arrow-hit-ctrl-2026-ar1cb1u23.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-beat-hybrid-3-air-2026",
+      "model": "Siux Beat Hybrid 3 Air 2026",
+      "url": "https://www.padelnuestro.com/siux-beat-hybrid-3-air.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-extreme-motion-paula-josemaria-2024",
+      "model": "HEAD EXTREME MOTION 2024",
+      "url": "https://www.padelnuestro.com/head-extreme-motion-paula-josemaria-2024-112800-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-radical-motion-2024",
+      "model": "HEAD RADICAL MOTION 2024",
+      "url": "https://www.padelnuestro.com/head-radical-motion-2024-111512-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-04-hybrid-25",
+      "model": "Bullpadel Vertex 05 Hybrid 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-05-hybrid.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-04-hybrid-25",
+      "model": "Bullpadel Hack 04 Hybrid 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-04-hybrid-26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-k2-power-2024",
+      "model": "BULLPADEL K2 POWER 2024",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-k2-power-25-448131.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-metalbone-team-light-2024-pala",
+      "model": "ADIDAS METALBONE TEAM LIGHT 2024",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-team-light-2026-ar2ca3u42.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-hack-03-2024-paquito-navarro-pala",
+      "model": "BULLPADEL HACK 03 2024",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-03-2022-26106-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-pearl-bea-gonzalez-2024",
+      "model": "BULLPADEL PEARL 2024",
+      "url": "https://www.padelnuestro.com/bullpadel-pearl-bea-gonzalez-2024-112922-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-02-prf-2024",
+      "model": "BULLPADEL HACK 02 PRF 2024",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-02-prf-2024-110909-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-xplo-tf-2024",
+      "model": "BULLPADEL XPLO TF 2024",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-xplo-tf-24-448424.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-04-tf-2024",
+      "model": "BULLPADEL VERTEX 04 TF 2024",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-04-tf-2024.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kombat-kombat-etna-2025",
+      "model": "KOMBAT ETNA 2025",
+      "url": "https://www.padelnuestro.com/kombat-etna-115021-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-03-2023",
+      "model": "BULLPADEL VERTEX 03 2023",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-03-2022-26109-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-hack-03-comfort-2024-pala",
+      "model": "BULLPADEL HACK 03 COMFORT 2024",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-03-comfort-23-32423-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-basalto-2024",
+      "model": "STARVIE BASALTO 2024",
+      "url": "https://www.padelnuestro.com/starvie-basalto-2020.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-helion-2024",
+      "model": "STARVIE HELION 2024",
+      "url": "https://www.padelnuestro.com/starvie-helion-2024-112014-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-indiga-w-2025-mujer",
+      "model": "BULLPADEL INDIGA W 2025 MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-indiga-w-26-494418-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-radar-2024",
+      "model": "STARVIE RADAR 2024",
+      "url": "https://www.padelnuestro.com/starvie-radar-2024-112021-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-wilson-bela-pro-v3-2025-fernando-belasteguin-pala",
+      "model": "WILSON BELA PRO V3 2025",
+      "url": "https://www.padelnuestro.com/wilson-bela-pro-v2-105138-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-nextgen-pro-attack-3k-2025",
+      "model": "NOX NEXTGEN PRO ATTACK 3K 2025",
+      "url": "https://www.padelnuestro.com/pala-nox-nextgen-pro-attack-3k-nfa-series-pnfangatt.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-vesta-2024",
+      "model": "STARVIE VESTA 2024",
+      "url": "https://www.padelnuestro.com/starvie-vesta-2024-112028-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-nextgen-pro-hybrid-3k-2025",
+      "model": "NOX NEXTGEN PRO HYBRID 3K 2025",
+      "url": "https://www.padelnuestro.com/pala-nox-nextgen-pro-hybrid-3k-nfa-series-pnfanghyb.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-black-crown-piton-13-2025-pala",
+      "model": "BLACK CROWN PITON 13 2025",
+      "url": "https://www.padelnuestro.com/black-crown-piton-1675-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-carbon-force-padel-2-2024",
+      "model": "WILSON CARBON FORCE PADEL 2 2024",
+      "url": "https://www.padelnuestro.com/wilson-carbon-force-lt-2023-109495-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "black-black-crown-piton-epic-energy-2025",
+      "model": "BLACK CROWN PITON EPIC ENERGY 2025",
+      "url": "https://www.padelnuestro.com/pala-black-crown-piton-epic-energy-a002736.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-drive-32-bronze-2023",
+      "model": "ADIDAS DRIVE 3.2 BRONZE 2023",
+      "url": "https://www.padelnuestro.com/adidas-drive-3-2-bronze-2023.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-match-32-2023",
+      "model": "ADIDAS MATCH 3.2 2023",
+      "url": "https://www.padelnuestro.com/adidas-match-3-2-2023-32322-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-hrd-32-2023",
+      "model": "ADIDAS METALBONE HRD 3.2 2023",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-hrd-3-2-2023-32301-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-at10-genius-12k-alum-xtreme-lite-2026-by-agustin-tapia-pala",
+      "model": "NOX AT10 GENIUS 12K ALUM XTREME LITE 2026",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-12k-alum-xtreme-lite-by-agustin-tapia-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "royal-royal-padel-m27-light-2026",
+      "model": "ROYAL PADEL M27 LIGHT 2026",
+      "url": "https://www.padelnuestro.com/pala-royal-padel-m27-light-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-grapheno-speed",
+      "model": "VAIRO GRAPHENO SPEED",
+      "url": "https://www.padelnuestro.com/vairo-grapheno-speed.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-everlast-speed",
+      "model": "VAIRO EVERLAST SPEED",
+      "url": "https://www.padelnuestro.com/vairo-everlast-speed-105779-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-compact-signature",
+      "model": "VAIRO COMPACT SIGNATURE",
+      "url": "https://www.padelnuestro.com/vairo-compact-signature.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-everlast-cross",
+      "model": "VAIRO EVERLAST CROSS",
+      "url": "https://www.padelnuestro.com/vairo-everlast-cross-105778-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-grapheno-confort",
+      "model": "VAIRO GRAPHENO CONFORT",
+      "url": "https://www.padelnuestro.com/vairo-grapheno-confort-105780-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-across-blue",
+      "model": "VAIRO ACROSS BLUE",
+      "url": "https://www.padelnuestro.com/vairo-across-blue-105769-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-black-karbon-confort",
+      "model": "VAIRO BLACK KARBON CONFORT",
+      "url": "https://www.padelnuestro.com/vairo-black-karbon-confort-105773-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-black-karbon-speed",
+      "model": "VAIRO BLACK KARBON SPEED",
+      "url": "https://www.padelnuestro.com/vairo-black-karbon-speed.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-everlast-confort",
+      "model": "VAIRO EVERLAST CONFORT",
+      "url": "https://www.padelnuestro.com/vairo-everlast-confort-105777-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-across-blue-sand-finish",
+      "model": "VAIRO ACROSS BLUE SAND FINISH",
+      "url": "https://www.padelnuestro.com/vairo-across-blue-sand-finish-106605-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-across-orange-sand-finish",
+      "model": "VAIRO ACROSS ORANGE SAND FINISH",
+      "url": "https://www.padelnuestro.com/vairo-across-orange-sand-finish.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-spyder-lite-3-hard",
+      "model": "SIUX SPYDER LITE 3 HARD",
+      "url": "https://www.padelnuestro.com/siux-spyder-lite-ctrl-3-hard-109483-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-columns-ultra",
+      "model": "VAIRO COLUMNS ULTRA",
+      "url": "https://www.padelnuestro.com/vairo-columns-ultra-108098-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vairo-vairo-turbo-speed",
+      "model": "VAIRO TURBO SPEED",
+      "url": "https://www.padelnuestro.com/vairo-turbo-speed.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-fenix-lite-4",
+      "model": "SIUX FENIX LITE 4",
+      "url": "https://www.padelnuestro.com/siux-fenix-lite-4-109480-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-diablo-revolution-lite-3",
+      "model": "SIUX DIABLO REVOLUTION LITE 3",
+      "url": "https://www.padelnuestro.com/siux-diablo-revolution-lite-3-109472-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "black-black-crown-piton",
+      "model": "BLACK CROWN PITON",
+      "url": "https://www.padelnuestro.com/pala-black-crown-piton-14-a005498.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-pegasus-revolution-cube",
+      "model": "SIUX PEGASUS REVOLUTION CUBE",
+      "url": "https://www.padelnuestro.com/siux-pegasus-revolution-2-109481-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-pegasus-grafeno-1k",
+      "model": "SIUX PEGASUS GRAFENO 1K",
+      "url": "https://www.padelnuestro.com/siux-pegasus-grafeno-1k-20110-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-diablo-all-black",
+      "model": "SIUX DIABLO ALL BLACK",
+      "url": "https://www.padelnuestro.com/siux-diablo-all-black-20687-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-fusion-iii",
+      "model": "SIUX FUSION III",
+      "url": "https://www.padelnuestro.com/siux-fusion-iii-24754-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-fenix-go-4",
+      "model": "SIUX FENIX GO 4",
+      "url": "https://www.padelnuestro.com/siux-fenix-pro-4-109479-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-trilogy-go-4-mujer",
+      "model": "SIUX TRILOGY GO 4 MUJER",
+      "url": "https://www.padelnuestro.com/siux-trilogy-go-4-w.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-diablo-go-4",
+      "model": "SIUX DIABLO GO 4",
+      "url": "https://www.padelnuestro.com/siux-diablo-sanyo-pro-4.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-adrenaline-ibai-edition",
+      "model": "SIUX ADRENALINE IBAI EDITION",
+      "url": "https://www.padelnuestro.com/siux-adrenaline-ibai-edition-27772-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-tsunami-revolution",
+      "model": "SIUX TSUNAMI REVOLUTION",
+      "url": "https://www.padelnuestro.com/pala-siux-tsunami-revolution-28765-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-subzero-3",
+      "model": "SIUX SUBZERO 3",
+      "url": "https://www.padelnuestro.com/pala-siux-subzero-3-28764-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-inspire-40",
+      "model": "SIUX INSPIRE 4.0",
+      "url": "https://www.padelnuestro.com/siux-inspire-4-0-24752-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-alaris",
+      "model": "SIUX ALARIS",
+      "url": "https://www.padelnuestro.com/siux-alaris-29884-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-sx6",
+      "model": "SIUX SX6",
+      "url": "https://www.padelnuestro.com/siux-sx6-24750-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-curve-avant-lady",
+      "model": "SIUX CURVE AVANT LADY",
+      "url": "https://www.padelnuestro.com/siux-curve-avant-lady-24353-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-tsunami-avant-lady",
+      "model": "SIUX TSUNAMI AVANT LADY",
+      "url": "https://www.padelnuestro.com/siux-tsunami-avant-24350-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-snake",
+      "model": "SIUX SNAKE",
+      "url": "https://www.padelnuestro.com/siux-snake-23118-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-evoque-3",
+      "model": "SIUX EVOQUE 3",
+      "url": "https://www.padelnuestro.com/siux-evoque-3-28779-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-viking-iv",
+      "model": "SIUX VIKING IV",
+      "url": "https://www.padelnuestro.com/pala-siux-viking-iv-28784-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-velox-flex-verde",
+      "model": "SIUX VELOX FLEX VERDE",
+      "url": "https://www.padelnuestro.com/siux-velox-flex-verde.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-velox-flex-azul",
+      "model": "SIUX VELOX FLEX AZUL",
+      "url": "https://www.padelnuestro.com/siux-velox-flex-azul.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-tsunami-avant",
+      "model": "SIUX TSUNAMI AVANT",
+      "url": "https://www.padelnuestro.com/siux-tsunami-avant-24350-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-infernal",
+      "model": "SIUX INFERNAL",
+      "url": "https://www.padelnuestro.com/siux-infernal-24188-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-black-carbon-revolution-2-rojo",
+      "model": "SIUX BLACK CARBON REVOLUTION 2 ROJO",
+      "url": "https://www.padelnuestro.com/siux-black-carbon-revolution-2-2023-106184-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-black-carbon-revolution-3k",
+      "model": "SIUX BLACK CARBON REVOLUTION 3K",
+      "url": "https://www.padelnuestro.com/siux-black-carbon-revolution-2-2023-106184-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-diablo-revolution-ii",
+      "model": "SIUX DIABLO REVOLUTION II",
+      "url": "https://www.padelnuestro.com/siux-diablo-revolution-ii-28750-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-radogar-woman",
+      "model": "ADIDAS RADOGAR WOMAN",
+      "url": "https://www.padelnuestro.com/adidas-radogar-woman-23575-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-pegasus-3k-2022",
+      "model": "SIUX PEGASUS 3K 2022",
+      "url": "https://www.padelnuestro.com/siux-pegasus-3k-2022-25380-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "orygen-orygen-intruder",
+      "model": "ORYGEN INTRUDER",
+      "url": "https://www.padelnuestro.com/orygen-intruder-23999-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-pegasus-revolution-3k",
+      "model": "SIUX PEGASUS REVOLUTION 3K",
+      "url": "https://www.padelnuestro.com/pala-siux-pegasus-revolution-3k-28747-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-rocket",
+      "model": "PRINCE ROCKET",
+      "url": "https://www.padelnuestro.com/prince-rocket-25140-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-tour-di-legend",
+      "model": "PRINCE TOUR DI LEGEND",
+      "url": "https://www.padelnuestro.com/prince-tour-di-legend-25137-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-pro-cup-coorp-by-miguel-lamperti",
+      "model": "NOX ML10 PRO CUP COORP",
+      "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-coorp-23-31585-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-falcon",
+      "model": "PRINCE FALCON",
+      "url": "https://www.padelnuestro.com/prince-falcon-25134-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-rocket-black-tattoo",
+      "model": "PRINCE ROCKET BLACK TATTOO",
+      "url": "https://www.padelnuestro.com/prince-rocket-black-tattoo-105958-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-pro-cup-rough-surface-edition-23",
+      "model": "NOX ML10 PRO CUP ROUGH SURFACE EDITION 23",
+      "url": "https://www.padelnuestro.com/pala-nox-ml10-pro-cup-rough-surface-edition-by-miguel-lamperti-pml10rough25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-pro-cup-luxury-series-ex",
+      "model": "NOX ML10 PRO CUP LUXURY SERIES EX",
+      "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-luxury-series-2022-25415-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-wall-master-365-blanco-negro",
+      "model": "TECNIFIBRE WALL MASTER 365 BLANCO NEGRO",
+      "url": "https://www.padelnuestro.com/tecnifibre-wall-master-365-blanco-negro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-wall-master-360",
+      "model": "TECNIFIBRE WALL MASTER 360",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-wall-master-360-2023-16wama3603.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at10-pro-cup-soft-by-agustin-tapia",
+      "model": "NOX AT10 PRO CUP SOFT",
+      "url": "https://www.padelnuestro.com/nox-at10-pro-cup-softby-agustin-tapia.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-wall-master-one",
+      "model": "TECNIFIBRE WALL MASTER ONE",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-wall-master-one-2023-16wamaone3.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-04-comfort-26",
+      "model": "BULLPADEL HACK 04 COMFORT 26",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-03-comfort-23-32423-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-adipower-light-31-2022",
+      "model": "ADIDAS ADIPOWER LIGHT 3.1 2022",
+      "url": "https://www.padelnuestro.com/adidas-adipower-light-3-1-2022-25660-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-03-comfort-2022",
+      "model": "BULLPADEL VERTEX 03 COMFORT 2022",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-03-comfort-2022-26113-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-axym-woman-2022",
+      "model": "BULLPADEL AXYM WOMAN 2022",
+      "url": "https://www.padelnuestro.com/bullpadel-axym-woman-2022-26117-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-05-woman",
+      "model": "BULLPADEL VERTEX 05 WOMAN",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-05-w-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-legend-40-woman",
+      "model": "BULLPADEL LEGEND 4.0 WOMAN",
+      "url": "https://www.padelnuestro.com/bullpadel-legend-4-0-woman-26842-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-flow-woman-2022",
+      "model": "BULLPADEL FLOW WOMAN 2022",
+      "url": "https://www.padelnuestro.com/bullpadel-flow-woman-2022.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-flow-woman-25-mujer",
+      "model": "BULLPADEL FLOW WOMAN 25 MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-flow-woman-25-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-cross",
+      "model": "ENEBE CROSS",
+      "url": "https://www.padelnuestro.com/enebe-cross-29285-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-rsx-azul",
+      "model": "ENEBE RSX AZUL",
+      "url": "https://www.padelnuestro.com/enebe-rsx-azul-106388-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-rs-91-amarillo",
+      "model": "ENEBE RS 9.1 AMARILLO",
+      "url": "https://www.padelnuestro.com/pala-enebe-rs-9-1-amarillo-155974.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-genius-red",
+      "model": "ENEBE GENIUS RED",
+      "url": "https://www.padelnuestro.com/pala-enebe-genius-red-a005845.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-massive-yellow",
+      "model": "ENEBE MASSIVE YELLOW",
+      "url": "https://www.padelnuestro.com/pala-enebe-massive-yellow-a003663.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-genius-blue",
+      "model": "ENEBE GENIUS BLUE",
+      "url": "https://www.padelnuestro.com/enebe-genius-blue-a005846.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-pink",
+      "model": "ENEBE RESPONSE PINK",
+      "url": "https://www.padelnuestro.com/pala-enebe-response-pink-a005772.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-combat-carbon-91",
+      "model": "ENEBE COMBAT CARBON 9.1",
+      "url": "https://www.padelnuestro.com/enebe-combat-carbon-9-1-28407-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-astra",
+      "model": "ENEBE ASTRA",
+      "url": "https://www.padelnuestro.com/pala-enebe-astra-a005702.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-aerox-carbon-21",
+      "model": "ENEBE AEROX CARBON 21",
+      "url": "https://www.padelnuestro.com/enebe-aerox-carbon-21-24780-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-cross-blue",
+      "model": "ENEBE CROSS BLUE",
+      "url": "https://www.padelnuestro.com/enebe-cross-blue-29284-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-space-20",
+      "model": "ENEBE SPACE 2.0",
+      "url": "https://www.padelnuestro.com/pala-enebe-space-2-0-a005828.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-lw-hexagon-88",
+      "model": "VARLION LW HEXAGON 8.8",
+      "url": "https://www.padelnuestro.com/varlion-lw-hexagon-8-8-28776-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-lw-carbon-8-prisma-pansy-mujer",
+      "model": "VARLION LW CARBON 8 PRISMA PANSY MUJER",
+      "url": "https://www.padelnuestro.com/varlion-lw-carbon-8-prisma-pansy-mujer-29501-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-avant-difusor-carbon-black",
+      "model": "VARLION AVANT DIFUSOR CARBON BLACK",
+      "url": "https://www.padelnuestro.com/varlion-avant-difusor-carbon-black-2023-106458-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-maxima-wpt-malmo",
+      "model": "VARLION MAXIMA WPT MALMO",
+      "url": "https://www.padelnuestro.com/pala-varlion-maxima-wpt-malmo-rackce2207015.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-canon-difusor-carbon-black",
+      "model": "VARLION CAÑON DIFUSOR CARBON BLACK",
+      "url": "https://www.padelnuestro.com/varlion-canon-cti-difusor-black-29525-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-maxima-summun-argentina-premier-padel",
+      "model": "VARLION MAXIMA SUMMUN ARGENTINA PREMIER PADEL",
+      "url": "https://www.padelnuestro.com/pala-varlion-maxima-summun-argentina-premier-padel-23308.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-maxima-summun-prisma-s",
+      "model": "VARLION MAXIMA SUMMUN PRISMA S",
+      "url": "https://www.padelnuestro.com/varlion-maxima-summun-prisma-s-29520-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-bourne-prisma-radio",
+      "model": "VARLION BOURNE PRISMA RADIO",
+      "url": "https://www.padelnuestro.com/varlion-bourne-prisma-radio-29519-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-canon-cti-difusor-black",
+      "model": "VARLION CANON CTI DIFUSOR BLACK",
+      "url": "https://www.padelnuestro.com/varlion-canon-cti-difusor-black-29525-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-lw-carbon-9-prisma-negro-naranja-rack",
+      "model": "VARLION LW CARBON 9 PRISMA NEGRO NARANJA RACK",
+      "url": "https://www.padelnuestro.com/varlion-lw-carbon-9-prisma-negro-naranja-rack-106472-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-wpt-bourne-stockholm",
+      "model": "VARLION WPT BOURNE STOCKHOLM",
+      "url": "https://www.padelnuestro.com/pala-varlion-wpt-bourne-stockholm-23309.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-maxima-summun-soft",
+      "model": "VARLION MAXIMA SUMMUN SOFT",
+      "url": "https://www.padelnuestro.com/pala-varlion-maxima-summun-soft-23311.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-impact-pro-hl-yellow",
+      "model": "DUNLOP IMPACT PRO HL YELLOW",
+      "url": "https://www.padelnuestro.com/dunlop-impact-hl-yellow-29698-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ultimate-power-ltd-carbon",
+      "model": "NOX ULTIMATE POWER LTD CARBON",
+      "url": "https://www.padelnuestro.com/nox-ultimate-power-ltd-carbon-29585-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-inferno-elite-ltd-amarillo-azul",
+      "model": "DUNLOP INFERNO ELITE LTD AMARILLO AZUL",
+      "url": "https://www.padelnuestro.com/dunlop-inferno-elite-ltd-amarillo-azul-29682-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-inferno-elite-lt-g1-hl-azul-naranja",
+      "model": "DUNLOP INFERNO ELITE LT G1 HL AZUL NARANJA",
+      "url": "https://www.padelnuestro.com/dunlop-inferno-elite-lt-g1-hl-naranja-azul-29684-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-impact-pro-hl-orange",
+      "model": "DUNLOP IMPACT PRO HL ORANGE",
+      "url": "https://www.padelnuestro.com/dunlop-impact-pro-hl-orange-29692-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-infinity-pro-g1-hl-silver",
+      "model": "DUNLOP INFINITY PRO G1 HL SILVER",
+      "url": "https://www.padelnuestro.com/dunlop-infinity-pro-g1-hl-silver-29695-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-impact-pro-hl-pink",
+      "model": "DUNLOP IMPACT PRO HL PINK",
+      "url": "https://www.padelnuestro.com/dunlop-impact-pro-hl-pink-29694-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-impact-pro-hl-green",
+      "model": "DUNLOP IMPACT PRO HL GREEN",
+      "url": "https://www.padelnuestro.com/dunlop-impact-pro-hl-green-29693-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-infinity-pro-g1-hl-metal",
+      "model": "DUNLOP INFINITY PRO G1 HL METAL",
+      "url": "https://www.padelnuestro.com/dunlop-infinity-pro-g1-hl-metal-29696-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-aero-star-pro-moyano",
+      "model": "DUNLOP AERO-STAR PRO MOYANO",
+      "url": "https://www.padelnuestro.com/dunlop-aero-star-pro-moyano-104752-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-fx-pro-gun-metalcyanmetallic-silver",
+      "model": "DUNLOP FX PRO GUN METAL/CYAN/METALLIC SILVER",
+      "url": "https://www.padelnuestro.com/pala-dunlop-fx-pro-gun-metal-cyan-metallic-silver-10370734.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-infinity-pro-g1-hl-black",
+      "model": "DUNLOP INFINITY PRO G1 HL BLACK",
+      "url": "https://www.padelnuestro.com/dunlop-infinity-pro-g1-hl-black-29697-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-electra-st2-control-racket",
+      "model": "SIUX ELECTRA ST2 CONTROL RACKET",
+      "url": "https://www.padelnuestro.com/siux-electra-st2-control-racket-30237-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-k3-tour-70",
+      "model": "SOFTEE K3 TOUR 7.0",
+      "url": "https://www.padelnuestro.com/softee-k3-tour-7-0-30961-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-speed-orange-power",
+      "model": "SOFTEE SPEED ORANGE POWER",
+      "url": "https://www.padelnuestro.com/softee-speed-orange-power-30972-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-trionic-nano-mesh",
+      "model": "SOFTEE TRIONIC NANO MESH",
+      "url": "https://www.padelnuestro.com/pala-softee-trionic-nano-mesh-a005779.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-potenza-rainbow-blue",
+      "model": "SOFTEE POTENZA RAINBOW BLUE",
+      "url": "https://www.padelnuestro.com/softee-potenza-rainbow-blue-112480-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-speed-gold-power-40-nano-mesh-a005844",
+      "model": "SOFTEE SPEED GOLD POWER 4.0 NANO MESH A005844",
+      "url": "https://www.padelnuestro.com/pala-softee-speed-gold-power-4-0-nano-mesh-a005844.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-oxel",
+      "model": "SOFTEE OXEL",
+      "url": "https://www.padelnuestro.com/pala-softee-oxel-a003648.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-trionic-fiber",
+      "model": "SOFTEE TRIONIC FIBER",
+      "url": "https://www.padelnuestro.com/pala-softee-trionic-fiber-a005778.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-rebounce-orange",
+      "model": "SOFTEE REBOUNCE ORANGE",
+      "url": "https://www.padelnuestro.com/pala-softee-rebounce-orange-a005874.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-summit-perla",
+      "model": "SOFTEE SUMMIT PERLA",
+      "url": "https://www.padelnuestro.com/pala-softee-summit-perla-a006217.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-chacal",
+      "model": "SOFTEE CHACAL",
+      "url": "https://www.padelnuestro.com/pala-softee-chacal-a005703.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-pro-master-evolution-amarillo",
+      "model": "SOFTEE PRO MASTER EVOLUTION AMARILLO",
+      "url": "https://www.padelnuestro.com/softee-pro-master-evolution-amarillo-30966-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-pro-master-evolution-naranja",
+      "model": "SOFTEE PRO MASTER EVOLUTION NARANJA",
+      "url": "https://www.padelnuestro.com/softee-pro-master-evolution-naranja-30968-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-phantom",
+      "model": "SOFTEE PHANTOM",
+      "url": "https://www.padelnuestro.com/pala-softee-phantom-a005704.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-impact-carbon-pro-ltd-amarilla",
+      "model": "DUNLOP IMPACT CARBON PRO LTD AMARILLA",
+      "url": "https://www.padelnuestro.com/dunlop-impact-carbon-pro-ltd-amarilla-31558-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-x-zero-red",
+      "model": "NOX X-ZERO RED",
+      "url": "https://www.padelnuestro.com/pala-nox-x-hero-red-pxherore.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-x-zero-blue",
+      "model": "NOX X-ZERO BLUE",
+      "url": "https://www.padelnuestro.com/pala-nox-x-hero-blue-pxherobl.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-x-one-evo-red",
+      "model": "NOX X-ONE EVO RED",
+      "url": "https://www.padelnuestro.com/nox-x-one-evo-red-31590-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-equation-soft-advanced",
+      "model": "NOX EQUATION SOFT ADVANCED",
+      "url": "https://www.padelnuestro.com/nox-equation-soft-advanced.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at10-genius-ultralight-23",
+      "model": "NOX AT10 GENIUS ULTRALIGHT 23",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-ultralight-by-agustin-tapia.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-tempo-wpt-luxury-series-2022",
+      "model": "NOX TEMPO WPT LUXURY SERIES 2022",
+      "url": "https://www.padelnuestro.com/nox-tempo-wpt-luxury-series-2022-25408-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-x-hero-white",
+      "model": "NOX X-HERO WHITE",
+      "url": "https://www.padelnuestro.com/nox-x-hero-white.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-bahia-luxury-series-ex",
+      "model": "NOX ML10 BAHIA LUXURY SERIES EX",
+      "url": "https://www.padelnuestro.com/pala-nox-ml10-bahia-luxury-series-ex-pn-pexml10luxbapn-smu.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-x-one-casual-series-23",
+      "model": "NOX X-ONE CASUAL SERIES 23",
+      "url": "https://www.padelnuestro.com/nox-x-one-casual-series-23-31592-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-ctrl-32-2023",
+      "model": "ADIDAS METALBONE CTRL 3.2 2023",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-ctrl-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-nerbo-wpt-luxury-series-2022",
+      "model": "NOX NERBO WPT LUXURY SERIES 2022",
+      "url": "https://www.padelnuestro.com/nox-nerbo-wpt-luxury-series-2022-25407-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-adipower-multiweight-ctrl-2023",
+      "model": "ADIDAS ADIPOWER MULTIWEIGHT CTRL 2023",
+      "url": "https://www.padelnuestro.com/pala-adidas-adipower-multiweight-ctrl-3-4-ar1ca2u31.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-elite-w-mujer-2023",
+      "model": "BULLPADEL ELITE W MUJER 2023",
+      "url": "https://www.padelnuestro.com/bullpadel-elite-light-w-mujer-2023-32433-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-stima-energy-2023",
+      "model": "BABOLAT STIMA ENERGY 2023",
+      "url": "https://www.padelnuestro.com/babolat-stima-energy-2023-103650-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-dyna-energy-2023",
+      "model": "BABOLAT DYNA ENERGY 2023",
+      "url": "https://www.padelnuestro.com/babolat-dyna-energy-2023-103648-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-technical-viper-lebron-2023",
+      "model": "BABOLAT TECHNICAL VIPER 2023",
+      "url": "https://www.padelnuestro.com/babolat-technical-viper-lebron-2023-103654-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-stima-spirit-2023",
+      "model": "BABOLAT STIMA SPIRIT 2023",
+      "url": "https://www.padelnuestro.com/babolat-stima-spirit-2023-103651-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-speed-attack-20",
+      "model": "DUNLOP SPEED ATTACK 2.0",
+      "url": "https://www.padelnuestro.com/dunlop-speed-attack-2-0-104762-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-boost-attack-2022",
+      "model": "DUNLOP BOOST ATTACK 2022",
+      "url": "https://www.padelnuestro.com/dunlop-boost-attack-2022-26398-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-skin-attack",
+      "model": "DUNLOP SKIN ATTACK",
+      "url": "https://www.padelnuestro.com/dunlop-skin-attack-21581-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-taipan-liquid-edition-2023",
+      "model": "VIBOR-A TAIPAN LIQUID EDITION 2023",
+      "url": "https://www.padelnuestro.com/vibor-a-taipan-liquid-edition-2023-105296-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-electra-st3-stupa-pro",
+      "model": "SIUX ELECTRA ST3 PRO",
+      "url": "https://www.padelnuestro.com/pala-siux-electra-st2-stupa-pro-28752-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-evo-extreme-2023",
+      "model": "HEAD EVO EXTREME 2023",
+      "url": "https://www.padelnuestro.com/head-evo-extreme-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-liberty-hybrid",
+      "model": "SIUX LIBERTY HYBRID",
+      "url": "https://www.padelnuestro.com/siux-liberty-hybrid-108573-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-extreme-motion-2023",
+      "model": "HEAD EXTREME MOTION 2023",
+      "url": "https://www.padelnuestro.com/head-extreme-motion-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "joma-joma-master-verde",
+      "model": "JOMA MASTER VERDE",
+      "url": "https://www.padelnuestro.com/pala-joma-master-verde-108793-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-trilogy-control-pro-4",
+      "model": "SIUX TRILOGY CONTROL PRO 4",
+      "url": "https://www.padelnuestro.com/siux-trilogy-control-pro-4-109486-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-extreme-one-2023-special-packaging",
+      "model": "HEAD EXTREME ONE 2023 SPECIAL PACKAGING",
+      "url": "https://www.padelnuestro.com/head-extreme-one-2023-special-packaging-110104-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-youth-33-2024",
+      "model": "ADIDAS METALBONE YOUTH 3.3 2024",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-youth-3-4-ar4aa0u22.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-zephyr-pro",
+      "model": "HEAD ZEPHYR PRO",
+      "url": "https://www.padelnuestro.com/head-zephyr-pro-113580-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-adipower-legend-2024",
+      "model": "ADIDAS ADIPOWER LEGEND 2024",
+      "url": "https://www.padelnuestro.com/adidas-adipower-legend-2025-ar1ab1u34.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-speed-motion-2023",
+      "model": "HEAD SPEED MOTION 2023",
+      "url": "https://www.padelnuestro.com/head-speed-motion-2023-32510-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-extreme-pro",
+      "model": "HEAD EXTREME PRO",
+      "url": "https://www.padelnuestro.com/head-extreme-pro-2025.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-metalbone-33-2024-ale-galan-pala",
+      "model": "ADIDAS METALBONE 3.3 2024",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-3-4-ar1aa0u22.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-carbon-ctrl-33-2024",
+      "model": "ADIDAS METALBONE CARBON CTRL 3.3 2024",
+      "url": "https://www.padelnuestro.com/adidas-metalbone-carbon-ctrl-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-technical-viper-2024",
+      "model": "BABOLAT TECHNICAL VIPER 2024",
+      "url": "https://www.padelnuestro.com/babolat-technical-viper-2024-110465-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-counter-viper-2024",
+      "model": "BABOLAT COUNTER VIPER 2024",
+      "url": "https://www.padelnuestro.com/pala-babolat-counter-viper-150177-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at-genius-attack-18k-agustin-tapia-2024",
+      "model": "NOX AT GENIUS ATTACK 18K 2024",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-attack-18k-alum-by-agustin-tapia-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-radical-elite-2024",
+      "model": "HEAD RADICAL ELITE 2024",
+      "url": "https://www.padelnuestro.com/head-radical-elite-2024-111511-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-mustang-2024",
+      "model": "ENEBE MUSTANG 2024",
+      "url": "https://www.padelnuestro.com/enebe-mustang-2024-111891-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-rs-91-blue-2024",
+      "model": "ENEBE RS 9.1 BLUE 2024",
+      "url": "https://www.padelnuestro.com/enebe-rs-9-1-blue-2024-111900-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-24k-silver",
+      "model": "ENEBE RESPONSE 24K SILVER",
+      "url": "https://www.padelnuestro.com/pala-enebe-response-24k-violet-a005775.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-24k-violet",
+      "model": "ENEBE RESPONSE 24K VIOLET",
+      "url": "https://www.padelnuestro.com/pala-enebe-response-24k-violet-a005775.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-24k",
+      "model": "ENEBE RESPONSE 24K",
+      "url": "https://www.padelnuestro.com/enebe-response-3k-111897-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-supra-3k-2024",
+      "model": "ENEBE SUPRA 3K 2024",
+      "url": "https://www.padelnuestro.com/enebe-supra-3k-2024-111904-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-spitfire-12k-2024",
+      "model": "ENEBE SPITFIRE 12K 2024",
+      "url": "https://www.padelnuestro.com/enebe-spitfire-12k-2024-111903-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-speed-30-royal-power-2024",
+      "model": "SOFTEE SPEED 3.0 ROYAL POWER 2024",
+      "url": "https://www.padelnuestro.com/softee-speed-3-0-royal-power-2024-112487-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-speed-gold-power-30-2024",
+      "model": "SOFTEE SPEED GOLD POWER 3.0 2024",
+      "url": "https://www.padelnuestro.com/softee-speed-gold-power-3-0-2024-112490-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-summit-30-orange-power-2024",
+      "model": "SOFTEE SUMMIT 3.0 ORANGE POWER 2024",
+      "url": "https://www.padelnuestro.com/softee-summit-3-0-orange-power-2024-112491-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-be-hype-2024",
+      "model": "LOK BE HYPE 2024",
+      "url": "https://www.padelnuestro.com/lok-be-hype-2024-112977-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-carb-on-hype-2024",
+      "model": "LOK CARB-ON HYPE 2024",
+      "url": "https://www.padelnuestro.com/lok-carb-on-hype-2024-112979-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-be-flow-2024",
+      "model": "LOK BE FLOW 2024",
+      "url": "https://www.padelnuestro.com/lok-be-flow-2024-112976-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-easy-flow-2024",
+      "model": "LOK EASY FLOW 2024",
+      "url": "https://www.padelnuestro.com/lok-easy-flow-2024-112980-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-easy-hype-2024",
+      "model": "LOK EASY HYPE 2024",
+      "url": "https://www.padelnuestro.com/lok-easy-hype-2024-112981-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-carb-on-flow-2024",
+      "model": "LOK CARB-ON FLOW 2024",
+      "url": "https://www.padelnuestro.com/lok-carb-on-flow-2024-112978-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-maxx-hype-2024",
+      "model": "LOK MAXX HYPE 2024",
+      "url": "https://www.padelnuestro.com/lok-maxx-hype-2024-112983-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-juice-elite-2-2024",
+      "model": "WILSON JUICE ELITE 2 2024",
+      "url": "https://www.padelnuestro.com/pala-wilson-fierce-elite-2-wr114911u2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-equation-light-2025",
+      "model": "NOX EQUATION LIGHT 2025",
+      "url": "https://www.padelnuestro.com/nox-equation-light-2025-113545-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-maxx-flow-2024",
+      "model": "LOK MAXX FLOW 2024",
+      "url": "https://www.padelnuestro.com/lok-maxx-flow-2024-112982-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-wilson-blade-pro-v3-padel",
+      "model": "WILSON BLADE PRO V3 PADEL",
+      "url": "https://www.padelnuestro.com/wilson-blade-pro-v3-padel-113593-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-stormbreaker",
+      "model": "AKKERON BLACK STORMBREAKER",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-stormbreaker-pro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-predator",
+      "model": "AKKERON BLACK PREDATOR",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-predator-pro-kvr25-predator-pro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-blade-v3-padel",
+      "model": "WILSON BLADE V3 PADEL",
+      "url": "https://www.padelnuestro.com/wilson-blade-ls-v3-padel-2-113569-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-nexus-20-th-anniversary",
+      "model": "AKKERON NEXUS 20 TH ANNIVERSARY",
+      "url": "https://www.padelnuestro.com/akkeron-oro-20-th-anniversary-113608-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-poseidon",
+      "model": "AKKERON BLACK POSEIDON",
+      "url": "https://www.padelnuestro.com/akkeron-black-poseidon.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-oro-edition-a25",
+      "model": "AKKERON BLACK ORO EDITION A25",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-oro-black-line-25-oro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-fenix-a25",
+      "model": "AKKERON BLACK FENIX A25",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-fenix-black-line-25-fenix.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-diavolo-25",
+      "model": "AKKERON BLACK DIAVOLO 25",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-diavolo-kvr25-diavolo.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-atlas-edition",
+      "model": "AKKERON BLACK ATLAS EDITION",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-atlas-black-line-25-atlas.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-rose",
+      "model": "AKKERON BLACK ROSE",
+      "url": "https://www.padelnuestro.com/akkeron-black-rose.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-armageddon",
+      "model": "AKKERON BLACK ARMAGEDDON",
+      "url": "https://www.padelnuestro.com/akkeron-black-armageddon.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-oro-23",
+      "model": "AKKERON ORO 23",
+      "url": "https://www.padelnuestro.com/akkeron-oro-23-113619-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-oro-20-th-anniversary",
+      "model": "AKKERON ORO 20 TH ANNIVERSARY",
+      "url": "https://www.padelnuestro.com/akkeron-oro-20-th-anniversary-113608-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-metalbone-team-34-2025",
+      "model": "ADIDAS METALBONE TEAM 3.4 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-metalbone-team-2026-ar2aa3u22.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-atlas-23",
+      "model": "AKKERON ATLAS 23",
+      "url": "https://www.padelnuestro.com/akkeron-atlas-23-113616-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-cross-it-team-2025-pala",
+      "model": "ADIDAS CROSS IT TEAM 2025",
+      "url": "https://www.padelnuestro.com/pala-adidas-crossit-team-ctrl-2026-ar2aa6u23.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-armageddon-23",
+      "model": "AKKERON ARMAGEDDON 23",
+      "url": "https://www.padelnuestro.com/akkeron-armageddon-23-113615-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-radical-pro-2024",
+      "model": "HEAD RADICAL PRO 2024",
+      "url": "https://www.padelnuestro.com/head-radical-pro-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-gravity-team-2024",
+      "model": "HEAD GRAVITY TEAM 2024",
+      "url": "https://www.padelnuestro.com/head-gravity-team-2024-113826-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-aquila-pro-2025",
+      "model": "STARVIE AQUILA PRO 2025",
+      "url": "https://www.padelnuestro.com/starvie-aquila-2025-114810-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-gravity-pro-2024",
+      "model": "HEAD GRAVITY PRO 2024",
+      "url": "https://www.padelnuestro.com/head-gravity-pro-2024-113828-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-gravity-team-light-2024",
+      "model": "HEAD GRAVITY TEAM LIGHT 2024",
+      "url": "https://www.padelnuestro.com/head-gravity-team-light-2024-113829-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-brava-pro-2025",
+      "model": "STARVIE BRAVA PRO 2025",
+      "url": "https://www.padelnuestro.com/starvie-brava-2025-114816-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-astrum-pro-2025",
+      "model": "STARVIE ASTRUM PRO 2025",
+      "url": "https://www.padelnuestro.com/pala-starvie-astrum-pstamp31000.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-drax-pro-touch-2025",
+      "model": "STARVIE DRAX PRO TOUCH 2025",
+      "url": "https://www.padelnuestro.com/starvie-drax-pro-touch-2025-114817-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-kenta-pro-2025",
+      "model": "STARVIE KENTA PRO 2025",
+      "url": "https://www.padelnuestro.com/star-vie-kraken-pro-21825-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-raptor-pro-touch-2025",
+      "model": "STARVIE RAPTOR PRO TOUCH 2025",
+      "url": "https://www.padelnuestro.com/starvie-raptor-pro-touch-2025-114824-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-metheora-pro-touch-2025",
+      "model": "STARVIE METHEORA PRO TOUCH 2025",
+      "url": "https://www.padelnuestro.com/starvie-metheora-pro-touch-2025-114823-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-triton-pro-2025",
+      "model": "STARVIE TRITÓN PRO 2025",
+      "url": "https://www.padelnuestro.com/starvie-titania-pro-2025-114827-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-triton-pro-touch-2025",
+      "model": "STARVIE TRITÓN PRO TOUCH 2025",
+      "url": "https://www.padelnuestro.com/starvie-triton-pro-touch-2025-114829-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-basalto-pro-2025",
+      "model": "STARVIE BASALTO PRO 2025",
+      "url": "https://www.padelnuestro.com/starvie-basalto-pro-2025-114813-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-titania-lite-2025",
+      "model": "STARVIE TITANIA LITE 2025",
+      "url": "https://www.padelnuestro.com/starvie-titania-lite-2025-114826-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-aero-star-team",
+      "model": "DUNLOP AERO-STAR TEAM",
+      "url": "https://www.padelnuestro.com/dunlop-aero-star-team-104753-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-25-galactica-team",
+      "model": "DUNLOP 25 GALACTICA TEAM",
+      "url": "https://www.padelnuestro.com/pala-dunlop-25-galactica-team-10359943.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-fx-team-gun-metalcyanmetallic-silver",
+      "model": "DUNLOP FX TEAM GUN METAL/CYAN/METALLIC SILVER",
+      "url": "https://www.padelnuestro.com/pala-dunlop-fx-junior-gun-metal-cyan-metallic-silver-10370738.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kombat-kombat-galeras-mujer",
+      "model": "KOMBAT GALERAS MUJER",
+      "url": "https://www.padelnuestro.com/kombat-galeras-mujer-115023-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kombat-kombat-arenal-mujer",
+      "model": "KOMBAT ARENAL MUJER",
+      "url": "https://www.padelnuestro.com/kombat-arenal-mujer-115020-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kombat-kombat-teide",
+      "model": "KOMBAT TEIDE",
+      "url": "https://www.padelnuestro.com/kombat-teide-115026-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kombat-kombat-osorno",
+      "model": "KOMBAT OSORNO",
+      "url": "https://www.padelnuestro.com/kombat-osorno-115025-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kombat-kombat-krakatoa",
+      "model": "KOMBAT KRAKATOA",
+      "url": "https://www.padelnuestro.com/kombat-krakatoa-115024-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kombat-kombat-vesubio",
+      "model": "KOMBAT VESUBIO",
+      "url": "https://www.padelnuestro.com/kombat-vesubio-115027-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-diva-elite-3k-20-2025",
+      "model": "VIBOR-A DIVA ELITE 3K 2.0 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-diva-elite-3k-2024-111909-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-dio-titan-2025",
+      "model": "VIBOR-A DIO TITAN 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-dio-titan-2025-115107-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-naya-xtreme-fiber-20-mujer",
+      "model": "VIBOR-A NAYA XTREME FIBER 2.0 MUJER",
+      "url": "https://www.padelnuestro.com/vibor-a-naya-xtreme-fiber-2-0-mujer-115112-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-yarara-xtreme-fiber-black",
+      "model": "VIBOR-A YARARÁ XTREME FIBER BLACK",
+      "url": "https://www.padelnuestro.com/vibor-a-yarara-xtreme-fiber-black-115119-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-king-cobra-elite-24k-20-2025",
+      "model": "VIBOR-A KING COBRA ÉLITE 24K 2.0 2025",
+      "url": "https://www.padelnuestro.com/vibor-a-king-cobra-elite-24k-2-0-2025-115109-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-king-cobra-technic",
+      "model": "VIBOR-A KING COBRA TECHNIC",
+      "url": "https://www.padelnuestro.com/pala-vibor-a-king-cobra-technic-a005784.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-boa-advance-22",
+      "model": "VIBOR-A BOA ADVANCE 22",
+      "url": "https://www.padelnuestro.com/vibor-a-boa-advance-22.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-yarara-xtreme-3k-20",
+      "model": "VIBOR-A YARARA XTREME 3K 2.0",
+      "url": "https://www.padelnuestro.com/vibor-a-yarara-xtreme-3k-2-0-115118-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-titan-3k-black",
+      "model": "VIBOR-A TITAN 3K BLACK",
+      "url": "https://www.padelnuestro.com/vibor-a-titan-3k-black.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-green-2025",
+      "model": "ENEBE RESPONSE GREEN 2025",
+      "url": "https://www.padelnuestro.com/enebe-response-green-2025-115151-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-orange-2025",
+      "model": "ENEBE RESPONSE ORANGE 2025",
+      "url": "https://www.padelnuestro.com/enebe-response-orange-2025-115159-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-alu-2025",
+      "model": "ENEBE RESPONSE ALU 2025",
+      "url": "https://www.padelnuestro.com/enebe-response-alu-2025-115158-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-space-2025",
+      "model": "ENEBE SPACE 2025",
+      "url": "https://www.padelnuestro.com/pala-enebe-space-2-0-a005828.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-royal-2025",
+      "model": "ENEBE RESPONSE ROYAL 2025",
+      "url": "https://www.padelnuestro.com/enebe-response-royal-2025-115160-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-combat-71-v2-2025",
+      "model": "ENEBE COMBAT 7.1-V.2 2025",
+      "url": "https://www.padelnuestro.com/enebe-combat-7-1-v-2-2025-115165-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-spitfire-black-2025",
+      "model": "ENEBE SPITFIRE BLACK 2025",
+      "url": "https://www.padelnuestro.com/enebe-spitfire-black-2025-115161-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-aerox-71-v2-2025",
+      "model": "ENEBE AEROX 7.1- V.2 2025",
+      "url": "https://www.padelnuestro.com/enebe-aerox-7-1-v-2-2025-115166-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-rsx-71-carbon-v2-2025",
+      "model": "ENEBE RSX 7.1 CARBON- V.2 2025",
+      "url": "https://www.padelnuestro.com/enebe-rsx-7-1-carbon-v-2-2025-115164-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-mustang-blue-2025",
+      "model": "ENEBE MUSTANG BLUE 2025",
+      "url": "https://www.padelnuestro.com/enebe-mustang-blue-2025-115150-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-supra-3k-black-2025",
+      "model": "ENEBE SUPRA 3K BLACK 2025",
+      "url": "https://www.padelnuestro.com/enebe-supra-3k-black-2025-115162-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-optix-v1-black-padel-2",
+      "model": "WILSON OPTIX V1 BLACK PADEL 2",
+      "url": "https://www.padelnuestro.com/wilson-optix-v1-black-padel-2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-burn-team-2-2025",
+      "model": "WILSON BURN TEAM 2 2025",
+      "url": "https://www.padelnuestro.com/pala-wilson-burn-team-2-wr105111u2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-optix-v1-white-padel-2",
+      "model": "WILSON OPTIX V1 WHITE PADEL 2",
+      "url": "https://www.padelnuestro.com/wilson-optix-v1-white-padel-2-wr181711u2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-future-hybrid-12k-alum",
+      "model": "NOX FUTURE HYBRID 12K ALUM",
+      "url": "https://www.padelnuestro.com/pala-nox-future-hybrid-12k-alum-pfuthyb25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-curva-club-2025",
+      "model": "TECNIFIBRE CURVA CLUB 2025",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-curva-club-16curvacl5.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-curva-power-2025",
+      "model": "TECNIFIBRE CURVA POWER 2025",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-curva-speed-16curvasp5.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-wall-breaker-360-w",
+      "model": "TECNIFIBRE WALL BREAKER 360 W",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-wall-breaker-360-24-16wabr3604.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-curva-soft-2025",
+      "model": "TECNIFIBRE CURVA SOFT 2025",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-curva-team-16curvatea.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-fusion-elite-pro-plata",
+      "model": "DUNLOP FUSION ELITE PRO PLATA",
+      "url": "https://www.padelnuestro.com/pala-dunlop-fusion-elite-pro-oro-626041.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-fusion-elite-pro-oro",
+      "model": "DUNLOP FUSION ELITE PRO ORO",
+      "url": "https://www.padelnuestro.com/pala-dunlop-fusion-elite-pro-oro-626041.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-trilogy-lite-air-4",
+      "model": "SIUX TRILOGY LITE AIR 4",
+      "url": "https://www.padelnuestro.com/siux-trilogy-lite-air-4-109485-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-flash-w-2022-228272",
+      "model": "HEAD FLASH W 2022 228272",
+      "url": "https://www.padelnuestro.com/head-flash-w-2022-228272-26441-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at-pro-cup-coorp-2024",
+      "model": "NOX AT PRO CUP COORP 2024",
+      "url": "https://www.padelnuestro.com/nox-at-pro-cup-coorp-2024-110803-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-bela-team-v2-rojo",
+      "model": "WILSON BELA TEAM V2 ROJO",
+      "url": "https://www.padelnuestro.com/wilson-bela-team-v2-rojo-105139-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-sniper-20-control-petroleo-2026",
+      "model": "BULLPADEL SNIPER 2.0 CONTROL PETROLEO 2026",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-sniper-2-0-control-petroleo-2026-199289.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-sniper-20-control-gris-oscuro-2026",
+      "model": "BULLPADEL SNIPER 2.0 CONTROL GRIS OSCURO 2026",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-sniper-2-0-control-gris-oscuro-2026-199286.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-bullpadel-ionic-control-2026-pala",
+      "model": "BULLPADEL IONIC CONTROL 2026",
+      "url": "https://www.padelnuestro.com/bullpadel-ionic-control-2023-32431-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-elite-w-tour-final-25-mujer",
+      "model": "BULLPADEL ELITE W TOUR FINAL 25 MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-elite-w-tour-final-25-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-astrum-eris-black-master-edition",
+      "model": "STARVIE ASTRUM ERIS BLACK MASTER EDITION",
+      "url": "https://www.padelnuestro.com/star-vie-astrum-master-edition.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-trionic-light",
+      "model": "SOFTEE TRIONIC LIGHT",
+      "url": "https://www.padelnuestro.com/pala-softee-trionic-light-a00577.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-rebounce-rojo-3k",
+      "model": "SOFTEE REBOUNCE ROJO 3K",
+      "url": "https://www.padelnuestro.com/pala-softee-rebounce-red-3k-a005875.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-freezer-carbon-3k-verde-sft",
+      "model": "SOFTEE FREEZER CARBON 3K VERDE SFT",
+      "url": "https://www.padelnuestro.com/pala-softee-freezer-carbon-3k-verde-sft-a005788.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-freezer-carbon-3k-petrol",
+      "model": "SOFTEE FREEZER CARBON 3K PETROL",
+      "url": "https://www.padelnuestro.com/pala-softee-freezer-carbon-3k-petrol-a005789.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-invictus-lw",
+      "model": "LEGEND INVICTUS LW",
+      "url": "https://www.padelnuestro.com/legend-invictus-x.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-stealth-x",
+      "model": "LEGEND STEALTH-X",
+      "url": "https://www.padelnuestro.com/legend-stealth-evo-premium-15k-aluminio.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-revenant-evo",
+      "model": "LEGEND REVENANT EVO",
+      "url": "https://www.padelnuestro.com/pala-legend-revenant-evo-premium-12k-carbono.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-invictus-classic",
+      "model": "LEGEND INVICTUS CLASSIC",
+      "url": "https://www.padelnuestro.com/legend-invictus-classic-24k-textreme.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-stealth-evo",
+      "model": "LEGEND STEALTH-EVO",
+      "url": "https://www.padelnuestro.com/legend-stealth-evo-premium-15k-aluminio.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-odyssey-20",
+      "model": "LEGEND ODYSSEY 2.0",
+      "url": "https://www.padelnuestro.com/legend-odyssey-2-0-105102-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-invictus-40",
+      "model": "LEGEND INVICTUS 4.0",
+      "url": "https://www.padelnuestro.com/legend-invictus-4-0-105100-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "legend-legend-shadow-gold",
+      "model": "LEGEND SHADOW GOLD",
+      "url": "https://www.padelnuestro.com/legend-shadow-gold-ultra-luxury-15k-carbono.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-beat-hybrid-3-air",
+      "model": "Siux Beat Hybrid Air 2 2025",
+      "url": "https://www.padelnuestro.com/siux-beat-hybrid-3-air.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-excelsior-pro-25",
+      "model": "AKKERON BLACK EXCELSIOR PRO 25",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-excelsior-pro-kvr25-excelsior-pro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-pegasus-pro",
+      "model": "AKKERON BLACK PEGASUS PRO",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-pegasus-pro-kvr25-pegasus-pro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "akkeron-akkeron-black-diablo-pro",
+      "model": "AKKERON BLACK DIABLO PRO",
+      "url": "https://www.padelnuestro.com/pala-akkeron-black-diablo-pro-kvr25-diablo-pro.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-pegasus-elite-4",
+      "model": "SIUX PEGASUS ELITE 4",
+      "url": "https://www.padelnuestro.com/pala-siux-pegasus-elite-4-200055.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "lok-lok-jungle-lite",
+      "model": "LOK JUNGLE LITE",
+      "url": "https://www.padelnuestro.com/lok-jungle-lite.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-point-light",
+      "model": "ENEBE POINT LIGHT",
+      "url": "https://www.padelnuestro.com/pala-enebe-point-light-a005773.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-mustang-silver-3k",
+      "model": "ENEBE MUSTANG SILVER 3K",
+      "url": "https://www.padelnuestro.com/pala-enebe-mustang-silver-3k-a005787.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-suburban-silver-3k",
+      "model": "ENEBE SUBURBAN SILVER 3K",
+      "url": "https://www.padelnuestro.com/pala-enebe-suburban-silver-3k.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-yarara-pro-silver",
+      "model": "VIBOR-A YARARA PRO SILVER",
+      "url": "https://www.padelnuestro.com/vibor-a-yarara-pro-silver.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-response-3k-evo",
+      "model": "ENEBE RESPONSE 3K EVO",
+      "url": "https://www.padelnuestro.com/pala-enebe-response-3k-evo-a005776.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-black-mamba-evo-pro-white",
+      "model": "VIBOR-A BLACK MAMBA EVO PRO WHITE",
+      "url": "https://www.padelnuestro.com/vibor-a-black-mamba-evo-pro-white.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-titan-black-light",
+      "model": "VIBOR-A TITAN BLACK LIGHT",
+      "url": "https://www.padelnuestro.com/vibor-a-titan-black-light.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-black-mamba-evo-pro-black",
+      "model": "VIBOR-A BLACK MAMBA EVO PRO BLACK",
+      "url": "https://www.padelnuestro.com/vibor-a-black-mamba-evo-pro-black.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "enebe-enebe-suburban-green-12k",
+      "model": "ENEBE SUBURBAN GREEN 12K",
+      "url": "https://www.padelnuestro.com/pala-enebe-suburban-red-12k-a005848.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-titan-15k-black-twill",
+      "model": "VIBOR-A TITAN 15K BLACK TWILL",
+      "url": "https://www.padelnuestro.com/vibor-a-titan-15k-black-twill.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ventus-hybrid-12k-lite-pventus12hl",
+      "model": "NOX VENTUS HYBRID 12K LITE PVENTUS12HL",
+      "url": "https://www.padelnuestro.com/nox-ventus-hybrid-12k-lite-pventus12hl.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-titan-12k-red",
+      "model": "VIBOR-A TITAN 12K RED",
+      "url": "https://www.padelnuestro.com/pala-vibor-a-titan-12k-red-a006225.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at10-genius-attack-12k-alum-xtrem-by-agustin-tapia",
+      "model": "NOX AT10 GENIUS ATTACK 12K ALUM XTREM",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-12k-alum-xtrem-by-agustin-tapia-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-future-attack-12k-alum",
+      "model": "NOX FUTURE ATTACK 12K ALUM",
+      "url": "https://www.padelnuestro.com/pala-nox-future-attack-12k-alum-pfutatt25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-04-ltd-ed-juan-tello-argentina",
+      "model": "BULLPADEL VERTEX 04 LTD ED. ARGENTINA",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-vertex-04-24-ltd-ed-juan-tello-argentina.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-pearl-mx-ltd-mujer",
+      "model": "BULLPADEL PEARL MX LTD MUJER",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-pearl-mx-ltd-448486-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-indiga-mundial-argentina-ltd-1988",
+      "model": "BULLPADEL INDIGA MUNDIAL ARGENTINA LTD 1988",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-indiga-mundial-argentina-ltd-1988-448407.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "slazenger-slazenger-epic-pro-12k",
+      "model": "SLAZENGER EPIC PRO 12K",
+      "url": "https://www.padelnuestro.com/pala-slazenger-epic-pro-12k.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "slazenger-slazenger-challenge-4-3k",
+      "model": "SLAZENGER CHALLENGE 4 3K",
+      "url": "https://www.padelnuestro.com/pala-slazenger-challenge-4-3k.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "slazenger-slazenger-challenge-1-12k-hybrid",
+      "model": "SLAZENGER CHALLENGE 1 12K HYBRID",
+      "url": "https://www.padelnuestro.com/pala-slazenger-challenge-1-12k-hybrid.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-speed-elite-ltd",
+      "model": "HEAD SPEED ELITE LTD",
+      "url": "https://www.padelnuestro.com/pala-head-speed-elite-ltd-221095.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "harlem-harlem-pro-helix-hp-224",
+      "model": "HARLEM PRO HELIX HP-224",
+      "url": "https://www.padelnuestro.com/pala-harlem-pro-hp-224.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "harlem-harlem-euphoria-soft",
+      "model": "HARLEM EUPHORIA SOFT",
+      "url": "https://www.padelnuestro.com/pala-harlem-euphoria-pro-hp-222.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "harlem-harlem-euphoria-pro",
+      "model": "HARLEM EUPHORIA PRO",
+      "url": "https://www.padelnuestro.com/pala-harlem-euphoria-pro-hp-222.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "harlem-harlem-bionic-hp-221",
+      "model": "HARLEM BIONIC HP-221",
+      "url": "https://www.padelnuestro.com/pala-harlem-bionic-hp-221.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-wall-breaker-355-24",
+      "model": "TECNIFIBRE WALL BREAKER 355 24",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-wall-breaker-355-24-16wabr3554.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-wall-breaker-370",
+      "model": "TECNIFIBRE WALL BREAKER 370",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-wall-breaker-370-24-16wabr3704.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-future-control-12k-alum",
+      "model": "NOX FUTURE CONTROL 12K ALUM",
+      "url": "https://www.padelnuestro.com/pala-nox-future-control-12k-alum-pfutcon25.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kswiss-kswiss-ultrashot-18k",
+      "model": "KSWISS ULTRASHOT 18K",
+      "url": "https://www.padelnuestro.com/pala-kswiss-ultrashot-18k-100165.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-kswiss-supreme-12k",
+      "model": "KSWISS SUPREME 12K",
+      "url": "https://www.padelnuestro.com/pala-kswiss-supreme-12k-100166.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-air-vertuo-26",
+      "model": "BABOLAT AIR VERTUO 2.6",
+      "url": "https://www.padelnuestro.com/pala-babolat-air-veron-150180-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "kswiss-kswiss-express-3k",
+      "model": "KSWISS EXPRESS 3K",
+      "url": "https://www.padelnuestro.com/pala-kswiss-express-3k-100167.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-air-origin",
+      "model": "BABOLAT AIR ORIGIN",
+      "url": "https://www.padelnuestro.com/pala-babolat-air-origin-150153-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "drop-drop-shot-blitz-attack",
+      "model": "DROP SHOT BLITZ ATTACK",
+      "url": "https://www.padelnuestro.com/pala-drop-shot-blitz-attack-dp324020.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-04-w-tf-2024-mujer",
+      "model": "BULLPADEL VERTEX 04 W TF 2024 MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-03-w-mujer-2023-32427-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-bela-lt-v25-padel",
+      "model": "WILSON BELA LT V2.5 PADEL",
+      "url": "https://www.padelnuestro.com/wilson-bela-lt-v2-5-padel-111817-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-gea",
+      "model": "Siux Gea 2 2026",
+      "url": "https://www.padelnuestro.com/siux-gea.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "adidas-adidas-cross-it-light-pro-edt-by-martita-ortega",
+      "model": "ADIDAS CROSS IT LIGHT PRO EDT",
+      "url": "https://www.padelnuestro.com/adidas-cross-it-light-pro-edt-by-martita-ortega-112034-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "mystica-mystica-legacy-carbon-hybrid-blue-2024",
+      "model": "MYSTICA LEGACY CARBON HYBRID BLUE 2024",
+      "url": "https://www.padelnuestro.com/mystica-legacy-carbon-hybrid-blue-2024-110818-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "mystica-mystica-legacy-hybrid-orange-2024",
+      "model": "MYSTICA LEGACY HYBRID ORANGE 2024",
+      "url": "https://www.padelnuestro.com/mystica-legacy-hybrid-orange-2024-110820-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "mystica-mystica-legacy-carbon-attack-red-2024",
+      "model": "MYSTICA LEGACY CARBON ATTACK RED 2024",
+      "url": "https://www.padelnuestro.com/mystica-legacy-carbon-attack-red-2024-110817-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-at10-genius-18k-gloss-by-agustin-tapia-ex",
+      "model": "NOX AT10 GENIUS 18K GLOSS EX",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-18k-gloss-by-agustin-tapia-ex-112576-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "softee-softee-runa-blue-hybrid",
+      "model": "SOFTEE RUNA BLUE HYBRID",
+      "url": "https://www.padelnuestro.com/softee-runa-blue-hybrid-112485-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-la10-by-leo-augsburger-2024",
+      "model": "NOX LA10 2024",
+      "url": "https://www.padelnuestro.com/nox-la10-by-leo-augsburger-2024-110808-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-vk10-par-aranzazu-osoro-2024",
+      "model": "NOX VK10 PAR 2024",
+      "url": "https://www.padelnuestro.com/nox-vk10-by-aranzazu-osoro-2024-110814-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-equation-advanced-series-2024",
+      "model": "NOX EQUATION ADVANCED SERIES 2024",
+      "url": "https://www.padelnuestro.com/nox-equation-advanced-series-2024-110806-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-bourne-summum-carbon-black-2023",
+      "model": "VARLION BOURNE SUMMUM CARBON BLACK 2023",
+      "url": "https://www.padelnuestro.com/varlion-bourne-summum-carbon-black-29503-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-bourne-carbon-3-prisma-2023",
+      "model": "VARLION BOURNE CARBON 3 PRISMA 2023",
+      "url": "https://www.padelnuestro.com/varlion-bourne-carbon-3-prisma-2023-106459-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-lw-carbon-ti-magnolia-2023",
+      "model": "VARLION LW CARBON TI MAGNOLIA 2023",
+      "url": "https://www.padelnuestro.com/varlion-lw-carbon-ti-magnolia-2023-106473-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-bourne-advanced-black-carbon-ti-2023",
+      "model": "VARLION BOURNE ADVANCED BLACK CARBON TI 2023",
+      "url": "https://www.padelnuestro.com/varlion-bourne-advanced-black-carbon-ti-2023-106460-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "varlion-varlion-lw-pro-carbon-9-pansy-prisma",
+      "model": "VARLION LW PRO CARBON 9 PANSY PRISMA",
+      "url": "https://www.padelnuestro.com/varlion-lw-pro-carbon-9-pansy-prisma-2023.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-air-v",
+      "model": "PRINCE AIR V",
+      "url": "https://www.padelnuestro.com/prince-air-v-109953-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-raptor-v2",
+      "model": "PRINCE RAPTOR V2",
+      "url": "https://www.padelnuestro.com/prince-raptor-v2-109956-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-mach-v2",
+      "model": "PRINCE MACH V2",
+      "url": "https://www.padelnuestro.com/prince-mach-v2-105119-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-quartz-v2",
+      "model": "PRINCE QUARTZ V2",
+      "url": "https://www.padelnuestro.com/prince-quartz-v2-109955-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-premier-v2",
+      "model": "PRINCE PREMIER V2",
+      "url": "https://www.padelnuestro.com/prince-premier-v2-25139-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "prince-prince-phantom-v2",
+      "model": "PRINCE PHANTOM V2",
+      "url": "https://www.padelnuestro.com/prince-phantom-v2-25138-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-impact-carbon-pro-ltd-woman",
+      "model": "DUNLOP IMPACT CARBON PRO LTD WOMAN",
+      "url": "https://www.padelnuestro.com/dunlop-impact-carbon-pro-ltd-woman-31560-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-limited-edition-2023",
+      "model": "NOX ML10 LIMITED EDITION 2023",
+      "url": "https://www.padelnuestro.com/nox-ml10-limited-edition-2023-31572-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-pro-cup-silver-2023",
+      "model": "NOX ML10 PRO CUP SILVER 2023",
+      "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-silver-2023-31586-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "dunlop-dunlop-nemesis-control",
+      "model": "DUNLOP NEMESIS CONTROL",
+      "url": "https://www.padelnuestro.com/dunlop-nemesis-control-31550-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-pegasus-1k-limited-edition",
+      "model": "SIUX PEGASUS 1K LIMITED EDITION",
+      "url": "https://www.padelnuestro.com/siux-pegasus-1k-limited-edition-30397-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-graphene-xt-master-ltd-with-cb",
+      "model": "HEAD GRAPHENE XT MASTER LTD WITH CB",
+      "url": "https://www.padelnuestro.com/head-graphene-xt-master-ltd-with-cb-29573-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "royal-royal-padel-130-factor",
+      "model": "ROYAL PADEL 130 FACTOR",
+      "url": "https://www.padelnuestro.com/pala-royal-padel-rp-130-factor-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "royal-royal-padel-rp-r30-golden-white",
+      "model": "ROYAL PADEL RP R30 GOLDEN WHITE",
+      "url": "https://www.padelnuestro.com/pala-royal-padel-rp-r30-golden-white.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-j-hayber-dominator-d3k",
+      "model": "J HAYBER DOMINATOR D3K",
+      "url": "https://www.padelnuestro.com/j-hayber-dominator-d3k-26995-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-astra-hybrid",
+      "model": "Siux Astra Hybrid 2026",
+      "url": "https://www.padelnuestro.com/siux-astra-hybrid-air.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-pala-siux-beat-hybrid-3-2026",
+      "model": "Siux Beat Hybrid 3 2026",
+      "url": "https://www.padelnuestro.com/siux-beat-hybrid-3.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-03-control-2022",
+      "model": "BULLPADEL HACK 03 CONTROL 2022",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-03-control-2022-26107-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-bela-elite-v2-rojo",
+      "model": "WILSON BELA ELITE V2 ROJO",
+      "url": "https://www.padelnuestro.com/wilson-bela-elite-v2-rojo-105136-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-spyder-2-revolution-attack",
+      "model": "SIUX SPYDER 2 REVOLUTION ATTACK",
+      "url": "https://www.padelnuestro.com/pala-siux-spyder-2-revolution-attack-28762-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "siux-siux-spyder-4-attack-flex",
+      "model": "SIUX SPYDER 4 ATTACK FLEX",
+      "url": "https://www.padelnuestro.com/siux-spyder-4-attack-flex.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-air-viper-26",
+      "model": "Babolat Air Viper 2026",
+      "url": "https://www.padelnuestro.com/pala-babolat-air-vertuo-150184-100.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-ionic-light-26-mujer",
+      "model": "BULLPADEL IONIC LIGHT 26 MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-ionic-light-26-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-hybrid-04-25-miami",
+      "model": "BULLPADEL HACK HYBRID 04 25 MIAMI",
+      "url": "https://www.padelnuestro.com/pala-bullpadel-hack-hybrid-04-25-premier-padel-miami-492183.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-hack-04-hybrid-cloud",
+      "model": "BULLPADEL HACK 04 HYBRID CLOUD",
+      "url": "https://www.padelnuestro.com/bullpadel-hack-04-hybrid-cloud.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-nox-at10-genius-attack-18k-2026-by-agustin-tapia-pala",
+      "model": "NOX AT10 GENIUS ATTACK 18K 2026",
+      "url": "https://www.padelnuestro.com/nox-at10-genius-attack-18k-alum-by-agustin-tapia-2026.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-extreme-elite-2023",
+      "model": "HEAD EXTREME ELITE 2023",
+      "url": "https://www.padelnuestro.com/head-extreme-elite-2023-110100-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "unknown-adidas-cross-it-team-light-2026-pala",
+      "model": "ADIDAS CROSS IT TEAM LIGHT 2026",
+      "url": "https://www.padelnuestro.com/pala-adidas-crossit-team-light-2026-ar2ca6u26.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-fierce-elite-2-2025",
+      "model": "WILSON FIERCE ELITE 2 2025",
+      "url": "https://www.padelnuestro.com/pala-wilson-fierce-elite-2-wr114911u2.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "wilson-wilson-carbon-force-pro-padel-2",
+      "model": "WILSON CARBON FORCE PRO PADEL 2",
+      "url": "https://www.padelnuestro.com/wilson-carbon-force-pro-padel-2-109497-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "tecnifibre-tecnifibre-curva-team",
+      "model": "TECNIFIBRE CURVA TEAM",
+      "url": "https://www.padelnuestro.com/pala-tecnifibre-curva-team-16curvatea.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "vibor-a-vibor-a-diva-elite-3k-2024",
+      "model": "VIBOR-A DIVA ELITE 3K 2024",
+      "url": "https://www.padelnuestro.com/vibor-a-diva-elite-3k-2024-111909-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-shotgun-18k-luxury-series-2024",
+      "model": "NOX ML10 SHOTGUN 18K LUXURY SERIES 2024",
+      "url": "https://www.padelnuestro.com/nox-ml10-shotgun-18k-luxury-series-2024-110811-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-elite-26-mujer",
+      "model": "BULLPADEL ELITE 26 MUJER",
+      "url": "https://www.padelnuestro.com/bullpadel-elite-26-mujer.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-elite-light-w-mujer-2023",
+      "model": "BULLPADEL ELITE LIGHT W MUJER 2023",
+      "url": "https://www.padelnuestro.com/bullpadel-elite-light-w-mujer-2023-32433-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "bullpadel-bullpadel-vertex-03-w-mujer-2023",
+      "model": "BULLPADEL VERTEX 03 W MUJER 2023",
+      "url": "https://www.padelnuestro.com/bullpadel-vertex-03-w-mujer-2023-32427-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "head-head-speed-pro-x-2023",
+      "model": "HEAD SPEED PRO X 2023",
+      "url": "https://www.padelnuestro.com/head-speed-pro-x-2023-32512-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-kraken-pro",
+      "model": "STARVIE KRAKEN PRO",
+      "url": "https://www.padelnuestro.com/star-vie-kraken-pro-21825-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "starvie-starvie-triton-pro-20-2023",
+      "model": "STARVIE TRITÓN PRO 2.0 2023",
+      "url": "https://www.padelnuestro.com/starvie-triton-pro-2-0-2023-104435-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "babolat-babolat-air-viper-2024",
+      "model": "BABOLAT AIR VIPER 2024",
+      "url": "https://www.padelnuestro.com/babolat-air-viper-2024-110451-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    },
+    {
+      "racket_id": "nox-nox-ml10-pro-cup-3k-luxury-series-2024",
+      "model": "NOX ML10 PRO CUP 3K LUXURY SERIES 2024",
+      "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-3k-luxury-series-2024-110810-p.html",
+      "ends_html": true,
+      "status": 404,
+      "final_url": null
+    }
+  ],
+  "redirected": [],
+  "errors": []
+}
