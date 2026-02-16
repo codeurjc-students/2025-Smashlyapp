@@ -17,7 +17,8 @@ export interface BasicFormData {
   };
 }
 
-export interface AdvancedFormData extends BasicFormData {
+export interface AdvancedFormData extends Omit<BasicFormData, 'budget'> {
+  budget: number;
   style: string;
   years_playing: string;
   position: string;

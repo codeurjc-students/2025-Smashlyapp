@@ -272,8 +272,12 @@ export const EditRacketModal: React.FC<EditRacketModalProps> = ({
                   <Label>Imagen URL</Label>
                   <Input
                     type='text'
-                    value={formData.imagen || ''}
-                    onChange={e => handleInputChange('imagen', e.target.value)}
+                    value={formData.imagenes?.[0] || ''}
+                    onChange={e => {
+                      const newImages = [...(formData.imagenes || [])];
+                      newImages[0] = e.target.value;
+                      handleInputChange('imagenes', newImages);
+                    }}
                   />
                 </FormGroup>
                 <FormGroup>

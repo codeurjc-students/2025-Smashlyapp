@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from 'axios';
 import { Racket, UserFormData } from '../types/racket';
 import logger from '../config/logger';
 import { freeAiService } from './freeAiService';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Interfaz para las métricas de radar (0-10)
 export interface RadarMetrics {
@@ -123,8 +124,19 @@ export class OpenRouterService {
       logger.warn(`⚠️ Free AI API failed, falling back to OpenRouter: ${error}`);
     }
 
-    // 2. Fallback a OpenRouter
-    return this.generateContentOpenRouterFallback(prompt);
+    // 2. Check if OpenRouter key is available
+    if (!this.apiKey) {
+      logger.warn('⚠️ OPENROUTER_API_KEY missing, trying Gemini fallback');
+      return this.generateContentGeminiFallback(prompt);
+    }
+
+    // 3. Fallback a OpenRouter
+    try {
+      return await this.generateContentOpenRouterFallback(prompt);
+    } catch (error) {
+      logger.warn(`⚠️ OpenRouter fallback failed, trying Gemini: ${error}`);
+      return this.generateContentGeminiFallback(prompt);
+    }
   }
 
   /**
@@ -205,6 +217,32 @@ export class OpenRouterService {
   }
 
   /**
+   * Genera contenido usando Gemini como último recurso
+   */
+  private async generateContentGeminiFallback(prompt: string): Promise<string> {
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (!geminiKey) {
+      logger.error('❌ GEMINI_API_KEY missing in environment variables');
+      throw new Error('Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas');
+    }
+
+    try {
+      logger.info('🤖 Attempting fallback to Gemini API (gemini-1.5-flash)');
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text();
+      logger.info('✅ Gemini fallback success, response length:', text.length);
+      return text;
+    } catch (error: any) {
+      logger.error('❌ Gemini fallback failed:', error);
+      throw new Error(`Error generating content with Gemini fallback: ${error.message}`);
+    }
+  }
+
+  /**
    * Compara palas usando sistema híbrido con formato estructurado
    */
   async compareRackets(rackets: Racket[], userProfile?: UserFormData): Promise<ComparisonResult> {
@@ -231,8 +269,19 @@ export class OpenRouterService {
       logger.warn(`⚠️ Free AI API comparison failed, falling back to OpenRouter: ${error}`);
     }
 
-    // 2. Fallback a OpenRouter
-    return this.compareRacketsOpenRouterFallback(combinedPrompt, rackets);
+    // 2. Check if OpenRouter key is available
+    if (!this.apiKey) {
+      logger.warn('⚠️ OPENROUTER_API_KEY missing for comparison, trying Gemini fallback');
+      return this.compareRacketsGeminiFallback(combinedPrompt, rackets);
+    }
+
+    // 3. Fallback a OpenRouter
+    try {
+      return await this.compareRacketsOpenRouterFallback(combinedPrompt, rackets);
+    } catch (error) {
+      logger.warn(`⚠️ OpenRouter comparison failed, trying Gemini: ${error}`);
+      return this.compareRacketsGeminiFallback(combinedPrompt, rackets);
+    }
   }
 
   private async compareRacketsOpenRouterFallback(
@@ -302,6 +351,63 @@ export class OpenRouterService {
 
     logger.error('❌ All models failed for comparison. Last error:', errorMessage);
     throw new Error(`Error al generar la comparación con IA: ${errorMessage}`);
+  }
+
+  /**
+   * Compara palas usando Gemini como último recurso
+   */
+  private async compareRacketsGeminiFallback(
+    prompt: string,
+    rackets: Racket[]
+  ): Promise<ComparisonResult> {
+    const geminiKey = process.env.GEMINI_API_KEY;
+    if (!geminiKey) {
+      logger.error('❌ GEMINI_API_KEY missing in environment variables');
+      throw new Error('Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas');
+    }
+
+    try {
+      logger.info('🤖 Attempting comparison fallback to Gemini API (gemini-1.5-flash)');
+      const genAI = new GoogleGenerativeAI(geminiKey);
+      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const fullText = response.text();
+
+      if (!fullText) {
+        throw new Error('Empty response from Gemini');
+      }
+
+      logger.info('✅ Gemini raw response received, length:', fullText.length);
+
+      // Parsear la respuesta estructurada (reutilizamos la lógica existente)
+      const comparisonResult = this.parseStructuredResponse(fullText, rackets);
+
+      logger.info('✅ Comparison generated and parsed successfully with Gemini fallback');
+      return comparisonResult;
+    } catch (error: any) {
+      logger.error('❌ Gemini comparison fallback failed:', error);
+      
+      // Intentar una vez más con modelo pro si falla el flash
+      try {
+          logger.info('🔄 Retrying with gemini-1.5-pro...');
+          const genAI = new GoogleGenerativeAI(geminiKey);
+          const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+          
+          const result = await model.generateContent(prompt);
+          const response = await result.response;
+          const fullText = response.text();
+          
+           if (!fullText) throw new Error('Empty response from Gemini Pro');
+           
+           const comparisonResult = this.parseStructuredResponse(fullText, rackets);
+           logger.info('✅ Comparison generated successfully with Gemini Pro fallback');
+           return comparisonResult;
+      } catch (retryError: any) {
+           throw new Error(`Error al generar la comparación con IA (Gemini): ${error.message}`);
+      }
+    }
   }
 
   private buildRacketsInfo(rackets: Racket[]): string {

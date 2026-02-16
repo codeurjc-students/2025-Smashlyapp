@@ -18,7 +18,7 @@ interface ReviewItemProps {
       nombre: string;
       marca?: string;
       modelo?: string;
-      imagen?: string;
+      imagenes?: string[];
     };
   };
   onDelete: () => void;

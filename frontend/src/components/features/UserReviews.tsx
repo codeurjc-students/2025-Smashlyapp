@@ -20,7 +20,7 @@ interface ReviewWithUserAndRacket extends ReviewWithUser {
     nombre: string;
     marca?: string;
     modelo?: string;
-    imagen?: string;
+    imagenes?: string[];
   };
 }
 
@@ -112,9 +112,9 @@ export const UserReviews: React.FC<UserReviewsProps> = ({ userId }) => {
               >
                 {/* Imagen de la pala */}
                 <RacketImageContainer>
-                  {review.racket?.imagen ? (
+                  {review.racket?.imagenes?.[0] ? (
                     <RacketImage
-                      src={review.racket.imagenes?.[0]}
+                      src={review.racket.imagenes[0]}
                       alt={review.racket.nombre}
                     />
                   ) : (

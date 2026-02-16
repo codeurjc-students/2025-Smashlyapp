@@ -22,7 +22,6 @@ export const ContentLock: React.FC<ContentLockProps> = ({
   children,
   title = "Premium Feature",
   description = "Sign in to access this feature",
-  feature = "content"
 }) => {
   if (!isLocked) {
     return <>{children}</>;

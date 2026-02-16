@@ -8,7 +8,7 @@ export class FreeAiService {
   constructor() {}
 
   private get baseUrl(): string {
-    return process.env.FREE_AI_API_URL || 'http://localhost:3000';
+    return process.env.FREE_AI_API_URL || 'http://localhost:3001';
   }
 
   /**

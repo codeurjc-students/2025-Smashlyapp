@@ -56,7 +56,7 @@ export class RacketPdfGenerator {
 
     // 4. Tabla Comparativa
     if (comparison.comparisonTable) {
-      this.renderComparisonTableFromMarkdown(comparison.comparisonTable);
+      this.renderComparisonTableFromData(comparison.comparisonTable);
     }
 
     // 5. Análisis Técnico
@@ -174,9 +174,8 @@ export class RacketPdfGenerator {
     this.currentY += 100;
   }
 
-  private renderComparisonTableFromMarkdown(markdown: string) {
-    const tableData = this.extractTableFromMarkdown(markdown);
-    if (!tableData) return;
+  private renderComparisonTableFromData(tableData: any[]) {
+    if (!tableData || tableData.length === 0) return;
 
     this.checkPageBreak(60);
 
@@ -190,15 +189,23 @@ export class RacketPdfGenerator {
     this.doc.text('TABLA COMPARATIVA', this.margin, this.currentY);
     this.currentY += 8;
 
-    // Limpieza de datos de la tabla: quitar ** de las celdas
-    const cleanBody = tableData.body.map(row => row.map(cell => cell.replace(/\*\*/g, '').trim()));
-    const cleanHead = tableData.head.map(h => h.replace(/\*\*/g, '').trim());
+    // Transform structured data for autoTable
+    // We need to extract headers and body
+    // Assuming tableData is an array of objects where keys are columns
+    if (tableData.length === 0) return;
+
+    const headers = Object.keys(tableData[0]).filter(k => k !== 'feature');
+    const head = ['Característica', ...headers];
+    
+    const body = tableData.map(item => {
+      return [item.feature, ...headers.map(h => item[h])];
+    });
 
     // @ts-ignore
     autoTable(this.doc, {
       startY: this.currentY,
-      head: [cleanHead],
-      body: cleanBody,
+      head: [head],
+      body: body,
       theme: 'grid',
       styles: {
         font: 'helvetica',
@@ -432,33 +439,7 @@ export class RacketPdfGenerator {
     });
   }
 
-  private extractTableFromMarkdown(markdown: string) {
-    const lines = markdown.split('\n');
-    let head: string[] = [];
-    let body: string[][] = [];
-    let inTable = false;
 
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed.startsWith('|')) {
-        if (trimmed.includes('---')) continue;
-        const cols = trimmed
-          .split('|')
-          .map(c => c.trim())
-          .filter(c => c !== '');
-
-        if (!inTable) {
-          head = cols;
-          inTable = true;
-        } else {
-          body.push(cols);
-        }
-      } else if (inTable) {
-        break;
-      }
-    }
-    return head.length > 0 ? { head, body } : null;
-  }
 
   private checkPageBreak(neededHeight: number) {
     if (this.currentY + neededHeight > this.pageHeight - this.margin) {
