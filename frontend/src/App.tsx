@@ -5,14 +5,13 @@ import { ScrollToTop } from './components/common/ScrollToTop';
 import { ComparisonProvider } from './contexts/ComparisonContext';
 import { RacketsProvider } from './contexts/RacketsContext';
 import { ListsProvider } from './contexts/ListsContext';
-import { BackgroundTasksProvider } from './contexts/BackgroundTasksContext';
-import { BackgroundTaskPopup } from './components/common/BackgroundTaskPopup';
 import ErrorBoundary from './components/ErrorBoundary';
 import LoadingSpinner from './components/common/LoadingSpinner';
 import PageSkeleton from './components/common/PageSkeleton';
 import { FloatingCompareButton } from './components/common/FloatingCompareButton';
 import { AuthProvider } from './contexts/AuthContext';
 import { AuthModalProvider } from './contexts/AuthModalContext';
+import { NotificationProvider } from './contexts/NotificationContext';
 import AuthModal from './components/auth/AuthModal';
 
 // Code split routes - load on demand
@@ -50,17 +49,16 @@ export default function App() {
     <ErrorBoundary>
       <Suspense fallback={<RouteLoadingFallback />}>
         <AuthProvider>
-          <RacketsProvider>
+          <NotificationProvider>
+            <RacketsProvider>
             <ComparisonProvider>
               <ListsProvider>
-                <BackgroundTasksProvider>
-                  <AuthModalProvider>
-                    <ScrollToTop />
-                    <AuthModal />
-                    <Layout>
-                      <FloatingCompareButton />
-                      <BackgroundTaskPopup />
-                      <Routes>
+                <AuthModalProvider>
+                  <ScrollToTop />
+                  <AuthModal />
+                  <Layout>
+                    <FloatingCompareButton />
+                    <Routes>
                       {/* Critical routes - prioritized */}
                       <Route
                         path='/'
@@ -190,10 +188,10 @@ export default function App() {
                     </Routes>
                   </Layout>
                   </AuthModalProvider>
-                </BackgroundTasksProvider>
               </ListsProvider>
             </ComparisonProvider>
           </RacketsProvider>
+          </NotificationProvider>
         </AuthProvider>
       </Suspense>
     </ErrorBoundary>

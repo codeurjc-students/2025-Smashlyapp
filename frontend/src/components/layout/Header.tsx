@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthModal } from '../../contexts/AuthModalContext';
 import GlobalSearch from '../features/GlobalSearch';
+import { NotificationBell } from '../notifications/NotificationBell';
 
 const HeaderContainer = styled.header`
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
@@ -468,7 +469,8 @@ const Header: React.FC = () => {
 
         <AuthButtons>
           {userProfile ? (
-            <UserMenuContainer ref={userMenuRef}>
+            <UserMenuContainer ref={userMenuRef} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <NotificationBell />
               <AvatarButton onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
                 {userProfile.avatar_url ? (
                   <img src={userProfile.avatar_url} alt='Avatar' />

@@ -372,12 +372,6 @@ const LoginPrompt = styled(Link)`
   }
 `;
 
-const EmptySummary = styled.div`
-  text-align: center;
-  color: #9ca3af;
-  margin: 2rem 0;
-`;
-
 // -- Reviews List --
 
 const ReviewsColumn = styled.div`

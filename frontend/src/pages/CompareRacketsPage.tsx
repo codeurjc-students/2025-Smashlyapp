@@ -1,12 +1,13 @@
-import React, { useState, useRef, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiX, FiPlus, FiCpu, FiDownload, FiSave, FiCheck, FiHeart } from 'react-icons/fi';
 import { useRackets } from '../contexts/RacketsContext';
 import { useAuth } from '../contexts/AuthContext';
-import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import { ComparisonService } from '../services/comparisonService';
 import { ListService } from '../services/listService';
+import { NotificationService } from '../services/notificationService';
 import { Racket, ComparisonResult, RacketComparisonData } from '../types/racket';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -507,8 +508,7 @@ const EmptyFavorites = styled.div`
 const CompareRacketsPage: React.FC = () => {
   const { rackets } = useRackets();
   const { user, isAuthenticated } = useAuth();
-  const { addTask, updateTaskProgress, completeTask, failTask, dismissTask, tasks } =
-    useBackgroundTasks();
+  const { addNotification } = useNotifications();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRackets, setSelectedRackets] = useState<Racket[]>([]);
   const [comparisonResult, setComparisonResult] = useState<ComparisonResult | null>(null);
@@ -516,11 +516,26 @@ const CompareRacketsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [showChart, setShowChart] = useState(false);
-  const [modalManuallyClosed, setModalManuallyClosed] = useState(false);
   const [favoriteRackets, setFavoriteRackets] = useState<Racket[]>([]);
   const [loadingFavorites, setLoadingFavorites] = useState(false);
-  const resultRef = useRef<HTMLDivElement>(null);
-  const lastShownTaskIdRef = useRef<string | null>(null);
+
+  // Cargar comparación guardada desde sessionStorage al iniciar (viene de notificación)
+  useEffect(() => {
+    const savedComparison = sessionStorage.getItem('smashly_last_comparison');
+    if (savedComparison) {
+      try {
+        const parsed = JSON.parse(savedComparison);
+        if (parsed.comparison && parsed.rackets) {
+          setComparisonResult(parsed.comparison);
+          setComparisonMetrics(parsed.metrics || null);
+          setSelectedRackets(parsed.rackets);
+          sessionStorage.removeItem('smashly_last_comparison');
+        }
+      } catch (error) {
+        console.error('Error loading saved comparison:', error);
+      }
+    }
+  }, []);
 
   // Configure Fuse.js con búsqueda mejorada
   const fuse = new Fuse(rackets, {
@@ -542,63 +557,8 @@ const CompareRacketsPage: React.FC = () => {
         .search(searchQuery)
         .map(result => result.item)
         .filter(r => !selectedRackets.find(sr => sr.id === r.id))
-        .slice(0, 8) // Mostrar más resultados (8 en lugar de 5)
+        .slice(0, 8)
     : [];
-
-  // Efecto para cargar resultados de tareas completadas en segundo plano
-  React.useEffect(() => {
-    // Buscar la última tarea de comparación completada
-    const completedComparisonTask = tasks
-      .filter(task => task.type === 'comparison' && task.status === 'completed')
-      .sort(
-        (a, b) => new Date(b.completedAt || 0).getTime() - new Date(a.completedAt || 0).getTime()
-      )[0];
-
-    // Solo mostrar si:
-    // 1. Hay una tarea completada
-    // 2. No se ha mostrado antes (diferente ID)
-    // 3. El usuario no cerró manualmente el modal
-    // 4. No hay ya un resultado visible
-    // 5. No ha sido visto previamente (check sessionStorage)
-    const lastViewedId = sessionStorage.getItem('smashly_last_viewed_comparison_task');
-
-    if (
-      completedComparisonTask &&
-      completedComparisonTask.result &&
-      completedComparisonTask.id !== lastShownTaskIdRef.current &&
-      completedComparisonTask.id !== lastViewedId &&
-      !modalManuallyClosed &&
-      !comparisonResult
-    ) {
-      try {
-        const { comparison, metrics } = completedComparisonTask.result;
-
-        // Verificar que comparison tenga la estructura correcta (ComparisonResult)
-        // Debe ser un objeto con las propiedades requeridas
-        if (
-          comparison &&
-          typeof comparison === 'object' &&
-          'executiveSummary' in comparison &&
-          'technicalAnalysis' in comparison &&
-          'metrics' in comparison
-        ) {
-          setComparisonResult(comparison as ComparisonResult);
-          setComparisonMetrics(comparison.metrics || metrics || null);
-          lastShownTaskIdRef.current = completedComparisonTask.id;
-
-          // Marcar como visto en sessionStorage para persistencia entre recargas/navegación
-          sessionStorage.setItem('smashly_last_viewed_comparison_task', completedComparisonTask.id);
-        } else {
-          // Si el formato es antiguo, simplemente ignorar esta tarea
-          console.warn('Ignoring old format comparison task:', completedComparisonTask.id);
-          lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista para no intentar de nuevo
-        }
-      } catch (error) {
-        console.error('Error loading comparison from background task:', error);
-        lastShownTaskIdRef.current = completedComparisonTask.id; // Marcar como vista
-      }
-    }
-  }, [tasks, comparisonResult, modalManuallyClosed]);
 
   // Lazy loading del gráfico - renderizar después de que el modal esté abierto
   useEffect(() => {
@@ -742,21 +702,6 @@ const CompareRacketsPage: React.FC = () => {
 
     setLoading(true);
     setComparisonResult(null);
-    setModalManuallyClosed(false); // Reset flag when starting new comparison
-
-    // Crear tarea en segundo plano
-    const taskId = addTask(
-      'comparison',
-      {
-        racketNames: selectedRackets.map(r => r.nombre),
-      },
-      '/compare'
-    );
-
-    // Simular progreso
-    const progressInterval = setInterval(() => {
-      updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
-    }, 500);
 
     try {
       // Prepare user profile if authenticated
@@ -780,8 +725,8 @@ const CompareRacketsPage: React.FC = () => {
           height: user.height?.toString() || undefined,
           age: age?.toString() || undefined,
           gameLevel: user.game_level || undefined,
-          playingStyle: undefined, // Not available in current user profile
-          experience: undefined, // Not available in current user profile
+          playingStyle: undefined,
+          experience: undefined,
           preferences: user.limitations?.join(', ') || undefined,
         };
       }
@@ -789,17 +734,34 @@ const CompareRacketsPage: React.FC = () => {
       const racketIds = selectedRackets.map(r => r.id!);
       const response = await ComparisonService.compareRackets(racketIds, userProfile);
 
-      clearInterval(progressInterval);
-      completeTask(taskId, {
-        comparison: response.comparison,
-        metrics: response.comparison.metrics,
-      });
-
       setComparisonResult(response.comparison);
       setComparisonMetrics(response.comparison.metrics || null);
+
+      sessionStorage.setItem('smashly_last_comparison', JSON.stringify({
+        comparison: response.comparison,
+        metrics: response.comparison.metrics,
+        rackets: selectedRackets,
+        timestamp: Date.now()
+      }));
+
+      const notification = await NotificationService.createNotification(
+        'comparison_complete',
+        'Comparación completada',
+        'Tu comparación de palas está lista. ¡Descúbrela!',
+        { racketCount: selectedRackets.length }
+      );
+      
+      if (notification) {
+        addNotification(notification);
+      } else {
+        console.error('Error: No se pudo crear la notificación');
+      }
+      
+      sileo.success({ 
+        title: '¡Comparación lista!', 
+        description: 'Tu comparación de palas está lista. ¡Descúbrela!'
+      });
     } catch (error: any) {
-      clearInterval(progressInterval);
-      failTask(taskId, 'Error al realizar la comparación');
       console.error('Error comparing rackets:', error);
 
       // Mostrar mensaje de error más específico
@@ -1007,17 +969,9 @@ const CompareRacketsPage: React.FC = () => {
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
             onClick={() => {
-              // Limpiar completamente la comparación
               setComparisonResult(null);
               setComparisonMetrics(null);
               setSelectedRackets([]);
-              setModalManuallyClosed(true);
-
-              // Descartar la tarea de fondo si existe
-              if (lastShownTaskIdRef.current) {
-                dismissTask(lastShownTaskIdRef.current);
-                lastShownTaskIdRef.current = null;
-              }
             }}
           >
             <ModalContent
@@ -1030,24 +984,15 @@ const CompareRacketsPage: React.FC = () => {
               <CloseButton
                 onClick={e => {
                   e.stopPropagation();
-                  // Limpiar completamente la comparación
                   setComparisonResult(null);
                   setComparisonMetrics(null);
                   setSelectedRackets([]);
-                  setModalManuallyClosed(true);
-
-                  // Descartar la tarea de fondo si existe
-                  if (lastShownTaskIdRef.current) {
-                    dismissTask(lastShownTaskIdRef.current);
-                    lastShownTaskIdRef.current = null;
-                  }
                 }}
               >
                 <FiX size={24} />
               </CloseButton>
 
               <ResultSection
-                ref={resultRef}
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

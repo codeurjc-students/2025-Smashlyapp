@@ -65,6 +65,13 @@ export const API_ENDPOINTS = {
 
   // Health
   HEALTH: '/api/v1/health',
+
+  // Notifications
+  NOTIFICATIONS: '/api/v1/notifications',
+  NOTIFICATIONS_UNREAD_COUNT: '/api/v1/notifications/unread-count',
+  NOTIFICATIONS_MARK_READ: (id: string) => `/api/v1/notifications/${id}/read`,
+  NOTIFICATIONS_MARK_ALL_READ: '/api/v1/notifications/read-all',
+  NOTIFICATIONS_DELETE: (id: string) => `/api/v1/notifications/${id}`,
 } as const;
 
 /**

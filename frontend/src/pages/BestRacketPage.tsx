@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
-import { useBackgroundTasks } from '../contexts/BackgroundTasksContext';
+import { useNotifications } from '../contexts/NotificationContext';
 import { BasicForm } from '../components/recommendation/BasicForm';
 import { AdvancedForm } from '../components/recommendation/AdvancedForm';
 import { RecommendationResult } from '../components/recommendation/RecommendationResult';
 import { RecommendationService } from '../services/recommendationService';
+import { NotificationService } from '../services/notificationService';
 import {
   BasicFormData,
   AdvancedFormData,
@@ -109,7 +110,7 @@ const AlertButton = styled.button`
 
 export const BestRacketPage: React.FC = () => {
   const { user } = useAuth();
-  const { addTask, updateTaskProgress, completeTask, failTask } = useBackgroundTasks();
+  const { addNotification } = useNotifications();
   const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
   const [formType, setFormType] = useState<'basic' | 'advanced'>('basic');
   const [result, setResult] = useState<ResultType | null>(null);
@@ -126,6 +127,23 @@ export const BestRacketPage: React.FC = () => {
 
   // Restore state from sessionStorage on mount
   useEffect(() => {
+    const savedRecommendation = sessionStorage.getItem('smashly_last_recommendation');
+    if (savedRecommendation) {
+      try {
+        const parsed = JSON.parse(savedRecommendation);
+        if (parsed.result) {
+          setResult(parsed.result);
+          setStep('result');
+          setFormType(parsed.formType || 'basic');
+          sessionStorage.removeItem('smashly_last_recommendation');
+          setStateRestored(true);
+          return;
+        }
+      } catch (error) {
+        console.error('Error loading saved recommendation:', error);
+      }
+    }
+
     const savedState = sessionStorage.getItem('bestRacketPageState');
     if (savedState) {
       try {
@@ -204,25 +222,36 @@ export const BestRacketPage: React.FC = () => {
     setBasicData(data);
     setStep('loading');
 
-    // Crear tarea en segundo plano
-    const taskId = addTask('recommendation', { formData: data }, '/best-racket');
-
-    // Simular progreso
-    const progressInterval = setInterval(() => {
-      updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
-    }, 500);
-
     try {
       const res = await RecommendationService.generate('basic', data);
 
-      clearInterval(progressInterval);
-      completeTask(taskId, res);
-
       setResult(res);
       setStep('result');
+
+      sessionStorage.setItem('smashly_last_recommendation', JSON.stringify({
+        result: res,
+        formType: 'basic',
+        timestamp: Date.now()
+      }));
+
+      const notification = await NotificationService.createNotification(
+        'recommendation_complete',
+        'Recomendación lista',
+        'Tu recomendación básica está lista. ¡Descúbrela!',
+        { formType: 'basic' }
+      );
+      
+      if (notification) {
+        addNotification(notification);
+      } else {
+        console.error('Error: No se pudo crear la notificación');
+      }
+      
+      sileo.success({ 
+        title: '¡Recomendación lista!', 
+        description: 'Tu recomendación está lista. ¡Descúbrela!'
+      });
     } catch (error) {
-      clearInterval(progressInterval);
-      failTask(taskId, 'Error al generar la recomendación');
       console.error(error);
       sileo.error({ title: 'Error', description: 'Error al generar la recomendación' });
       setStep('form');
@@ -233,25 +262,36 @@ export const BestRacketPage: React.FC = () => {
     setAdvancedData(data);
     setStep('loading');
 
-    // Crear tarea en segundo plano
-    const taskId = addTask('recommendation', { formData: data }, '/best-racket');
-
-    // Simular progreso
-    const progressInterval = setInterval(() => {
-      updateTaskProgress(taskId, Math.min(90, Math.random() * 20 + 70));
-    }, 500);
-
     try {
       const res = await RecommendationService.generate('advanced', data);
 
-      clearInterval(progressInterval);
-      completeTask(taskId, res);
-
       setResult(res);
       setStep('result');
+
+      sessionStorage.setItem('smashly_last_recommendation', JSON.stringify({
+        result: res,
+        formType: 'advanced',
+        timestamp: Date.now()
+      }));
+
+      const notification = await NotificationService.createNotification(
+        'recommendation_complete',
+        'Recomendación lista',
+        'Tu recomendación avanzada está lista. ¡Descúbrela!',
+        { formType: 'advanced' }
+      );
+      
+      if (notification) {
+        addNotification(notification);
+      } else {
+        console.error('Error: No se pudo crear la notificación');
+      }
+      
+      sileo.success({ 
+        title: '¡Recomendación lista!', 
+        description: 'Tu recomendación está lista. ¡Descúbrela!'
+      });
     } catch (error) {
-      clearInterval(progressInterval);
-      failTask(taskId, 'Error al generar la recomendación');
       console.error(error);
       sileo.error({ title: 'Error', description: 'Error al generar la recomendación' });
       setStep('form');
