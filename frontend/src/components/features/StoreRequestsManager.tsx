@@ -1,17 +1,9 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import {
-  FiSearch,
-  FiCheck,
-  FiX,
-  FiMapPin,
-  FiMail,
-  FiPhone,
-  FiGlobe,
-} from "react-icons/fi";
-import toast from "react-hot-toast";
-import { AdminService } from "../../services/adminService";
-import { Store } from "../../services/storeService";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { FiSearch, FiCheck, FiX, FiMapPin, FiMail, FiPhone, FiGlobe } from 'react-icons/fi';
+import { sileo } from 'sileo';
+import { AdminService } from '../../services/adminService';
+import { Store } from '../../services/storeService';
 
 const Container = styled.div`
   display: flex;
@@ -65,10 +57,10 @@ const TabsContainer = styled.div`
 
 const Tab = styled.button<{ active: boolean }>`
   padding: 0.75rem 1.5rem;
-  background: ${(props) => (props.active ? "white" : "transparent")};
-  color: ${(props) => (props.active ? "#16a34a" : "#666")};
+  background: ${props => (props.active ? 'white' : 'transparent')};
+  color: ${props => (props.active ? '#16a34a' : '#666')};
   border: none;
-  border-bottom: 2px solid ${(props) => (props.active ? "#16a34a" : "transparent")};
+  border-bottom: 2px solid ${props => (props.active ? '#16a34a' : 'transparent')};
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
@@ -113,29 +105,29 @@ const StoreName = styled.h3`
   font-weight: 700;
 `;
 
-const StatusBadge = styled.span<{ status: "pending" | "approved" | "rejected" }>`
+const StatusBadge = styled.span<{ status: 'pending' | 'approved' | 'rejected' }>`
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 600;
-  background: ${(props) => {
+  background: ${props => {
     switch (props.status) {
-      case "approved":
-        return "#dcfce7";
-      case "rejected":
-        return "#fee2e2";
-      case "pending":
-        return "#fef3c7";
+      case 'approved':
+        return '#dcfce7';
+      case 'rejected':
+        return '#fee2e2';
+      case 'pending':
+        return '#fef3c7';
     }
   }};
-  color: ${(props) => {
+  color: ${props => {
     switch (props.status) {
-      case "approved":
-        return "#15803d";
-      case "rejected":
-        return "#dc2626";
-      case "pending":
-        return "#d97706";
+      case 'approved':
+        return '#15803d';
+      case 'rejected':
+        return '#dc2626';
+      case 'pending':
+        return '#d97706';
     }
   }};
 `;
@@ -168,7 +160,7 @@ const ActionsContainer = styled.div`
   border-top: 1px solid #e5e7eb;
 `;
 
-const ActionButton = styled.button<{ variant: "approve" | "reject" }>`
+const ActionButton = styled.button<{ variant: 'approve' | 'reject' }>`
   flex: 1;
   display: flex;
   align-items: center;
@@ -182,8 +174,8 @@ const ActionButton = styled.button<{ variant: "approve" | "reject" }>`
   cursor: pointer;
   transition: all 0.3s ease;
 
-  ${(props) =>
-    props.variant === "approve"
+  ${props =>
+    props.variant === 'approve'
       ? `
     background: #dcfce7;
     color: #15803d;
@@ -224,13 +216,13 @@ const LoadingContainer = styled.div`
   color: #666;
 `;
 
-type ViewMode = "all" | "pending";
+type ViewMode = 'all' | 'pending';
 
 const StoreRequestsManager: React.FC = () => {
   const [requests, setRequests] = useState<Store[]>([]);
   const [filteredRequests, setFilteredRequests] = useState<Store[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>("pending");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('pending');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -244,14 +236,14 @@ const StoreRequestsManager: React.FC = () => {
   const loadRequests = async () => {
     try {
       setLoading(true);
-      console.log("🏪 Loading store requests...");
+      console.log('🏪 Loading store requests...');
       const storeRequests = await AdminService.getStoreRequests();
-      console.log("🏪 Store requests loaded:", storeRequests);
-      console.log("🏪 Number of requests:", storeRequests.length);
+      console.log('🏪 Store requests loaded:', storeRequests);
+      console.log('🏪 Number of requests:', storeRequests.length);
       setRequests(storeRequests);
     } catch (error) {
-      console.error("❌ Error loading store requests:", error);
-      toast.error("Error al cargar las solicitudes de tiendas");
+      console.error('❌ Error loading store requests:', error);
+      sileo.error({ title: 'Error', description: 'Error al cargar las solicitudes de tiendas' });
     } finally {
       setLoading(false);
     }
@@ -260,27 +252,27 @@ const StoreRequestsManager: React.FC = () => {
   const filterRequests = () => {
     let filtered = requests;
 
-    console.log("🔍 Filtering requests...");
-    console.log("🔍 Total requests:", requests.length);
-    console.log("🔍 View mode:", viewMode);
+    console.log('🔍 Filtering requests...');
+    console.log('🔍 Total requests:', requests.length);
+    console.log('🔍 View mode:', viewMode);
 
     // Filtrar por modo de vista
-    if (viewMode === "pending") {
-      filtered = filtered.filter((r) => !r.verified);
-      console.log("🔍 After pending filter:", filtered.length);
+    if (viewMode === 'pending') {
+      filtered = filtered.filter(r => !r.verified);
+      console.log('🔍 After pending filter:', filtered.length);
     }
 
     // Filtrar por búsqueda
     if (searchTerm) {
       filtered = filtered.filter(
-        (r) =>
+        r =>
           r.store_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           r.location.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      console.log("🔍 After search filter:", filtered.length);
+      console.log('🔍 After search filter:', filtered.length);
     }
 
-    console.log("🔍 Final filtered requests:", filtered);
+    console.log('🔍 Final filtered requests:', filtered);
     setFilteredRequests(filtered);
   };
 
@@ -288,11 +280,11 @@ const StoreRequestsManager: React.FC = () => {
     try {
       await AdminService.verifyStore(requestId);
       // Remover de la lista de pending
-      setRequests(requests.filter((r) => r.id !== requestId));
-      toast.success("Solicitud de tienda aprobada");
+      setRequests(requests.filter(r => r.id !== requestId));
+      sileo.success({ title: 'Éxito', description: 'Solicitud de tienda aprobada' });
     } catch (error) {
-      console.error("Error approving request:", error);
-      toast.error("Error al aprobar la solicitud");
+      console.error('Error approving request:', error);
+      sileo.error({ title: 'Error', description: 'Error al aprobar la solicitud' });
     }
   };
 
@@ -300,11 +292,11 @@ const StoreRequestsManager: React.FC = () => {
     try {
       await AdminService.rejectStore(requestId);
       // Remover de la lista
-      setRequests(requests.filter((r) => r.id !== requestId));
-      toast.success("Solicitud de tienda rechazada");
+      setRequests(requests.filter(r => r.id !== requestId));
+      sileo.success({ title: 'Éxito', description: 'Solicitud de tienda rechazada' });
     } catch (error) {
-      console.error("Error rejecting request:", error);
-      toast.error("Error al rechazar la solicitud");
+      console.error('Error rejecting request:', error);
+      sileo.error({ title: 'Error', description: 'Error al rechazar la solicitud' });
     }
   };
 
@@ -318,46 +310,40 @@ const StoreRequestsManager: React.FC = () => {
         <SearchBar>
           <SearchIcon />
           <SearchInput
-            type="text"
-            placeholder="Buscar por nombre o ciudad..."
+            type='text'
+            placeholder='Buscar por nombre o ciudad...'
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
           />
         </SearchBar>
       </TopBar>
 
       <TabsContainer>
-        <Tab
-          active={viewMode === "pending"}
-          onClick={() => setViewMode("pending")}
-        >
+        <Tab active={viewMode === 'pending'} onClick={() => setViewMode('pending')}>
           Solicitudes Pendientes
         </Tab>
-        <Tab active={viewMode === "all"} onClick={() => setViewMode("all")}>
+        <Tab active={viewMode === 'all'} onClick={() => setViewMode('all')}>
           Todas las Solicitudes
         </Tab>
       </TabsContainer>
 
       {filteredRequests.length === 0 ? (
         <EmptyState>
-          {searchTerm
-            ? "No se encontraron solicitudes"
-            : "No hay solicitudes para mostrar"}
+          {searchTerm ? 'No se encontraron solicitudes' : 'No hay solicitudes para mostrar'}
         </EmptyState>
       ) : (
         <RequestsGrid>
-          {filteredRequests.map((request) => (
+          {filteredRequests.map(request => (
             <RequestCard key={request.id}>
               <CardHeader>
                 <StoreName>{request.store_name}</StoreName>
-                <StatusBadge status={request.verified ? "approved" : "pending"}>
-                  {request.verified ? "Verificada" : "Pendiente"}
+                <StatusBadge status={request.verified ? 'approved' : 'pending'}>
+                  {request.verified ? 'Verificada' : 'Pendiente'}
                 </StatusBadge>
               </CardHeader>
 
               <RequestDate>
-                Solicitado el{" "}
-                {new Date(request.created_at).toLocaleDateString()}
+                Solicitado el {new Date(request.created_at).toLocaleDateString()}
               </RequestDate>
 
               <InfoItem>
@@ -382,9 +368,9 @@ const StoreRequestsManager: React.FC = () => {
                   <FiGlobe />
                   <a
                     href={request.website_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#16a34a", textDecoration: "none" }}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    style={{ color: '#16a34a', textDecoration: 'none' }}
                   >
                     {request.website_url}
                   </a>
@@ -392,28 +378,22 @@ const StoreRequestsManager: React.FC = () => {
               )}
 
               {request.short_description && (
-                <InfoItem style={{ display: "block", marginTop: "0.5rem" }}>
+                <InfoItem style={{ display: 'block', marginTop: '0.5rem' }}>
                   <strong>Descripción:</strong> {request.short_description}
                 </InfoItem>
               )}
 
-              <InfoItem style={{ display: "block", fontSize: "0.875rem", color: "#6b7280" }}>
+              <InfoItem style={{ display: 'block', fontSize: '0.875rem', color: '#6b7280' }}>
                 <strong>Razón Social:</strong> {request.legal_name} ({request.cif_nif})
               </InfoItem>
 
               {!request.verified && (
                 <ActionsContainer>
-                  <ActionButton
-                    variant="approve"
-                    onClick={() => handleApprove(request.id)}
-                  >
+                  <ActionButton variant='approve' onClick={() => handleApprove(request.id)}>
                     <FiCheck />
                     Aprobar
                   </ActionButton>
-                  <ActionButton
-                    variant="reject"
-                    onClick={() => handleReject(request.id)}
-                  >
+                  <ActionButton variant='reject' onClick={() => handleReject(request.id)}>
                     <FiX />
                     Rechazar
                   </ActionButton>

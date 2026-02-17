@@ -1,13 +1,8 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import {
-  FiSearch,
-  FiTrash2,
-  FiShield,
-  FiUser,
-} from "react-icons/fi";
-import toast from "react-hot-toast";
-import { AdminService, AdminUser } from "../../services/adminService";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import { FiSearch, FiTrash2, FiShield, FiUser } from 'react-icons/fi';
+import { sileo } from 'sileo';
+import { AdminService, AdminUser } from '../../services/adminService';
 
 const Container = styled.div`
   display: flex;
@@ -60,9 +55,9 @@ const FilterButtons = styled.div`
 
 const FilterButton = styled.button<{ active: boolean }>`
   padding: 0.75rem 1.25rem;
-  background: ${(props) => (props.active ? "#16a34a" : "white")};
-  color: ${(props) => (props.active ? "white" : "#666")};
-  border: 1px solid ${(props) => (props.active ? "#16a34a" : "#e5e7eb")};
+  background: ${props => (props.active ? '#16a34a' : 'white')};
+  color: ${props => (props.active ? 'white' : '#666')};
+  border: 1px solid ${props => (props.active ? '#16a34a' : '#e5e7eb')};
   border-radius: 8px;
   font-size: 0.875rem;
   font-weight: 600;
@@ -70,7 +65,7 @@ const FilterButton = styled.button<{ active: boolean }>`
   transition: all 0.3s ease;
 
   &:hover {
-    background: ${(props) => (props.active ? "#15803d" : "#f9fafb")};
+    background: ${props => (props.active ? '#15803d' : '#f9fafb')};
   }
 `;
 
@@ -164,7 +159,7 @@ const UserNickname = styled.div`
   color: #999;
 `;
 
-const RoleBadge = styled.span<{ role: "admin" | "player" }>`
+const RoleBadge = styled.span<{ role: 'admin' | 'player' }>`
   padding: 0.25rem 0.75rem;
   border-radius: 20px;
   font-size: 0.75rem;
@@ -172,8 +167,8 @@ const RoleBadge = styled.span<{ role: "admin" | "player" }>`
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: ${(props) => (props.role === "admin" ? "#fee2e2" : "#dbeafe")};
-  color: ${(props) => (props.role === "admin" ? "#dc2626" : "#2563eb")};
+  background: ${props => (props.role === 'admin' ? '#fee2e2' : '#dbeafe')};
+  color: ${props => (props.role === 'admin' ? '#dc2626' : '#2563eb')};
 
   svg {
     font-size: 0.875rem;
@@ -188,8 +183,8 @@ const ActionsCell = styled(Cell)`
 
 const IconButton = styled.button<{ color?: string }>`
   padding: 0.5rem;
-  background: ${(props) => props.color || "#f3f4f6"};
-  color: ${(props) => (props.color ? "white" : "#666")};
+  background: ${props => props.color || '#f3f4f6'};
+  color: ${props => (props.color ? 'white' : '#666')};
   border: none;
   border-radius: 8px;
   cursor: pointer;
@@ -248,13 +243,13 @@ const StatLabel = styled.div`
   font-size: 0.875rem;
 `;
 
-type FilterType = "all" | "admin" | "player";
+type FilterType = 'all' | 'admin' | 'player';
 
 const UsersManager: React.FC = () => {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [filteredUsers, setFilteredUsers] = useState<AdminUser[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filter, setFilter] = useState<FilterType>("all");
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<FilterType>('all');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -271,8 +266,8 @@ const UsersManager: React.FC = () => {
       const usersData = await AdminService.getAllUsers();
       setUsers(usersData);
     } catch (error) {
-      console.error("Error loading users:", error);
-      toast.error("Error al cargar los usuarios");
+      console.error('Error loading users:', error);
+      sileo.error({ title: 'Error', description: 'Error al cargar los usuarios' });
     } finally {
       setLoading(false);
     }
@@ -282,14 +277,14 @@ const UsersManager: React.FC = () => {
     let filtered = users;
 
     // Filtrar por rol
-    if (filter !== "all") {
-      filtered = filtered.filter((u) => u.role === filter);
+    if (filter !== 'all') {
+      filtered = filtered.filter(u => u.role === filter);
     }
 
     // Filtrar por búsqueda
     if (searchTerm) {
       filtered = filtered.filter(
-        (u) =>
+        u =>
           u.nickname.toLowerCase().includes(searchTerm.toLowerCase()) ||
           u.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
           u.full_name?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -299,10 +294,10 @@ const UsersManager: React.FC = () => {
     setFilteredUsers(filtered);
   };
 
-  const handleToggleRole = async (userId: string, currentRole: "admin" | "player") => {
-    const newRole = currentRole === "admin" ? "player" : "admin";
+  const handleToggleRole = async (userId: string, currentRole: 'admin' | 'player') => {
+    const newRole = currentRole === 'admin' ? 'player' : 'admin';
     const confirmMessage = `¿Estás seguro de cambiar el rol a ${
-      newRole === "admin" ? "Administrador" : "Jugador"
+      newRole === 'admin' ? 'Administrador' : 'Jugador'
     }?`;
 
     if (!window.confirm(confirmMessage)) {
@@ -312,22 +307,20 @@ const UsersManager: React.FC = () => {
     try {
       // Llamar a la API para actualizar el rol
       await AdminService.updateUserRole(userId, newRole);
-      
+
       // Actualizar el estado local
-      setUsers(
-        users.map((u) => (u.id === userId ? { ...u, role: newRole } : u))
-      );
-      toast.success("Rol actualizado correctamente");
+      setUsers(users.map(u => (u.id === userId ? { ...u, role: newRole } : u)));
+      sileo.success({ title: 'Éxito', description: 'Rol actualizado correctamente' });
     } catch (error) {
-      console.error("Error updating user role:", error);
-      toast.error("Error al actualizar el rol");
+      console.error('Error updating user role:', error);
+      sileo.error({ title: 'Error', description: 'Error al actualizar el rol' });
     }
   };
 
   const handleDeleteUser = async (userId: string) => {
     if (
       !window.confirm(
-        "¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer."
+        '¿Estás seguro de que quieres eliminar este usuario? Esta acción no se puede deshacer.'
       )
     ) {
       return;
@@ -336,19 +329,19 @@ const UsersManager: React.FC = () => {
     try {
       // Llamar a la API para eliminar el usuario
       await AdminService.deleteUser(userId);
-      
+
       // Actualizar el estado local
-      setUsers(users.filter((u) => u.id !== userId));
-      toast.success("Usuario eliminado correctamente");
+      setUsers(users.filter(u => u.id !== userId));
+      sileo.success({ title: 'Éxito', description: 'Usuario eliminado correctamente' });
     } catch (error) {
-      console.error("Error deleting user:", error);
-      toast.error("Error al eliminar el usuario");
+      console.error('Error deleting user:', error);
+      sileo.error({ title: 'Error', description: 'Error al eliminar el usuario' });
     }
   };
 
   const getInitials = (name: string, nickname: string) => {
     if (name) {
-      const parts = name.split(" ");
+      const parts = name.split(' ');
       return parts.length > 1
         ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
         : parts[0].substring(0, 2).toUpperCase();
@@ -356,8 +349,8 @@ const UsersManager: React.FC = () => {
     return nickname.substring(0, 2).toUpperCase();
   };
 
-  const totalAdmins = users.filter((u) => u.role?.toLowerCase() === "admin").length;
-  const totalPlayers = users.filter((u) => u.role?.toLowerCase() === "player").length;
+  const totalAdmins = users.filter(u => u.role?.toLowerCase() === 'admin').length;
+  const totalPlayers = users.filter(u => u.role?.toLowerCase() === 'player').length;
 
   if (loading) {
     return <LoadingContainer>Cargando usuarios...</LoadingContainer>;
@@ -384,26 +377,20 @@ const UsersManager: React.FC = () => {
         <SearchBar>
           <SearchIcon />
           <SearchInput
-            type="text"
-            placeholder="Buscar por nombre, email o nickname..."
+            type='text'
+            placeholder='Buscar por nombre, email o nickname...'
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={e => setSearchTerm(e.target.value)}
           />
         </SearchBar>
         <FilterButtons>
-          <FilterButton active={filter === "all"} onClick={() => setFilter("all")}>
+          <FilterButton active={filter === 'all'} onClick={() => setFilter('all')}>
             Todos
           </FilterButton>
-          <FilterButton
-            active={filter === "player"}
-            onClick={() => setFilter("player")}
-          >
+          <FilterButton active={filter === 'player'} onClick={() => setFilter('player')}>
             Jugadores
           </FilterButton>
-          <FilterButton
-            active={filter === "admin"}
-            onClick={() => setFilter("admin")}
-          >
+          <FilterButton active={filter === 'admin'} onClick={() => setFilter('admin')}>
             Administradores
           </FilterButton>
         </FilterButtons>
@@ -416,18 +403,18 @@ const UsersManager: React.FC = () => {
           <Cell>Email</Cell>
           <Cell>Rol</Cell>
           <Cell>Registro</Cell>
-          <Cell style={{ textAlign: "right" }}>Acciones</Cell>
+          <Cell style={{ textAlign: 'right' }}>Acciones</Cell>
         </TableHeader>
         {filteredUsers.length === 0 ? (
           <EmptyState>
-            {searchTerm ? "No se encontraron usuarios" : "No hay usuarios para mostrar"}
+            {searchTerm ? 'No se encontraron usuarios' : 'No hay usuarios para mostrar'}
           </EmptyState>
         ) : (
           filteredUsers.map((user, index) => (
             <TableRow key={user.id}>
               <Cell>{index + 1}</Cell>
               <UserCell>
-                <Avatar>{getInitials(user.full_name || "", user.nickname)}</Avatar>
+                <Avatar>{getInitials(user.full_name || '', user.nickname)}</Avatar>
                 <UserInfo>
                   <UserName>{user.full_name || user.nickname}</UserName>
                   <UserNickname>@{user.nickname}</UserNickname>
@@ -436,23 +423,23 @@ const UsersManager: React.FC = () => {
               <Cell>{user.email}</Cell>
               <Cell>
                 <RoleBadge role={user.role}>
-                  {user.role === "admin" ? <FiShield /> : <FiUser />}
-                  {user.role === "admin" ? "Admin" : "Jugador"}
+                  {user.role === 'admin' ? <FiShield /> : <FiUser />}
+                  {user.role === 'admin' ? 'Admin' : 'Jugador'}
                 </RoleBadge>
               </Cell>
               <Cell>{new Date(user.created_at).toLocaleDateString()}</Cell>
               <ActionsCell>
                 <IconButton
-                  color="#3b82f6"
+                  color='#3b82f6'
                   onClick={() => handleToggleRole(user.id, user.role)}
-                  title={`Cambiar a ${user.role === "admin" ? "Jugador" : "Admin"}`}
+                  title={`Cambiar a ${user.role === 'admin' ? 'Jugador' : 'Admin'}`}
                 >
-                  {user.role === "admin" ? <FiUser /> : <FiShield />}
+                  {user.role === 'admin' ? <FiUser /> : <FiShield />}
                 </IconButton>
                 <IconButton
-                  color="#ef4444"
+                  color='#ef4444'
                   onClick={() => handleDeleteUser(user.id)}
-                  title="Eliminar usuario"
+                  title='Eliminar usuario'
                 >
                   <FiTrash2 />
                 </IconButton>

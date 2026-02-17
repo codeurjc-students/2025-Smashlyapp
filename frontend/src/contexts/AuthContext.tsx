@@ -25,7 +25,7 @@ interface AuthContextType {
   signIn: (
     email: string,
     password: string
-  ) => Promise<{ data: UserProfile | null; error: string | null }>;
+  ) => Promise<{ data: UserProfile | null; error: string | null; errorCode?: string }>;
   signInWithGoogle: () => Promise<{
     data: UserProfile | null;
     error: string | null;
@@ -206,12 +206,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const signIn = async (
     email: string,
     password: string
-  ): Promise<{ data: UserProfile | null; error: string | null }> => {
+  ): Promise<{ data: UserProfile | null; error: string | null; errorCode?: string }> => {
     try {
       console.log('Attempting to sign in with email:', email);
 
       if (!email || !password) {
-        return { data: null, error: 'Email y contraseña son requeridos' };
+        return { data: null, error: 'Email y contraseña son requeridos', errorCode: 'MISSING_CREDENTIALS' };
       }
 
       const url = buildApiUrl(API_ENDPOINTS.AUTH_LOGIN);
@@ -227,20 +227,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const result = await response.json();
 
       if (!response.ok || !result.success) {
+        const errorCode = result.error;
         const errorMessage =
           result.message || result.error || 'Error desconocido durante el inicio de sesión';
         console.error('API SignIn error:', errorMessage);
 
-        // Proporcionar mensajes de error más específicos
+        // Proporcionar mensajes de error más específicos usando códigos del backend
         let friendlyErrorMessage = errorMessage;
 
-        if (
-          errorMessage.toLowerCase().includes('invalid') ||
-          errorMessage.toLowerCase().includes('incorrect')
-        ) {
+        if (errorCode === 'USER_NOT_FOUND') {
+          friendlyErrorMessage = 'No tienes una cuenta con este email. ¿Quieres registrarte?';
+        } else if (errorCode === 'INVALID_PASSWORD') {
+          friendlyErrorMessage = 'La contraseña es incorrecta. Inténtalo de nuevo.';
+        } else if (errorMessage.toLowerCase().includes('invalid') ||
+                   errorMessage.toLowerCase().includes('incorrect')) {
           friendlyErrorMessage = 'Credenciales inválidas. Verifica tu email y contraseña.';
         } else if (errorMessage.toLowerCase().includes('not found')) {
-          friendlyErrorMessage = 'No existe una cuenta con este email.';
+          friendlyErrorMessage = 'No tienes una cuenta con este email. ¿Quieres registrarte?';
         } else if (errorMessage.toLowerCase().includes('not confirmed')) {
           friendlyErrorMessage = 'Por favor confirma tu email antes de iniciar sesión.';
         } else if (errorMessage.toLowerCase().includes('too many')) {
@@ -248,7 +251,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             'Demasiados intentos. Espera un momento antes de intentar de nuevo.';
         }
 
-        return { data: null, error: friendlyErrorMessage };
+        return { data: null, error: friendlyErrorMessage, errorCode };
       }
 
       const { access_token, user: loggedInUser } = result.data;
@@ -267,6 +270,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error:
           error.message ||
           'Error inesperado durante el inicio de sesión. Verifica tu conexión a internet.',
+        errorCode: error.code || 'UNKNOWN_ERROR',
       };
     }
   };

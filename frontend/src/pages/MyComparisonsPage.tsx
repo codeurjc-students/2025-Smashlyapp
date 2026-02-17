@@ -18,7 +18,7 @@ import { ComparisonService, SavedComparison } from '../services/comparisonServic
 import { RacketService } from '../services/racketService';
 import { Racket } from '../types/racket';
 import { useAuth } from '../contexts/AuthContext';
-import toast from 'react-hot-toast';
+import { sileo } from 'sileo';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import RacketRadarChart from '../components/features/RacketRadarChart';
@@ -466,7 +466,7 @@ const MyComparisonsPage: React.FC = () => {
   const [_sharingId, setSharingId] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const observerTarget = useRef<HTMLDivElement>(null);
-  
+
   const ITEMS_PER_PAGE = 9;
 
   useEffect(() => {
@@ -483,7 +483,7 @@ const MyComparisonsPage: React.FC = () => {
       setLoading(true);
       const data = await ComparisonService.getUserComparisons();
       setAllComparisons(data);
-      
+
       // Mostrar las primeras 9
       const initialBatch = data.slice(0, ITEMS_PER_PAGE);
       setDisplayedComparisons(initialBatch);
@@ -512,7 +512,7 @@ const MyComparisonsPage: React.FC = () => {
       setRacketsCache(cache);
     } catch (error: any) {
       console.error('Error loading comparisons:', error);
-      toast.error('Error al cargar las comparaciones');
+      sileo.error({ title: 'Error', description: 'Error al cargar las comparaciones' });
     } finally {
       setLoading(false);
     }
@@ -522,11 +522,11 @@ const MyComparisonsPage: React.FC = () => {
     if (loadingMore || !hasMore) return;
 
     setLoadingMore(true);
-    
+
     // Simular un pequeño delay para mejor UX
     setTimeout(() => {
       const nextBatch = allComparisons.slice(currentIndex, currentIndex + ITEMS_PER_PAGE);
-      
+
       if (nextBatch.length > 0) {
         setDisplayedComparisons(prev => [...prev, ...nextBatch]);
         setCurrentIndex(prev => prev + ITEMS_PER_PAGE);
@@ -534,7 +534,7 @@ const MyComparisonsPage: React.FC = () => {
       } else {
         setHasMore(false);
       }
-      
+
       setLoadingMore(false);
     }, 300);
   }, [loadingMore, hasMore, allComparisons, currentIndex]);
@@ -572,10 +572,10 @@ const MyComparisonsPage: React.FC = () => {
       await ComparisonService.deleteComparison(id);
       setAllComparisons(prev => prev.filter(c => c.id !== id));
       setDisplayedComparisons(prev => prev.filter(c => c.id !== id));
-      toast.success('Comparación eliminada correctamente');
+      sileo.success({ title: 'Éxito', description: 'Comparación eliminada correctamente' });
     } catch (error: any) {
       console.error('Error deleting comparison:', error);
-      toast.error('Error al eliminar la comparación');
+      sileo.error({ title: 'Error', description: 'Error al eliminar la comparación' });
     } finally {
       setDeletingId(null);
     }
@@ -613,12 +613,12 @@ const MyComparisonsPage: React.FC = () => {
       // Copy to clipboard
       await navigator.clipboard.writeText(shareUrl);
       setCopiedId(id);
-      toast.success('Enlace copiado al portapapeles');
+      sileo.success({ title: 'Éxito', description: 'Enlace copiado al portapapeles' });
 
       setTimeout(() => setCopiedId(null), 3000);
     } catch (error: any) {
       console.error('Error sharing comparison:', error);
-      toast.error('Error al compartir la comparación');
+      sileo.error({ title: 'Error', description: 'Error al compartir la comparación' });
     } finally {
       setSharingId(null);
     }
@@ -629,10 +629,10 @@ const MyComparisonsPage: React.FC = () => {
       const shareUrl = `${window.location.origin}/shared/${shareToken}`;
       await navigator.clipboard.writeText(shareUrl);
       setCopiedId(id);
-      toast.success('Enlace copiado al portapapeles');
+      sileo.success({ title: 'Éxito', description: 'Enlace copiado al portapapeles' });
       setTimeout(() => setCopiedId(null), 3000);
     } catch (error) {
-      toast.error('Error al copiar el enlace');
+      sileo.error({ title: 'Error', description: 'Error al copiar el enlace' });
     }
   };
 
@@ -712,7 +712,9 @@ const MyComparisonsPage: React.FC = () => {
                       Ver
                     </ActionButton>
                     {comparison.is_public && comparison.share_token ? (
-                      <ActionButton onClick={() => handleCopyLink(comparison.share_token!, comparison.id)}>
+                      <ActionButton
+                        onClick={() => handleCopyLink(comparison.share_token!, comparison.id)}
+                      >
                         {copiedId === comparison.id ? <FiCheck /> : <FiCopy />}
                         {copiedId === comparison.id ? 'Copiado' : 'Copiar link'}
                       </ActionButton>
@@ -741,30 +743,34 @@ const MyComparisonsPage: React.FC = () => {
                 </ComparisonPreview>
               </ComparisonCard>
             ))}
-            
+
             {/* Elemento observador para scroll infinito */}
             <div ref={observerTarget} style={{ height: '20px', margin: '2rem 0' }} />
-            
+
             {/* Indicador de carga */}
             {loadingMore && (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2rem',
-                color: '#6b7280',
-                fontSize: '0.875rem'
-              }}>
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '2rem',
+                  color: '#6b7280',
+                  fontSize: '0.875rem',
+                }}
+              >
                 Cargando más comparaciones...
               </div>
             )}
-            
+
             {/* Mensaje de fin */}
             {!hasMore && displayedComparisons.length > 0 && (
-              <div style={{ 
-                textAlign: 'center', 
-                padding: '2rem',
-                color: '#9ca3af',
-                fontSize: '0.875rem'
-              }}>
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '2rem',
+                  color: '#9ca3af',
+                  fontSize: '0.875rem',
+                }}
+              >
                 Has visto todas tus comparaciones
               </div>
             )}

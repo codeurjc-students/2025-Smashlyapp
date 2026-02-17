@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import toast from 'react-hot-toast';
+import { sileo } from 'sileo';
 import { FiEye, FiEyeOff, FiLock, FiMail } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -80,12 +80,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
     setLoading(true);
 
     try {
-      const { error } = await signIn(formData.email, formData.password);
+      const { error, errorCode } = await signIn(formData.email, formData.password);
       if (error) {
-        toast.error(error);
+        if (errorCode === 'USER_NOT_FOUND') {
+          sileo.warning({ 
+            title: 'Cuenta no encontrada', 
+            description: error 
+          });
+        } else if (errorCode === 'INVALID_PASSWORD') {
+          sileo.error({ title: 'Error', description: error });
+        } else {
+          sileo.error({ title: 'Error', description: error });
+        }
         return;
       }
-      toast.success('¡Bienvenido de nuevo!');
+      sileo.success({ title: 'Éxito', description: '¡Bienvenido de nuevo!' });
 
       if (onSuccess) {
         onSuccess();
@@ -94,7 +103,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
       }
     } catch (error: any) {
       console.error('Error durante el inicio de sesión:', error);
-      toast.error(error?.message || 'Error inesperado');
+      sileo.error({ title: 'Error', description: error?.message || 'Error inesperado' });
     } finally {
       setLoading(false);
     }
@@ -106,7 +115,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
       const { error, isNewUser, suggestedNickname: nickname } = await signInWithGoogle();
 
       if (error) {
-        toast.error(error);
+        sileo.error({ title: 'Error', description: error });
         return;
       }
 
@@ -116,7 +125,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
         setShowNicknameModal(true);
       } else {
         // Existing user, proceed normally
-        toast.success('¡Bienvenido de nuevo!');
+        sileo.success({ title: 'Éxito', description: '¡Bienvenido de nuevo!' });
         if (onSuccess) {
           onSuccess();
         } else {
@@ -125,7 +134,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
       }
     } catch (error: any) {
       console.error('Error during Google sign-in:', error);
-      toast.error(error?.message || 'Error inesperado con Google');
+      sileo.error({ title: 'Error', description: error?.message || 'Error inesperado con Google' });
     } finally {
       setGoogleLoading(false);
     }
@@ -136,7 +145,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
       // Update the user's nickname
       await UserProfileService.updateUserProfile({ nickname });
 
-      toast.success('¡Bienvenido a Smashlyapp!');
+      sileo.success({ title: 'Éxito', description: '¡Bienvenido a Smashlyapp!' });
       setShowNicknameModal(false);
 
       if (onSuccess) {

@@ -12,7 +12,7 @@ import {
   FiCheck,
 } from 'react-icons/fi';
 import { UserProfileService } from '../../services/userProfileService';
-import toast from 'react-hot-toast';
+import { sileo } from 'sileo';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface OnboardingPromptModalProps {
@@ -294,11 +294,14 @@ const OnboardingPromptModal: React.FC<OnboardingPromptModalProps> = ({ isOpen, o
 
       await UserProfileService.updateUserProfile(updates);
       await refreshUserProfile();
-      toast.success('¡Perfil completado con éxito!');
+      sileo.success({ title: 'Éxito', description: '¡Perfil completado con éxito!' });
       onClose();
     } catch (error) {
       console.error('Error updating profile:', error);
-      toast.error('Error al guardar los datos. Inténtalo de nuevo.');
+      sileo.error({
+        title: 'Error',
+        description: 'Error al guardar los datos. Inténtalo de nuevo.',
+      });
     } finally {
       setLoading(false);
     }

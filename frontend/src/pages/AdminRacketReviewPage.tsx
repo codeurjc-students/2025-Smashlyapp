@@ -3,7 +3,7 @@ import styled from 'styled-components';
 import { AdminService } from '../services/adminService';
 import { FiAlertTriangle, FiCheck, FiX, FiLayers, FiArrowLeft } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { sileo } from 'sileo';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -29,7 +29,7 @@ const BackButton = styled(Link)`
   padding: 0.5rem 1rem;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s;
 
   &:hover {
@@ -54,7 +54,7 @@ const Content = styled.div`
 const ConflictCard = styled.div`
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
   padding: 1.5rem;
   border: 1px solid #e5e7eb;
 `;
@@ -81,17 +81,17 @@ const ComparisonGrid = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
 `;
 
 const RacketColumn = styled.div<{ type: 'existing' | 'new' }>`
-  background: ${props => props.type === 'existing' ? '#f0fdf4' : '#fff7ed'};
+  background: ${props => (props.type === 'existing' ? '#f0fdf4' : '#fff7ed')};
   padding: 1rem;
   border-radius: 8px;
-  border: 1px solid ${props => props.type === 'existing' ? '#bbf7d0' : '#fed7aa'};
+  border: 1px solid ${props => (props.type === 'existing' ? '#bbf7d0' : '#fed7aa')};
 `;
 
 const ColumnTitle = styled.h4`
@@ -143,9 +143,9 @@ const ActionButton = styled.button<{ variant: 'success' | 'danger' | 'neutral' }
   cursor: pointer;
   border: none;
   transition: all 0.2s;
-  
+
   ${props => {
-    switch(props.variant) {
+    switch (props.variant) {
       case 'success':
         return `
           background: #16a34a;
@@ -183,7 +183,7 @@ const AdminRacketReviewPage: React.FC = () => {
       setConflicts(data);
     } catch (error) {
       console.error('Error loading conflicts:', error);
-      toast.error('Error al cargar conflictos');
+      sileo.error({ title: 'Error', description: 'Error al cargar conflictos' });
     } finally {
       setLoading(false);
     }
@@ -192,12 +192,12 @@ const AdminRacketReviewPage: React.FC = () => {
   const handleResolve = async (id: number, action: 'replace' | 'reject' | 'keep_both') => {
     try {
       await AdminService.resolveRacketConflict(id, action);
-      toast.success('Conflicto resuelto');
+      sileo.success({ title: 'Éxito', description: 'Conflicto resuelto' });
       // Remove from list locally
       setConflicts(prev => prev.filter(c => c.id !== id));
     } catch (error) {
       console.error('Error resolving conflict:', error);
-      toast.error('Error al resolver conflicto');
+      sileo.error({ title: 'Error', description: 'Error al resolver conflicto' });
     }
   };
 
@@ -208,7 +208,7 @@ const AdminRacketReviewPage: React.FC = () => {
   return (
     <PageContainer>
       <Header>
-        <BackButton to="/admin">
+        <BackButton to='/admin'>
           <FiArrowLeft /> Volver
         </BackButton>
         <Title>Revisión de Conflictos ({conflicts.length})</Title>
@@ -216,92 +216,98 @@ const AdminRacketReviewPage: React.FC = () => {
 
       <Content>
         {conflicts.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
-                <h3>🎉 No hay conflictos pendientes</h3>
-                <p>Todas las palas están sincronizadas correctamente.</p>
-            </div>
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
+            <h3>🎉 No hay conflictos pendientes</h3>
+            <p>Todas las palas están sincronizadas correctamente.</p>
+          </div>
         ) : (
-            conflicts.map(conflict => (
+          conflicts.map(conflict => (
             <ConflictCard key={conflict.id}>
-                <ConflictHeader>
+              <ConflictHeader>
                 <ConflictTitle>
-                    <FiAlertTriangle color="#f59e0b" />
-                    Posible Duplicado Detectado
+                  <FiAlertTriangle color='#f59e0b' />
+                  Posible Duplicado Detectado
                 </ConflictTitle>
                 <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>
-                    Detectado el: {new Date(conflict.created_at).toLocaleDateString()}
+                  Detectado el: {new Date(conflict.created_at).toLocaleDateString()}
                 </div>
-                </ConflictHeader>
+              </ConflictHeader>
 
-                <ComparisonGrid>
+              <ComparisonGrid>
                 {/* Existing Racket */}
-                <RacketColumn type="existing">
-                    <ColumnTitle>
-                        Existente (ID: {conflict.related_racket?.id})
-                        <small style={{ fontWeight: 'normal', color: '#16a34a' }}>Activa</small>
-                    </ColumnTitle>
-                    {conflict.related_racket && (
-                        <DataList>
-                            <DataRow>
-                                <Label>Nombre</Label>
-                                <Value>{conflict.related_racket.name}</Value>
-                            </DataRow>
-                            <DataRow>
-                                <Label>Marca</Label>
-                                <Value>{conflict.related_racket.brand}</Value>
-                            </DataRow>
-                            <DataRow>
-                                <Label>Modelo</Label>
-                                <Value>{conflict.related_racket.model}</Value>
-                            </DataRow>
-                            <DataRow>
-                                <Label>P. PadelPro</Label>
-                                <Value>{conflict.related_racket.padelproshop_actual_price || '-'}€</Value>
-                            </DataRow>
-                        </DataList>
-                    )}
+                <RacketColumn type='existing'>
+                  <ColumnTitle>
+                    Existente (ID: {conflict.related_racket?.id})
+                    <small style={{ fontWeight: 'normal', color: '#16a34a' }}>Activa</small>
+                  </ColumnTitle>
+                  {conflict.related_racket && (
+                    <DataList>
+                      <DataRow>
+                        <Label>Nombre</Label>
+                        <Value>{conflict.related_racket.name}</Value>
+                      </DataRow>
+                      <DataRow>
+                        <Label>Marca</Label>
+                        <Value>{conflict.related_racket.brand}</Value>
+                      </DataRow>
+                      <DataRow>
+                        <Label>Modelo</Label>
+                        <Value>{conflict.related_racket.model}</Value>
+                      </DataRow>
+                      <DataRow>
+                        <Label>P. PadelPro</Label>
+                        <Value>{conflict.related_racket.padelproshop_actual_price || '-'}€</Value>
+                      </DataRow>
+                    </DataList>
+                  )}
                 </RacketColumn>
 
                 {/* New Racket (Conflict) */}
-                <RacketColumn type="new">
-                    <ColumnTitle>
-                        Nueva / Entrante (ID: {conflict.id})
-                        <small style={{ fontWeight: 'normal', color: '#f59e0b' }}>Conflicto</small>
-                    </ColumnTitle>
-                    <DataList>
-                        <DataRow>
-                            <Label>Nombre</Label>
-                            <Value>{conflict.name}</Value>
-                        </DataRow>
-                        <DataRow>
-                            <Label>Marca</Label>
-                            <Value>{conflict.brand}</Value>
-                        </DataRow>
-                        <DataRow>
-                            <Label>Modelo</Label>
-                            <Value>{conflict.model}</Value>
-                        </DataRow>
-                        <DataRow>
-                            <Label>P. PadelPro</Label>
-                            <Value>{conflict.padelproshop_actual_price || '-'}€</Value>
-                        </DataRow>
-                    </DataList>
+                <RacketColumn type='new'>
+                  <ColumnTitle>
+                    Nueva / Entrante (ID: {conflict.id})
+                    <small style={{ fontWeight: 'normal', color: '#f59e0b' }}>Conflicto</small>
+                  </ColumnTitle>
+                  <DataList>
+                    <DataRow>
+                      <Label>Nombre</Label>
+                      <Value>{conflict.name}</Value>
+                    </DataRow>
+                    <DataRow>
+                      <Label>Marca</Label>
+                      <Value>{conflict.brand}</Value>
+                    </DataRow>
+                    <DataRow>
+                      <Label>Modelo</Label>
+                      <Value>{conflict.model}</Value>
+                    </DataRow>
+                    <DataRow>
+                      <Label>P. PadelPro</Label>
+                      <Value>{conflict.padelproshop_actual_price || '-'}€</Value>
+                    </DataRow>
+                  </DataList>
                 </RacketColumn>
-                </ComparisonGrid>
+              </ComparisonGrid>
 
-                <Actions>
-                    <ActionButton variant="neutral" onClick={() => handleResolve(conflict.id, 'keep_both')}>
-                        <FiLayers /> Mantener Ambos
-                    </ActionButton>
-                    <ActionButton variant="danger" onClick={() => handleResolve(conflict.id, 'reject')}>
-                        <FiX /> Rechazar Nuevo
-                    </ActionButton>
-                    <ActionButton variant="success" onClick={() => handleResolve(conflict.id, 'replace')}>
-                        <FiCheck /> Aprobar (Sobrescribir)
-                    </ActionButton>
-                </Actions>
+              <Actions>
+                <ActionButton
+                  variant='neutral'
+                  onClick={() => handleResolve(conflict.id, 'keep_both')}
+                >
+                  <FiLayers /> Mantener Ambos
+                </ActionButton>
+                <ActionButton variant='danger' onClick={() => handleResolve(conflict.id, 'reject')}>
+                  <FiX /> Rechazar Nuevo
+                </ActionButton>
+                <ActionButton
+                  variant='success'
+                  onClick={() => handleResolve(conflict.id, 'replace')}
+                >
+                  <FiCheck /> Aprobar (Sobrescribir)
+                </ActionButton>
+              </Actions>
             </ConflictCard>
-            ))
+          ))
         )}
       </Content>
     </PageContainer>

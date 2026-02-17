@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
+import { sileo } from 'sileo';
 import {
   FiActivity,
   FiAlertCircle,
@@ -354,12 +354,12 @@ const UserProfilePage: React.FC = () => {
 
   const validateForm = (): boolean => {
     if (formData.peso && (isNaN(Number(formData.peso)) || Number(formData.peso) <= 0)) {
-      toast.error('El peso debe ser un número válido mayor a 0');
+      sileo.error({ title: 'Error', description: 'El peso debe ser un número válido mayor a 0' });
       return false;
     }
 
     if (formData.altura && (isNaN(Number(formData.altura)) || Number(formData.altura) <= 0)) {
-      toast.error('La altura debe ser un número válido mayor a 0');
+      sileo.error({ title: 'Error', description: 'La altura debe ser un número válido mayor a 0' });
       return false;
     }
 
@@ -369,7 +369,10 @@ const UserProfilePage: React.FC = () => {
       const age = today.getFullYear() - birthDate.getFullYear();
 
       if (age < 5 || age > 120) {
-        toast.error('Por favor, ingresa una fecha de nacimiento válida');
+        sileo.error({
+          title: 'Error',
+          description: 'Por favor, ingresa una fecha de nacimiento válida',
+        });
         return false;
       }
     }
@@ -385,7 +388,7 @@ const UserProfilePage: React.FC = () => {
     }
 
     if (!user) {
-      toast.error('Usuario no autenticado');
+      sileo.error({ title: 'Error', description: 'Usuario no autenticado' });
       return;
     }
 
@@ -403,11 +406,14 @@ const UserProfilePage: React.FC = () => {
 
       await UserProfileService.updateUserProfile(updates);
       await refreshUserProfile(); // Actualizar el perfil en el contexto
-      toast.success('Perfil actualizado correctamente');
+      sileo.success({ title: 'Éxito', description: 'Perfil actualizado correctamente' });
       setIsEditing(false);
     } catch (error: any) {
       console.error('Error updating profile:', error);
-      toast.error(error.message || 'Error al actualizar el perfil');
+      sileo.error({
+        title: 'Error',
+        description: error.message || 'Error al actualizar el perfil',
+      });
     } finally {
       setLoading(false);
     }

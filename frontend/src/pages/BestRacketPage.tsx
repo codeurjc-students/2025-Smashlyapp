@@ -11,7 +11,7 @@ import {
   AdvancedFormData,
   RecommendationResult as ResultType,
 } from '../types/recommendation';
-import { toast } from 'react-hot-toast';
+import { sileo } from 'sileo';
 
 const PageContainer = styled.div`
   min-height: 100vh;
@@ -197,7 +197,7 @@ export const BestRacketPage: React.FC = () => {
     }
 
     setShowReusePrompt(false);
-    toast.success('Datos cargados correctamente');
+    sileo.success({ title: 'Éxito', description: 'Datos cargados correctamente' });
   };
 
   const handleBasicSubmit = async (data: BasicFormData) => {
@@ -224,7 +224,7 @@ export const BestRacketPage: React.FC = () => {
       clearInterval(progressInterval);
       failTask(taskId, 'Error al generar la recomendación');
       console.error(error);
-      toast.error('Error al generar la recomendación');
+      sileo.error({ title: 'Error', description: 'Error al generar la recomendación' });
       setStep('form');
     }
   };
@@ -253,7 +253,7 @@ export const BestRacketPage: React.FC = () => {
       clearInterval(progressInterval);
       failTask(taskId, 'Error al generar la recomendación');
       console.error(error);
-      toast.error('Error al generar la recomendación');
+      sileo.error({ title: 'Error', description: 'Error al generar la recomendación' });
       setStep('form');
     }
   };
@@ -266,10 +266,10 @@ export const BestRacketPage: React.FC = () => {
       const dataToSave = formType === 'basic' ? basicData : advancedData;
       // Need to cast because state is Partial but service expects full (validated by form)
       await RecommendationService.save(formType, dataToSave as any, result);
-      toast.success('Recomendación guardada en tu perfil');
+      sileo.success({ title: 'Éxito', description: 'Recomendación guardada en tu perfil' });
     } catch (error) {
       console.error(error);
-      toast.error('Error al guardar');
+      sileo.error({ title: 'Error', description: 'Error al guardar' });
     } finally {
       setIsSaving(false);
     }
@@ -324,7 +324,10 @@ export const BestRacketPage: React.FC = () => {
               $active={formType === 'advanced'}
               onClick={() => {
                 if (!user) {
-                  toast('Inicia sesión para acceder al modo avanzado', { icon: '🔒' });
+                  sileo.show({
+                    title: 'Cargando',
+                    description: 'Inicia sesión para acceder al modo avanzado',
+                  });
                   return;
                 }
                 setFormType('advanced');

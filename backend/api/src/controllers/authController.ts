@@ -31,16 +31,34 @@ export class AuthController {
         return;
       }
 
+      const normalizedEmail = email.toLowerCase().trim();
+
+      const { data: profileData, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('email', normalizedEmail)
+        .single();
+
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: normalizedEmail,
         password,
       });
 
       if (error) {
+        if (!profileData) {
+          res.status(404).json({
+            success: false,
+            error: "USER_NOT_FOUND",
+            message: "No tienes una cuenta con este email. ¿Quieres registrarte?",
+            timestamp: new Date().toISOString(),
+          } as ApiResponse);
+          return;
+        }
+
         res.status(401).json({
           success: false,
-          error: "Invalid credentials",
-          message: getErrorMessage(error),
+          error: "INVALID_PASSWORD",
+          message: "La contraseña es incorrecta. Inténtalo de nuevo.",
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;

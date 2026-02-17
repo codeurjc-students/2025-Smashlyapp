@@ -285,4 +285,8 @@ export const GlobalStyles = createGlobalStyle`
       background: white !important;
     }
   }
+  /* Sileo Toast Viewport Z-Index Override */
+  [data-sileo-viewport] {
+    z-index: 9999 !important;
+  }
 `;

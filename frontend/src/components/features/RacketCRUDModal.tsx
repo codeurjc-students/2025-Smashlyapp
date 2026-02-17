@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from "react";
-import styled from "styled-components";
-import { FiX } from "react-icons/fi";
-import toast from "react-hot-toast";
+import React, { useState, useEffect } from 'react';
+import styled from 'styled-components';
+import { FiX } from 'react-icons/fi';
+import { sileo } from 'sileo';
 
 const Overlay = styled.div`
   position: fixed;
@@ -155,7 +155,7 @@ const ModalFooter = styled.div`
   justify-content: flex-end;
 `;
 
-const Button = styled.button<{ variant?: "primary" | "secondary" }>`
+const Button = styled.button<{ variant?: 'primary' | 'secondary' }>`
   padding: 0.75rem 1.5rem;
   border: none;
   border-radius: 8px;
@@ -164,8 +164,8 @@ const Button = styled.button<{ variant?: "primary" | "secondary" }>`
   cursor: pointer;
   transition: all 0.3s ease;
 
-  ${(props) =>
-    props.variant === "primary"
+  ${props =>
+    props.variant === 'primary'
       ? `
     background: #16a34a;
     color: white;
@@ -213,23 +213,19 @@ interface RacketCRUDModalProps {
   onSave: (racket: Racket) => Promise<void>;
 }
 
-const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
-  racket,
-  onClose,
-  onSave,
-}) => {
+const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({ racket, onClose, onSave }) => {
   const [formData, setFormData] = useState<Partial<Racket>>({
-    nombre: "",
-    marca: "",
+    nombre: '',
+    marca: '',
     precio_actual: 0,
-    forma: "",
-    balance: "",
+    forma: '',
+    balance: '',
     peso: 0,
-    nucleo: "",
-    superficie: "",
+    nucleo: '',
+    superficie: '',
     perfil: 0,
     longitud: 0,
-    descripcion: "",
+    descripcion: '',
   });
   const [saving, setSaving] = useState(false);
 
@@ -243,10 +239,10 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
+    setFormData(prev => ({
       ...prev,
       [name]:
-        name === "precio_actual" || name === "peso" || name === "perfil" || name === "longitud"
+        name === 'precio_actual' || name === 'peso' || name === 'perfil' || name === 'longitud'
           ? parseFloat(value) || 0
           : value,
     }));
@@ -254,10 +250,10 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Validaciones básicas
     if (!formData.nombre || !formData.marca || !formData.precio_actual) {
-      toast.error("Por favor, completa los campos obligatorios");
+      sileo.error({ title: 'Error', description: 'Por favor, completa los campos obligatorios' });
       return;
     }
 
@@ -266,8 +262,8 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
     try {
       await onSave({
         id: racket?.id || Date.now(),
-        nombre: formData.nombre || "",
-        marca: formData.marca || "",
+        nombre: formData.nombre || '',
+        marca: formData.marca || '',
         precio_actual: formData.precio_actual || 0,
         forma: formData.forma,
         balance: formData.balance,
@@ -278,7 +274,7 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
         longitud: formData.longitud,
       });
     } catch (error) {
-      console.error("Error saving racket:", error);
+      console.error('Error saving racket:', error);
       // El error ya se muestra en el padre (handleSaveRacket)
     } finally {
       setSaving(false);
@@ -287,9 +283,9 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
 
   return (
     <Overlay onClick={onClose}>
-      <Modal onClick={(e) => e.stopPropagation()}>
+      <Modal onClick={e => e.stopPropagation()}>
         <ModalHeader>
-          <ModalTitle>{racket ? "Editar Pala" : "Nueva Pala"}</ModalTitle>
+          <ModalTitle>{racket ? 'Editar Pala' : 'Nueva Pala'}</ModalTitle>
           <CloseButton onClick={onClose}>
             <FiX />
           </CloseButton>
@@ -299,14 +295,14 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
           <Form onSubmit={handleSubmit}>
             <FormGroup>
               <Label>
-                Nombre <span style={{ color: "#dc2626" }}>*</span>
+                Nombre <span style={{ color: '#dc2626' }}>*</span>
               </Label>
               <Input
-                type="text"
-                name="nombre"
+                type='text'
+                name='nombre'
                 value={formData.nombre}
                 onChange={handleChange}
-                placeholder="Ej: Vertex 03"
+                placeholder='Ej: Vertex 03'
                 required
               />
             </FormGroup>
@@ -314,30 +310,30 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
             <FormRow>
               <FormGroup>
                 <Label>
-                  Marca <span style={{ color: "#dc2626" }}>*</span>
+                  Marca <span style={{ color: '#dc2626' }}>*</span>
                 </Label>
                 <Input
-                  type="text"
-                  name="marca"
+                  type='text'
+                  name='marca'
                   value={formData.marca}
                   onChange={handleChange}
-                  placeholder="Ej: Bullpadel"
+                  placeholder='Ej: Bullpadel'
                   required
                 />
               </FormGroup>
 
               <FormGroup>
                 <Label>
-                  Precio (€) <span style={{ color: "#dc2626" }}>*</span>
+                  Precio (€) <span style={{ color: '#dc2626' }}>*</span>
                 </Label>
                 <Input
-                  type="number"
-                  name="precio_actual"
+                  type='number'
+                  name='precio_actual'
                   value={formData.precio_actual}
                   onChange={handleChange}
-                  placeholder="299.99"
-                  step="0.01"
-                  min="0"
+                  placeholder='299.99'
+                  step='0.01'
+                  min='0'
                   required
                 />
               </FormGroup>
@@ -346,21 +342,21 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
             <FormRow>
               <FormGroup>
                 <Label>Forma</Label>
-                <Select name="forma" value={formData.forma} onChange={handleChange}>
-                  <option value="">Seleccionar...</option>
-                  <option value="Redonda">Redonda</option>
-                  <option value="Lágrima">Lágrima</option>
-                  <option value="Diamante">Diamante</option>
+                <Select name='forma' value={formData.forma} onChange={handleChange}>
+                  <option value=''>Seleccionar...</option>
+                  <option value='Redonda'>Redonda</option>
+                  <option value='Lágrima'>Lágrima</option>
+                  <option value='Diamante'>Diamante</option>
                 </Select>
               </FormGroup>
 
               <FormGroup>
                 <Label>Balance</Label>
-                <Select name="balance" value={formData.balance} onChange={handleChange}>
-                  <option value="">Seleccionar...</option>
-                  <option value="Bajo">Bajo</option>
-                  <option value="Medio">Medio</option>
-                  <option value="Alto">Alto</option>
+                <Select name='balance' value={formData.balance} onChange={handleChange}>
+                  <option value=''>Seleccionar...</option>
+                  <option value='Bajo'>Bajo</option>
+                  <option value='Medio'>Medio</option>
+                  <option value='Alto'>Alto</option>
                 </Select>
               </FormGroup>
             </FormRow>
@@ -369,25 +365,25 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
               <FormGroup>
                 <Label>Peso (g)</Label>
                 <Input
-                  type="number"
-                  name="peso"
-                  value={formData.peso || ""}
+                  type='number'
+                  name='peso'
+                  value={formData.peso || ''}
                   onChange={handleChange}
-                  placeholder="365"
-                  min="0"
+                  placeholder='365'
+                  min='0'
                 />
               </FormGroup>
 
               <FormGroup>
                 <Label>Perfil (mm)</Label>
                 <Input
-                  type="number"
-                  name="perfil"
-                  value={formData.perfil || ""}
+                  type='number'
+                  name='perfil'
+                  value={formData.perfil || ''}
                   onChange={handleChange}
-                  placeholder="38"
-                  step="0.1"
-                  min="0"
+                  placeholder='38'
+                  step='0.1'
+                  min='0'
                 />
               </FormGroup>
             </FormRow>
@@ -396,22 +392,22 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
               <FormGroup>
                 <Label>Núcleo</Label>
                 <Input
-                  type="text"
-                  name="nucleo"
-                  value={formData.nucleo || ""}
+                  type='text'
+                  name='nucleo'
+                  value={formData.nucleo || ''}
                   onChange={handleChange}
-                  placeholder="Ej: MultiEVA"
+                  placeholder='Ej: MultiEVA'
                 />
               </FormGroup>
 
               <FormGroup>
                 <Label>Superficie</Label>
                 <Input
-                  type="text"
-                  name="superficie"
-                  value={formData.superficie || ""}
+                  type='text'
+                  name='superficie'
+                  value={formData.superficie || ''}
                   onChange={handleChange}
-                  placeholder="Ej: Carbono 3K"
+                  placeholder='Ej: Carbono 3K'
                 />
               </FormGroup>
             </FormRow>
@@ -419,26 +415,21 @@ const RacketCRUDModal: React.FC<RacketCRUDModalProps> = ({
             <FormGroup>
               <Label>Descripción</Label>
               <TextArea
-                name="descripcion"
-                value={formData.descripcion || ""}
+                name='descripcion'
+                value={formData.descripcion || ''}
                 onChange={handleChange}
-                placeholder="Descripción detallada de la pala..."
+                placeholder='Descripción detallada de la pala...'
               />
             </FormGroup>
           </Form>
         </ModalBody>
 
         <ModalFooter>
-          <Button type="button" variant="secondary" onClick={onClose}>
+          <Button type='button' variant='secondary' onClick={onClose}>
             Cancelar
           </Button>
-          <Button
-            type="button"
-            variant="primary"
-            onClick={handleSubmit}
-            disabled={saving}
-          >
-            {saving ? "Guardando..." : racket ? "Actualizar" : "Crear"}
+          <Button type='button' variant='primary' onClick={handleSubmit} disabled={saving}>
+            {saving ? 'Guardando...' : racket ? 'Actualizar' : 'Crear'}
           </Button>
         </ModalFooter>
       </Modal>

@@ -1,6 +1,6 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   FiEdit2,
   FiMail,
@@ -9,13 +9,13 @@ import {
   FiActivity,
   FiTrendingUp,
   FiAlertCircle,
-} from "react-icons/fi";
-import { useAuth } from "../contexts/AuthContext";
-import { MyListsSection } from "../components/features/MyListsSection";
-import { EditProfileModal } from "../components/features/EditProfileModal";
-import { UserReviews } from "../components/features/UserReviews";
-import { UserProfileService } from "../services/userProfileService";
-import toast from "react-hot-toast";
+} from 'react-icons/fi';
+import { useAuth } from '../contexts/AuthContext';
+import { MyListsSection } from '../components/features/MyListsSection';
+import { EditProfileModal } from '../components/features/EditProfileModal';
+import { UserReviews } from '../components/features/UserReviews';
+import { UserProfileService } from '../services/userProfileService';
+import { sileo } from 'sileo';
 
 const PageContainer = styled.div`
   min-height: calc(100vh - 70px);
@@ -259,9 +259,12 @@ const UserPage: React.FC = () => {
     try {
       await UserProfileService.updateUserProfile(updates);
       await refreshUserProfile();
-      toast.success("Perfil actualizado exitosamente");
+      sileo.success({ title: 'Éxito', description: 'Perfil actualizado exitosamente' });
     } catch (error: any) {
-      toast.error(error.message || "Error al actualizar el perfil");
+      sileo.error({
+        title: 'Error',
+        description: error.message || 'Error al actualizar el perfil',
+      });
       throw error;
     }
   };
@@ -285,12 +288,8 @@ const UserPage: React.FC = () => {
               <EmptyStateIcon>
                 <FiAlertCircle />
               </EmptyStateIcon>
-              <EmptyStateText>
-                No se encontró el perfil de usuario
-              </EmptyStateText>
-              <EditButton onClick={() => navigate("/login")}>
-                Iniciar sesión
-              </EditButton>
+              <EmptyStateText>No se encontró el perfil de usuario</EmptyStateText>
+              <EditButton onClick={() => navigate('/login')}>Iniciar sesión</EditButton>
             </EmptyState>
           </DetailsSection>
         </ContentWrapper>
@@ -300,31 +299,31 @@ const UserPage: React.FC = () => {
 
   const getInitials = (name?: string, email?: string) => {
     if (name) {
-      const parts = name.split(" ");
+      const parts = name.split(' ');
       return parts.length > 1
         ? `${parts[0][0]}${parts[1][0]}`.toUpperCase()
         : name.substring(0, 2).toUpperCase();
     }
-    return email ? email.substring(0, 2).toUpperCase() : "U";
+    return email ? email.substring(0, 2).toUpperCase() : 'U';
   };
 
   const formatDate = (dateString?: string) => {
-    if (!dateString) return "No especificado";
+    if (!dateString) return 'No especificado';
     const date = new Date(dateString);
-    return date.toLocaleDateString("es-ES", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
+    return date.toLocaleDateString('es-ES', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
     });
   };
 
   const getNivelJuegoLabel = (nivel?: string) => {
-    if (!nivel) return "No especificado";
+    if (!nivel) return 'No especificado';
     const niveles: { [key: string]: string } = {
-      principiante: "Principiante",
-      intermedio: "Intermedio",
-      avanzado: "Avanzado",
-      profesional: "Profesional",
+      principiante: 'Principiante',
+      intermedio: 'Intermedio',
+      avanzado: 'Avanzado',
+      profesional: 'Profesional',
     };
     return niveles[nivel] || nivel;
   };
@@ -344,12 +343,12 @@ const UserPage: React.FC = () => {
                 {userProfile.avatar_url ? (
                   <img
                     src={userProfile.avatar_url}
-                    alt={userProfile.nickname || "Usuario"}
+                    alt={userProfile.nickname || 'Usuario'}
                     style={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                      borderRadius: "50%",
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      borderRadius: '50%',
                     }}
                   />
                 ) : (
@@ -358,9 +357,7 @@ const UserPage: React.FC = () => {
               </Avatar>
 
               <UserInfo>
-                <UserName>
-                  {userProfile.full_name || userProfile.nickname || "Usuario"}
-                </UserName>
+                <UserName>{userProfile.full_name || userProfile.nickname || 'Usuario'}</UserName>
                 <UserEmail>
                   <FiMail />
                   {userProfile.email}
@@ -381,9 +378,7 @@ const UserPage: React.FC = () => {
                 <FiUser />
                 Nickname
               </DetailLabel>
-              <DetailValue>
-                {userProfile.nickname || "No especificado"}
-              </DetailValue>
+              <DetailValue>{userProfile.nickname || 'No especificado'}</DetailValue>
             </DetailCard>
 
             <DetailCard>
@@ -400,9 +395,7 @@ const UserPage: React.FC = () => {
                 Peso
               </DetailLabel>
               <DetailValue>
-                {userProfile.weight
-                  ? `${userProfile.weight} kg`
-                  : "No especificado"}
+                {userProfile.weight ? `${userProfile.weight} kg` : 'No especificado'}
               </DetailValue>
             </DetailCard>
 
@@ -412,9 +405,7 @@ const UserPage: React.FC = () => {
                 Altura
               </DetailLabel>
               <DetailValue>
-                {userProfile.height
-                  ? `${userProfile.height} cm`
-                  : "No especificado"}
+                {userProfile.height ? `${userProfile.height} cm` : 'No especificado'}
               </DetailValue>
             </DetailCard>
           </DetailGrid>
@@ -431,9 +422,7 @@ const UserPage: React.FC = () => {
                 <FiTrendingUp />
                 Nivel de Juego
               </DetailLabel>
-              <DetailValue>
-                {getNivelJuegoLabel(userProfile.game_level)}
-              </DetailValue>
+              <DetailValue>{getNivelJuegoLabel(userProfile.game_level)}</DetailValue>
             </DetailCard>
 
             <DetailCard>
@@ -443,8 +432,8 @@ const UserPage: React.FC = () => {
               </DetailLabel>
               <DetailValue>
                 {userProfile.limitations && userProfile.limitations.length > 0
-                  ? userProfile.limitations.join(", ")
-                  : "Ninguna especificada"}
+                  ? userProfile.limitations.join(', ')
+                  : 'Ninguna especificada'}
               </DetailValue>
             </DetailCard>
           </DetailGrid>

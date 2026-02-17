@@ -10,7 +10,7 @@ import { ListService } from '../services/listService';
 import { Racket, ComparisonResult, RacketComparisonData } from '../types/racket';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import toast from 'react-hot-toast';
+import { sileo } from 'sileo';
 import Fuse from 'fuse.js';
 // Importamos el nuevo servicio
 import { RacketPdfGenerator } from '../services/pdfGenerator';
@@ -805,22 +805,21 @@ const CompareRacketsPage: React.FC = () => {
       // Mostrar mensaje de error más específico
       const errorMessage = error?.message || '';
       if (errorMessage.includes('503') || errorMessage.includes('overloaded')) {
-        toast.error(
-          'El servicio de IA está temporalmente sobrecargado. Por favor, inténtalo de nuevo en unos segundos.',
-          {
-            duration: 5000,
-          }
-        );
+        sileo.error({
+          title: 'Error',
+          description:
+            'El servicio de IA está temporalmente sobrecargado. Por favor, inténtalo de nuevo en unos segundos.',
+        });
       } else if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
-        toast.error(
-          'Has alcanzado el límite de comparaciones. Por favor, espera un momento e inténtalo de nuevo.',
-          {
-            duration: 5000,
-          }
-        );
+        sileo.error({
+          title: 'Error',
+          description:
+            'Has alcanzado el límite de comparaciones. Por favor, espera un momento e inténtalo de nuevo.',
+        });
       } else {
-        toast.error('Error al realizar la comparación. Por favor, inténtalo de nuevo.', {
-          duration: 4000,
+        sileo.error({
+          title: 'Error',
+          description: 'Error al realizar la comparación. Por favor, inténtalo de nuevo.',
         });
       }
     } finally {
@@ -831,7 +830,10 @@ const CompareRacketsPage: React.FC = () => {
   const handleDownloadPDF = async () => {
     if (!comparisonResult || selectedRackets.length === 0) return;
 
-    const toastId = toast.loading('Diseñando tu comparativa profesional...');
+    sileo.show({
+      title: 'Generando PDF',
+      description: 'Diseñando tu comparativa profesional...',
+    });
 
     try {
       const generator = new RacketPdfGenerator();
@@ -843,16 +845,19 @@ const CompareRacketsPage: React.FC = () => {
         proxyUrlBase: import.meta.env.VITE_API_URL || '',
       });
 
-      toast.success('PDF descargado con éxito', { id: toastId });
+      sileo.success({ title: 'Éxito', description: 'PDF descargado con éxito' });
     } catch (error) {
       console.error('Error generating PDF:', error);
-      toast.error('Hubo un problema al generar el diseño', { id: toastId });
+      sileo.error({ title: 'Error', description: 'Hubo un problema al generar el diseño' });
     }
   };
 
   const handleSaveComparison = async () => {
     if (!isAuthenticated) {
-      toast.error('Debes iniciar sesión para guardar comparaciones');
+      sileo.error({
+        title: 'Error',
+        description: 'Debes iniciar sesión para guardar comparaciones',
+      });
       return;
     }
     if (!comparisonResult) return;
@@ -862,9 +867,9 @@ const CompareRacketsPage: React.FC = () => {
         selectedRackets.map(r => r.id!),
         comparisonResult
       );
-      toast.success('Comparación guardada en tu perfil');
+      sileo.success({ title: 'Éxito', description: 'Comparación guardada en tu perfil' });
     } catch (error) {
-      toast.error('Error al guardar la comparación');
+      sileo.error({ title: 'Error', description: 'Error al guardar la comparación' });
     }
   };
 
@@ -897,7 +902,10 @@ const CompareRacketsPage: React.FC = () => {
             <SearchResults>
               {filteredRackets.map(racket => (
                 <SearchResultItem key={racket.id} onClick={() => handleAddRacket(racket)}>
-                  <img src={racket.imagenes?.[0] || '/placeholder-racket.png'} alt={racket.nombre} />
+                  <img
+                    src={racket.imagenes?.[0] || '/placeholder-racket.png'}
+                    alt={racket.nombre}
+                  />
                   <div>
                     <div style={{ fontWeight: 600 }}>{racket.nombre}</div>
                     <div style={{ fontSize: '0.875rem', color: '#6b7280' }}>{racket.marca}</div>
@@ -930,7 +938,10 @@ const CompareRacketsPage: React.FC = () => {
                     whileHover={!isSelected ? { scale: 1.05 } : {}}
                     whileTap={!isSelected ? { scale: 0.95 } : {}}
                   >
-                    <img src={racket.imagenes?.[0] || '/placeholder-racket.png'} alt={racket.nombre} />
+                    <img
+                      src={racket.imagenes?.[0] || '/placeholder-racket.png'}
+                      alt={racket.nombre}
+                    />
                     <FavoriteRacketInfo>
                       <FavoriteRacketName>{racket.nombre}</FavoriteRacketName>
                       <FavoriteRacketBrand>{racket.marca}</FavoriteRacketBrand>
@@ -965,7 +976,10 @@ const CompareRacketsPage: React.FC = () => {
               <RemoveButton onClick={() => handleRemoveRacket(racket.id!)}>
                 <FiX />
               </RemoveButton>
-              <RacketImage src={racket.imagenes?.[0] || '/placeholder-racket.png'} alt={racket.nombre} />
+              <RacketImage
+                src={racket.imagenes?.[0] || '/placeholder-racket.png'}
+                alt={racket.nombre}
+              />
               <RacketName>{racket.nombre}</RacketName>
               <RacketBrand>{racket.marca}</RacketBrand>
             </SelectedRacketCard>

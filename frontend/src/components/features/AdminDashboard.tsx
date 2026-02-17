@@ -1,9 +1,18 @@
-import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { FiUsers, FiShoppingBag, FiPackage, FiTrendingUp, FiActivity, FiStar, FiHeart, FiAlertTriangle } from "react-icons/fi";
-import toast from "react-hot-toast";
-import { Link } from "react-router-dom";
-import { AdminService, AdminMetrics, Activity } from "../../services/adminService";
+import React, { useEffect, useState } from 'react';
+import styled from 'styled-components';
+import {
+  FiUsers,
+  FiShoppingBag,
+  FiPackage,
+  FiTrendingUp,
+  FiActivity,
+  FiStar,
+  FiHeart,
+  FiAlertTriangle,
+} from 'react-icons/fi';
+import { sileo } from 'sileo';
+import { Link } from 'react-router-dom';
+import { AdminService, AdminMetrics, Activity } from '../../services/adminService';
 
 const DashboardContainer = styled.div`
   display: grid;
@@ -24,7 +33,9 @@ const MetricCard = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-2px);
@@ -36,8 +47,8 @@ const MetricIcon = styled.div<{ color: string }>`
   width: 60px;
   height: 60px;
   border-radius: 12px;
-  background: ${(props) => props.color}15;
-  color: ${(props) => props.color};
+  background: ${props => props.color}15;
+  color: ${props => props.color};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -61,7 +72,7 @@ const MetricValue = styled.div`
 `;
 
 const MetricChange = styled.div<{ positive: boolean }>`
-  color: ${(props) => (props.positive ? "#16a34a" : "#dc2626")};
+  color: ${props => (props.positive ? '#16a34a' : '#dc2626')};
   font-size: 0.875rem;
   font-weight: 600;
   display: flex;
@@ -74,7 +85,7 @@ const ChartsSection = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
   gap: 2rem;
-  
+
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
   }
@@ -181,20 +192,28 @@ const AdminDashboard: React.FC = () => {
       const [metricsData, activitiesData, conflictsData] = await Promise.all([
         AdminService.getDashboardMetrics(),
         AdminService.getRecentActivity(10),
-        AdminService.getRacketConflicts()
+        AdminService.getRacketConflicts(),
       ]);
-      
+
       setMetrics(metricsData);
       setActivities(activitiesData);
       setConflictsCount(conflictsData.length);
     } catch (error: any) {
       console.error('Error loading dashboard data:', error);
-      
+
       // Mostrar error más específico
       if (error.message.includes('404')) {
-        toast.error('El servidor backend necesita reiniciarse para cargar las nuevas rutas de administración');
+        sileo.error({
+          title: 'Error',
+          description:
+            'El servidor backend necesita reiniciarse para cargar las nuevas rutas de administración',
+        });
       } else {
-        toast.error('Error al cargar los datos del dashboard. Verifica que el backend esté corriendo.');
+        sileo.error({
+          title: 'Error',
+          description:
+            'Error al cargar los datos del dashboard. Verifica que el backend esté corriendo.',
+        });
       }
     } finally {
       setLoading(false);
@@ -226,37 +245,35 @@ const AdminDashboard: React.FC = () => {
     <DashboardContainer>
       <MetricsGrid>
         <MetricCard>
-          <MetricIcon color="#16a34a">
+          <MetricIcon color='#16a34a'>
             <FiUsers />
           </MetricIcon>
           <MetricInfo>
             <MetricLabel>Total Usuarios</MetricLabel>
             <MetricValue>{metrics.totalUsers.toLocaleString()}</MetricValue>
             <MetricChange positive={metrics.usersChange > 0}>
-              <FiTrendingUp />
-              +{metrics.usersChange}% este mes
+              <FiTrendingUp />+{metrics.usersChange}% este mes
             </MetricChange>
           </MetricInfo>
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#3b82f6">
+          <MetricIcon color='#3b82f6'>
             <FiPackage />
           </MetricIcon>
           <MetricInfo>
             <MetricLabel>Total Palas</MetricLabel>
             <MetricValue>{metrics.totalRackets.toLocaleString()}</MetricValue>
             <MetricChange positive={metrics.racketsChange > 0}>
-              <FiTrendingUp />
-              +{metrics.racketsChange}% este mes
+              <FiTrendingUp />+{metrics.racketsChange}% este mes
             </MetricChange>
           </MetricInfo>
         </MetricCard>
 
         {/* Conflicts Card - Detailed */}
-        <Link to="/admin/rackets/review" style={{ textDecoration: 'none' }}>
+        <Link to='/admin/rackets/review' style={{ textDecoration: 'none' }}>
           <MetricCard style={{ border: conflictsCount > 0 ? '2px solid #f59e0b' : 'none' }}>
-            <MetricIcon color="#f59e0b">
+            <MetricIcon color='#f59e0b'>
               <FiAlertTriangle />
             </MetricIcon>
             <MetricInfo>
@@ -272,7 +289,7 @@ const AdminDashboard: React.FC = () => {
         </Link>
 
         <MetricCard>
-          <MetricIcon color="#f59e0b">
+          <MetricIcon color='#f59e0b'>
             <FiShoppingBag />
           </MetricIcon>
           <MetricInfo>
@@ -282,7 +299,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#8b5cf6">
+          <MetricIcon color='#8b5cf6'>
             <FiStar />
           </MetricIcon>
           <MetricInfo>
@@ -292,7 +309,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#ef4444">
+          <MetricIcon color='#ef4444'>
             <FiActivity />
           </MetricIcon>
           <MetricInfo>
@@ -302,7 +319,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#10b981">
+          <MetricIcon color='#10b981'>
             <FiTrendingUp />
           </MetricIcon>
           <MetricInfo>
@@ -312,7 +329,7 @@ const AdminDashboard: React.FC = () => {
         </MetricCard>
 
         <MetricCard>
-          <MetricIcon color="#ec4899">
+          <MetricIcon color='#ec4899'>
             <FiHeart />
           </MetricIcon>
           <MetricInfo>
@@ -326,7 +343,7 @@ const AdminDashboard: React.FC = () => {
         <ChartCard>
           <ChartTitle>Actividad Reciente</ChartTitle>
           <ActivityList>
-            {activities.map((activity) => (
+            {activities.map(activity => (
               <ActivityItem key={activity.id}>
                 <ActivityIcon>{getActivityIcon(activity.type)}</ActivityIcon>
                 <ActivityContent>
