@@ -3,19 +3,19 @@ import { RecommendationController } from '../../controllers/recommendationContro
 import { RecommendationService } from '../../services/recommendationService';
 import { AuthRequest } from '../../types';
 
-jest.mock('../../services/recommendationService');
+vi.mock('../../services/recommendationService');
 
 describe('RecommendationController', () => {
   let mockRequest: Partial<Request & AuthRequest>;
   let mockResponse: Partial<Response>;
-  let jsonMock: jest.Mock;
-  let statusMock: jest.Mock;
+  let jsonMock: vi.Mock;
+  let statusMock: vi.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    jsonMock = jest.fn();
-    statusMock = jest.fn().mockReturnValue({ json: jsonMock });
+    jsonMock = vi.fn();
+    statusMock = vi.fn().mockReturnValue({ json: jsonMock });
 
     mockRequest = {
       body: {},
@@ -52,7 +52,7 @@ describe('RecommendationController', () => {
         data: { level: 'intermediate' },
       };
 
-      (RecommendationService.generateRecommendation as jest.Mock).mockResolvedValue(mockResult);
+      (RecommendationService.generateRecommendation as vi.Mock).mockResolvedValue(mockResult);
 
       await RecommendationController.generate(
         mockRequest as Request,
@@ -97,7 +97,7 @@ describe('RecommendationController', () => {
       };
       mockRequest.user = { id: 'user123', email: 'test@test.com' };
 
-      (RecommendationService.saveRecommendation as jest.Mock).mockResolvedValue(mockSaved);
+      (RecommendationService.saveRecommendation as vi.Mock).mockResolvedValue(mockSaved);
 
       await RecommendationController.save(
         mockRequest as Request & AuthRequest,
@@ -125,7 +125,7 @@ describe('RecommendationController', () => {
     it('should return message when no recommendations found', async () => {
       mockRequest.user = { id: 'user123', email: 'test@test.com' };
 
-      (RecommendationService.getLastRecommendation as jest.Mock).mockResolvedValue(null);
+      (RecommendationService.getLastRecommendation as vi.Mock).mockResolvedValue(null);
 
       await RecommendationController.getLast(
         mockRequest as Request & AuthRequest,

@@ -1,25 +1,25 @@
 import { storeService } from "../../../src/services/storeService";
 import { supabase } from "../../../src/config/supabase";
 
-jest.mock("../../../src/config/supabase", () => ({
+vi.mock("../../../src/config/supabase", () => ({
   supabase: {
-    from: jest.fn(),
+    from: vi.fn(),
   },
 }));
 
 describe("storeService", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     jest.restoreAllMocks();
   });
 
   describe("createStore", () => {
     it("creates a store with verified=false and returns data", async () => {
       const newStore = { id: "s1", store_name: "Shop", verified: false };
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         insert: () => ({
           select: () => ({
-            single: jest.fn().mockResolvedValue({ data: newStore, error: null }),
+            single: vi.fn().mockResolvedValue({ data: newStore, error: null }),
           }),
         }),
       }));
@@ -38,10 +38,10 @@ describe("storeService", () => {
     });
 
     it("throws on insert error", async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         insert: () => ({
           select: () => ({
-            single: jest.fn().mockResolvedValue({ error: { message: "fail" } }),
+            single: vi.fn().mockResolvedValue({ error: { message: "fail" } }),
           }),
         }),
       }));
@@ -63,9 +63,9 @@ describe("storeService", () => {
   describe("getAllStores", () => {
     it("returns all stores without filter", async () => {
       const stores = [{ id: "s1" }, { id: "s2" }];
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         select: () => ({
-          order: jest.fn().mockResolvedValue({ data: stores, error: null }),
+          order: vi.fn().mockResolvedValue({ data: stores, error: null }),
         }),
       }));
 
@@ -75,8 +75,8 @@ describe("storeService", () => {
 
     it("applies verified filter when provided", async () => {
       const stores = [{ id: "s1", verified: true }];
-      const orderMock = jest.fn().mockReturnValue({ eq: jest.fn().mockResolvedValue({ data: stores, error: null }) });
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      const orderMock = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ data: stores, error: null }) });
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         select: () => ({ order: orderMock }),
       }));
 
@@ -89,10 +89,10 @@ describe("storeService", () => {
   describe("getStoreById", () => {
     it("returns store data when found", async () => {
       const store = { id: "s1" };
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         select: () => ({
           eq: () => ({
-            single: jest.fn().mockResolvedValue({ data: store, error: null }),
+            single: vi.fn().mockResolvedValue({ data: store, error: null }),
           }),
         }),
       }));
@@ -102,10 +102,10 @@ describe("storeService", () => {
     });
 
     it("throws when supabase returns error", async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         select: () => ({
           eq: () => ({
-            single: jest.fn().mockResolvedValue({ error: { message: "not found" } }),
+            single: vi.fn().mockResolvedValue({ error: { message: "not found" } }),
           }),
         }),
       }));
@@ -117,10 +117,10 @@ describe("storeService", () => {
   describe("getStoreByOwnerId", () => {
     it("returns store when found", async () => {
       const store = { id: "s1", admin_user_id: "owner-1" };
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         select: () => ({
           eq: () => ({
-            single: jest.fn().mockResolvedValue({ data: store, error: null }),
+            single: vi.fn().mockResolvedValue({ data: store, error: null }),
           }),
         }),
       }));
@@ -130,10 +130,10 @@ describe("storeService", () => {
     });
 
     it("returns null when no rows found (PGRST116)", async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         select: () => ({
           eq: () => ({
-            single: jest.fn().mockResolvedValue({ error: { code: "PGRST116", message: "No rows" } }),
+            single: vi.fn().mockResolvedValue({ error: { code: "PGRST116", message: "No rows" } }),
           }),
         }),
       }));
@@ -146,11 +146,11 @@ describe("storeService", () => {
   describe("updateStore", () => {
     it("updates and returns store", async () => {
       const updated = { id: "s1", verified: true };
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         update: () => ({
           eq: () => ({
             select: () => ({
-              single: jest.fn().mockResolvedValue({ data: updated, error: null }),
+              single: vi.fn().mockResolvedValue({ data: updated, error: null }),
             }),
           }),
         }),
@@ -161,11 +161,11 @@ describe("storeService", () => {
     });
 
     it("throws on update error", async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         update: () => ({
           eq: () => ({
             select: () => ({
-              single: jest.fn().mockResolvedValue({ error: { message: "update failed" } }),
+              single: vi.fn().mockResolvedValue({ error: { message: "update failed" } }),
             }),
           }),
         }),
@@ -193,9 +193,9 @@ describe("storeService", () => {
 
   describe("deleteStore", () => {
     it("deletes store successfully", async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         delete: () => ({
-          eq: jest.fn().mockResolvedValue({ error: null }),
+          eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       }));
 
@@ -204,9 +204,9 @@ describe("storeService", () => {
     });
 
     it("throws on delete error", async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         delete: () => ({
-          eq: jest.fn().mockResolvedValue({ error: { message: "delete failed" } }),
+          eq: vi.fn().mockResolvedValue({ error: { message: "delete failed" } }),
         }),
       }));
 

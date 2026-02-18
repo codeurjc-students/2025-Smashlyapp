@@ -6,9 +6,9 @@ import {
 } from "../../../src/services/racketService";
 import { supabase } from "../../../src/config/supabase";
 
-jest.mock("../../../src/config/supabase", () => ({
+vi.mock("../../../src/config/supabase", () => ({
   supabase: {
-    from: jest.fn(),
+    from: vi.fn(),
   },
 }));
 
@@ -108,7 +108,7 @@ describe("racketService helpers", () => {
 
 describe("RacketService", () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it("getAllRackets returns mapped data without extra pagination", async () => {
@@ -116,7 +116,7 @@ describe("RacketService", () => {
       { ...baseRacketRow(), padelmarket_actual_price: 100 },
       { ...baseRacketRow(), id: 2, name: "Bullpadel X", brand: "Bullpadel", padelmarket_actual_price: 150 },
     ];
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: () => ({
         range: () => ({
           order: () => Promise.resolve({ data: rows, error: null, count: rows.length }),
@@ -138,7 +138,7 @@ describe("RacketService", () => {
       { ...baseRacketRow(), padelmarket_actual_price: 100 },
       { ...baseRacketRow(), id: 2, name: "Bullpadel X", brand: "Bullpadel", padelmarket_actual_price: 150 },
     ];
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: () => ({
         order: () => ({
           range: () => Promise.resolve({ data: rows, error: null, count: 2 }),
@@ -154,9 +154,9 @@ describe("RacketService", () => {
   });
 
   it("getRacketById returns null on PGRST116", async () => {
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: () => ({
-        eq: () => ({ single: jest.fn().mockResolvedValue({ error: { code: "PGRST116", message: "no rows" } }) }),
+        eq: () => ({ single: vi.fn().mockResolvedValue({ error: { code: "PGRST116", message: "no rows" } }) }),
       }),
     }));
 
@@ -166,9 +166,9 @@ describe("RacketService", () => {
 
   it("getRacketById returns mapped item when found", async () => {
     const row = { ...baseRacketRow(), padelmarket_actual_price: 120 };
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: () => ({
-        eq: () => ({ single: jest.fn().mockResolvedValue({ data: row, error: null }) }),
+        eq: () => ({ single: vi.fn().mockResolvedValue({ data: row, error: null }) }),
       }),
     }));
 
@@ -182,7 +182,7 @@ describe("RacketService", () => {
       { ...baseRacketRow(), name: "Adidas Alpha" },
       { ...baseRacketRow(), id: 2, name: "Alpha Plus" },
     ];
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: () => ({
         or: () => ({
           order: () => ({
@@ -203,10 +203,10 @@ describe("RacketService", () => {
       { ...baseRacketRow(), id: 2, brand: "Adidas", padelmarket_actual_price: 140, on_offer: true },
       { ...baseRacketRow(), id: 3, brand: "Adidas", padelmarket_actual_price: 95, on_offer: true },
     ];
-    (supabase.from as jest.Mock).mockImplementation(() => {
+    (supabase.from as vi.Mock).mockImplementation(() => {
       const chain: any = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnValue(Promise.resolve({ data: rows, error: null })),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnValue(Promise.resolve({ data: rows, error: null })),
       };
       return {
         select: () => chain,
@@ -230,7 +230,7 @@ describe("RacketService", () => {
       { ...baseRacketRow(), brand: "Bullpadel" },
       { ...baseRacketRow(), id: 2, brand: "Bullpadel" },
     ];
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: () => ({
         eq: () => ({
           order: () => ({ limit: () => Promise.resolve({ data: rows, error: null }) }),
@@ -253,7 +253,7 @@ describe("RacketService", () => {
       { ...baseRacketRow(), on_offer: true },
       { ...baseRacketRow(), id: 2, on_offer: true },
     ];
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: () => ({
         eq: () => ({
           order: () => ({ limit: () => Promise.resolve({ data: rows, error: null }) }),
@@ -268,7 +268,7 @@ describe("RacketService", () => {
 
   it("getBrands returns unique sorted list", async () => {
     const rows = [{ brand: "Adidas" }, { brand: "Bullpadel" }, { brand: "Adidas" }];
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: (columns: string) => ({
         not: () => Promise.resolve({ data: rows, error: null }),
       }),
@@ -279,7 +279,7 @@ describe("RacketService", () => {
   });
 
   it("getStats aggregates counts and unique brands", async () => {
-    (supabase.from as jest.Mock).mockImplementation(() => ({
+    (supabase.from as vi.Mock).mockImplementation(() => ({
       select: (columns: string, options?: any) => {
         if (columns === "id" && options?.head) {
           // Support chaining for onSale count

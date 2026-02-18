@@ -3,24 +3,24 @@ import { RequestWithUser } from '../../../src/types';
 import { storeController } from '../../../src/controllers/storeController';
 import { storeService } from '../../../src/services/storeService';
 
-jest.mock('../../../src/services/storeService');
-jest.mock('../../../src/config/logger', () => ({
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
+vi.mock('../../../src/services/storeService');
+vi.mock('../../../src/config/logger', () => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
 }));
 
 describe('storeController', () => {
   let mockReq: Partial<RequestWithUser>;
   let mockRes: Partial<Response>;
-  let statusMock: jest.Mock;
-  let jsonMock: jest.Mock;
+  let statusMock: vi.Mock;
+  let jsonMock: vi.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    statusMock = jest.fn().mockReturnThis();
-    jsonMock = jest.fn().mockReturnThis();
+    statusMock = vi.fn().mockReturnThis();
+    jsonMock = vi.fn().mockReturnThis();
 
     mockRes = {
       status: statusMock,
@@ -47,8 +47,8 @@ describe('storeController', () => {
 
     it('should create a store request successfully', async () => {
       mockReq.body = validStoreData;
-      (storeService.getStoreByOwnerId as jest.Mock).mockResolvedValue(null);
-      (storeService.createStore as jest.Mock).mockResolvedValue({
+      (storeService.getStoreByOwnerId as vi.Mock).mockResolvedValue(null);
+      (storeService.createStore as vi.Mock).mockResolvedValue({
         id: 'store-1',
         ...validStoreData,
       });
@@ -78,7 +78,7 @@ describe('storeController', () => {
     });
 
     it('should return 400 when user already has a store', async () => {
-      (storeService.getStoreByOwnerId as jest.Mock).mockResolvedValue({
+      (storeService.getStoreByOwnerId as vi.Mock).mockResolvedValue({
         id: 'existing-store',
       });
 
@@ -97,7 +97,7 @@ describe('storeController', () => {
         store_name: 'Test Store',
         // Missing other required fields
       };
-      (storeService.getStoreByOwnerId as jest.Mock).mockResolvedValue(null);
+      (storeService.getStoreByOwnerId as vi.Mock).mockResolvedValue(null);
 
       await storeController.createStoreRequest(mockReq as RequestWithUser, mockRes as Response);
 
@@ -111,7 +111,7 @@ describe('storeController', () => {
 
     it('should handle errors gracefully', async () => {
       mockReq.body = validStoreData;
-      (storeService.getStoreByOwnerId as jest.Mock).mockRejectedValue(
+      (storeService.getStoreByOwnerId as vi.Mock).mockRejectedValue(
         new Error('Database error')
       );
 
@@ -132,7 +132,7 @@ describe('storeController', () => {
         { id: '1', store_name: 'Store 1' },
         { id: '2', store_name: 'Store 2' },
       ];
-      (storeService.getAllStores as jest.Mock).mockResolvedValue(mockStores);
+      (storeService.getAllStores as vi.Mock).mockResolvedValue(mockStores);
 
       await storeController.getAllStores(mockReq as RequestWithUser, mockRes as Response);
 
@@ -146,7 +146,7 @@ describe('storeController', () => {
         data: [{ id: '1', store_name: 'Store 1' }],
         pagination: { total: 1, page: 0, limit: 10 },
       };
-      (storeService.getStoresWithPagination as jest.Mock).mockResolvedValue(
+      (storeService.getStoresWithPagination as vi.Mock).mockResolvedValue(
         mockPaginatedResult
       );
 
@@ -163,7 +163,7 @@ describe('storeController', () => {
     it('should filter by verified=true', async () => {
       mockReq.query = { verified: 'true' };
       const mockStores = [{ id: '1', verified: true }];
-      (storeService.getAllStores as jest.Mock).mockResolvedValue(mockStores);
+      (storeService.getAllStores as vi.Mock).mockResolvedValue(mockStores);
 
       await storeController.getAllStores(mockReq as RequestWithUser, mockRes as Response);
 
@@ -173,7 +173,7 @@ describe('storeController', () => {
     it('should filter by verified=false', async () => {
       mockReq.query = { verified: 'false' };
       const mockStores = [{ id: '1', verified: false }];
-      (storeService.getAllStores as jest.Mock).mockResolvedValue(mockStores);
+      (storeService.getAllStores as vi.Mock).mockResolvedValue(mockStores);
 
       await storeController.getAllStores(mockReq as RequestWithUser, mockRes as Response);
 
@@ -181,7 +181,7 @@ describe('storeController', () => {
     });
 
     it('should handle errors', async () => {
-      (storeService.getAllStores as jest.Mock).mockRejectedValue(
+      (storeService.getAllStores as vi.Mock).mockRejectedValue(
         new Error('Database error')
       );
 
@@ -200,7 +200,7 @@ describe('storeController', () => {
     it('should get store by id', async () => {
       const mockStore = { id: '1', store_name: 'Test Store' };
       mockReq.params = { id: '1' };
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(mockStore);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(mockStore);
 
       await storeController.getStoreById(mockReq as RequestWithUser, mockRes as Response);
 
@@ -210,7 +210,7 @@ describe('storeController', () => {
 
     it('should return 404 when store not found', async () => {
       mockReq.params = { id: 'nonexistent' };
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(null);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(null);
 
       await storeController.getStoreById(mockReq as RequestWithUser, mockRes as Response);
 
@@ -224,7 +224,7 @@ describe('storeController', () => {
 
     it('should handle errors', async () => {
       mockReq.params = { id: '1' };
-      (storeService.getStoreById as jest.Mock).mockRejectedValue(
+      (storeService.getStoreById as vi.Mock).mockRejectedValue(
         new Error('Database error')
       );
 
@@ -237,7 +237,7 @@ describe('storeController', () => {
   describe('getMyStore', () => {
     it('should get user store', async () => {
       const mockStore = { id: '1', admin_user_id: 'user-123' };
-      (storeService.getStoreByOwnerId as jest.Mock).mockResolvedValue(mockStore);
+      (storeService.getStoreByOwnerId as vi.Mock).mockResolvedValue(mockStore);
 
       await storeController.getMyStore(mockReq as RequestWithUser, mockRes as Response);
 
@@ -259,7 +259,7 @@ describe('storeController', () => {
     });
 
     it('should return 404 when user has no store', async () => {
-      (storeService.getStoreByOwnerId as jest.Mock).mockResolvedValue(null);
+      (storeService.getStoreByOwnerId as vi.Mock).mockResolvedValue(null);
 
       await storeController.getMyStore(mockReq as RequestWithUser, mockRes as Response);
 
@@ -279,8 +279,8 @@ describe('storeController', () => {
       const mockStore = { id: '1', admin_user_id: 'user-123' };
       mockReq.params = { id: '1' };
       mockReq.body = updates;
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(mockStore);
-      (storeService.updateStore as jest.Mock).mockResolvedValue({
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(mockStore);
+      (storeService.updateStore as vi.Mock).mockResolvedValue({
         ...mockStore,
         ...updates,
       });
@@ -295,8 +295,8 @@ describe('storeController', () => {
       mockReq.params = { id: '1' };
       mockReq.body = updates;
       mockReq.user = { id: 'admin-123', email: 'admin@test.com', role: 'admin' };
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(mockStore);
-      (storeService.updateStore as jest.Mock).mockResolvedValue({
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(mockStore);
+      (storeService.updateStore as vi.Mock).mockResolvedValue({
         ...mockStore,
         ...updates,
       });
@@ -318,7 +318,7 @@ describe('storeController', () => {
       const mockStore = { id: '1', admin_user_id: 'different-user' };
       mockReq.params = { id: '1' };
       mockReq.body = updates;
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(mockStore);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(mockStore);
 
       await storeController.updateStore(mockReq as RequestWithUser, mockRes as Response);
 
@@ -333,7 +333,7 @@ describe('storeController', () => {
     it('should return 404 when store not found', async () => {
       mockReq.params = { id: 'nonexistent' };
       mockReq.body = updates;
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(null);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(null);
 
       await storeController.updateStore(mockReq as RequestWithUser, mockRes as Response);
 
@@ -345,8 +345,8 @@ describe('storeController', () => {
     it('should delete store when user is owner', async () => {
       const mockStore = { id: '1', admin_user_id: 'user-123' };
       mockReq.params = { id: '1' };
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(mockStore);
-      (storeService.deleteStore as jest.Mock).mockResolvedValue(undefined);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(mockStore);
+      (storeService.deleteStore as vi.Mock).mockResolvedValue(undefined);
 
       await storeController.deleteStore(mockReq as RequestWithUser, mockRes as Response);
 
@@ -363,8 +363,8 @@ describe('storeController', () => {
       const mockStore = { id: '1', admin_user_id: 'different-user' };
       mockReq.params = { id: '1' };
       mockReq.user = { id: 'admin-123', email: 'admin@test.com', role: 'admin' };
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(mockStore);
-      (storeService.deleteStore as jest.Mock).mockResolvedValue(undefined);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(mockStore);
+      (storeService.deleteStore as vi.Mock).mockResolvedValue(undefined);
 
       await storeController.deleteStore(mockReq as RequestWithUser, mockRes as Response);
 
@@ -374,7 +374,7 @@ describe('storeController', () => {
     it('should return 403 when user is not owner or admin', async () => {
       const mockStore = { id: '1', admin_user_id: 'different-user' };
       mockReq.params = { id: '1' };
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(mockStore);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(mockStore);
 
       await storeController.deleteStore(mockReq as RequestWithUser, mockRes as Response);
 
@@ -388,7 +388,7 @@ describe('storeController', () => {
 
     it('should return 404 when store not found', async () => {
       mockReq.params = { id: 'nonexistent' };
-      (storeService.getStoreById as jest.Mock).mockResolvedValue(null);
+      (storeService.getStoreById as vi.Mock).mockResolvedValue(null);
 
       await storeController.deleteStore(mockReq as RequestWithUser, mockRes as Response);
 

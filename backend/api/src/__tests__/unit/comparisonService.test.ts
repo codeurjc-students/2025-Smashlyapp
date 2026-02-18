@@ -1,15 +1,15 @@
 import { ComparisonService } from '../../services/comparisonService';
 import { supabase } from '../../config/supabase';
 
-jest.mock('../../config/supabase', () => ({
+vi.mock('../../config/supabase', () => ({
   supabase: {
-    from: jest.fn(),
+    from: vi.fn(),
   },
 }));
 
 describe('ComparisonService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('createComparison', () => {
@@ -27,10 +27,10 @@ describe('ComparisonService', () => {
         updated_at: '2024-01-01T00:00:00Z',
       };
 
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: mockCreated,
               error: null,
             }),
@@ -72,10 +72,10 @@ describe('ComparisonService', () => {
         updated_at: '2024-01-01T00:00:00Z',
       };
 
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: mockCreated,
               error: null,
             }),
@@ -90,10 +90,10 @@ describe('ComparisonService', () => {
     });
 
     it('should throw error on database error', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: null,
               error: { message: 'Database error' },
             }),
@@ -130,10 +130,10 @@ describe('ComparisonService', () => {
         },
       ];
 
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({
               data: mockComparisons,
               error: null,
             }),
@@ -148,10 +148,10 @@ describe('ComparisonService', () => {
     });
 
     it('should return empty array when no comparisons exist', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({
               data: [],
               error: null,
             }),
@@ -174,10 +174,10 @@ describe('ComparisonService', () => {
         comparison_text: 'Test',
       };
 
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
             data: mockComparison,
             error: null,
           }),
@@ -190,10 +190,10 @@ describe('ComparisonService', () => {
     });
 
     it('should return null when not found', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
             data: null,
             error: { code: 'PGRST116', message: 'Not found' },
           }),
@@ -208,9 +208,9 @@ describe('ComparisonService', () => {
 
   describe('deleteComparison', () => {
     it('should delete comparison successfully', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        delete: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnThis(),
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
         }),
       }));
 
@@ -220,18 +220,18 @@ describe('ComparisonService', () => {
     });
 
     it('should throw error on database error', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        delete: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
             error: { message: 'Delete failed' },
           }),
         }),
       }));
 
       // Mock the error to be thrown
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        delete: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
             error: { message: 'Delete failed' },
           }),
         }),
@@ -245,9 +245,9 @@ describe('ComparisonService', () => {
 
   describe('getUserComparisonCount', () => {
     it('should return correct count', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
             count: 5,
             error: null,
           }),
@@ -260,9 +260,9 @@ describe('ComparisonService', () => {
     });
 
     it('should return 0 when no comparisons exist', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
             count: null,
             error: null,
           }),
@@ -283,11 +283,11 @@ describe('ComparisonService', () => {
         is_public: true,
       };
 
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnThis(),
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: mockUpdated,
               error: null,
             }),
@@ -303,11 +303,11 @@ describe('ComparisonService', () => {
     });
 
     it('should throw error when comparison not found', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnThis(),
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: null,
               error: null,
             }),
@@ -330,10 +330,10 @@ describe('ComparisonService', () => {
         comparison_text: 'Test',
       };
 
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
             data: mockComparison,
             error: null,
           }),
@@ -347,10 +347,10 @@ describe('ComparisonService', () => {
     });
 
     it('should return null when token not found', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnThis(),
-          single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnThis(),
+          single: vi.fn().mockResolvedValue({
             data: null,
             error: { code: 'PGRST116', message: 'Not found' },
           }),
@@ -365,10 +365,10 @@ describe('ComparisonService', () => {
 
   describe('unshareComparison', () => {
     it('should set is_public to false', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            eq: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({
               error: null,
             }),
           }),
@@ -381,9 +381,9 @@ describe('ComparisonService', () => {
     });
 
     it('should throw error on database error', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({
             error: { message: 'Update failed' },
           }),
         }),

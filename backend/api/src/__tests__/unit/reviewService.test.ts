@@ -2,39 +2,39 @@ import { ReviewService } from '../../../src/services/reviewService';
 import { supabase } from '../../../src/config/supabase';
 import { CreateReviewDTO, UpdateReviewDTO, CreateCommentDTO } from '../../../src/types/review';
 
-jest.mock('../../../src/config/supabase', () => ({
+vi.mock('../../../src/config/supabase', () => ({
   supabase: {
-    from: jest.fn(() => ({
-      select: jest.fn(() => ({
-        order: jest.fn(() => ({
-          range: jest.fn(() => ({
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        order: vi.fn(() => ({
+          range: vi.fn(() => ({
             data: [],
             error: null,
           })),
         })),
       })),
-      insert: jest.fn(() => ({
-        select: jest.fn(() => ({
-          single: jest.fn(() => ({
+      insert: vi.fn(() => ({
+        select: vi.fn(() => ({
+          single: vi.fn(() => ({
             data: null,
             error: null,
           })),
         })),
       })),
-      update: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          select: jest.fn(() => ({
-            single: jest.fn(() => ({
+      update: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          select: vi.fn(() => ({
+            single: vi.fn(() => ({
               data: null,
               error: null,
             })),
           })),
         })),
       })),
-      delete: jest.fn(() => ({
-        eq: jest.fn(() => ({
-          select: jest.fn(() => ({
-            single: jest.fn(() => ({
+      delete: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          select: vi.fn(() => ({
+            single: vi.fn(() => ({
               data: null,
               error: null,
             })),
@@ -76,7 +76,7 @@ describe('ReviewService', () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('mapRacketFields', () => {
@@ -140,12 +140,12 @@ describe('ReviewService', () => {
 
   describe('buildReviewsQuery', () => {
     it('should build base query with racket_id filter', () => {
-      const mockSelect = jest.fn().mockReturnThis();
-      const mockEq = jest.fn().mockReturnThis();
-      const mockOrder = jest.fn().mockReturnThis();
-      const mockRange = jest.fn().mockResolvedValue({ data: [], error: null });
+      const mockSelect = vi.fn().mockReturnThis();
+      const mockEq = vi.fn().mockReturnThis();
+      const mockOrder = vi.fn().mockReturnThis();
+      const mockRange = vi.fn().mockResolvedValue({ data: [], error: null });
 
-      (supabase.from as jest.Mock).mockReturnValue({
+      (supabase.from as vi.Mock).mockReturnValue({
         select: mockSelect,
       });
 
@@ -163,8 +163,8 @@ describe('ReviewService', () => {
   describe('applyReviewFilters', () => {
     it('should apply rating filter when provided', () => {
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
       };
 
       const result = ReviewService['applyReviewFilters'](mockQuery as any, { rating: 5 });
@@ -174,8 +174,8 @@ describe('ReviewService', () => {
 
     it('should sort by recent by default', () => {
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
       };
 
       const result = ReviewService['applyReviewFilters'](mockQuery as any, {});
@@ -185,8 +185,8 @@ describe('ReviewService', () => {
 
     it('should sort by rating high to low', () => {
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
       };
 
       const result = ReviewService['applyReviewFilters'](mockQuery as any, { sort: 'rating_high' });
@@ -196,8 +196,8 @@ describe('ReviewService', () => {
 
     it('should sort by rating low to high', () => {
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
       };
 
       const result = ReviewService['applyReviewFilters'](mockQuery as any, { sort: 'rating_low' });
@@ -207,8 +207,8 @@ describe('ReviewService', () => {
 
     it('should sort by most liked', () => {
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
       };
 
       const result = ReviewService['applyReviewFilters'](mockQuery as any, { sort: 'most_liked' });
@@ -282,18 +282,18 @@ describe('ReviewService', () => {
       ];
 
       const mockQueryBuilder = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({
           data: mockReviews,
           error: null,
           count: 1,
         }),
       };
 
-      const mockSelect = jest.fn().mockReturnValue(mockQueryBuilder);
+      const mockSelect = vi.fn().mockReturnValue(mockQueryBuilder);
 
-      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+      (supabase.from as vi.Mock).mockImplementation((table: string) => {
         if (table === 'reviews') {
           return {
             select: mockSelect,
@@ -301,9 +301,9 @@ describe('ReviewService', () => {
         }
         if (table === 'review_likes') {
           return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                in: jest.fn().mockResolvedValue({ data: [], error: null }),
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                in: vi.fn().mockResolvedValue({ data: [], error: null }),
               }),
             }),
           };
@@ -325,23 +325,23 @@ describe('ReviewService', () => {
       ];
 
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({
           data: mockReviews,
           error: null,
           count: 1,
         }),
-        select: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
       };
 
-      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+      (supabase.from as vi.Mock).mockImplementation((table: string) => {
         if (table === 'reviews') return mockQuery;
         if (table === 'review_likes') {
           return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                in: jest.fn().mockResolvedValue({
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                in: vi.fn().mockResolvedValue({
                   data: [{ review_id: mockReviewId }],
                   error: null,
                 }),
@@ -363,17 +363,17 @@ describe('ReviewService', () => {
       ];
 
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({
           data: mockReviews,
           error: null,
           count: 1,
         }),
-        select: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.getReviewsByRacket(mockRacketId, {});
 
@@ -388,17 +388,17 @@ describe('ReviewService', () => {
       ];
 
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        order: jest.fn().mockReturnThis(),
-        range: jest.fn().mockResolvedValue({
+        eq: vi.fn().mockReturnThis(),
+        order: vi.fn().mockReturnThis(),
+        range: vi.fn().mockResolvedValue({
           data: mockReviews,
           error: null,
           count: 1,
         }),
-        select: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.getReviewsByUser(mockUserId, 1, 10);
 
@@ -426,33 +426,33 @@ describe('ReviewService', () => {
       ];
 
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
           data: mockReviewWithDetails,
           error: null,
         }),
-        select: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
       };
 
       let callCount = 0;
-      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+      (supabase.from as vi.Mock).mockImplementation((table: string) => {
         callCount++;
         if (table === 'reviews') return mockQuery;
         if (table === 'review_comments') {
           return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                order: jest.fn().mockResolvedValue({ data: mockComments, error: null }),
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                order: vi.fn().mockResolvedValue({ data: mockComments, error: null }),
               }),
             }),
           };
         }
         if (table === 'review_likes') {
           return {
-            select: jest.fn().mockReturnValue({
-              eq: jest.fn().mockReturnValue({
-                eq: jest.fn().mockReturnValue({
-                  single: jest.fn().mockResolvedValue({ data: { id: 'like-1' }, error: null }),
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                eq: vi.fn().mockReturnValue({
+                  single: vi.fn().mockResolvedValue({ data: { id: 'like-1' }, error: null }),
                 }),
               }),
             }),
@@ -470,15 +470,15 @@ describe('ReviewService', () => {
 
     it('should return null when review not found', async () => {
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
           data: null,
           error: { code: 'PGRST116' },
         }),
-        select: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.getReviewById('non-existent-id');
 
@@ -487,15 +487,15 @@ describe('ReviewService', () => {
 
     it('should return null when there is an error', async () => {
       const mockQuery = {
-        eq: jest.fn().mockReturnThis(),
-        single: jest.fn().mockResolvedValue({
+        eq: vi.fn().mockReturnThis(),
+        single: vi.fn().mockResolvedValue({
           data: null,
           error: { message: 'Not found' },
         }),
-        select: jest.fn().mockReturnThis(),
+        select: vi.fn().mockReturnThis(),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.getReviewById('error-id');
 
@@ -513,16 +513,16 @@ describe('ReviewService', () => {
 
     it('should create a new review', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({ data: null, error: null }),
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({ data: null, error: null }),
             }),
           }),
         }),
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: mockReview,
               error: null,
             }),
@@ -530,7 +530,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.createReview(mockUserId, createReviewDTO);
 
@@ -539,16 +539,16 @@ describe('ReviewService', () => {
 
     it('should throw error when user already has a review for this racket', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({ data: { id: 'existing' }, error: null }),
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({ data: { id: 'existing' }, error: null }),
             }),
           }),
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       await expect(
         ReviewService.createReview(mockUserId, createReviewDTO)
@@ -565,18 +565,18 @@ describe('ReviewService', () => {
 
     it('should update review when user is owner', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: { user_id: mockUserId },
               error: null,
             }),
           }),
         }),
-        update: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            select: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
+        update: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            select: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
                 data: { ...mockReview, ...updateDTO },
                 error: null,
               }),
@@ -585,7 +585,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.updateReview(mockReviewId, mockUserId, updateDTO);
 
@@ -595,9 +595,9 @@ describe('ReviewService', () => {
 
     it('should throw error when user is not the owner', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: { user_id: 'different-user' },
               error: null,
             }),
@@ -605,7 +605,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       await expect(
         ReviewService.updateReview(mockReviewId, mockUserId, updateDTO)
@@ -614,9 +614,9 @@ describe('ReviewService', () => {
 
     it('should throw error when review not found', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: null,
               error: null,
             }),
@@ -624,7 +624,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       await expect(
         ReviewService.updateReview(mockReviewId, mockUserId, updateDTO)
@@ -635,29 +635,29 @@ describe('ReviewService', () => {
   describe('deleteReview', () => {
     it('should delete review when user is owner', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: { user_id: mockUserId },
               error: null,
             }),
           }),
         }),
-        delete: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({ error: null }),
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       await expect(ReviewService.deleteReview(mockReviewId, mockUserId)).resolves.not.toThrow();
     });
 
     it('should throw error when user is not the owner', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: { user_id: 'different-user' },
               error: null,
             }),
@@ -665,7 +665,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       await expect(
         ReviewService.deleteReview(mockReviewId, mockUserId)
@@ -676,20 +676,20 @@ describe('ReviewService', () => {
   describe('toggleLike', () => {
     it('should add like when it does not exist', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
                 data: null,
                 error: null,
               }),
             }),
           }),
         }),
-        insert: jest.fn().mockResolvedValue({ error: null }),
+        insert: vi.fn().mockResolvedValue({ error: null }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.toggleLike(mockReviewId, mockUserId);
 
@@ -698,22 +698,22 @@ describe('ReviewService', () => {
 
     it('should remove like when it exists', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            eq: jest.fn().mockReturnValue({
-              single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({
                 data: { id: 'like-123' },
                 error: null,
               }),
             }),
           }),
         }),
-        delete: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({ error: null }),
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.toggleLike(mockReviewId, mockUserId);
 
@@ -736,9 +736,9 @@ describe('ReviewService', () => {
       };
 
       const mockQuery = {
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: mockComment,
               error: null,
             }),
@@ -746,7 +746,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.addComment(mockReviewId, mockUserId, commentDTO);
 
@@ -762,9 +762,9 @@ describe('ReviewService', () => {
       ];
 
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({
               data: mockComments,
               error: null,
             }),
@@ -772,7 +772,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       const result = await ReviewService.getComments(mockReviewId);
 
@@ -783,29 +783,29 @@ describe('ReviewService', () => {
   describe('deleteComment', () => {
     it('should delete comment when user is owner', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: { user_id: mockUserId },
               error: null,
             }),
           }),
         }),
-        delete: jest.fn().mockReturnValue({
-          eq: jest.fn().mockResolvedValue({ error: null }),
+        delete: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       await expect(ReviewService.deleteComment('comment-1', mockUserId)).resolves.not.toThrow();
     });
 
     it('should throw error when user is not the owner', async () => {
       const mockQuery = {
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: { user_id: 'different-user' },
               error: null,
             }),
@@ -813,7 +813,7 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as jest.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
       await expect(
         ReviewService.deleteComment('comment-1', mockUserId)

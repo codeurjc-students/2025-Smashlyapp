@@ -2,17 +2,17 @@ import { AdminController } from "../../../src/controllers/adminController";
 import { storeService } from "../../../src/services/storeService";
 import { supabase } from "../../../src/config/supabase";
 
-jest.mock("../../../src/services/storeService", () => ({
+vi.mock("../../../src/services/storeService", () => ({
   storeService: {
-    getAllStores: jest.fn(),
-    verifyStore: jest.fn(),
-    rejectStore: jest.fn(),
+    getAllStores: vi.fn(),
+    verifyStore: vi.fn(),
+    rejectStore: vi.fn(),
   },
 }));
 
-jest.mock("../../../src/config/supabase", () => ({
+vi.mock("../../../src/config/supabase", () => ({
   supabase: {
-    from: jest.fn(),
+    from: vi.fn(),
   },
 }));
 
@@ -20,8 +20,8 @@ describe("AdminController", () => {
   const createMockRes = () => {
     const res: any = {};
     res.statusCode = 200;
-    res.json = jest.fn(() => res);
-    res.status = jest.fn((code: number) => {
+    res.json = vi.fn(() => res);
+    res.status = vi.fn((code: number) => {
       res.statusCode = code;
       return res;
     });
@@ -37,12 +37,12 @@ describe("AdminController", () => {
   }) as any;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getMetrics", () => {
     it("returns aggregated metrics successfully", async () => {
-      (supabase.from as jest.Mock).mockImplementation((table: string) => {
+      (supabase.from as vi.Mock).mockImplementation((table: string) => {
         return {
           select: (columns: string, options?: any) => {
             // Base counts for direct table count queries
@@ -80,7 +80,7 @@ describe("AdminController", () => {
       await AdminController.getMetrics(req, res);
 
       expect(res.statusCode).toBe(200);
-      const payload = (res.json as jest.Mock).mock.calls[0][0];
+      const payload = (res.json as vi.Mock).mock.calls[0][0];
       expect(payload.success).toBe(true);
       expect(payload.data).toMatchObject({
         totalUsers: 10,
@@ -100,9 +100,9 @@ describe("AdminController", () => {
       const users = [
         { id: "u1", email: "u1@test.com", nickname: "u1", role: "player" },
       ];
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         select: () => ({
-          order: jest.fn().mockResolvedValue({ data: users, error: null }),
+          order: vi.fn().mockResolvedValue({ data: users, error: null }),
         }),
       }));
 
@@ -133,11 +133,11 @@ describe("AdminController", () => {
 
     it("updates role successfully", async () => {
       const updatedUser = { id: "u1", role: "admin" };
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         update: () => ({
           eq: () => ({
             select: () => ({
-              single: jest.fn().mockResolvedValue({ data: updatedUser, error: null }),
+              single: vi.fn().mockResolvedValue({ data: updatedUser, error: null }),
             }),
           }),
         }),
@@ -169,9 +169,9 @@ describe("AdminController", () => {
     });
 
     it("deletes user successfully", async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
         delete: () => ({
-          eq: jest.fn().mockResolvedValue({ error: null }),
+          eq: vi.fn().mockResolvedValue({ error: null }),
         }),
       }));
 
@@ -204,7 +204,7 @@ describe("AdminController", () => {
   describe("getStoreRequests", () => {
     it("returns pending stores", async () => {
       const stores = [{ id: "s1", verified: false }];
-      (storeService.getAllStores as jest.Mock).mockResolvedValue(stores);
+      (storeService.getAllStores as vi.Mock).mockResolvedValue(stores);
       const req = createMockReq({ user: { id: "admin-1", role: "admin" } });
       const res = createMockRes();
 
@@ -221,7 +221,7 @@ describe("AdminController", () => {
   describe("verifyStore", () => {
     it("verifies store successfully", async () => {
       const store = { id: "s1", verified: true };
-      (storeService.verifyStore as jest.Mock).mockResolvedValue(store);
+      (storeService.verifyStore as vi.Mock).mockResolvedValue(store);
       const req = createMockReq({ params: { id: "s1" }, user: { id: "admin-1", role: "admin" } });
       const res = createMockRes();
 
@@ -237,7 +237,7 @@ describe("AdminController", () => {
 
   describe("rejectStore", () => {
     it("rejects store successfully", async () => {
-      (storeService.rejectStore as jest.Mock).mockResolvedValue(undefined);
+      (storeService.rejectStore as vi.Mock).mockResolvedValue(undefined);
       const req = createMockReq({ params: { id: "s1" }, user: { id: "admin-1", role: "admin" } });
       const res = createMockRes();
 

@@ -5,11 +5,11 @@ import type { RequestWithUser } from '../../types';
 function createMockRes(): Partial<Response> & { body?: any; statusCode: number } {
   const res: any = {};
   res.statusCode = 200;
-  res.status = jest.fn((code: number) => {
+  res.status = vi.fn((code: number) => {
     res.statusCode = code;
     return res;
   });
-  res.json = jest.fn((payload: any) => {
+  res.json = vi.fn((payload: any) => {
     res.body = payload;
     return res;
   });
@@ -20,7 +20,7 @@ describe('requireAdmin middleware', () => {
   it('returns 401 when user is not authenticated', () => {
     const req = { user: undefined } as RequestWithUser;
     const res = createMockRes();
-    const next: NextFunction = jest.fn();
+    const next: NextFunction = vi.fn();
 
     requireAdmin(req, res as Response, next);
 
@@ -33,7 +33,7 @@ describe('requireAdmin middleware', () => {
   it('returns 403 when user is not admin', () => {
     const req = { user: { id: 'u1', email: 'user@test.com', role: 'player' } } as RequestWithUser;
     const res = createMockRes();
-    const next: NextFunction = jest.fn();
+    const next: NextFunction = vi.fn();
 
     requireAdmin(req, res as Response, next);
 
@@ -46,7 +46,7 @@ describe('requireAdmin middleware', () => {
   it('calls next when user is admin', () => {
     const req = { user: { id: 'u1', email: 'admin@test.com', role: 'admin' } } as RequestWithUser;
     const res = createMockRes();
-    const next: NextFunction = jest.fn();
+    const next: NextFunction = vi.fn();
 
     requireAdmin(req, res as Response, next);
 

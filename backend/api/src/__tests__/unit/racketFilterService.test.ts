@@ -2,11 +2,11 @@ import { RacketFilterService } from '../../../src/services/racketFilterService';
 import { Racket } from '../../../src/types/racket';
 
 // Mock logger
-jest.mock('../../../src/config/logger', () => ({
-  info: jest.fn(),
-  warn: jest.fn(),
-  debug: jest.fn(),
-  error: jest.fn(),
+vi.mock('../../../src/config/logger', () => ({
+  info: vi.fn(),
+  warn: vi.fn(),
+  debug: vi.fn(),
+  error: vi.fn(),
 }));
 
 describe('RacketFilterService', () => {
