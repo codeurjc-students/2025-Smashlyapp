@@ -95,10 +95,9 @@ export class ReviewService {
       case 'rating_low':
         query = query.order('rating', { ascending: true });
         break;
-      // TODO: Implement likes count functionality
-      // case "most_liked":
-      //   query = query.order("likes_count", { ascending: false });
-      //   break;
+      case 'most_liked':
+        query = query.order('likes_count', { ascending: false });
+        break;
       case 'recent':
       default:
         query = query.order('created_at', { ascending: false });

@@ -53,7 +53,7 @@ export class GeminiService {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         console.log(`Intento ${attempt + 1} de ${maxRetries} para generar comparación...`);
-        
+
         // Una única llamada a la API para obtener ambos resultados
         const result = await this.model.generateContent(combinedPrompt);
         const response = await result.response;
@@ -67,10 +67,10 @@ export class GeminiService {
       } catch (error: any) {
         lastError = error;
         const errorMessage = error.message || 'Error desconocido';
-        
+
         // Verificar si es un error de sobrecarga (503) o rate limit (429)
-        const isRetryableError = 
-          errorMessage.includes('503') || 
+        const isRetryableError =
+          errorMessage.includes('503') ||
           errorMessage.includes('overloaded') ||
           errorMessage.includes('429') ||
           errorMessage.includes('rate limit');
@@ -80,9 +80,9 @@ export class GeminiService {
           const waitTime = Math.pow(2, attempt) * 1000;
           console.warn(
             `Gemini API temporalmente no disponible (intento ${attempt + 1}/${maxRetries}). ` +
-            `Reintentando en ${waitTime / 1000}s...`
+              `Reintentando en ${waitTime / 1000}s...`
           );
-          
+
           // Esperar antes de reintentar
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
@@ -268,6 +268,12 @@ JSON (sin markdown):
       .replace(/```json\n?/g, '')
       .replace(/```\n?/g, '')
       .trim();
+
+    // Extraer solo la parte del array JSON si hay texto adicional
+    const jsonArrayMatch = metricsText.match(/\[[\s\S]*\]/);
+    if (jsonArrayMatch) {
+      metricsText = jsonArrayMatch[0];
+    }
 
     let metrics: RacketMetrics[];
     try {

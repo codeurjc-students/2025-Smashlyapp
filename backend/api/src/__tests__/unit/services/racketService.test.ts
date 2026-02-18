@@ -13,6 +13,8 @@ vi.mock('@config/supabase', () => ({
       limit: vi.fn().mockReturnThis(),
       single: vi.fn().mockReturnThis(),
       not: vi.fn().mockReturnThis(),
+      in: vi.fn().mockReturnThis(),
+      update: vi.fn().mockReturnThis(),
     })),
   },
 }));

@@ -223,7 +223,9 @@ export class OpenRouterService {
     const geminiKey = process.env.GEMINI_API_KEY;
     if (!geminiKey) {
       logger.error('❌ GEMINI_API_KEY missing in environment variables');
-      throw new Error('Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas');
+      throw new Error(
+        'Error al generar contenido con IA: Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas'
+      );
     }
 
     try {
@@ -363,7 +365,9 @@ export class OpenRouterService {
     const geminiKey = process.env.GEMINI_API_KEY;
     if (!geminiKey) {
       logger.error('❌ GEMINI_API_KEY missing in environment variables');
-      throw new Error('Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas');
+      throw new Error(
+        'Error al generar la comparación con IA: Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas'
+      );
     }
 
     try {
@@ -388,24 +392,24 @@ export class OpenRouterService {
       return comparisonResult;
     } catch (error: any) {
       logger.error('❌ Gemini comparison fallback failed:', error);
-      
+
       // Intentar una vez más con modelo pro si falla el flash
       try {
-          logger.info('🔄 Retrying with gemini-1.5-pro...');
-          const genAI = new GoogleGenerativeAI(geminiKey);
-          const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-          
-          const result = await model.generateContent(prompt);
-          const response = await result.response;
-          const fullText = response.text();
-          
-           if (!fullText) throw new Error('Empty response from Gemini Pro');
-           
-           const comparisonResult = this.parseStructuredResponse(fullText, rackets);
-           logger.info('✅ Comparison generated successfully with Gemini Pro fallback');
-           return comparisonResult;
+        logger.info('🔄 Retrying with gemini-1.5-pro...');
+        const genAI = new GoogleGenerativeAI(geminiKey);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+
+        const result = await model.generateContent(prompt);
+        const response = await result.response;
+        const fullText = response.text();
+
+        if (!fullText) throw new Error('Empty response from Gemini Pro');
+
+        const comparisonResult = this.parseStructuredResponse(fullText, rackets);
+        logger.info('✅ Comparison generated successfully with Gemini Pro fallback');
+        return comparisonResult;
       } catch (retryError: any) {
-           throw new Error(`Error al generar la comparación con IA (Gemini): ${error.message}`);
+        throw new Error(`Error al generar la comparación con IA (Gemini): ${error.message}`);
       }
     }
   }

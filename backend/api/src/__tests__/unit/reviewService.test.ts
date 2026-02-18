@@ -73,7 +73,7 @@ describe('ReviewService', () => {
     name: 'Test Racket',
     brand: 'Test Brand',
     model: 'Test Model',
-    image: 'https://example.com/racket.jpg',
+    images: ['https://example.com/racket.jpg'],
   };
 
   beforeEach(() => {
@@ -101,7 +101,7 @@ describe('ReviewService', () => {
         nombre: mockRacket.name,
         marca: mockRacket.brand,
         modelo: mockRacket.model,
-        imagen: mockRacket.image,
+        imagen: mockRacket.images,
       });
     });
 
@@ -230,11 +230,7 @@ describe('ReviewService', () => {
     });
 
     it('should calculate average rating correctly', () => {
-      const reviews = [
-        { rating: 5 },
-        { rating: 4 },
-        { rating: 3 },
-      ];
+      const reviews = [{ rating: 5 }, { rating: 4 }, { rating: 3 }];
 
       const result = ReviewService['calculateStats'](reviews);
 
@@ -243,11 +239,7 @@ describe('ReviewService', () => {
     });
 
     it('should round average rating to 1 decimal', () => {
-      const reviews = [
-        { rating: 5 },
-        { rating: 4 },
-        { rating: 4 },
-      ];
+      const reviews = [{ rating: 5 }, { rating: 4 }, { rating: 4 }];
 
       const result = ReviewService['calculateStats'](reviews);
 
@@ -278,9 +270,7 @@ describe('ReviewService', () => {
 
   describe('getReviewsByRacket', () => {
     it('should get reviews with pagination and filters', async () => {
-      const mockReviews = [
-        { ...mockReview, user: mockUser, racket: mockRacket },
-      ];
+      const mockReviews = [{ ...mockReview, user: mockUser, racket: mockRacket }];
 
       const mockQueryBuilder = {
         eq: vi.fn().mockReturnThis(),
@@ -321,9 +311,7 @@ describe('ReviewService', () => {
     });
 
     it('should include user like information when userId is provided', async () => {
-      const mockReviews = [
-        { ...mockReview, user: mockUser, racket: mockRacket },
-      ];
+      const mockReviews = [{ ...mockReview, user: mockUser, racket: mockRacket }];
 
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
@@ -359,9 +347,7 @@ describe('ReviewService', () => {
     });
 
     it('should set user_has_liked to false when userId not provided', async () => {
-      const mockReviews = [
-        { ...mockReview, user: mockUser, racket: mockRacket },
-      ];
+      const mockReviews = [{ ...mockReview, user: mockUser, racket: mockRacket }];
 
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
@@ -384,9 +370,7 @@ describe('ReviewService', () => {
 
   describe('getReviewsByUser', () => {
     it('should get reviews by user with pagination', async () => {
-      const mockReviews = [
-        { ...mockReview, user: mockUser, racket: mockRacket },
-      ];
+      const mockReviews = [{ ...mockReview, user: mockUser, racket: mockRacket }];
 
       const mockQuery = {
         eq: vi.fn().mockReturnThis(),
@@ -551,9 +535,9 @@ describe('ReviewService', () => {
 
       (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
-      await expect(
-        ReviewService.createReview(mockUserId, createReviewDTO)
-      ).rejects.toThrow('Ya has publicado una review para esta pala');
+      await expect(ReviewService.createReview(mockUserId, createReviewDTO)).rejects.toThrow(
+        'Ya has publicado una review para esta pala'
+      );
     });
   });
 
@@ -608,9 +592,9 @@ describe('ReviewService', () => {
 
       (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
-      await expect(
-        ReviewService.updateReview(mockReviewId, mockUserId, updateDTO)
-      ).rejects.toThrow('No tienes permiso para editar esta review');
+      await expect(ReviewService.updateReview(mockReviewId, mockUserId, updateDTO)).rejects.toThrow(
+        'No tienes permiso para editar esta review'
+      );
     });
 
     it('should throw error when review not found', async () => {
@@ -627,9 +611,9 @@ describe('ReviewService', () => {
 
       (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
-      await expect(
-        ReviewService.updateReview(mockReviewId, mockUserId, updateDTO)
-      ).rejects.toThrow('No tienes permiso para editar esta review');
+      await expect(ReviewService.updateReview(mockReviewId, mockUserId, updateDTO)).rejects.toThrow(
+        'No tienes permiso para editar esta review'
+      );
     });
   });
 
@@ -668,9 +652,9 @@ describe('ReviewService', () => {
 
       (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
-      await expect(
-        ReviewService.deleteReview(mockReviewId, mockUserId)
-      ).rejects.toThrow('No tienes permiso para eliminar esta review');
+      await expect(ReviewService.deleteReview(mockReviewId, mockUserId)).rejects.toThrow(
+        'No tienes permiso para eliminar esta review'
+      );
     });
   });
 
@@ -816,9 +800,9 @@ describe('ReviewService', () => {
 
       (supabase.from as vi.Mock).mockReturnValue(mockQuery);
 
-      await expect(
-        ReviewService.deleteComment('comment-1', mockUserId)
-      ).rejects.toThrow('No tienes permiso para eliminar este comentario');
+      await expect(ReviewService.deleteComment('comment-1', mockUserId)).rejects.toThrow(
+        'No tienes permiso para eliminar este comentario'
+      );
     });
   });
 });
