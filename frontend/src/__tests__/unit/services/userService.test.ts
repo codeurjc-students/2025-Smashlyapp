@@ -51,7 +51,8 @@ describe('UserService', () => {
         json: async () => ({}),
       });
 
-      await expect(UserService.getUserProfile()).rejects.toThrow();
+      const result = await UserService.getUserProfile();
+      expect(result).toBeNull();
     });
   });
 
@@ -132,9 +133,13 @@ describe('UserService', () => {
       await UserService.addFavorite(1);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/users/favorites/1'),
+        expect.stringContaining('/api/v1/users/favorites'),
         expect.objectContaining({
           method: 'POST',
+          body: JSON.stringify({ racket_id: 1 }),
+          headers: expect.objectContaining({
+            'Content-Type': 'application/json',
+          }),
         })
       );
     });

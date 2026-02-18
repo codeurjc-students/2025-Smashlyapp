@@ -163,7 +163,11 @@ describe('ListService', () => {
         expect.stringContaining('/api/v1/lists/list-1/rackets'),
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ racketId: 1 }),
+          body: JSON.stringify({ racket_id: 1 }),
+          headers: expect.objectContaining({
+            Authorization: 'Bearer valid-token',
+            'Content-Type': 'application/json',
+          }),
         })
       );
     });

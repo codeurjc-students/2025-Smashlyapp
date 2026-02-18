@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { AdminController } from "../../../src/controllers/adminController";
 import { storeService } from "../../../src/services/storeService";
 import { supabase } from "../../../src/config/supabase";

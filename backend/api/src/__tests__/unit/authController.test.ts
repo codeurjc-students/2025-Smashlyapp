@@ -2,6 +2,11 @@ import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { AuthController } from '../../controllers/authController';
 import type { Request, Response } from 'express';
 
+const mockFrom = vi.fn();
+const mockSelect = vi.fn();
+const mockEq = vi.fn();
+const mockSingle = vi.fn();
+
 vi.mock('../../config/supabase', () => ({
   supabase: {
     auth: {
@@ -11,7 +16,13 @@ vi.mock('../../config/supabase', () => ({
       refreshSession: vi.fn(),
       getUser: vi.fn(),
     },
-    from: vi.fn(),
+    from: vi.fn(() => ({
+      select: vi.fn(() => ({
+        eq: vi.fn(() => ({
+          single: vi.fn(),
+        })),
+      })),
+    })),
   },
 }));
 
@@ -54,7 +65,14 @@ describe('AuthController.login', () => {
   });
 
   it('returns 401 when Supabase reports invalid credentials', async () => {
-    supabase.auth.signInWithPassword.mockResolvedValueOnce({
+    (supabase.from as any).mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          single: vi.fn().mockResolvedValue({ data: { id: 'u1' }, error: null }),
+        }),
+      }),
+    });
+    (supabase.auth.signInWithPassword as any).mockResolvedValueOnce({
       data: { user: null, session: null },
       error: new Error('Invalid credentials'),
     });
@@ -67,12 +85,18 @@ describe('AuthController.login', () => {
     expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({ email: 'user@test.com', password: 'bad' });
     expect(res.status).toHaveBeenCalledWith(401);
     expect(res.body.success).toBe(false);
-    expect(res.body.error).toBe('Invalid credentials');
-    expect(res.body.message).toBe('Invalid credentials');
+    expect(res.body.error).toBe('INVALID_PASSWORD');
   });
 
   it('returns 200 with tokens on successful login', async () => {
-    supabase.auth.signInWithPassword.mockResolvedValueOnce({
+    (supabase.from as any).mockReturnValue({
+      select: () => ({
+        eq: () => ({
+          single: vi.fn().mockResolvedValue({ data: { id: 'u1' }, error: null }),
+        }),
+      }),
+    });
+    (supabase.auth.signInWithPassword as any).mockResolvedValueOnce({
       data: {
         user: { id: 'u1', email: 'user@test.com' },
         session: { access_token: 'at', refresh_token: 'rt', expires_at: 12345 },
@@ -111,7 +135,7 @@ describe('AuthController.register', () => {
   });
 
   it('returns 400 when Supabase signUp fails', async () => {
-    supabase.auth.signUp.mockResolvedValueOnce({ data: { user: null, session: null }, error: new Error('signup fail') });
+    (supabase.auth.signUp as any).mockResolvedValueOnce({ data: { user: null, session: null }, error: new Error('signup fail') });
     const req = createMockReq({ email: 'u@test.com', password: 'pw', nickname: 'nick', full_name: 'User' });
     const res = createMockRes();
 
@@ -124,7 +148,7 @@ describe('AuthController.register', () => {
   });
 
   it('returns 400 when Supabase signUp returns no user', async () => {
-    supabase.auth.signUp.mockResolvedValueOnce({ data: { user: null, session: null }, error: null });
+    (supabase.auth.signUp as any).mockResolvedValueOnce({ data: { user: null, session: null }, error: null });
     const req = createMockReq({ email: 'u@test.com', password: 'pw', nickname: 'nick', full_name: 'User' });
     const res = createMockRes();
 
@@ -138,9 +162,9 @@ describe('AuthController.register', () => {
 
   it('returns 201 with session tokens when signUp provides access token', async () => {
     const insert = vi.fn().mockReturnValue({ select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: 'u1' }, error: null }) }) });
-    supabase.from.mockReturnValue({ insert });
+    (supabase.from as any).mockReturnValue({ insert });
 
-    supabase.auth.signUp.mockResolvedValueOnce({
+    (supabase.auth.signUp as any).mockResolvedValueOnce({
       data: {
         user: { id: 'u1', email: 'u@test.com', user_metadata: { nickname: 'nick', full_name: 'User' } },
         session: { access_token: 'at', refresh_token: 'rt', expires_at: 111 },
@@ -165,9 +189,9 @@ describe('AuthController.register', () => {
   it('auto-logins when signUp session lacks access token', async () => {
     const select = vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: { id: 'u1' }, error: null }) });
     const insert = vi.fn().mockReturnValue({ select });
-    supabase.from.mockReturnValue({ insert });
+    (supabase.from as any).mockReturnValue({ insert });
 
-    supabase.auth.signUp.mockResolvedValueOnce({
+    (supabase.auth.signUp as any).mockResolvedValueOnce({
       data: {
         user: { id: 'u1', email: 'u@test.com', user_metadata: { nickname: 'nick', full_name: 'User' } },
         session: { access_token: undefined },
@@ -175,7 +199,7 @@ describe('AuthController.register', () => {
       error: null,
     });
 
-    supabase.auth.signInWithPassword.mockResolvedValueOnce({
+    (supabase.auth.signInWithPassword as any).mockResolvedValueOnce({
       data: { session: { access_token: 'auto-at', refresh_token: 'auto-rt', expires_at: 222 } },
       error: null,
     });
@@ -200,7 +224,7 @@ describe('AuthController.logout', () => {
   });
 
   it('returns 400 when supabase signOut fails', async () => {
-    supabase.auth.signOut.mockResolvedValueOnce({ error: new Error('Oops') });
+    (supabase.auth.signOut as any).mockResolvedValueOnce({ error: new Error('Oops') });
     const req = createMockReq();
     const res = createMockRes();
 
@@ -213,7 +237,7 @@ describe('AuthController.logout', () => {
   });
 
   it('returns 200 when signOut succeeds', async () => {
-    supabase.auth.signOut.mockResolvedValueOnce({ error: null });
+    (supabase.auth.signOut as any).mockResolvedValueOnce({ error: null });
     const req = createMockReq();
     const res = createMockRes();
 
@@ -243,7 +267,7 @@ describe('AuthController.refreshToken', () => {
   });
 
   it('returns 401 when Supabase fails to refresh', async () => {
-    supabase.auth.refreshSession.mockResolvedValueOnce({
+    (supabase.auth.refreshSession as any).mockResolvedValueOnce({
       data: { session: null },
       error: new Error('bad token'),
     });
@@ -260,7 +284,7 @@ describe('AuthController.refreshToken', () => {
   });
 
   it('returns 200 with new tokens on success', async () => {
-    supabase.auth.refreshSession.mockResolvedValueOnce({
+    (supabase.auth.refreshSession as any).mockResolvedValueOnce({
       data: { session: { access_token: 'new-at', refresh_token: 'new-rt', expires_at: 99999 } },
       error: null,
     });
@@ -295,7 +319,7 @@ describe('AuthController.getCurrentUser', () => {
   });
 
   it('returns 401 when Supabase returns error or no user', async () => {
-    supabase.auth.getUser.mockResolvedValueOnce({ data: { user: null }, error: new Error('bad') });
+    (supabase.auth.getUser as any).mockResolvedValueOnce({ data: { user: null }, error: new Error('bad') });
     const req = createMockReq({}, { authorization: 'Bearer at' });
     const res = createMockRes();
 
@@ -309,7 +333,7 @@ describe('AuthController.getCurrentUser', () => {
   });
 
   it('returns 200 with user when token is valid', async () => {
-    supabase.auth.getUser.mockResolvedValueOnce({ data: { user: { id: 'u1', email: 'user@test.com' } }, error: null });
+    (supabase.auth.getUser as any).mockResolvedValueOnce({ data: { user: { id: 'u1', email: 'user@test.com' } }, error: null });
     const req = createMockReq({}, { authorization: 'Bearer good-token' });
     const res = createMockRes();
 

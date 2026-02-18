@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RecommendationService } from '../../services/recommendationService';
 import { OpenRouterService } from '../../services/openRouterService';
 import { RacketService } from '../../services/racketService';

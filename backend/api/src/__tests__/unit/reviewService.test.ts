@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ReviewService } from '../../../src/services/reviewService';
 import { supabase } from '../../../src/config/supabase';
 import { CreateReviewDTO, UpdateReviewDTO, CreateCommentDTO } from '../../../src/types/review';

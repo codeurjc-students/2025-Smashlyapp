@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { requireAdmin } from '../../middleware/auth';
 import type { Response, NextFunction } from 'express';
 import type { RequestWithUser } from '../../types';

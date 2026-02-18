@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { storeService } from "../../../src/services/storeService";
 import { supabase } from "../../../src/config/supabase";
 
@@ -10,7 +11,7 @@ vi.mock("../../../src/config/supabase", () => ({
 describe("storeService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   describe("createStore", () => {
@@ -177,14 +178,14 @@ describe("storeService", () => {
 
   describe("verifyStore & rejectStore", () => {
     it("verifyStore delegates to updateStore with verified=true", async () => {
-      const spy = jest.spyOn(storeService, "updateStore").mockResolvedValue({ id: "s1", verified: true } as any);
+      const spy = vi.spyOn(storeService, "updateStore").mockResolvedValue({ id: "s1", verified: true } as any);
       const result = await storeService.verifyStore("s1");
       expect(spy).toHaveBeenCalledWith("s1", { verified: true });
       expect((result as any).verified).toBe(true);
     });
 
     it("rejectStore delegates to deleteStore", async () => {
-      const spy = jest.spyOn(storeService, "deleteStore").mockResolvedValue({ success: true } as any);
+      const spy = vi.spyOn(storeService, "deleteStore").mockResolvedValue({ success: true } as any);
       const result = await storeService.rejectStore("s1");
       expect(spy).toHaveBeenCalledWith("s1");
       expect(result).toEqual({ success: true });

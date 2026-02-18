@@ -1,18 +1,18 @@
+import { describe, it, expect, vi } from 'vitest';
 import { RacketService, calculateBestPrice, processRacketData } from '@services/racketService';
 import { supabase } from '@config/supabase';
 
-// Mockear supabase para evitar llamadas reales a la base de datos
-jest.mock('@config/supabase', () => ({
+vi.mock('@config/supabase', () => ({
   supabase: {
-    from: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      or: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      range: jest.fn().mockReturnThis(),
-      limit: jest.fn().mockReturnThis(),
-      single: jest.fn().mockReturnThis(),
-      not: jest.fn().mockReturnThis(),
+    from: vi.fn(() => ({
+      select: vi.fn().mockReturnThis(),
+      eq: vi.fn().mockReturnThis(),
+      or: vi.fn().mockReturnThis(),
+      order: vi.fn().mockReturnThis(),
+      range: vi.fn().mockReturnThis(),
+      limit: vi.fn().mockReturnThis(),
+      single: vi.fn().mockReturnThis(),
+      not: vi.fn().mockReturnThis(),
     })),
   },
 }));

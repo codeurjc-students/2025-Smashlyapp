@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Response } from 'express';
 import { RequestWithUser } from '../../../src/types';
 import { storeController } from '../../../src/controllers/storeController';
@@ -5,9 +6,11 @@ import { storeService } from '../../../src/services/storeService';
 
 vi.mock('../../../src/services/storeService');
 vi.mock('../../../src/config/logger', () => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
+  default: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 describe('storeController', () => {

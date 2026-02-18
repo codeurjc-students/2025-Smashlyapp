@@ -1,12 +1,15 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RacketFilterService } from '../../../src/services/racketFilterService';
 import { Racket } from '../../../src/types/racket';
 
 // Mock logger
 vi.mock('../../../src/config/logger', () => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  debug: vi.fn(),
-  error: vi.fn(),
+  default: {
+    info: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
+    error: vi.fn(),
+  },
 }));
 
 describe('RacketFilterService', () => {

@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UserController } from "../../../src/controllers/userController";
 import { UserService } from "../../../src/services/userService";
 

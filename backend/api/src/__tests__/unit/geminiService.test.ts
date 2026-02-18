@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GeminiService } from '../../../src/services/geminiService';
 import { Racket } from '../../../src/types/racket';
 
@@ -79,7 +80,7 @@ describe('GeminiService', () => {
     preferences: 'Control y potencia equilibrados',
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Save original env
     const originalEnv = process.env.GEMINI_API_KEY;
 
@@ -139,7 +140,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
 
     it('should warn but initialize when GEMINI_API_KEY is not set', () => {
       delete process.env.GEMINI_API_KEY;
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation();
       const newService = new GeminiService();
       expect(newService).toBeInstanceOf(GeminiService);
       expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -396,7 +397,7 @@ Comparison text.
     it('should return default metrics when JSON parsing fails', async () => {
       process.env.GEMINI_API_KEY = 'test-api-key';
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       const invalidJsonResponse = `
 Comparison text.
@@ -430,7 +431,7 @@ This is not valid JSON at all.
     it('should handle response with no JSON at all', async () => {
       process.env.GEMINI_API_KEY = 'test-api-key';
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation();
 
       const textOnlyResponse = `
 # Comparison Analysis

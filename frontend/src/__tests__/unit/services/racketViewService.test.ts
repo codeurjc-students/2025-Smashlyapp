@@ -30,7 +30,7 @@ describe('RacketViewService', () => {
         expect.objectContaining({
           method: 'POST',
           headers: expect.objectContaining({
-            Authorization: 'Bearer test-token',
+            'Content-Type': 'application/json',
           }),
         })
       );

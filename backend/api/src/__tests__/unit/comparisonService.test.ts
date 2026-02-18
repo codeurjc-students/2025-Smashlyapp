@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComparisonService } from '../../services/comparisonService';
 import { supabase } from '../../config/supabase';
 

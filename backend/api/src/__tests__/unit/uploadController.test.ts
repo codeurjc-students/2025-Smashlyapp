@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Response } from 'express';
 import { RequestWithUser } from '../../../src/types';
 import { UploadController } from '../../../src/controllers/uploadController';
@@ -12,11 +13,15 @@ vi.mock('../../../src/config/supabase', () => ({
   },
 }));
 
-vi.mock('../../../src/config/logger', () => ({
-  info: vi.fn(),
-  warn: vi.fn(),
-  error: vi.fn(),
-}));
+vi.mock('../../../src/config/logger', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  };
+});
 
 describe('UploadController', () => {
   let mockReq: Partial<RequestWithUser>;
