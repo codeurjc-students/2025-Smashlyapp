@@ -1,6 +1,7 @@
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import { AuthController } from '../../controllers/authController';
 import type { Request, Response } from 'express';
+import { supabase } from '../../config/supabase';
 
 const mockFrom = vi.fn();
 const mockSelect = vi.fn();
@@ -25,8 +26,6 @@ vi.mock('../../config/supabase', () => ({
     })),
   },
 }));
-
-const { supabase } = await import('../../config/supabase');
 
 function createMockReq(body: any = {}, headers: Record<string, string> = {}): Partial<Request> {
   return { body, headers };
