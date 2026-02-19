@@ -1436,58 +1436,6 @@
             }
         ]
     },
-    "unknown-nox-at10-genius-attack-12k-alum-xtreme-2026-by-agustin-tapia-pala": {
-        "id": "unknown-nox-at10-genius-attack-12k-alum-xtreme-2026-by-agustin-tapia-pala",
-        "brand": "Nox",
-        "model": "NOX AT10 GENIUS ATTACK 12K ALUM XTREME 2026",
-        "description": null,
-        "specs": {
-            "Género": "Unisex",
-            "Nivel": "Avanzado",
-            "Tipo de juego": "Potencia",
-            "Forma": "Diamante",
-            "Peso": "360-375 g",
-            "Marco": "Carbono",
-            "Núcleo": "HR3",
-            "Cara": "Carbono 12K",
-            "Temporada": "2026",
-            "SKU": "PAT10GENIUSAT1226",
-            "Ean13": "8435778902669",
-            "Balance": "Alto"
-        },
-        "images": [
-            "https://padelmarket.com/cdn/shop/files/NOXAT10GENIUSAttack12KAlumXtreme2026byAGUSTINTAPIA_Pala_1.jpg?v=1758616463",
-            "https://padelmarket.com/cdn/shop/files/NOXAT10GENIUSAttack12KAlumXtreme2026byAGUSTINTAPIA_Pala_2.jpg?v=1758616463",
-            "https://padelmarket.com/cdn/shop/files/NOXAT10GENIUSAttack12KAlumXtreme2026byAGUSTINTAPIA_Pala_3.jpg?v=1758616464",
-            "https://padelmarket.com/cdn/shop/files/NOXAT10GENIUSAttack12KAlumXtreme2026byAGUSTINTAPIA_Pala_4.jpg?v=1758616464",
-            "https://padelmarket.com/cdn/shop/files/NOXAT10GENIUSAttack12KAlumXtreme2026byAGUSTINTAPIA_Pala_5.jpg?v=1758616464",
-            "https://padelmarket.com/cdn/shop/files/NOXAT10GENIUSAttack12KAlumXtreme2026byAGUSTINTAPIA_Pala_6.jpg?v=1758616464",
-            "https://padelmarket.com/cdn/shop/files/NOXAT10GENIUSAttack12KAlumXtreme2026byAGUSTINTAPIA_Pala_7.jpg?v=1758616463",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/at.webp?v=1761030874",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/at1.webp?v=1762247797",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/at6.webp?v=1762247797",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/at4.webp?v=1762247797",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/at2.webp?v=1762247797"
-        ],
-        "prices": [
-            {
-                "store": "padelmarket",
-                "price": 323.95,
-                "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/nox-at10-genius-attack-12k-alum-xtreme-2026-by-agustin-tapia-pala",
-                "currency": "EUR",
-                "last_updated": "2026-02-12T10:32:58.269953"
-            },
-            {
-                "store": "padelproshop",
-                "price": 323.95,
-                "original_price": 359.95,
-                "url": "https://padelproshop.com/products/pala-nox-at10-genius-attack-12k-alum-xtrem-by-agustin-tapia-2026",
-                "currency": "EUR",
-                "last_updated": "2026-02-13T08:39:47.231965"
-            }
-        ]
-    },
     "unknown-nox-ea10-ventus-attack-12k-xtreme-2026-by-edu-alonso-pala": {
         "id": "unknown-nox-ea10-ventus-attack-12k-xtreme-2026-by-edu-alonso-pala",
         "brand": "Nox",
@@ -6926,6 +6874,13 @@
                 "url": "https://www.padelnuestro.com/pala-nox-quantum-12k-cobalt-pluxqcob25",
                 "currency": "EUR",
                 "last_updated": "2026-02-13T08:51:45.032267"
+            },{
+                "store": "padelproshop",
+                "price": 161.46,
+                "original_price": 339.99,
+                "url": "https://padelproshop.com/products/pala-nox-quantum-12k-cobalt",
+                "currency": "EUR",
+                "last_updated": "2026-02-13T08:46:36.495285"
             }
         ]
     },
@@ -14634,41 +14589,6 @@
             }
         ]
     },
-    "unknown-nox-future-attack-12k-alum-nfa-series-2025-pala": {
-        "id": "unknown-nox-future-attack-12k-alum-nfa-series-2025-pala",
-        "brand": "Nox",
-        "model": "NOX FUTURE ATTACK 12K ALUM NFA SERIES 2025",
-        "description": "",
-        "specs": {
-            "Género": "Unisex",
-            "Nivel": "Avanzado",
-            "Tipo de juego": "Polivalente",
-            "Forma": "Diamante",
-            "Peso": "360-375 gr",
-            "Marco": "Carbono",
-            "Núcleo": "EV50",
-            "Cara": "Carbono 12K",
-            "Temporada": "2025",
-            "SKU": "PFUTATT25",
-            "Ean13": "8435778900689"
-        },
-        "images": [
-            "https://padelmarket.com/cdn/shop/files/NOXFUTUREAttack12KAlum2025_Pala_1.jpg?v=1742473984",
-            "https://padelmarket.com/cdn/shop/files/NOXFUTUREAttack12KAlum2025_Pala_2.jpg?v=1742473983",
-            "https://padelmarket.com/cdn/shop/files/NOXFUTUREAttack12KAlum2025_Pala_3.jpg?v=1742473983",
-            "https://padelmarket.com/cdn/shop/files/NOXFUTUREAttack12KAlum2025_Pala_4.jpg?v=1742473984"
-        ],
-        "prices": [
-            {
-                "store": "padelmarket",
-                "price": 169.95,
-                "original_price": null,
-                "url": "https://padelmarket.com/es-eu/products/nox-future-attack-12k-alum-2025-pala",
-                "currency": "EUR",
-                "last_updated": "2026-02-10T16:39:18.721710"
-            }
-        ]
-    },
     "unknown-nox-ml10-quantum-3k-2025-by-miguel-lamperti-pala": {
         "id": "unknown-nox-ml10-quantum-3k-2025-by-miguel-lamperti-pala",
         "brand": "Nox",
@@ -16591,55 +16511,7 @@
             }
         ]
     },
-    "adidas-pala-adidas-metalbone-youth-34-2025": {
-        "id": "adidas-pala-adidas-metalbone-youth-34-2025",
-        "brand": "Adidas",
-        "model": "Adidas Metalbone Youth 3.4 2025",
-        "description": "",
-        "specs": {
-            "Balance": "Perfecto",
-            "Forma": "Diamante",
-            "Peso": "330-345 g",
-            "Núcleo": "EVA De Baja Densidad",
-            "Cara": "Fibra De Vidrio",
-            "Dureza": "Blanda",
-            "Nivel": "Principiante / Intermedio",
-            "Rugosidad": "Lisa",
-            "Tipo de Juego": "Potencia"
-        },
-        "images": [
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/yo5.webp?v=1760981216",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/yo4.webp?v=1760981223",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/yo3.webp?v=1760981231",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/yo1.webp?v=1760981238",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/yo.webp?v=1760981244",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/113690-pala-adidas-metalbone-youth-3-4-ar4aa0u221500x1500-1.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/113690-pala-adidas-metalbone-youth-3-4-ar4aa0u221500x1500-2.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/113690-pala-adidas-metalbone-youth-3-4-ar4aa0u221500x1500-3.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/113690-pala-adidas-metalbone-youth-3-4-ar4aa0u221500x1500-4.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/113690-pala-adidas-metalbone-youth-3-4-ar4aa0u221500x1500-5.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/113690-pala-adidas-metalbone-youth-3-4-ar4aa0u221500x1500-6.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/113690-pala-adidas-metalbone-youth-3-4-ar4aa0u221500x1500-7.jpg"
-        ],
-        "prices": [
-            {
-                "store": "padelproshop",
-                "price": 79.0,
-                "original_price": 114.95,
-                "url": "https://padelproshop.com/products/pala-adidas-metalbone-youth-3-4",
-                "currency": "EUR",
-                "last_updated": "2026-02-13T08:43:34.115834"
-            },
-            {
-                "store": "padelnuestro",
-                "price": 74.95,
-                "original_price": 115.0,
-                "url": "https://www.padelnuestro.com/pala-adidas-metalbone-youth-3-4-ar4aa0u22",
-                "currency": "EUR",
-                "last_updated": "2026-02-12T10:34:45.093100"
-            }
-        ]
-    },
+    
     "adidas-pala-adidas-drive-black-34-2025": {
         "id": "adidas-pala-adidas-drive-black-34-2025",
         "brand": "Adidas",
@@ -20548,6 +20420,13 @@
                 "url": "https://padelmarket.com/es-eu/products/nox-future-hybrid-12k-alum-2025-pala",
                 "currency": "EUR",
                 "last_updated": "2026-02-10T16:39:28.844369"
+            },{
+                "store": "padelnuestro",
+                "price": 174.95,
+                "original_price": null,
+                "url": "https://www.padelnuestro.com/pala-nox-future-hybrid-12k-alum-pfuthyb25",
+                "currency": "EUR",
+                "last_updated": "2026-02-10T16:47:58.315015"
             }
         ]
     },
@@ -21344,30 +21223,6 @@
                 "url": "https://www.padelnuestro.com/pala-drop-shot-canyon-pro-attack-1-5-dp324025",
                 "currency": "EUR",
                 "last_updated": "2026-02-13T08:58:18.329946"
-            }
-        ]
-    },
-    "nox-pala-nox-quantum-12k-cobalt": {
-        "id": "nox-pala-nox-quantum-12k-cobalt",
-        "brand": "Nox",
-        "model": "Nox Quantum 12K Cobalt",
-        "description": "",
-        "specs": {},
-        "images": [
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaNoxQuantum12KCobalt_1.webp?v=1761046199",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaNoxQuantum12KCobalt_2.webp?v=1761046205",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaNoxQuantum12KCobalt_3.webp?v=1761046211",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaNoxQuantum12KCobalt_4.webp?v=1761046218",
-            "https://cdn.shopify.com/s/files/1/0763/9577/4257/files/PalaNoxQuantum12KCobalt_5.webp?v=1761046225"
-        ],
-        "prices": [
-            {
-                "store": "padelproshop",
-                "price": 161.46,
-                "original_price": 339.99,
-                "url": "https://padelproshop.com/products/pala-nox-quantum-12k-cobalt",
-                "currency": "EUR",
-                "last_updated": "2026-02-13T08:46:36.495285"
             }
         ]
     },
@@ -29615,60 +29470,6 @@
             }
         ]
     },
-    "nox-nox-ml10-pro-cup-coorp-by-miguel-lamperti": {
-        "id": "nox-nox-ml10-pro-cup-coorp-by-miguel-lamperti",
-        "brand": "Nox",
-        "model": "NOX ML10 PRO CUP COORP",
-        "description": "<h2>Nox ML10 Pro Cup Coorp 2025, la pala de Miguel Lamperti</h2>\n<p>La<strong> ML10 Pro Cup 2025 de Nox </strong>es una pala ic&oacute;nica que ha evolucionado sin perder su esencia. Con <strong>forma redonda y un punto dulce amplio</strong>, garantiza un control excepcional y una salida de bola eficiente. Su n&uacute;cleo HR3 y su construcci&oacute;n con fibra de vidrio Silver y marco de carbono proporcionan un golpeo s&oacute;lido, absorbiendo vibraciones y maximizando el confort.</p>\n<p>Su peso de <strong>360-375 gramos</strong> la hace manejable sin comprometer potencia ni resistencia, por lo que podr&aacute;s jugar largas jornadas sin preocuparte de molestias o posibles lesiones. Control sobresaliente y potencia notable para unas jugadas impresionantes y alta adaptabilidad en la pista.</p>\n<h2>Pala ML10 Pro Cup, para jugadores vers&aacute;tiles</h2>\n<p>Esta <strong>pala redonda Nox </strong>es perfecta para jugadores de cualquier nivel que buscan equilibrio entre control y potencia. Su construcci&oacute;n avanzada ofrece estabilidad en cada golpe y una adaptabilidad total en defensa y ataque.</p>\n<p>Desde jugadores t&eacute;cnicos hasta aquellos que buscan seguridad en su juego, la <strong>pala ML10 Pro Cup</strong>, de la colecci&oacute;n 2025, se convierte en la mejor aliada en la pista. Es una opci&oacute;n vers&aacute;til y fiable para enfrentar con &eacute;xito cualquier desaf&iacute;o en el terreno de juego.</p>\n<h2>Tecnolog&iacute;as innovadoras y materiales de alta calidad</h2>\n<ul>\n<li><strong>Fiber Glass Silver:</strong> Mejora la rigidez y el tacto de los planos</li>\n<li><strong>Smartstrap:</strong> Cord&oacute;n de seguridad intercambiable</li>\n<li><strong>HR3 Core:</strong> N&uacute;cleo de alta densidad con mayor efecto de memoria</li>\n<li><strong>Carbon Frame:</strong> Mayor durabilidad y resistencia en la estructura</li>\n</ul>\n<h3>Domina la Pista con la Nox ML10 Pro Cup 2025</h3>\n<p>La combinaci&oacute;n perfecta de control, potencia y durabilidad hacen de la<strong> pala oficial de Lamperti</strong> en una opci&oacute;n imprescindible para cualquier jugador. Descubre la <strong>pala redonda Nox ML10 Pro Cup 2025</strong> y lleva tu juego al siguiente nivel. &iexcl;Cons&iacute;guela ahora y experimenta su rendimiento incomparable!</p>",
-        "specs": {
-            "Forma": "Redonda",
-            "Peso": "360-375 g",
-            "Balance": "Bajo",
-            "Núcleo": "HR3 Core",
-            "Cara": "Fibra de Vidrio",
-            "Nivel": "Principiante / Intermedio",
-            "Rugosidad": "Lisa",
-            "Tipo de Juego": "Polivalente"
-        },
-        "images": [
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117963-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-pml10pcoor25-1500x1500-1.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117963-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-pml10pcoor25-1500x1500-2.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117963-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-pml10pcoor25-1500x1500-3.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117963-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-pml10pcoor25-1500x1500-4.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117963-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-pml10pcoor25-1500x1500-5.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117963-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-pml10pcoor25-1500x1500-6.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117963-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-pml10pcoor25-1500x1500-7.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista1.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista2.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista3.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista4.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista5.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-pn-smu-1500x1500-vista6.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista7.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista8.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista9.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120495-pala-nox-ml10-pro-cup-coorp-by-miguel-lamperti-ex-smu-1500x1500-vista10.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista1_3c90.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista2_99fe.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista3_617d.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista4_329c.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista5_fd33.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista6_fd8f.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista7_621a.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista8_b183.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/2/5/25420_nox_ml10_pro_cup_coorp_pml10pcoor22_1500x1500_vista9_2bf3.jpg"
-        ],
-        "prices": [
-            {
-                "store": "padelnuestro",
-                "price": 89.95,
-                "original_price": null,
-                "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-coorp-23-31585-p",
-                "currency": "EUR",
-                "last_updated": "2026-02-10T17:04:50.390736"
-            }
-        ]
-    },
     "nox-nox-ml10-pro-cup-rough-surface-edition-23": {
         "id": "nox-nox-ml10-pro-cup-rough-surface-edition-23",
         "brand": "Nox",
@@ -29775,7 +29576,7 @@
                 "store": "padelnuestro",
                 "price": 139.95,
                 "original_price": null,
-                "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-luxury-series-2022-25415-p",
+                "url": "https://www.padelnuestro.com/nox-ml10-pro-cup-luxury-series-ex-pn-pexml10pcoluxpn",
                 "currency": "EUR",
                 "last_updated": "2026-02-10T16:58:30.970283"
             }
@@ -33197,42 +32998,6 @@
                 "url": "https://padelproshop.com/products/metalbone-3-3",
                 "currency": "EUR",
                 "last_updated": "2026-02-13T08:40:29.711246"
-            }
-        ]
-    },
-    "adidas-adidas-metalbone-youth-33-2024": {
-        "id": "adidas-adidas-metalbone-youth-33-2024",
-        "brand": "Adidas",
-        "model": "ADIDAS METALBONE YOUTH 3.3 2024",
-        "description": "<h2>Adidas Metalbone Youth 3.3 2024, pala polivalente para las jóvenes promesas</h2> <p><strong>Adidas Metalbone Youth 3.3</strong>, pala de pádel para los<strong> jugadores más jóvenes </strong>en su etapa de crecimiento más importante. Una pala de la colección <strong>2024</strong>. Esta pala con cuerpo en forma de <strong>diamante <em>oversize</em></strong><em> </em>tiene un punto dulce alto para poder rematar.</p> <p>Este modelo de pala es<em><strong> Light Weight</strong></em>. El peso de la pala es bastante más reducido al peso estándar de una pala de adulto. Ronda los 330-345 gramos para que los jóvenes jugadores de pádel la puedan manejarla con facilidad.</p> <h2>Pala de diamante con fibra de vidrio, potencia y confort</h2> <p>Para poder trabajar golpes rematadores con potencia a la vez que se sienten golpes confortables. El tacto de esta pala es flexible y blando. El marco y las caras se han confeccionado con<strong> fibra de vidrio</strong>.</p> <p>El núcleo de la pala es de <strong>goma EVA <em>Soft Performance</em></strong><em>.</em> Una goma de baja densidad para amortiguar y sacar con rebote la pelota. Permite jugar mejor los tiros del rival que vienen con menor velocidad.</p> <p>Gracias a la tecnología <em><strong>Smart Holes Curve </strong></em>se consigue un mejor manejo y juego de los efectos de la pelota. Esto se consigue con la distribución específica de los troqueles siguiendo como unas líneas curvas en los planos.</p> <h3>Tecnologías diseñadas para una pala fuerte y resistente</h3> <p>Para resistir las torsiones durante el juego la pala se ha diseñado con la tecnología<em> Structural Reinforcement</em>. La estructura de la pala está reforzada perimetralmente. Y para tener una mayor rigidez cuenta con<em><strong> Octogonal Structure</strong></em>, una estructura tubular en forma octogonal.</p> <p>Una pala con un diseño juvenil y deportivo en color negro con vibrantes detalles en rojo y el logo de Adidas en blanco sobre las caras. Si quieres que tu joven jugador de pádel sea el más destacado de la pista no dudes en comprarle esta pala.</p>",
-        "specs": {
-            "Forma": "Diamante",
-            "Peso": "330-345 g",
-            "Núcleo": "La Pala Es De Goma EVA Soft Performance",
-            "Balance": "Alto",
-            "Cara": "Fibra De Vidrio",
-            "Dureza": "Blanda",
-            "Nivel": "Principiante / Intermedio",
-            "Rugosidad": "Lisa",
-            "Tipo de Juego": "Potencia"
-        },
-        "images": [
-            "https://www.padelnuestro.com/media/catalog/product/1/1/110148_padel_webs_padel_y_grupo_pala_adidas_metalbone_youth_3_3_adrk4aa0u0116f__d3bd.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/110148_padel_webs_padel_y_grupo_pala_adidas_metalbone_youth_3_3_adrk4aa0u0116f__29e3.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/110148_padel_webs_padel_y_grupo_pala_adidas_metalbone_youth_3_3_adrk4aa0u0116f__1a47.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/110148_padel_webs_padel_y_grupo_pala_adidas_metalbone_youth_3_3_adrk4aa0u0116f__8444.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/110148_padel_webs_padel_y_grupo_pala_adidas_metalbone_youth_3_3_adrk4aa0u0116f__1af0.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/110148_padel_webs_padel_y_grupo_pala_adidas_metalbone_youth_3_3_adrk4aa0u0116f__f89e.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/110148_padel_webs_padel_y_grupo_pala_adidas_metalbone_youth_3_3_adrk4aa0u0116f__4908.jpg"
-        ],
-        "prices": [
-            {
-                "store": "padelnuestro",
-                "price": 74.95,
-                "original_price": null,
-                "url": "https://www.padelnuestro.com/pala-adidas-metalbone-youth-3-4-ar4aa0u22",
-                "currency": "EUR",
-                "last_updated": "2026-02-10T16:43:36.661926"
             }
         ]
     },
@@ -36932,39 +36697,6 @@
             }
         ]
     },
-    "nox-nox-future-hybrid-12k-alum": {
-        "id": "nox-nox-future-hybrid-12k-alum",
-        "brand": "Nox",
-        "model": "NOX FUTURE HYBRID 12K ALUM",
-        "description": "<h2>Nox Future Hybrid 12k Alum, equilibrio a trav&eacute;s de versatilidad</h2>\n<p>La pala&nbsp;<strong>Future Hybrid 12k Alum </strong>es la nueva pala de 2025 que la marca Nox presenta en forma de l&aacute;grima. Su forma contiene un<strong> punto dulce amplio</strong>, que permitir&aacute; un remate mucho m&aacute;s seguro abarcando cualquier punto de la pala.&nbsp;</p>\n<p>Su peso de entre 360-375 gramos permitir&aacute; una buena estabilidad de la bola mediante un r&aacute;pido y preciso <strong>golpeo </strong>para conseguir un dominio total sin tener que renunciar a otras habilidades. Las innovaciones tecnol&oacute;gicas como el <strong>carbon alum 12k</strong> o la superficie en <strong>3D</strong> completar&aacute; la comodidad y la solidez que pretende aportar esta nueva pala de<strong> Nox </strong>2025.</p>\n<h2>Future Hybrid 12k Alum, para jugadores dominantes</h2>\n<p>La <strong>Future Hybrid 12k Alum </strong>es la herramienta perfecta para aquellos jugadores resolutivos que quieren marcar la diferencia. Esta pala cuenta con los principales materiales que te ayudar&aacute;n a resurgir en cada uno de los<strong> puntos</strong> jugados, ya que est&aacute; destinada a jugadores que barajan todas las actitudes en la pista, tanto en ataque como en defensa.&nbsp;</p>\n<p>Los jugadores que mantienen un <strong>nivel medio-alto</strong> contemplan en esta pala una manera de jugar muy pr&oacute;xima a la elevaci&oacute;n de nivel, consiguiendo formar un equilibrio entre <strong>potencia y control</strong>, que lograr&aacute; mediante la precisi&oacute;n en los golpeos.</p>\n<h2>Dise&ntilde;o y estructura innovadora:</h2>\n<ol>\n<li><strong>Carbon 12k Alum: </strong>su material aportar&aacute; mucha m&aacute;s resistencia para un golpeo</li>\n<li><strong>Superficie: </strong>rugosa y textura 3D, que facilitar&aacute; la estabilidad de la pelota en los efectos marcados</li>\n<li><strong>N&uacute;cleo: </strong>EV50 ayuda a la bola a mejorar su salida con una mayor potencia</li>\n<li><strong>Smartstrap: </strong>sistema que ayuda a la personalizaci&oacute;n de la pala</li>\n<li><strong>Marco:&nbsp;</strong>carbon frame, que aporta mucha m&aacute;s resistencia a la vida &uacute;til de la pala</li>\n<li><strong>Dynamic Composite Structure: </strong>para un fortalecimiento del material</li>\n<li><strong>Custom Grip: </strong>mayor comodidad en los golpeos</li>\n</ol>\n<h3>Marca la diferencia con la pala Nox Future Hybrid 12k Alum</h3>\n<p>Si lo que buscas es una pala que potencie tus movimientos y te permita un ataque talentoso y una buena defensa, la nueva&nbsp;<strong>Nox future Hybrid 12K Alum es ideal&nbsp;</strong>para ti. &iexcl;Hazte con ella ya desde Pādel Nuestro!</p>",
-        "specs": {
-            "Forma": "L",
-            "Peso": "360-375 g",
-            "Dureza": "Media",
-            "Nivel": "Avanzado / Competición",
-            "Rugosidad": "Rugosa"
-        },
-        "images": [
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-1.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-2.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-3.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-4.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-5.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-6.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-7.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/1/117962-pala-nox-future-hybrid-12k-alum-pfuthyb25-1500x1500-8.jpg"
-        ],
-        "prices": [
-            {
-                "store": "padelnuestro",
-                "price": 174.95,
-                "original_price": null,
-                "url": "https://www.padelnuestro.com/pala-nox-future-hybrid-12k-alum-pfuthyb25",
-                "currency": "EUR",
-                "last_updated": "2026-02-10T16:47:58.315015"
-            }
-        ]
-    },
     "tecnifibre-tecnifibre-curva-club-2025": {
         "id": "tecnifibre-tecnifibre-curva-club-2025",
         "brand": "Tecnifibre",
@@ -38462,45 +38194,6 @@
             }
         ]
     },
-    "nox-nox-at10-genius-attack-12k-alum-xtrem-by-agustin-tapia": {
-        "id": "nox-nox-at10-genius-attack-12k-alum-xtrem-by-agustin-tapia",
-        "brand": "Nox",
-        "model": "NOX AT10 GENIUS ATTACK 12K ALUM XTREM",
-        "description": "<h2>Nox AT10 Genius Attack 12K Alum Xtrem By Agust&iacute;n Tapia, potencia y precisi&oacute;n</h2>\n<p>La <strong>pala AT10 12K Alum XTREM Attack 2026 de Nox</strong> es la opci&oacute;n definitiva para quienes buscan un rendimiento ofensivo de &eacute;lite. Dise&ntilde;ada en colaboraci&oacute;n con&nbsp;<strong>Agust&iacute;n Tapia</strong>, se presenta con <strong>formato diamante</strong>, <strong>balance alto</strong> y un peso que oscila entre 360 y 375 gramos, garantizando golpes potentes y decisivos en cada acci&oacute;n.</p>\n<p>Su&nbsp;<strong>n&uacute;cleo HR3 Black EVA</strong> de alta densidad asegura m&aacute;xima respuesta en el remate, mientras que la <strong>cara de carbono 12K Alum Xtrem</strong> aporta rigidez, durabilidad y estabilidad incluso en condiciones extremas de temperatura.&nbsp;</p>\n<h2>Pala AT10 Genius Attack 12K Alum Xtrem, jugadores agresivos y profesionales</h2>\n<p>Esta <strong>pala Nox de diamante</strong> ha sido creado para&nbsp;<strong>jugadores de nivel avanzado o profesional</strong> que priorizan la <em>potencia y la firmeza</em> en su estilo de juego. Gracias a su tacto intermedio-duro, la pala transmite sensaciones s&oacute;lidas en cada impacto, optimizando la potencia en golpes ofensivos como smashes o v&iacute;boras profundas.</p>\n<p>El innovador sistema&nbsp;<strong>Weight Balance</strong> permite personalizar el equilibrio seg&uacute;n las preferencias del jugador, adapt&aacute;ndose a quienes buscan dominar desde el ataque sin renunciar a un toque preciso en situaciones defensivas.</p>\n<h2>Caracter&iacute;sticas y tecnolog&iacute;as destacadas</h2>\n<ul>\n<li><strong>Carbon 12K Alum Xtrem:</strong> mayor rigidez, durabilidad y superficie m&aacute;s uniforme</li>\n<li><strong>HR3 Black EVA:</strong> goma de alta densidad con efecto memoria para m&aacute;xima potencia</li>\n<li><strong>Weight Balance:</strong> sistema de contrapesos para ajustar balance y peso</li>\n<li><strong>Dual Spin:</strong> textura rugosa 3D + arena de s&iacute;lice para golpes con efecto</li>\n<li><strong>Carbon Frame:</strong> marco de carbono para mayor resistencia y durabilidad</li>\n<li><strong>EOS Tunnel:</strong> perforaciones que optimizan aerodin&aacute;mica y manejabilidad</li>\n<li><strong>Dynamic Composite Structure:</strong> refuerzo interno que reduce roturas y aumenta vida &uacute;til</li>\n<li><strong>Oversize Grip:</strong> empu&ntilde;adura m&aacute;s larga para comodidad y mejor control</li>\n<li><strong>Pulse System:</strong> reducci&oacute;n de vibraciones para proteger articulaciones</li>\n<li><strong>Custom Grip:</strong> agarre personalizado con tecnolog&iacute;a NOX certificada por Testea P&aacute;del</li>\n<li><strong>SmartStrap:</strong> sistema que permite cambiar el cord&oacute;n de agarre f&aacute;cilmente</li>\n<li><strong>Photochromic Paint:</strong> pintura reactiva que cambia seg&uacute;n la luz</li>\n</ul>\n<h3>Consigue en la web de Pādel&nbsp;Nuestro esta pala de diamante Nox</h3>\n<p>Si tu objetivo es imponerte en la pista con un juego ofensivo, la <strong>AT10 12K Alum XTREM Attack 2026</strong> es tu mejor aliada. Potencia, precisi&oacute;n y tecnolog&iacute;as innovadoras se unen en un dise&ntilde;o exclusivo para jugadores que quieren marcar la diferencia en cada punto.</p>",
-        "specs": {
-            "Forma": "Diamante",
-            "Balance": "Alto",
-            "Nivel": "Avanzado",
-            "Núcleo": "Black EVA HR3",
-            "Cara": "Carbono 12K",
-            "Rugosidad": "Arenosa",
-            "Tipo de Juego": "Potencia"
-        },
-        "images": [
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-1.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-2.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-3.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-4.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-5.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-6.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-7.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-8.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-9.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-10.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-11.jpg",
-            "https://www.padelnuestro.com/media/catalog/product/1/2/120971-pala-nox-at10-genius-attack-12k-alum-xtreme-by-agustin-tapia-1500x1500-12.jpg"
-        ],
-        "prices": [
-            {
-                "store": "padelnuestro",
-                "price": 349.95,
-                "original_price": null,
-                "url": "https://www.padelnuestro.com/nox-at10-genius-12k-alum-xtrem-by-agustin-tapia-2026",
-                "currency": "EUR",
-                "last_updated": "2026-02-10T16:52:29.722586"
-            }
-        ]
-    },
     "nox-nox-future-attack-12k-alum": {
         "id": "nox-nox-future-attack-12k-alum",
         "brand": "Nox",
@@ -38531,6 +38224,13 @@
                 "url": "https://www.padelnuestro.com/pala-nox-future-attack-12k-alum-pfutatt25",
                 "currency": "EUR",
                 "last_updated": "2026-02-10T16:54:50.072823"
+            },{
+                "store": "padelmarket",
+                "price": 169.95,
+                "original_price": null,
+                "url": "https://padelmarket.com/es-eu/products/nox-future-attack-12k-alum-2025-pala",
+                "currency": "EUR",
+                "last_updated": "2026-02-10T16:39:18.721710"
             }
         ]
     },

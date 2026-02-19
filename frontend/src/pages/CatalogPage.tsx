@@ -434,13 +434,55 @@ const CatalogPage: React.FC = () => {
 
   const ITEMS_PER_PAGE = 9;
 
-  // Initialize search from URL params
+  // Initialize state from URL params
   useEffect(() => {
-    const queryParam = searchParams.get('search');
-    if (queryParam) {
-      setSearchQuery(queryParam);
-    }
+    const queryParam = searchParams.get('search') || '';
+    const brandParam = searchParams.get('brand') || 'Todas';
+    const shapeParam = searchParams.get('shape') || 'Todas';
+    const balanceParam = searchParams.get('balance') || 'Todos';
+    const coreParam = searchParams.get('core') || 'Todos';
+    const faceParam = searchParams.get('face') || 'Todas';
+    const levelParam = searchParams.get('level') || 'Todos';
+    const gameTypeParam = searchParams.get('gameType') || 'Todos';
+    const hardnessParam = searchParams.get('hardness') || 'Todas';
+    const offersParam = searchParams.get('offers');
+    const mostViewedParam = searchParams.get('mostViewed');
+    const sortParam = searchParams.get('sort') || 'most-viewed';
+
+    setSearchQuery(queryParam);
+    setSelectedBrand(brandParam);
+    setSelectedShape(shapeParam);
+    setSelectedBalance(balanceParam);
+    setSelectedCore(coreParam);
+    setSelectedFace(faceParam);
+    setSelectedLevel(levelParam);
+    setSelectedGameType(gameTypeParam);
+    setSelectedHardness(hardnessParam);
+    setShowOffers(offersParam === 'true');
+    setShowMostViewed(mostViewedParam === 'true');
+    setSortBy(sortParam);
   }, [searchParams]);
+
+  // Update URL when filters change
+  useEffect(() => {
+    const params = new URLSearchParams();
+    
+    if (searchQuery) params.set('search', searchQuery);
+    if (selectedBrand !== 'Todas') params.set('brand', selectedBrand);
+    if (selectedShape !== 'Todas') params.set('shape', selectedShape);
+    if (selectedBalance !== 'Todos') params.set('balance', selectedBalance);
+    if (selectedCore !== 'Todos') params.set('core', selectedCore);
+    if (selectedFace !== 'Todas') params.set('face', selectedFace);
+    if (selectedLevel !== 'Todos') params.set('level', selectedLevel);
+    if (selectedGameType !== 'Todos') params.set('gameType', selectedGameType);
+    if (selectedHardness !== 'Todas') params.set('hardness', selectedHardness);
+    if (showOffers) params.set('offers', 'true');
+    if (showMostViewed) params.set('mostViewed', 'true');
+    if (sortBy !== 'most-viewed') params.set('sort', sortBy);
+
+    const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
+    navigate(newUrl, { replace: true });
+  }, [searchQuery, selectedBrand, selectedShape, selectedBalance, selectedCore, selectedFace, selectedLevel, selectedGameType, selectedHardness, showOffers, showMostViewed, sortBy, navigate]);
 
   // Fetch server-side total count
   useEffect(() => {
