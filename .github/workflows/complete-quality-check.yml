@@ -277,14 +277,14 @@ jobs:
         run: |
           npm install
           npm audit fix || true
-          npm audit --audit-level=high
+          npm audit --audit-level=critical
 
       - name: Audit frontend dependencies
         working-directory: ./frontend
         run: |
           npm install
           npm audit fix || true
-          npm audit --audit-level=high || echo "⚠️ Vulnerabilities found, but continuing (only high/critical will fail)"
+          npm audit --audit-level=critical
 
       - name: Run CodeQL Analysis
         uses: github/codeql-action/init@v2

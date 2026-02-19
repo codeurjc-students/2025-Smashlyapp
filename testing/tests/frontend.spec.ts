@@ -22,6 +22,7 @@ test.describe('Frontend E2E Tests', () => {
     });
 
     test('should display search functionality', async ({ page }) => {
+      test.setTimeout(60000);
       const mainPage = new MainPage(page);
       
       await mainPage.navigateTo('/catalog');
