@@ -21,22 +21,18 @@ const Container = styled.div`
 `;
 
 const HeroSection = styled.div`
-  padding: 3rem 1.5rem;
+  padding: clamp(2rem, 5vw, 3rem) 1.5rem;
   text-align: center;
   background: #f8faf8;
 `;
 
 const MainTitle = styled.h1`
-  font-size: 2rem;
+  font-size: clamp(1.75rem, 5vw, 2.5rem);
   font-weight: 700;
   color: #1f2937;
   text-align: center;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   line-height: 1.2;
-
-  @media (min-width: 768px) {
-    font-size: 2.5rem;
-  }
 `;
 
 const HighlightText = styled.span`
@@ -44,16 +40,17 @@ const HighlightText = styled.span`
 `;
 
 const Subtitle = styled.p`
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 2vw, 1rem);
   color: #6b7280;
   text-align: center;
   line-height: 1.5;
   max-width: 600px;
   margin: 0 auto;
+  padding: 0 1rem;
 `;
 
 const CategorySection = styled.div`
-  padding: 2rem 0;
+  padding: 1.5rem 0;
   background: white;
   border-top: 1px solid #e5e7eb;
   border-bottom: 1px solid #e5e7eb;
@@ -63,17 +60,19 @@ const CategorySection = styled.div`
 const CategoryContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 1.5rem;
+  padding: 0 clamp(1rem, 3vw, 1.5rem);
 `;
 
 const CategoryScrollContainer = styled.div`
   display: flex;
-  gap: 0.75rem;
-  padding: 0.5rem 0;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: #d1d5db transparent;
   scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
 
   &::-webkit-scrollbar {
     height: 4px;
@@ -93,22 +92,28 @@ const CategoryScrollContainer = styled.div`
     }
   }
 
+  @media (max-width: 767px) {
+    display: none;
+  }
+
   @media (min-width: 768px) {
     justify-content: center;
     flex-wrap: wrap;
     overflow-x: visible;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
   }
 `;
 
 const CategoryButton = styled.button<{ isActive: boolean }>`
-  padding: 0.75rem 1.5rem;
+  padding: 0.625rem 1.25rem;
   border-radius: 50px;
   background: ${(props) =>
     props.isActive
       ? "linear-gradient(135deg, #16a34a 0%, #059669 100%)"
       : "white"};
   border: 2px solid ${(props) => (props.isActive ? "#16a34a" : "#e5e7eb")};
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: ${(props) => (props.isActive ? "600" : "500")};
   color: ${(props) => (props.isActive ? "white" : "#6b7280")};
   cursor: pointer;
@@ -165,10 +170,15 @@ const CategoryButton = styled.button<{ isActive: boolean }>`
     ring: 2px solid #16a34a;
     ring-opacity: 0.5;
   }
+
+  @media (min-width: 768px) {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+  }
 `;
 
 const FAQSection = styled.div`
-  padding: 1.25rem 1.5rem;
+  padding: 1.25rem clamp(1rem, 3vw, 1.5rem);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -188,7 +198,7 @@ const QuestionHeader = styled.button`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1.25rem;
+  padding: 1rem;
   background: white;
   border: none;
   cursor: pointer;
@@ -198,26 +208,41 @@ const QuestionHeader = styled.button`
   &:hover {
     background: #f9fafb;
   }
+
+  @media (min-width: 768px) {
+    padding: 1.25rem;
+  }
 `;
 
 const QuestionText = styled.span`
   flex: 1;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   font-weight: 600;
   color: #1f2937;
-  line-height: 1.5;
-  margin-right: 0.75rem;
+  line-height: 1.4;
+  margin-right: 0.5rem;
+
+  @media (min-width: 768px) {
+    font-size: 1rem;
+    margin-right: 0.75rem;
+  }
 `;
 
 const ChevronIcon = styled.div`
   margin-left: 0.5rem;
   color: #16a34a;
+  flex-shrink: 0;
 `;
 
 const AnswerContainer = styled.div`
-  padding: 1.25rem;
+  padding: 1rem;
   padding-top: 0;
   background: #f9fafb;
+
+  @media (min-width: 768px) {
+    padding: 1.25rem;
+    padding-top: 0;
+  }
 `;
 
 const CategoryBadge = styled.div`
@@ -225,7 +250,7 @@ const CategoryBadge = styled.div`
   padding: 0.25rem 0.5rem;
   border-radius: 0.75rem;
   display: inline-block;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.5rem;
 `;
 
 const CategoryBadgeText = styled.span`
@@ -242,7 +267,7 @@ const AnswerText = styled.p`
 `;
 
 const ContactSection = styled.div`
-  padding: 2.5rem 1.5rem;
+  padding: 2rem clamp(1rem, 4vw, 2.5rem);
   max-width: 600px;
   margin: 0 auto;
 `;
@@ -250,24 +275,28 @@ const ContactSection = styled.div`
 const ContactCard = styled.div`
   background: white;
   border-radius: 1rem;
-  padding: 2rem;
+  padding: clamp(1.5rem, 4vw, 2rem);
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 `;
 
 const ContactIconContainer = styled.div`
-  width: 5rem;
-  height: 5rem;
+  width: clamp(4rem, 12vw, 5rem);
+  height: clamp(4rem, 12vw, 5rem);
   border-radius: 50%;
   background: #f0f9ff;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 0 auto 1.25rem;
+  margin: 0 auto 1rem;
+
+  @media (min-width: 768px) {
+    margin-bottom: 1.25rem;
+  }
 `;
 
 const ContactTitle = styled.h3`
-  font-size: 1.25rem;
+  font-size: clamp(1.125rem, 3vw, 1.25rem);
   font-weight: 700;
   color: #1f2937;
   text-align: center;
@@ -279,7 +308,7 @@ const ContactDescription = styled.p`
   color: #6b7280;
   text-align: center;
   line-height: 1.4;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1.25rem;
 `;
 
 const ContactButton = styled.button`
@@ -304,6 +333,34 @@ const ContactButtonText = styled.span`
   color: white;
   font-size: 0.875rem;
   font-weight: 600;
+`;
+
+const CategorySelect = styled.select`
+  display: none;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 12px;
+  border: 2px solid #e5e7eb;
+  background: white;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #1f2937;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  padding-right: 2.5rem;
+
+  &:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
+  }
+
+  @media (max-width: 767px) {
+    display: block;
+  }
 `;
 
 const FAQPage: React.FC = () => {
@@ -431,6 +488,16 @@ const FAQPage: React.FC = () => {
       {/* Category filter section */}
       <CategorySection>
         <CategoryContainer>
+          <CategorySelect 
+            value={activeCategory} 
+            onChange={(e) => setActiveCategory(e.target.value)}
+          >
+            {categories.map((category) => (
+              <option key={category} value={category}>
+                {category}
+              </option>
+            ))}
+          </CategorySelect>
           <CategoryScrollContainer>
             {categories.map((category) => (
               <CategoryButton

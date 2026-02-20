@@ -570,8 +570,8 @@ const Header: React.FC = () => {
                   Catálogo de Palas
                 </NavLink>
                 <NavLink
-                  to='/rackets'
-                  isActive={isActive('/rackets')}
+                  to='/compare'
+                  isActive={isActive('/compare')}
                   isMobile
                   onClick={closeAllMenus}
                 >
