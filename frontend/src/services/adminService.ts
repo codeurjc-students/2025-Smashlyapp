@@ -76,6 +76,18 @@ export interface RacketRequest {
   requestDate?: string;
 }
 
+export interface Brand {
+  name: string;
+  country?: string;
+  racketCount: number;
+}
+
+export interface Category {
+  name: string;
+  description: string;
+  racketCount: number;
+}
+
 export class AdminService {
   /**
    * Obtiene las métricas del dashboard de admin
@@ -350,6 +362,30 @@ export class AdminService {
     );
 
     await handleApiResponse<void>(response);
+  }
+
+  /**
+   * Obtiene todas las marcas con el conteo de palas
+   */
+  static async getBrands(): Promise<Brand[]> {
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.BRANDS), {
+      method: "GET",
+      headers: getCommonHeaders(),
+    });
+
+    return handleApiResponse<Brand[]>(response);
+  }
+
+  /**
+   * Obtiene todas las categorías (formas) con el conteo de palas
+   */
+  static async getCategories(): Promise<Category[]> {
+    const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.CATEGORIES), {
+      method: "GET",
+      headers: getCommonHeaders(),
+    });
+
+    return handleApiResponse<Category[]>(response);
   }
 }
 

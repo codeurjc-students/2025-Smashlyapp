@@ -47,4 +47,7 @@ router.get('/:id', optionalAuth, validateIdParam(), RacketController.getRacketBy
 // TODO: Add stricter auth middleware (requireAuth + admin check)
 router.put('/:id', optionalAuth, validateIdParam(), RacketController.updateRacket);
 
+// DELETE /api/rackets/:id - Deletes a racket by ID
+router.delete('/:id', optionalAuth, validateIdParam(), RacketController.deleteRacket);
+
 export default router;

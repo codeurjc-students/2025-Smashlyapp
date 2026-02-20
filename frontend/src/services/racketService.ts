@@ -235,4 +235,25 @@ export class RacketService {
       throw error;
     }
   }
+
+  /**
+   * Elimina una pala por su ID
+   */
+  static async deleteRacket(id: number): Promise<void> {
+    try {
+      const url = buildApiUrl(API_ENDPOINTS.RACKETS_BY_ID(id));
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: getCommonHeaders(),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error: ${response.status}`);
+      }
+    } catch (error: any) {
+      console.error('Error deleting racket:', error);
+      throw error;
+    }
+  }
 }

@@ -25,9 +25,13 @@ const MyComparisonsPage = lazy(() => import('./pages/MyComparisonsPage'));
 const SharedComparisonPage = lazy(() => import('./pages/SharedComparisonPage'));
 const BestRacketPage = lazy(() => import('./pages/BestRacketPage').then(m => ({ default: m.BestRacketPage })));
 const FAQPage = lazy(() => import('./pages/FAQPage'));
-const UserPage = lazy(() => import('./pages/UserPage'));
+const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 const AdminPanelPage = lazy(() => import('./pages/AdminPanelPage'));
 const AdminRacketReviewPage = lazy(() => import('./pages/AdminRacketReviewPage'));
+const AdminRacketsPage = lazy(() => import('./pages/AdminRacketsPage'));
+const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
+const AdminStoresPage = lazy(() => import('./pages/AdminStoresPage'));
+const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 // Loading fallback component
@@ -153,7 +157,7 @@ export default function App() {
                         path='/profile'
                         element={
                           <Suspense fallback={<RouteLoadingFallback />}>
-                            <UserPage />
+                            <UserProfilePage />
                           </Suspense>
                         }
                       />
@@ -172,6 +176,38 @@ export default function App() {
                         element={
                           <Suspense fallback={<RouteLoadingFallback />}>
                             <AdminRacketReviewPage />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path='/admin/rackets'
+                        element={
+                          <Suspense fallback={<RouteLoadingFallback />}>
+                            <AdminRacketsPage />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path='/admin/users'
+                        element={
+                          <Suspense fallback={<RouteLoadingFallback />}>
+                            <AdminUsersPage />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path='/admin/stores'
+                        element={
+                          <Suspense fallback={<RouteLoadingFallback />}>
+                            <AdminStoresPage />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path='/admin/settings'
+                        element={
+                          <Suspense fallback={<RouteLoadingFallback />}>
+                            <AdminSettingsPage />
                           </Suspense>
                         }
                       />

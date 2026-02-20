@@ -459,7 +459,7 @@ const Header: React.FC = () => {
     <HeaderContainer>
       <HeaderContent>
         <Logo to='/' onClick={closeAllMenus}>
-          <img src='/images/icons/smashly-large-icon.ico' alt='Smashly' />
+          <img src='https://lrdgyfmkkboyhoycrnov.supabase.co/storage/v1/object/sign/images/smashly-large-icon.ico?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jY2NkNjhmMi03NDg2LTQzNGUtYjE0ZC1mYmE0YzJkM2RiNzMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvc21hc2hseS1sYXJnZS1pY29uLmljbyIsImlhdCI6MTc3MTU3OTQ4NCwiZXhwIjoxODAzMTE1NDg0fQ.gccmibb2sAt_EekW0HRgQEBFfsKKwc_3GoO75SVqbJc' alt='Smashly' />
         </Logo>
 
         {/* Central Search Bar (Desktop) */}

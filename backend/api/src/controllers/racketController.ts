@@ -140,6 +140,42 @@ export class RacketController {
   }
 
   /**
+   * DELETE /api/rackets/:id
+   * Elimina una pala por ID
+   */
+  static async deleteRacket(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id);
+
+      if (isNaN(id)) {
+        res.status(400).json({
+          success: false,
+          error: 'Invalid ID',
+          message: 'ID must be a number',
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      await RacketService.deleteRacket(id);
+
+      res.json({
+        success: true,
+        message: 'Pala eliminada correctamente',
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error('Error in deleteRacket:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Error interno del servidor',
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
    * GET /api/rackets/search?q=...
    * Busca palas por nombre, marca o modelo
    */

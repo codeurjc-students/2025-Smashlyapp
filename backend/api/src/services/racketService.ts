@@ -421,6 +421,18 @@ export class RacketService {
   }
 
   /**
+   * Elimina una pala por su ID
+   */
+  static async deleteRacket(id: number): Promise<void> {
+    const { error } = await supabase.from('rackets').delete().eq('id', id);
+
+    if (error) {
+      logger.error(`Error deleting racket ${id}:`, error);
+      throw new Error(`Error al eliminar la pala: ${error.message}`);
+    }
+  }
+
+  /**
    * Obtiene varias palas por sus IDs
    */
   static async getRacketsByIds(ids: number[]): Promise<Racket[]> {

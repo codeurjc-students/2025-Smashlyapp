@@ -79,4 +79,7 @@ router.delete(
   ListController.removeRacketFromList
 );
 
+// GET /api/users/me/activity - Get current user's activity stats
+router.get("/me/activity", authenticateUser, UserController.getUserActivity);
+
 export default router;

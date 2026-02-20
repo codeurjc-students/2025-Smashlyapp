@@ -3,7 +3,28 @@ import styled from "styled-components";
 import { useAuth } from "../contexts/AuthContext";
 import { Navigate } from "react-router-dom";
 import AdminLayout from "../components/features/AdminLayout";
-import AdminDashboard from "../components/features/AdminDashboard";
+import UsersManager from "../components/features/UsersManager";
+
+const PageHeader = styled.div`
+  margin-bottom: 2rem;
+`;
+
+const PageTitle = styled.h1`
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.025em;
+
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+  }
+`;
+
+const PageSubtitle = styled.p`
+  color: #64748b;
+  font-size: 1rem;
+`;
 
 const LoadingContainer = styled.div`
   display: flex;
@@ -12,7 +33,7 @@ const LoadingContainer = styled.div`
   min-height: 400px;
 `;
 
-const AdminPanelPage: React.FC = () => {
+const AdminUsersPage: React.FC = () => {
   const { user, loading } = useAuth();
 
   if (loading) {
@@ -29,9 +50,13 @@ const AdminPanelPage: React.FC = () => {
 
   return (
     <AdminLayout>
-      <AdminDashboard />
+      <PageHeader>
+        <PageTitle>Gestión de Usuarios</PageTitle>
+        <PageSubtitle>Administra los usuarios de la plataforma</PageSubtitle>
+      </PageHeader>
+      <UsersManager />
     </AdminLayout>
   );
 };
 
-export default AdminPanelPage;
+export default AdminUsersPage;

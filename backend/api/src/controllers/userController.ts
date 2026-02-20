@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { UserService } from '../services/userService';
+import { supabase } from '../config/supabase';
 import logger from '../config/logger';
 import {
   UserProfile,
@@ -330,6 +331,90 @@ export class UserController {
       res.status(500).json({
         success: false,
         error: 'Internal server error',
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * GET /api/users/me/activity
+   * Obtiene estadísticas de actividad del usuario actual
+   */
+  static async getUserActivity(req: RequestWithUser, res: Response): Promise<void> {
+    try {
+      const userId = req.user?.id;
+      if (!userId) {
+        res.status(401).json({
+          success: false,
+          error: 'No autorizado',
+          message: 'Usuario no autenticado',
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      // Obtener conteo de reviews
+      const { count: reviewsCount } = await supabase
+        .from('reviews')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      // Obtener conteo de listas
+      const { count: listsCount } = await supabase
+        .from('lists')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      // Obtener conteo de comparaciones guardadas
+      const { count: comparisonsCount } = await supabase
+        .from('comparisons')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', userId);
+
+      // Obtener reviews recientes
+      const { data: recentReviews } = await supabase
+        .from('reviews')
+        .select('id, rating, created_at, rackets(nombre, marca)')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Obtener listas recientes
+      const { data: recentLists } = await supabase
+        .from('lists')
+        .select('id, name, is_public, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      // Obtener comparaciones recientes
+      const { data: recentComparisons } = await supabase
+        .from('comparisons')
+        .select('id, name, is_public, created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      res.json({
+        success: true,
+        data: {
+          stats: {
+            reviewsCount: reviewsCount || 0,
+            listsCount: listsCount || 0,
+            comparisonsCount: comparisonsCount || 0,
+          },
+          recentReviews: recentReviews || [],
+          recentLists: recentLists || [],
+          recentComparisons: recentComparisons || [],
+        },
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error('Error in getUserActivity:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);

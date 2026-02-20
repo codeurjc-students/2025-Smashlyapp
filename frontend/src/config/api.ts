@@ -49,6 +49,8 @@ export const API_ENDPOINTS = {
     RACKET_REQUESTS: '/api/v1/admin/racket-requests',
     STORE_REQUESTS: '/api/v1/admin/store-requests',
     RECENT_ACTIVITY: '/api/v1/admin/recent-activity',
+    BRANDS: '/api/v1/admin/brands',
+    CATEGORIES: '/api/v1/admin/categories',
     VERIFY_STORE: (id: string) => `/api/v1/admin/stores/${id}/verify`,
     REJECT_STORE: (id: string) => `/api/v1/admin/stores/${id}/reject`,
     CONFLICTS: '/api/v1/admin/rackets/conflicts',

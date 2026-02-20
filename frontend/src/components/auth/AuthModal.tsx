@@ -141,8 +141,8 @@ const HeroDescription = styled.p`
 `;
 
 // Preload images content
-const LOGIN_IMAGE = "/images/login_register_images/login_image.png";
-const REGISTER_IMAGE = "/images/login_register_images/register_image.jpg";
+const LOGIN_IMAGE = "https://lrdgyfmkkboyhoycrnov.supabase.co/storage/v1/object/sign/images/login_image.png?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jY2NkNjhmMi03NDg2LTQzNGUtYjE0ZC1mYmE0YzJkM2RiNzMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvbG9naW5faW1hZ2UucG5nIiwiaWF0IjoxNzcxNTc5NjcyLCJleHAiOjE4MDMxMTU2NzJ9.9NpKzdw9rO8edv-6lPdKTsvdYSRN6e9LR51eB6NfmjQ";
+const REGISTER_IMAGE = "https://lrdgyfmkkboyhoycrnov.supabase.co/storage/v1/object/sign/images/register_image.jpg?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jY2NkNjhmMi03NDg2LTQzNGUtYjE0ZC1mYmE0YzJkM2RiNzMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvcmVnaXN0ZXJfaW1hZ2UuanBnIiwiaWF0IjoxNzcxNTc5Njk3LCJleHAiOjE4MDMxMTU2OTd9.i3zj8yOi70CpqKHcWj2c2k0yA8cevX7G58z-shmwbtw";
 
 const AuthModal: React.FC = () => {
   const { isOpen, view, closeModal, openLogin, openRegister } = useAuthModal();
@@ -173,7 +173,7 @@ const AuthModal: React.FC = () => {
   const leftPanelContent = useMemo(() => (
     <>
       <Branding>
-        <img src="/images/icons/smashly-large-icon.ico" alt="Smashly" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+        <img src="https://lrdgyfmkkboyhoycrnov.supabase.co/storage/v1/object/sign/images/smashly-large-icon.ico?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jY2NkNjhmMi03NDg2LTQzNGUtYjE0ZC1mYmE0YzJkM2RiNzMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvc21hc2hseS1sYXJnZS1pY29uLmljbyIsImlhdCI6MTc3MTU3OTQ4NCwiZXhwIjoxODAzMTE1NDg0fQ.gccmibb2sAt_EekW0HRgQEBFfsKKwc_3GoO75SVqbJc" alt="Smashly" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
       </Branding>
       <div>
         <HeroTitle>

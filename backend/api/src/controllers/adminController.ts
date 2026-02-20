@@ -4,7 +4,6 @@ import logger from "../config/logger";
 import { supabase } from "../config/supabase";
 import { storeService } from "../services/storeService";
 
-// Helper functions outside the class to avoid 'this' context issues
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
@@ -50,7 +49,6 @@ async function getPendingStoresCount(): Promise<number> {
 }
 
 async function getFavoritesCount(): Promise<number> {
-  // Get count of rackets in "Favoritas" lists
   const { data: favoritesLists } = await supabase
     .from("lists")
     .select("id")
@@ -103,10 +101,6 @@ async function collectMetricsData() {
 }
 
 export class AdminController {
-  /**
-   * GET /api/v1/admin/metrics
-   * Obtiene las métricas del dashboard de administración
-   */
   static async getMetrics(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const metrics = await collectMetricsData();
@@ -126,10 +120,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * GET /api/v1/admin/users
-   * Obtiene todos los usuarios del sistema
-   */
   static async getAllUsers(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const { data: users, error } = await supabase
@@ -157,10 +147,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * PATCH /api/v1/admin/users/:userId/role
-   * Actualiza el rol de un usuario
-   */
   static async updateUserRole(
     req: RequestWithUser,
     res: Response
@@ -207,15 +193,10 @@ export class AdminController {
     }
   }
 
-  /**
-   * DELETE /api/v1/admin/users/:userId
-   * Elimina un usuario del sistema
-   */
   static async deleteUser(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
 
-      // No permitir que un admin se elimine a sí mismo
       if (userId === req.user?.id) {
         res.status(400).json({
           success: false,
@@ -251,16 +232,11 @@ export class AdminController {
     }
   }
 
-  /**
-   * GET /api/v1/admin/racket-requests
-   * Obtiene todas las solicitudes de palas (simulado por ahora)
-   */
   static async getRacketRequests(
     req: RequestWithUser,
     res: Response
   ): Promise<void> {
     try {
-      // TODO: Implementar cuando tengamos tabla de solicitudes
       res.json({
         success: true,
         data: [],
@@ -277,16 +253,11 @@ export class AdminController {
     }
   }
 
-  /**
-   * GET /api/v1/admin/store-requests
-   * Obtiene todas las solicitudes de tiendas pendientes de verificación
-   */
   static async getStoreRequests(
     req: RequestWithUser,
     res: Response
   ): Promise<void> {
     try {
-      // Obtener tiendas no verificadas
       const pendingStores = await storeService.getAllStores(false);
       
       res.json({
@@ -305,10 +276,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * POST /api/v1/admin/stores/:id/verify
-   * Aprobar/verificar una tienda
-   */
   static async verifyStore(
     req: RequestWithUser,
     res: Response
@@ -335,10 +302,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * DELETE /api/v1/admin/stores/:id/reject
-   * Rechazar una solicitud de tienda
-   */
   static async rejectStore(
     req: RequestWithUser,
     res: Response
@@ -364,10 +327,6 @@ export class AdminController {
     }
   }
 
-  /**
-   * GET /api/v1/admin/recent-activity
-   * Obtiene la actividad reciente del sistema
-   */
   static async getRecentActivity(
     req: RequestWithUser,
     res: Response
@@ -375,21 +334,18 @@ export class AdminController {
     try {
       const limit = parseInt(req.query.limit as string) || 10;
 
-      // Obtener usuarios recientes
       const { data: recentUsers } = await supabase
         .from("user_profiles")
         .select("id, full_name, nickname, email, created_at")
         .order("created_at", { ascending: false })
         .limit(5);
 
-      // Obtener palas recientes
       const { data: recentRackets } = await supabase
         .from("rackets")
         .select("id, nombre, marca, created_at")
         .order("created_at", { ascending: false })
         .limit(5);
 
-      // Obtener reviews recientes
       const { data: recentReviews } = await supabase
         .from("reviews")
         .select(`
@@ -402,17 +358,14 @@ export class AdminController {
         .order("created_at", { ascending: false })
         .limit(5);
 
-      // Obtener solicitudes de tiendas recientes
       const { data: recentStores } = await supabase
         .from("stores")
         .select("id, store_name, verified, created_at")
         .order("created_at", { ascending: false })
         .limit(5);
 
-      // Combinar y formatear todas las actividades
       const activities: any[] = [];
 
-      // Agregar usuarios
       recentUsers?.forEach((user) => {
         activities.push({
           id: `user-${user.id}`,
@@ -423,7 +376,6 @@ export class AdminController {
         });
       });
 
-      // Agregar palas
       recentRackets?.forEach((racket) => {
         activities.push({
           id: `racket-${racket.id}`,
@@ -434,7 +386,6 @@ export class AdminController {
         });
       });
 
-      // Agregar reviews
       recentReviews?.forEach((review: any) => {
         const userName = review.user_profiles?.full_name || review.user_profiles?.nickname || "Usuario";
         const racketName = review.rackets?.nombre || "Pala";
@@ -447,7 +398,6 @@ export class AdminController {
         });
       });
 
-      // Agregar tiendas
       recentStores?.forEach((store) => {
         const status = store.verified ? "verificada" : "pendiente de verificación";
         activities.push({
@@ -459,7 +409,6 @@ export class AdminController {
         });
       });
 
-      // Ordenar por fecha y limitar
       activities.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
       const limitedActivities = activities.slice(0, limit);
 
@@ -470,6 +419,114 @@ export class AdminController {
       } as ApiResponse);
     } catch (error: unknown) {
       logger.error("Error in getRecentActivity:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error del servidor",
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  static async getBrands(
+    req: RequestWithUser,
+    res: Response
+  ): Promise<void> {
+    try {
+      logger.info("Fetching brands from database...");
+      const { data: rackets, error } = await supabase
+        .from("rackets")
+        .select("brand, characteristics_brand");
+
+      if (error) {
+        logger.error("Error fetching rackets for brands:", error);
+        throw error;
+      }
+
+      logger.info(`Found ${rackets?.length || 0} rackets`);
+
+      const brandMap = new Map<string, number>();
+      rackets?.forEach(racket => {
+        const brand = racket.brand || racket.characteristics_brand;
+        if (brand) {
+          brandMap.set(brand, (brandMap.get(brand) || 0) + 1);
+        }
+      });
+
+      const brands = Array.from(brandMap.entries())
+        .map(([name, racketCount]) => ({
+          name,
+          racketCount,
+          country: "España"
+        }))
+        .sort((a, b) => b.racketCount - a.racketCount);
+
+      res.json({
+        success: true,
+        data: brands,
+        message: `${brands.length} marcas encontradas`,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error("Error in getBrands:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error del servidor",
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  static async getCategories(
+    req: RequestWithUser,
+    res: Response
+  ): Promise<void> {
+    try {
+      logger.info("Fetching categories from database...");
+      const { data: rackets, error } = await supabase
+        .from("rackets")
+        .select("characteristics_shape");
+
+      if (error) {
+        logger.error("Error fetching rackets for categories:", error);
+        throw error;
+      }
+
+      logger.info(`Found ${rackets?.length || 0} rackets`);
+
+      const formaMap = new Map<string, number>();
+      rackets?.forEach(racket => {
+        const forma = racket.characteristics_shape;
+        if (forma) {
+          formaMap.set(forma, (formaMap.get(forma) || 0) + 1);
+        }
+      });
+
+      const formaDescriptions: Record<string, string> = {
+        "Redonda": "Forma clásica, mayor control",
+        "Diamante": "Forma de diamante, mayor potencia y balance alto",
+        "Lágrima": "Forma de gota, balance entre potencia y control",
+        "Ovalada": "Forma ovalada, control optimizado",
+        "Híbrida": "Forma híbrida, combinación de características",
+      };
+
+      const categories = Array.from(formaMap.entries())
+        .map(([name, racketCount]) => ({
+          name,
+          description: formaDescriptions[name] || "Forma de pala de pádel",
+          racketCount,
+        }))
+        .sort((a, b) => b.racketCount - a.racketCount);
+
+      res.json({
+        success: true,
+        data: categories,
+        message: `${categories.length} categorías encontradas`,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error("Error in getCategories:", error);
       res.status(500).json({
         success: false,
         error: "Error del servidor",

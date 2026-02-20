@@ -77,4 +77,16 @@ router.delete("/stores/:id/reject", AdminController.rejectStore);
  */
 router.get("/recent-activity", AdminController.getRecentActivity);
 
+/**
+ * GET /api/v1/admin/brands
+ * Gets all brands with racket count
+ */
+router.get("/brands", AdminController.getBrands);
+
+/**
+ * GET /api/v1/admin/categories
+ * Gets all categories (shapes) with racket count
+ */
+router.get("/categories", AdminController.getCategories);
+
 export default router;
