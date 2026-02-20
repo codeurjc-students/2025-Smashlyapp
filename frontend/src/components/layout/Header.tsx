@@ -48,6 +48,14 @@ const Logo = styled(Link)`
     height: 75px;
     width: auto;
     transition: transform 0.2s ease;
+
+    @media (max-width: 768px) {
+      height: 50px;
+    }
+
+    @media (max-width: 480px) {
+      height: 40px;
+    }
   }
 
   &:hover {
@@ -69,7 +77,7 @@ const CentralSearchContainer = styled.div`
   max-width: 500px;
   width: 100%;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: none;
   }
 `;
@@ -78,10 +86,10 @@ const CentralSearchContainer = styled.div`
 const MobileElements = styled.div`
   display: none;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.25rem;
   }
 `;
 
@@ -90,9 +98,9 @@ const MobileSearchButton = styled.button`
   background: none;
   border: none;
   color: white;
-  font-size: 1.2rem;
+  font-size: 1.25rem;
   cursor: pointer;
-  padding: 8px;
+  padding: 10px;
   border-radius: 50%;
   transition: all 0.2s ease;
   display: flex;
@@ -100,7 +108,12 @@ const MobileSearchButton = styled.button`
   justify-content: center;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.15);
+  }
+
+  @media (max-width: 480px) {
+    padding: 8px;
+    font-size: 1.1rem;
   }
 `;
 
@@ -128,7 +141,7 @@ const MobileSearchContainer = styled.div<{ isOpen: boolean }>`
   opacity: ${props => (props.isOpen ? '1' : '0')};
   transition: all 0.3s ease 0.1s;
 
-  @media (min-width: 769px) {
+  @media (min-width: 1025px) {
     display: none;
   }
 `;
@@ -191,10 +204,15 @@ const MobileMenuButton = styled.button`
     background: rgba(255, 255, 255, 0.1);
   }
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 1.3rem;
+    padding: 6px;
   }
 `;
 
@@ -203,7 +221,7 @@ const AuthButtons = styled.div`
   align-items: center;
   gap: 1rem;
 
-  @media (max-width: 768px) {
+  @media (max-width: 1024px) {
     display: none;
   }
 `;

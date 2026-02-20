@@ -12,10 +12,24 @@ const Container = styled.div`
 `;
 
 const HeroSection = styled.section`
-  padding: 80px 20px;
+  padding: clamp(60px, 10vw, 100px) 20px;
   text-align: center;
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   color: white;
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+                radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
 `;
 
 const HeroContent = styled.div`
@@ -30,16 +44,17 @@ const Badge = styled(motion.div)`
   background: rgba(255, 255, 255, 0.1);
   padding: 8px 16px;
   border-radius: 20px;
-  font-size: 14px;
-  margin-bottom: 24px;
+  font-size: clamp(0.75rem, 2vw, 14px);
+  margin-bottom: clamp(16px, 4vw, 24px);
   backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 `;
 
 const Title = styled(motion.h1)`
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(2rem, 6vw, 4rem);
   font-weight: 800;
-  margin-bottom: 24px;
-  line-height: 1.3;
+  margin-bottom: clamp(16px, 4vw, 24px);
+  line-height: 1.2;
   text-align: center;
   max-width: 1200px;
   margin-left: auto;
@@ -49,11 +64,16 @@ const Title = styled(motion.h1)`
   flex-direction: column;
   align-items: center;
   gap: 0.5rem;
+  position: relative;
 `;
 
 const TitleStaticBefore = styled.span`
   display: block;
   white-space: nowrap;
+
+  @media (max-width: 600px) {
+    white-space: normal;
+  }
 `;
 
 const RotatingText = styled.span`
@@ -61,20 +81,27 @@ const RotatingText = styled.span`
   display: block;
   text-align: center;
   white-space: nowrap;
-  min-height: 1.2em;
 
   @media (max-width: 640px) {
-    font-size: 0.85em;
+    font-size: 0.9em;
     white-space: normal;
     max-width: 90vw;
+  }
+
+  @media (max-width: 480px) {
+    font-size: 0.85em;
   }
 `;
 
 const Subtitle = styled(motion.p)`
-  font-size: 1.25rem;
-  margin-bottom: 40px;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
+  margin-bottom: clamp(24px, 5vw, 40px);
   opacity: 0.9;
   line-height: 1.6;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 20px;
 `;
 
 const CTAButtons = styled(motion.div)`
@@ -82,6 +109,7 @@ const CTAButtons = styled(motion.div)`
   gap: 16px;
   justify-content: center;
   flex-wrap: wrap;
+  padding: 0 20px;
 `;
 
 const PrimaryButton = styled(Link)`
@@ -90,13 +118,14 @@ const PrimaryButton = styled(Link)`
   gap: 8px;
   background: white;
   color: #16a34a;
-  padding: 16px 32px;
+  padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px);
   border-radius: 12px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.125rem;
+  font-size: clamp(0.9rem, 2vw, 1.125rem);
   transition: all 0.2s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  white-space: nowrap;
 
   &:hover {
     transform: translateY(-2px);
@@ -112,13 +141,14 @@ const SecondaryButton = styled(Link)`
   gap: 8px;
   background: transparent;
   color: white;
-  padding: 16px 32px;
+  padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px);
   border: 2px solid rgba(255, 255, 255, 0.3);
   border-radius: 12px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.125rem;
+  font-size: clamp(0.9rem, 2vw, 1.125rem);
   transition: all 0.2s ease;
+  white-space: nowrap;
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -129,7 +159,7 @@ const SecondaryButton = styled(Link)`
 `;
 
 const FeaturesSection = styled.section`
-  padding: 80px 20px;
+  padding: clamp(48px, 8vw, 80px) 20px;
 `;
 
 const FeaturesContent = styled.div`
@@ -139,7 +169,7 @@ const FeaturesContent = styled.div`
 
 const SectionTitle = styled.h2`
   text-align: center;
-  font-size: 2.5rem;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
   font-weight: 800;
   margin-bottom: 16px;
   color: #1f2937;
@@ -147,9 +177,9 @@ const SectionTitle = styled.h2`
 
 const SectionSubtitle = styled.p`
   text-align: center;
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2vw, 1.25rem);
   color: #6b7280;
-  margin-bottom: 64px;
+  margin-bottom: clamp(40px, 8vw, 64px);
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
@@ -157,13 +187,17 @@ const SectionSubtitle = styled.p`
 
 const FeaturesGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: clamp(20px, 4vw, 32px);
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
 `;
 
 const FeatureCard = styled(motion.div)`
   background: white;
-  padding: 32px;
+  padding: clamp(24px, 4vw, 32px);
   border-radius: 16px;
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
@@ -176,8 +210,8 @@ const FeatureCard = styled(motion.div)`
 `;
 
 const FeatureIcon = styled.div`
-  width: 64px;
-  height: 64px;
+  width: clamp(48px, 10vw, 64px);
+  height: clamp(48px, 10vw, 64px);
   background: linear-gradient(135deg, #16a34a, #22c55e);
   border-radius: 16px;
   display: flex;
@@ -185,11 +219,11 @@ const FeatureIcon = styled.div`
   justify-content: center;
   margin: 0 auto 24px;
   color: white;
-  font-size: 24px;
+  font-size: clamp(18px, 4vw, 24px);
 `;
 
 const FeatureTitle = styled.h3`
-  font-size: 1.25rem;
+  font-size: clamp(1rem, 2.5vw, 1.25rem);
   font-weight: 600;
   margin-bottom: 12px;
   color: #1f2937;
@@ -198,25 +232,26 @@ const FeatureTitle = styled.h3`
 const FeatureDescription = styled.p`
   color: #6b7280;
   line-height: 1.6;
+  font-size: clamp(0.875rem, 1.5vw, 1rem);
 `;
 
 const StatsSection = styled.section`
   background: #f8faf8;
-  padding: 60px 20px;
+  padding: clamp(40px, 8vw, 60px) 20px;
 `;
 
 const StatsGrid = styled.div`
   max-width: 800px;
   margin: 0 auto;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: clamp(20px, 5vw, 32px);
   text-align: center;
 `;
 
 const StatItem = styled.div`
   h3 {
-    font-size: 2.5rem;
+    font-size: clamp(2rem, 5vw, 2.5rem);
     font-weight: 800;
     color: #16a34a;
     margin-bottom: 8px;
@@ -225,6 +260,7 @@ const StatItem = styled.div`
   p {
     color: #6b7280;
     font-weight: 500;
+    font-size: clamp(0.875rem, 2vw, 1rem);
   }
 `;
 

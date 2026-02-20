@@ -17,6 +17,7 @@ const SearchWrapper = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
 `;
 
 const SearchInputContainer = styled(motion.div)<{ $isInHeader?: boolean }>`
@@ -24,7 +25,7 @@ const SearchInputContainer = styled(motion.div)<{ $isInHeader?: boolean }>`
   background: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.12)' : '#f8fafc')};
   border-radius: 24px;
   overflow: hidden;
-  width: 100%;
+  width: ${props => (props.$isInHeader ? '100%' : '280px')};
   border: 1px solid ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.15)' : 'transparent')};
   transition: all 0.2s ease;
 
@@ -36,6 +37,15 @@ const SearchInputContainer = styled(motion.div)<{ $isInHeader?: boolean }>`
     background: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.2)' : 'white')};
     border-color: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.25)' : '#16a34a20')};
     box-shadow: 0 0 0 3px ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.1)' : '#16a34a10')};
+  }
+
+  @media (max-width: 600px) {
+    border-radius: 16px;
+    width: ${props => (props.$isInHeader ? '100%' : '100%')};
+  }
+
+  @media (max-width: 480px) {
+    width: ${props => (props.$isInHeader ? '100%' : '100%')};
   }
 `;
 
@@ -51,6 +61,11 @@ const SearchInput = styled.input<{ $isInHeader?: boolean }>`
 
   &::placeholder {
     color: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.6)' : '#94a3b8')};
+  }
+
+  @media (max-width: 480px) {
+    font-size: 15px;
+    padding: 12px 40px 12px 14px;
   }
 `;
 
@@ -74,6 +89,11 @@ const ClearButton = styled.button<{ $isInHeader?: boolean }>`
     background: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.15)' : '#f1f5f9')};
     color: ${props => (props.$isInHeader ? 'white' : '#64748b')};
   }
+
+  @media (max-width: 480px) {
+    right: 10px;
+    padding: 6px;
+  }
 `;
 
 const SearchResultsDropdown = styled(motion.div)`
@@ -88,6 +108,17 @@ const SearchResultsDropdown = styled(motion.div)`
   max-height: 420px;
   overflow: hidden;
   z-index: 1001;
+
+  @media (max-width: 600px) {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    max-height: 70vh;
+    border-radius: 24px 24px 0 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+  }
 `;
 
 const ResultsGroup = styled.div`
@@ -121,6 +152,10 @@ const ResultsGroupCount = styled.span`
 const SearchResultsList = styled.div`
   max-height: 320px;
   overflow-y: auto;
+
+  @media (max-width: 600px) {
+    max-height: 50vh;
+  }
 `;
 
 const SearchResultItem = styled(motion.div)<{ $variant?: 'racket' | 'brand' | 'category' }>`
@@ -137,6 +172,11 @@ const SearchResultItem = styled(motion.div)<{ $variant?: 'racket' | 'brand' | 'c
 
   &:last-child {
     border-bottom: none;
+  }
+
+  @media (max-width: 600px) {
+    padding: 14px 16px;
+    gap: 14px;
   }
 `;
 
@@ -183,6 +223,10 @@ const ResultImage = styled.img`
 const ResultInfo = styled.div`
   flex: 1;
   min-width: 0;
+
+  @media (max-width: 480px) {
+    max-width: 140px;
+  }
 `;
 
 const ResultName = styled.div<{ $variant?: 'racket' | 'brand' | 'category' }>`
@@ -192,12 +236,20 @@ const ResultName = styled.div<{ $variant?: 'racket' | 'brand' | 'category' }>`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+
+  @media (max-width: 600px) {
+    font-size: 15px;
+  }
 `;
 
 const ResultSubtext = styled.div`
   font-size: 12px;
   color: #94a3b8;
   margin-top: 2px;
+
+  @media (max-width: 600px) {
+    font-size: 13px;
+  }
 `;
 
 const ResultPrice = styled.span`
@@ -205,11 +257,21 @@ const ResultPrice = styled.span`
   font-weight: 600;
   color: #16a34a;
   white-space: nowrap;
+
+  @media (max-width: 480px) {
+    font-size: 13px;
+    position: absolute;
+    right: 16px;
+  }
 `;
 
 const NoResults = styled.div`
   padding: 24px 16px;
   text-align: center;
+
+  @media (max-width: 600px) {
+    padding: 32px 16px;
+  }
 `;
 
 const NoResultsText = styled.p`
@@ -453,10 +515,10 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
           {(isSearchOpen || isInHeader) && (
             <SearchInputContainer
               $isInHeader={isInHeader}
-              initial={isInHeader ? { width: '100%', opacity: 1 } : { width: 0, opacity: 0 }}
-              animate={isInHeader ? { width: '100%', opacity: 1 } : { width: 280, opacity: 1 }}
-              exit={{ width: 0, opacity: 0 }}
-              transition={{ duration: 0.2, ease: 'easeInOut' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
             >
               <SearchInput
                 ref={searchInputRef}

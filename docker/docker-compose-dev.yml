@@ -19,6 +19,7 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       JWT_SECRET: ${JWT_SECRET}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      FREE_AI_API_URL: ${FREE_AI_API_URL}
     healthcheck:
       test: ["CMD-SHELL", "curl -k -fsS https://localhost:${PORT}/api/v1/docs || exit 1"]
       interval: 10s
