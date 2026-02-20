@@ -19,6 +19,7 @@ services:
       SUPABASE_SERVICE_ROLE_KEY: ${SUPABASE_SERVICE_ROLE_KEY}
       JWT_SECRET: ${JWT_SECRET}
       GEMINI_API_KEY: ${GEMINI_API_KEY}
+      FREE_AI_API_URL: ${FREE_AI_API_URL} 
     healthcheck:
       test:
         [
