@@ -1,16 +1,17 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import axios from 'axios';
 import proxyRoutes from '../../routes/proxyRoutes';
 
-jest.mock('axios');
+vi.mock('axios');
 
 const app = express();
 app.use('/api/v1/proxy', proxyRoutes);
 
 describe('Proxy Routes', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /image', () => {
@@ -32,7 +33,7 @@ describe('Proxy Routes', () => {
       const mockImageData = Buffer.from('fake-image-data');
       const mockImageUrl = 'https://example.com/image.jpg';
 
-      (axios.get as jest.Mock).mockResolvedValue({
+      (axios.get as vi.Mock).mockResolvedValue({
         data: mockImageData,
         headers: {
           'content-type': 'image/jpeg',
@@ -61,7 +62,7 @@ describe('Proxy Routes', () => {
       const mockImageData = Buffer.from('fake-image-data');
       const mockImageUrl = 'https://example.com/image.png';
 
-      (axios.get as jest.Mock).mockResolvedValue({
+      (axios.get as vi.Mock).mockResolvedValue({
         data: mockImageData,
         headers: {},
       });
@@ -77,7 +78,7 @@ describe('Proxy Routes', () => {
     it('should handle network errors', async () => {
       const mockImageUrl = 'https://example.com/image.jpg';
 
-      (axios.get as jest.Mock).mockRejectedValue(new Error('Network error'));
+      (axios.get as vi.Mock).mockRejectedValue(new Error('Network error'));
 
       const response = await request(app).get(
         `/api/v1/proxy/image?url=${encodeURIComponent(mockImageUrl)}`
@@ -90,7 +91,7 @@ describe('Proxy Routes', () => {
     it('should handle HTTP errors from source', async () => {
       const mockImageUrl = 'https://example.com/image.jpg';
 
-      (axios.get as jest.Mock).mockRejectedValue({
+      (axios.get as vi.Mock).mockRejectedValue({
         response: {
           status: 404,
           statusText: 'Not Found',
@@ -108,7 +109,7 @@ describe('Proxy Routes', () => {
     it('should handle timeout errors', async () => {
       const mockImageUrl = 'https://example.com/slow-image.jpg';
 
-      (axios.get as jest.Mock).mockRejectedValue({
+      (axios.get as vi.Mock).mockRejectedValue({
         code: 'ECONNABORTED',
         message: 'timeout of 10000ms exceeded',
       });
@@ -131,7 +132,7 @@ describe('Proxy Routes', () => {
       for (const testCase of testCases) {
         const mockImageData = Buffer.from('fake-image-data');
 
-        (axios.get as jest.Mock).mockResolvedValue({
+        (axios.get as vi.Mock).mockResolvedValue({
           data: mockImageData,
           headers: {
             'content-type': testCase.contentType,
@@ -151,7 +152,7 @@ describe('Proxy Routes', () => {
       const mockImageData = Buffer.from('fake-image-data');
       const mockImageUrl = 'https://example.com/images/test image (1).jpg?size=large&format=jpg';
 
-      (axios.get as jest.Mock).mockResolvedValue({
+      (axios.get as vi.Mock).mockResolvedValue({
         data: mockImageData,
         headers: {
           'content-type': 'image/jpeg',

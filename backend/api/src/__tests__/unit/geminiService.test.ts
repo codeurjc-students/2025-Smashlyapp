@@ -1,18 +1,19 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { GeminiService } from '../../../src/services/geminiService';
 import { Racket } from '../../../src/types/racket';
 
 // Mock the GoogleGenerativeAI
-jest.mock('@google/generative-ai', () => ({
-  GoogleGenerativeAI: jest.fn().mockImplementation(() => ({
-    getGenerativeModel: jest.fn().mockReturnValue({
-      generateContent: jest.fn(),
+vi.mock('@google/generative-ai', () => ({
+  GoogleGenerativeAI: vi.fn().mockImplementation(() => ({
+    getGenerativeModel: vi.fn().mockReturnValue({
+      generateContent: vi.fn(),
     }),
   })),
 }));
 
 describe('GeminiService', () => {
   let service: GeminiService;
-  let mockGenerateContent: jest.Mock;
+  let mockGenerateContent: vi.Mock;
 
   const mockRackets = [
     {
@@ -79,17 +80,17 @@ describe('GeminiService', () => {
     preferences: 'Control y potencia equilibrados',
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Save original env
     const originalEnv = process.env.GEMINI_API_KEY;
 
     // Set up mock
-    const { GoogleGenerativeAI } = require('@google/generative-ai');
+    const { GoogleGenerativeAI } = await import('@google/generative-ai');
     const mockModel = {
-      generateContent: jest.fn(),
+      generateContent: vi.fn(),
     };
-    (GoogleGenerativeAI as jest.Mock).mockImplementation(() => ({
-      getGenerativeModel: jest.fn().mockReturnValue(mockModel),
+    (GoogleGenerativeAI as vi.Mock).mockImplementation(() => ({
+      getGenerativeModel: vi.fn().mockReturnValue(mockModel),
     }));
 
     mockGenerateContent = mockModel.generateContent;
@@ -102,7 +103,7 @@ describe('GeminiService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   const mockComparisonResponse = `
@@ -139,7 +140,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
 
     it('should warn but initialize when GEMINI_API_KEY is not set', () => {
       delete process.env.GEMINI_API_KEY;
-      const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
+      const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const newService = new GeminiService();
       expect(newService).toBeInstanceOf(GeminiService);
       expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -182,7 +183,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(mockComparisonResponse),
+          text: vi.fn().mockReturnValue(mockComparisonResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -204,7 +205,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(mockComparisonResponse),
+          text: vi.fn().mockReturnValue(mockComparisonResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -245,7 +246,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(mockComparisonResponse),
+          text: vi.fn().mockReturnValue(mockComparisonResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -268,7 +269,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
         .mockRejectedValueOnce(new Error('overloaded'))
         .mockResolvedValueOnce({
           response: {
-            text: jest.fn().mockReturnValue(mockComparisonResponse),
+            text: vi.fn().mockReturnValue(mockComparisonResponse),
           },
         });
 
@@ -285,7 +286,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
         .mockRejectedValueOnce(new Error('429 Too Many Requests'))
         .mockResolvedValueOnce({
           response: {
-            text: jest.fn().mockReturnValue(mockComparisonResponse),
+            text: vi.fn().mockReturnValue(mockComparisonResponse),
           },
         });
 
@@ -324,7 +325,7 @@ La Adidas Metalbone 3.1 es ideal para jugadores ofensivos que buscan máxima pot
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(mockComparisonResponse),
+          text: vi.fn().mockReturnValue(mockComparisonResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -353,7 +354,7 @@ More analysis.
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(responseWithoutMarker),
+          text: vi.fn().mockReturnValue(responseWithoutMarker),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -382,7 +383,7 @@ Comparison text.
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(responseWithMarkdown),
+          text: vi.fn().mockReturnValue(responseWithMarkdown),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -396,7 +397,7 @@ Comparison text.
     it('should return default metrics when JSON parsing fails', async () => {
       process.env.GEMINI_API_KEY = 'test-api-key';
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const invalidJsonResponse = `
 Comparison text.
@@ -407,7 +408,7 @@ This is not valid JSON at all.
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(invalidJsonResponse),
+          text: vi.fn().mockReturnValue(invalidJsonResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -430,7 +431,7 @@ This is not valid JSON at all.
     it('should handle response with no JSON at all', async () => {
       process.env.GEMINI_API_KEY = 'test-api-key';
 
-      const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       const textOnlyResponse = `
 # Comparison Analysis
@@ -440,7 +441,7 @@ This is just text without any JSON metrics.
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(textOnlyResponse),
+          text: vi.fn().mockReturnValue(textOnlyResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -460,7 +461,7 @@ This is just text without any JSON metrics.
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(mockComparisonResponse),
+          text: vi.fn().mockReturnValue(mockComparisonResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -495,7 +496,7 @@ This is just text without any JSON metrics.
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue(mockComparisonResponse),
+          text: vi.fn().mockReturnValue(mockComparisonResponse),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);
@@ -514,7 +515,7 @@ This is just text without any JSON metrics.
 
       const mockResponse = {
         response: {
-          text: jest.fn().mockReturnValue('Generated content here'),
+          text: vi.fn().mockReturnValue('Generated content here'),
         },
       };
       mockGenerateContent.mockResolvedValue(mockResponse);

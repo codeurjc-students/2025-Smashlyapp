@@ -1,22 +1,23 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { RecommendationService } from '../../services/recommendationService';
 import { OpenRouterService } from '../../services/openRouterService';
 import { RacketService } from '../../services/racketService';
 import { RacketFilterService } from '../../services/racketFilterService';
 import { supabase } from '../../config/supabase';
 
-jest.mock('../../config/supabase', () => ({
+vi.mock('../../config/supabase', () => ({
   supabase: {
-    from: jest.fn(),
+    from: vi.fn(),
   },
 }));
 
-jest.mock('../../services/openRouterService');
-jest.mock('../../services/racketService');
-jest.mock('../../services/racketFilterService');
+vi.mock('../../services/openRouterService');
+vi.mock('../../services/racketService');
+vi.mock('../../services/racketFilterService');
 
 describe('RecommendationService', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('generateRecommendation', () => {
@@ -50,9 +51,9 @@ describe('RecommendationService', () => {
         budget: 200,
       };
 
-      (OpenRouterService.generateContent as jest.Mock).mockResolvedValue(mockAIResponse);
-      (RacketService.getAllRackets as jest.Mock).mockResolvedValue(mockRackets);
-      (RacketFilterService.filterRackets as jest.Mock).mockReturnValue(mockRackets);
+      (OpenRouterService.generateContent as vi.Mock).mockResolvedValue(mockAIResponse);
+      (RacketService.getAllRackets as vi.Mock).mockResolvedValue(mockRackets);
+      (RacketFilterService.filterRackets as vi.Mock).mockReturnValue(mockRackets);
 
       const result = await RecommendationService.generateRecommendation('basic', formData);
 
@@ -62,9 +63,9 @@ describe('RecommendationService', () => {
     });
 
     it('should throw error when AI response cannot be parsed', async () => {
-      (OpenRouterService.generateContent as jest.Mock).mockResolvedValue('Invalid response');
-      (RacketService.getAllRackets as jest.Mock).mockResolvedValue(mockRackets);
-      (RacketFilterService.filterRackets as jest.Mock).mockReturnValue(mockRackets);
+      (OpenRouterService.generateContent as vi.Mock).mockResolvedValue('Invalid response');
+      (RacketService.getAllRackets as vi.Mock).mockResolvedValue(mockRackets);
+      (RacketFilterService.filterRackets as vi.Mock).mockReturnValue(mockRackets);
 
       await expect(
         RecommendationService.generateRecommendation('basic', {} as any)
@@ -81,10 +82,10 @@ describe('RecommendationService', () => {
         created_at: '2024-01-01T00:00:00Z',
       };
 
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        insert: jest.fn().mockReturnValue({
-          select: jest.fn().mockReturnValue({
-            single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        insert: vi.fn().mockReturnValue({
+          select: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
               data: mockSavedRecommendation,
               error: null,
             }),
@@ -105,12 +106,12 @@ describe('RecommendationService', () => {
 
   describe('getLastRecommendation', () => {
     it('should return null when no recommendations exist', async () => {
-      (supabase.from as jest.Mock).mockImplementation(() => ({
-        select: jest.fn().mockReturnValue({
-          eq: jest.fn().mockReturnValue({
-            order: jest.fn().mockReturnValue({
-              limit: jest.fn().mockReturnValue({
-                single: jest.fn().mockResolvedValue({
+      (supabase.from as vi.Mock).mockImplementation(() => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockReturnValue({
+              limit: vi.fn().mockReturnValue({
+                single: vi.fn().mockResolvedValue({
                   data: null,
                   error: { code: 'PGRST116', message: 'No rows found' },
                 }),

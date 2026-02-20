@@ -1,19 +1,20 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ReviewController } from '../../controllers/reviewController';
 import { ReviewService } from '../../services/reviewService';
 import type { Request, Response } from 'express';
 
-jest.mock('../../services/reviewService', () => ({
+vi.mock('../../services/reviewService', () => ({
   ReviewService: {
-    getReviewsByRacket: jest.fn(),
-    getReviewsByUser: jest.fn(),
-    getReviewById: jest.fn(),
-    createReview: jest.fn(),
-    updateReview: jest.fn(),
-    deleteReview: jest.fn(),
-    toggleLike: jest.fn(),
-    addComment: jest.fn(),
-    getComments: jest.fn(),
-    deleteComment: jest.fn(),
+    getReviewsByRacket: vi.fn(),
+    getReviewsByUser: vi.fn(),
+    getReviewById: vi.fn(),
+    createReview: vi.fn(),
+    updateReview: vi.fn(),
+    deleteReview: vi.fn(),
+    toggleLike: vi.fn(),
+    addComment: vi.fn(),
+    getComments: vi.fn(),
+    deleteComment: vi.fn(),
   },
 }));
 
@@ -30,17 +31,17 @@ function createMockReq(overrides: any = {}): any {
 function createMockRes(): Partial<Response> & { body?: any; statusCode: number } {
   const res: any = {};
   res.statusCode = 200;
-  res.status = jest.fn((code: number) => { res.statusCode = code; return res; });
-  res.json = jest.fn((payload: any) => { res.body = payload; return res; });
-  res.send = jest.fn(() => res);
+  res.status = vi.fn((code: number) => { res.statusCode = code; return res; });
+  res.json = vi.fn((payload: any) => { res.body = payload; return res; });
+  res.send = vi.fn(() => res);
   return res;
 }
 
 describe('ReviewController.getReviewsByRacket', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns reviews with default filters', async () => {
-    (ReviewService.getReviewsByRacket as jest.Mock).mockResolvedValueOnce({ items: [], page: 1, total: 0 });
+    (ReviewService.getReviewsByRacket as vi.Mock).mockResolvedValueOnce({ items: [], page: 1, total: 0 });
     const req = createMockReq({ params: { racketId: '10' }, query: {} });
     const res = createMockRes();
     await ReviewController.getReviewsByRacket(req as any, res as Response);
@@ -50,10 +51,10 @@ describe('ReviewController.getReviewsByRacket', () => {
 });
 
 describe('ReviewController.getReviewsByUser', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns reviews for user with pagination', async () => {
-    (ReviewService.getReviewsByUser as jest.Mock).mockResolvedValueOnce({ items: [], page: 2, total: 0 });
+    (ReviewService.getReviewsByUser as vi.Mock).mockResolvedValueOnce({ items: [], page: 2, total: 0 });
     const req = createMockReq({ params: { userId: 'u1' }, query: { page: '2', limit: '10' } });
     const res = createMockRes();
     await ReviewController.getReviewsByUser(req as Request, res as Response);
@@ -63,10 +64,10 @@ describe('ReviewController.getReviewsByUser', () => {
 });
 
 describe('ReviewController.getReviewById', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns 404 if review not found', async () => {
-    (ReviewService.getReviewById as jest.Mock).mockResolvedValueOnce(null);
+    (ReviewService.getReviewById as vi.Mock).mockResolvedValueOnce(null);
     const req = createMockReq({ params: { reviewId: 'r1' }, user: { id: 'u1' } });
     const res = createMockRes();
     await ReviewController.getReviewById(req as any, res as Response);
@@ -75,7 +76,7 @@ describe('ReviewController.getReviewById', () => {
   });
 
   it('returns review when found', async () => {
-    (ReviewService.getReviewById as jest.Mock).mockResolvedValueOnce({ id: 'r1', title: 'Nice' });
+    (ReviewService.getReviewById as vi.Mock).mockResolvedValueOnce({ id: 'r1', title: 'Nice' });
     const req = createMockReq({ params: { reviewId: 'r1' }, user: { id: 'u1' } });
     const res = createMockRes();
     await ReviewController.getReviewById(req as any, res as Response);
@@ -85,7 +86,7 @@ describe('ReviewController.getReviewById', () => {
 });
 
 describe('ReviewController.createReview', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns 401 if unauthenticated', async () => {
     const req = createMockReq({ body: {} });
@@ -104,7 +105,7 @@ describe('ReviewController.createReview', () => {
   });
 
   it('returns 201 on successful creation', async () => {
-    (ReviewService.createReview as jest.Mock).mockResolvedValueOnce({ id: 'r2' });
+    (ReviewService.createReview as vi.Mock).mockResolvedValueOnce({ id: 'r2' });
     const req = createMockReq({ user: { id: 'u1' }, body: { racket_id: 1, title: 'Great Review', content: 'This is a very detailed review content...', rating: 5 } });
     const res = createMockRes();
     await ReviewController.createReview(req as any, res as Response);
@@ -114,7 +115,7 @@ describe('ReviewController.createReview', () => {
   });
 
   it('returns 409 when duplicate review error occurs', async () => {
-    (ReviewService.createReview as jest.Mock).mockRejectedValueOnce(new Error('Ya has publicado una review para esta pala'));
+    (ReviewService.createReview as vi.Mock).mockRejectedValueOnce(new Error('Ya has publicado una review para esta pala'));
     const req = createMockReq({ user: { id: 'u1' }, body: { racket_id: 1, title: 'Great Review', content: 'This is a very detailed review content...', rating: 5 } });
     const res = createMockRes();
     await ReviewController.createReview(req as any, res as Response);
@@ -124,7 +125,7 @@ describe('ReviewController.createReview', () => {
 });
 
 describe('ReviewController.updateReview', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns 401 if unauthenticated', async () => {
     const req = createMockReq({ params: { reviewId: 'r1' }, body: { title: 'Updated Title' } });
@@ -142,7 +143,7 @@ describe('ReviewController.updateReview', () => {
   });
 
   it('returns 200 on successful update', async () => {
-    (ReviewService.updateReview as jest.Mock).mockResolvedValueOnce({ id: 'r1', title: 'Updated Title' });
+    (ReviewService.updateReview as vi.Mock).mockResolvedValueOnce({ id: 'r1', title: 'Updated Title' });
     const req = createMockReq({ user: { id: 'u1' }, params: { reviewId: 'r1' }, body: { title: 'Updated Title' } });
     const res = createMockRes();
     await ReviewController.updateReview(req as any, res as Response);
@@ -151,7 +152,7 @@ describe('ReviewController.updateReview', () => {
   });
 
   it('returns 403 when permission error occurs', async () => {
-    (ReviewService.updateReview as jest.Mock).mockRejectedValueOnce(new Error('No tienes permiso'));
+    (ReviewService.updateReview as vi.Mock).mockRejectedValueOnce(new Error('No tienes permiso'));
     const req = createMockReq({ user: { id: 'u1' }, params: { reviewId: 'r1' }, body: { content: 'Valid content long enough here...' } });
     const res = createMockRes();
     await ReviewController.updateReview(req as any, res as Response);
@@ -161,7 +162,7 @@ describe('ReviewController.updateReview', () => {
 });
 
 describe('ReviewController.deleteReview', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns 401 if unauthenticated', async () => {
     const req = createMockReq({ params: { reviewId: 'r1' } });
@@ -171,7 +172,7 @@ describe('ReviewController.deleteReview', () => {
   });
 
   it('returns 204 after delete', async () => {
-    (ReviewService.deleteReview as jest.Mock).mockResolvedValueOnce(undefined);
+    (ReviewService.deleteReview as vi.Mock).mockResolvedValueOnce(undefined);
     const req = createMockReq({ user: { id: 'u1' }, params: { reviewId: 'r1' } });
     const res = createMockRes();
     await ReviewController.deleteReview(req as any, res as Response);
@@ -181,7 +182,7 @@ describe('ReviewController.deleteReview', () => {
 });
 
 describe('ReviewController.toggleLike', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('returns 401 if unauthenticated', async () => {
     const req = createMockReq({ params: { reviewId: 'r1' } });
@@ -191,7 +192,7 @@ describe('ReviewController.toggleLike', () => {
   });
 
   it('returns liked state', async () => {
-    (ReviewService.toggleLike as jest.Mock).mockResolvedValueOnce(true);
+    (ReviewService.toggleLike as vi.Mock).mockResolvedValueOnce(true);
     const req = createMockReq({ user: { id: 'u1' }, params: { reviewId: 'r1' } });
     const res = createMockRes();
     await ReviewController.toggleLike(req as any, res as Response);
@@ -201,7 +202,7 @@ describe('ReviewController.toggleLike', () => {
 });
 
 describe('ReviewController.comments', () => {
-  beforeEach(() => jest.clearAllMocks());
+  beforeEach(() => vi.clearAllMocks());
 
   it('addComment validates content length', async () => {
     const req = createMockReq({ user: { id: 'u1' }, params: { reviewId: 'r1' }, body: { content: '' } });
@@ -212,7 +213,7 @@ describe('ReviewController.comments', () => {
   });
 
   it('addComment returns 201 on success', async () => {
-    (ReviewService.addComment as jest.Mock).mockResolvedValueOnce({ id: 'c1', content: 'Nice!' });
+    (ReviewService.addComment as vi.Mock).mockResolvedValueOnce({ id: 'c1', content: 'Nice!' });
     const req = createMockReq({ user: { id: 'u1' }, params: { reviewId: 'r1' }, body: { content: 'Nice!' } });
     const res = createMockRes();
     await ReviewController.addComment(req as any, res as Response);
@@ -221,7 +222,7 @@ describe('ReviewController.comments', () => {
   });
 
   it('getComments returns list', async () => {
-    (ReviewService.getComments as jest.Mock).mockResolvedValueOnce([{ id: 'c1' }]);
+    (ReviewService.getComments as vi.Mock).mockResolvedValueOnce([{ id: 'c1' }]);
     const req = createMockReq({ params: { reviewId: 'r1' } });
     const res = createMockRes();
     await ReviewController.getComments(req as Request, res as Response);
@@ -230,7 +231,7 @@ describe('ReviewController.comments', () => {
   });
 
   it('deleteComment returns 204', async () => {
-    (ReviewService.deleteComment as jest.Mock).mockResolvedValueOnce(undefined);
+    (ReviewService.deleteComment as vi.Mock).mockResolvedValueOnce(undefined);
     const req = createMockReq({ user: { id: 'u1' }, params: { commentId: 'c1' } });
     const res = createMockRes();
     await ReviewController.deleteComment(req as any, res as Response);

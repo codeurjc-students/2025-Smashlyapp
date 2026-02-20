@@ -1,34 +1,39 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Response } from 'express';
 import { RequestWithUser } from '../../../src/types';
 import { UploadController } from '../../../src/controllers/uploadController';
 
 // Mock supabase
-jest.mock('../../../src/config/supabase', () => ({
+vi.mock('../../../src/config/supabase', () => ({
   supabase: {
     storage: {
-      from: jest.fn(),
+      from: vi.fn(),
     },
-    from: jest.fn(),
+    from: vi.fn(),
   },
 }));
 
-jest.mock('../../../src/config/logger', () => ({
-  info: jest.fn(),
-  warn: jest.fn(),
-  error: jest.fn(),
-}));
+vi.mock('../../../src/config/logger', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+  };
+});
 
 describe('UploadController', () => {
   let mockReq: Partial<RequestWithUser>;
   let mockRes: Partial<Response>;
-  let statusMock: jest.Mock;
-  let jsonMock: jest.Mock;
+  let statusMock: vi.Mock;
+  let jsonMock: vi.Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    statusMock = jest.fn().mockReturnThis();
-    jsonMock = jest.fn().mockReturnThis();
+    statusMock = vi.fn().mockReturnThis();
+    jsonMock = vi.fn().mockReturnThis();
 
     mockRes = {
       status: statusMock,
@@ -127,7 +132,7 @@ describe('UploadController', () => {
 
     it('should handle errors gracefully', async () => {
       // Force an error by mocking from to throw
-      const { supabase } = require('../../../src/config/supabase');
+      const { supabase } = await import('../../../src/config/supabase');
       supabase.from.mockImplementationOnce(() => {
         throw new Error('Database error');
       });

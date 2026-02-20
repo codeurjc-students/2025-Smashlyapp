@@ -1,10 +1,14 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
 import { ComparisonProvider, useComparison } from '../../../contexts/ComparisonContext';
-import toast from 'react-hot-toast';
+import { sileo } from 'sileo';
 
-vi.mock('react-hot-toast');
+vi.mock('sileo', () => ({
+  sileo: {
+    error: vi.fn(),
+    success: vi.fn(),
+  },
+}));
 
 describe('ComparisonContext', () => {
   beforeEach(() => {
@@ -50,11 +54,12 @@ describe('ComparisonContext', () => {
   it('should add racket to comparison', () => {
     const { result } = renderHook(() => useComparison(), { wrapper });
 
+    let success = false;
     act(() => {
-      const success = result.current.addRacket(mockRacket1);
-      expect(success).toBe(true);
+      success = result.current.addRacket(mockRacket1);
     });
 
+    expect(success).toBe(true);
     expect(result.current.rackets).toHaveLength(1);
     expect(result.current.rackets[0].nombre).toBe('Racket 1');
     expect(result.current.count).toBe(1);
@@ -65,12 +70,16 @@ describe('ComparisonContext', () => {
 
     act(() => {
       result.current.addRacket(mockRacket1);
-      const success = result.current.addRacket(mockRacket1);
-      expect(success).toBe(false);
     });
 
+    let success = true;
+    act(() => {
+      success = result.current.addRacket(mockRacket1);
+    });
+
+    expect(success).toBe(false);
     expect(result.current.rackets).toHaveLength(1);
-    expect(toast.error).toHaveBeenCalledWith('Esta pala ya está en la comparación');
+    expect(sileo.error).toHaveBeenCalledWith(expect.objectContaining({ title: 'Error' }));
   });
 
   it('should not add more than 3 rackets', () => {
@@ -80,12 +89,16 @@ describe('ComparisonContext', () => {
       result.current.addRacket(mockRacket1);
       result.current.addRacket(mockRacket2);
       result.current.addRacket(mockRacket3);
-      const success = result.current.addRacket({ ...mockRacket1, id: 4, nombre: 'Racket 4' });
-      expect(success).toBe(false);
     });
 
+    let success = true;
+    act(() => {
+      success = result.current.addRacket({ ...mockRacket1, id: 4, nombre: 'Racket 4' });
+    });
+
+    expect(success).toBe(false);
     expect(result.current.rackets).toHaveLength(3);
-    expect(toast.error).toHaveBeenCalledWith('Solo puedes comparar hasta 3 palas a la vez');
+    expect(sileo.error).toHaveBeenCalledWith(expect.objectContaining({ title: 'Error' }));
   });
 
   it('should remove racket from comparison', () => {
@@ -142,12 +155,10 @@ describe('ComparisonContext', () => {
       result.current.addRacket(mockRacket1);
     });
 
-    await waitFor(() => {
-      const stored = localStorage.getItem('smashly_comparison_list');
-      expect(stored).toBeTruthy();
-      const parsed = JSON.parse(stored!);
-      expect(parsed).toHaveLength(1);
-      expect(parsed[0].nombre).toBe('Racket 1');
-    });
+    const stored = localStorage.getItem('smashly_comparison_list');
+    expect(stored).toBeTruthy();
+    const parsed = JSON.parse(stored!);
+    expect(parsed).toHaveLength(1);
+    expect(parsed[0].nombre).toBe('Racket 1');
   });
 });

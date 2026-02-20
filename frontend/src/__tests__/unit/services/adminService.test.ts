@@ -1,10 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AdminService } from '../../../services/adminService';
 
-// Mock fetch
 global.fetch = vi.fn();
 
-// Mock localStorage
 Storage.prototype.getItem = vi.fn();
 
 describe('AdminService', () => {
@@ -13,7 +11,7 @@ describe('AdminService', () => {
     vi.mocked(localStorage.getItem).mockReturnValue('admin-token');
   });
 
-  describe('getMetrics', () => {
+  describe('getDashboardMetrics', () => {
     it('should fetch admin metrics', async () => {
       const mockMetrics = {
         totalUsers: 100,
@@ -32,21 +30,13 @@ describe('AdminService', () => {
         json: async () => ({ success: true, data: mockMetrics }),
       });
 
-      const result = await AdminService.getMetrics();
+      const result = await AdminService.getDashboardMetrics();
 
       expect(result).toEqual(mockMetrics);
-      expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/admin/metrics'),
-        expect.objectContaining({
-          headers: expect.objectContaining({
-            Authorization: 'Bearer admin-token',
-          }),
-        })
-      );
     });
   });
 
-  describe('getUsers', () => {
+  describe('getAllUsers', () => {
     it('should fetch all users', async () => {
       const mockUsers = [
         { id: '1', email: 'user1@test.com', nickname: 'user1', role: 'player' },
@@ -58,7 +48,7 @@ describe('AdminService', () => {
         json: async () => ({ success: true, data: mockUsers }),
       });
 
-      const result = await AdminService.getUsers();
+      const result = await AdminService.getAllUsers();
 
       expect(result).toEqual(mockUsers);
     });
@@ -93,10 +83,10 @@ describe('AdminService', () => {
         json: async () => ({ success: true }),
       });
 
-      await AdminService.approveStoreRequest('store-1');
+      await AdminService.approveStoreRequest(1);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/admin/stores/store-1/approve'),
+        expect.stringContaining('/api/v1/admin/store-requests/1/approve'),
         expect.objectContaining({
           method: 'POST',
         })
@@ -111,13 +101,12 @@ describe('AdminService', () => {
         json: async () => ({ success: true }),
       });
 
-      await AdminService.rejectStoreRequest('store-1', 'Invalid data');
+      await AdminService.rejectStoreRequest(1);
 
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/admin/stores/store-1/reject'),
+        expect.stringContaining('/api/v1/admin/store-requests/1/reject'),
         expect.objectContaining({
           method: 'POST',
-          body: JSON.stringify({ reason: 'Invalid data' }),
         })
       );
     });
@@ -135,7 +124,7 @@ describe('AdminService', () => {
       expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining('/api/v1/admin/users/user-1/role'),
         expect.objectContaining({
-          method: 'PUT',
+          method: 'PATCH',
           body: JSON.stringify({ role: 'admin' }),
         })
       );

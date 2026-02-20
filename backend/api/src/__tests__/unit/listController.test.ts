@@ -1,16 +1,17 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ListController } from "../../../src/controllers/listController";
 import { ListService } from "../../../src/services/listService";
 
 // Mock the ListService methods used by the controller
-jest.mock("../../../src/services/listService", () => ({
+vi.mock("../../../src/services/listService", () => ({
   ListService: {
-    getUserLists: jest.fn(),
-    getListById: jest.fn(),
-    createList: jest.fn(),
-    updateList: jest.fn(),
-    deleteList: jest.fn(),
-    addRacketToList: jest.fn(),
-    removeRacketFromList: jest.fn(),
+    getUserLists: vi.fn(),
+    getListById: vi.fn(),
+    createList: vi.fn(),
+    updateList: vi.fn(),
+    deleteList: vi.fn(),
+    addRacketToList: vi.fn(),
+    removeRacketFromList: vi.fn(),
   },
 }));
 
@@ -18,8 +19,8 @@ describe("ListController", () => {
   const createMockRes = () => {
     const res: any = {};
     res.statusCode = 200;
-    res.json = jest.fn(() => res);
-    res.status = jest.fn((code: number) => {
+    res.json = vi.fn(() => res);
+    res.status = vi.fn((code: number) => {
       res.statusCode = code;
       return res;
     });
@@ -37,7 +38,7 @@ describe("ListController", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getUserLists", () => {
@@ -55,7 +56,7 @@ describe("ListController", () => {
 
     it("returns lists for authenticated user", async () => {
       const lists = [{ id: "l1", name: "Favoritas" }];
-      (ListService.getUserLists as jest.Mock).mockResolvedValue(lists);
+      (ListService.getUserLists as vi.Mock).mockResolvedValue(lists);
       const req = createMockReq({ user: { id: "user-1" } });
       const res = createMockRes();
 
@@ -83,7 +84,7 @@ describe("ListController", () => {
     });
 
     it("returns 404 if list not found", async () => {
-      (ListService.getListById as jest.Mock).mockResolvedValue(null);
+      (ListService.getListById as vi.Mock).mockResolvedValue(null);
       const req = createMockReq({ user: { id: "user-1" }, params: { id: "list-1" } });
       const res = createMockRes();
 
@@ -98,7 +99,7 @@ describe("ListController", () => {
 
     it("returns list if found", async () => {
       const list = { id: "list-1", name: "Compras" };
-      (ListService.getListById as jest.Mock).mockResolvedValue(list);
+      (ListService.getListById as vi.Mock).mockResolvedValue(list);
       const req = createMockReq({ user: { id: "user-1" }, params: { id: "list-1" } });
       const res = createMockRes();
 
@@ -138,7 +139,7 @@ describe("ListController", () => {
 
     it("creates list successfully", async () => {
       const created = { id: "list-2", name: "Nueva" };
-      (ListService.createList as jest.Mock).mockResolvedValue(created);
+      (ListService.createList as vi.Mock).mockResolvedValue(created);
       const req = createMockReq({ user: { id: "user-1" }, body: { name: "Nueva" } });
       const res = createMockRes();
 
@@ -167,7 +168,7 @@ describe("ListController", () => {
 
     it("updates list successfully", async () => {
       const updated = { id: "list-1", name: "Editada" };
-      (ListService.updateList as jest.Mock).mockResolvedValue(updated);
+      (ListService.updateList as vi.Mock).mockResolvedValue(updated);
       const req = createMockReq({ user: { id: "user-1" }, params: { id: "list-1" }, body: { name: "Editada" } });
       const res = createMockRes();
 
@@ -195,7 +196,7 @@ describe("ListController", () => {
     });
 
     it("deletes list successfully", async () => {
-      (ListService.deleteList as jest.Mock).mockResolvedValue(undefined);
+      (ListService.deleteList as vi.Mock).mockResolvedValue(undefined);
       const req = createMockReq({ user: { id: "user-1" }, params: { id: "list-1" } });
       const res = createMockRes();
 
@@ -235,7 +236,7 @@ describe("ListController", () => {
     });
 
     it("adds racket successfully", async () => {
-      (ListService.addRacketToList as jest.Mock).mockResolvedValue(undefined);
+      (ListService.addRacketToList as vi.Mock).mockResolvedValue(undefined);
       const req = createMockReq({ user: { id: "user-1" }, params: { id: "list-1" }, body: { racket_id: 10 } });
       const res = createMockRes();
 
@@ -249,7 +250,7 @@ describe("ListController", () => {
     });
 
     it("returns 400 if duplicate racket error", async () => {
-      (ListService.addRacketToList as jest.Mock).mockRejectedValue(new Error("La raqueta ya está en la lista"));
+      (ListService.addRacketToList as vi.Mock).mockRejectedValue(new Error("La raqueta ya está en la lista"));
       const req = createMockReq({ user: { id: "user-1" }, params: { id: "list-1" }, body: { racket_id: 10 } });
       const res = createMockRes();
 
@@ -288,7 +289,7 @@ describe("ListController", () => {
     });
 
     it("removes racket successfully", async () => {
-      (ListService.removeRacketFromList as jest.Mock).mockResolvedValue(undefined);
+      (ListService.removeRacketFromList as vi.Mock).mockResolvedValue(undefined);
       const req = createMockReq({ user: { id: "user-1" }, params: { id: "list-1", racketId: "12" } });
       const res = createMockRes();
 

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { storeService } from '../../../services/storeService';
+import storeService from '../../../services/storeService';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -60,7 +60,7 @@ describe('storeService', () => {
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ stores: mockStores }),
+        json: async () => mockStores,
       });
 
       const result = await storeService.getAllStores();
@@ -75,10 +75,10 @@ describe('storeService', () => {
 
       (global.fetch as any).mockResolvedValueOnce({
         ok: true,
-        json: async () => ({ store: mockStore }),
+        json: async () => mockStore,
       });
 
-      const result = await storeService.getStoreById('1');
+      const result = await storeService.getStoreById('1', 'token');
 
       expect(result).toEqual(mockStore);
       expect(global.fetch).toHaveBeenCalledWith(

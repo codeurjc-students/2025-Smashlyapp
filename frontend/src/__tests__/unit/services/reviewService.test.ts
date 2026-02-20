@@ -34,7 +34,7 @@ describe('reviewService', () => {
 
       expect(result).toEqual(mockReviews);
       expect(global.fetch).toHaveBeenCalledWith(
-        expect.stringContaining('/api/v1/reviews/racket/1'),
+        expect.stringContaining('/api/v1/reviews/rackets/1'),
         expect.any(Object)
       );
     });

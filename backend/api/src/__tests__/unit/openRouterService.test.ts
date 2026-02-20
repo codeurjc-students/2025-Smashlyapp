@@ -1,22 +1,23 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import axios from 'axios';
 import { OpenRouterService } from '../../../src/services/openRouterService';
 import { freeAiService } from '../../../src/services/freeAiService';
 import { Racket } from '../../../src/types/racket';
 
 // Mock axios
-jest.mock('axios');
+vi.mock('axios');
 
 // Mock freeAiService
-jest.mock('../../../src/services/freeAiService', () => ({
+vi.mock('../../../src/services/freeAiService', () => ({
   freeAiService: {
-    generateContent: jest.fn(),
+    generateContent: vi.fn(),
   },
 }));
 
 describe('OpenRouterService', () => {
   let service: OpenRouterService;
   const mockAxiosInstance = {
-    post: jest.fn(),
+    post: vi.fn(),
   };
 
   const mockRackets = [
@@ -159,9 +160,9 @@ describe('OpenRouterService', () => {
     const originalEnv = process.env.OPENROUTER_API_KEY;
 
     // Mock axios.create
-    (axios.create as jest.Mock).mockReturnValue(mockAxiosInstance);
+    (axios.create as vi.Mock).mockReturnValue(mockAxiosInstance);
     // Mock freeAiService fail by default to test fallback flow
-    (freeAiService.generateContent as jest.Mock).mockRejectedValue(
+    (freeAiService.generateContent as vi.Mock).mockRejectedValue(
       new Error('Free AI API unavailable')
     );
 
@@ -176,7 +177,7 @@ describe('OpenRouterService', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('constructor', () => {
@@ -219,7 +220,7 @@ describe('OpenRouterService', () => {
 
   describe('static generateContent', () => {
     it('should prioritize Free AI API if available', async () => {
-      (freeAiService.generateContent as jest.Mock).mockResolvedValue('Content from Free API');
+      (freeAiService.generateContent as vi.Mock).mockResolvedValue('Content from Free API');
 
       const result = await OpenRouterService.generateContent('Test prompt');
       expect(result).toBe('Content from Free API');
@@ -302,7 +303,7 @@ describe('OpenRouterService', () => {
 
   describe('compareRackets', () => {
     it('should prioritize Free AI API if available', async () => {
-      (freeAiService.generateContent as jest.Mock).mockResolvedValue(
+      (freeAiService.generateContent as vi.Mock).mockResolvedValue(
         JSON.stringify(mockStructuredResponse)
       );
 

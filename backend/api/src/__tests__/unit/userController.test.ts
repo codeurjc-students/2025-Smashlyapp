@@ -1,16 +1,17 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { UserController } from "../../../src/controllers/userController";
 import { UserService } from "../../../src/services/userService";
 
-jest.mock("../../../src/services/userService", () => ({
+vi.mock("../../../src/services/userService", () => ({
   UserService: {
-    getUserProfile: jest.fn(),
-    validateProfileData: jest.fn(),
-    createUserProfile: jest.fn(),
-    updateUserProfile: jest.fn(),
-    deleteUserProfile: jest.fn(),
-    isNicknameAvailable: jest.fn(),
-    searchUsersByNickname: jest.fn(),
-    getUserStats: jest.fn(),
+    getUserProfile: vi.fn(),
+    validateProfileData: vi.fn(),
+    createUserProfile: vi.fn(),
+    updateUserProfile: vi.fn(),
+    deleteUserProfile: vi.fn(),
+    isNicknameAvailable: vi.fn(),
+    searchUsersByNickname: vi.fn(),
+    getUserStats: vi.fn(),
   },
 }));
 
@@ -18,8 +19,8 @@ describe("UserController", () => {
   const createMockRes = () => {
     const res: any = {};
     res.statusCode = 200;
-    res.json = jest.fn(() => res);
-    res.status = jest.fn((code: number) => {
+    res.json = vi.fn(() => res);
+    res.status = vi.fn((code: number) => {
       res.statusCode = code;
       return res;
     });
@@ -37,7 +38,7 @@ describe("UserController", () => {
   };
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe("getUserProfile", () => {
@@ -54,7 +55,7 @@ describe("UserController", () => {
     });
 
     it("returns 404 when profile not found", async () => {
-      (UserService.getUserProfile as jest.Mock).mockResolvedValue(null);
+      (UserService.getUserProfile as vi.Mock).mockResolvedValue(null);
       const req = createMockReq({ user: { id: "u1" } });
       const res = createMockRes();
 
@@ -69,7 +70,7 @@ describe("UserController", () => {
 
     it("returns profile when found", async () => {
       const profile = { id: "p1", user_id: "u1", nickname: "smash" };
-      (UserService.getUserProfile as jest.Mock).mockResolvedValue(profile);
+      (UserService.getUserProfile as vi.Mock).mockResolvedValue(profile);
       const req = createMockReq({ user: { id: "u1" } });
       const res = createMockRes();
 
@@ -96,7 +97,7 @@ describe("UserController", () => {
     });
 
     it("returns 400 when validation fails", async () => {
-      (UserService.validateProfileData as jest.Mock).mockReturnValue({ isValid: false, errors: ["Invalid"] });
+      (UserService.validateProfileData as vi.Mock).mockReturnValue({ isValid: false, errors: ["Invalid"] });
       const req = createMockReq({ user: { id: "u1" }, body: { nickname: "sm" } });
       const res = createMockRes();
 
@@ -109,9 +110,9 @@ describe("UserController", () => {
     });
 
     it("creates profile successfully", async () => {
-      (UserService.validateProfileData as jest.Mock).mockReturnValue({ isValid: true, errors: [] });
+      (UserService.validateProfileData as vi.Mock).mockReturnValue({ isValid: true, errors: [] });
       const created = { id: "p1", user_id: "u1", nickname: "smash" };
-      (UserService.createUserProfile as jest.Mock).mockResolvedValue(created);
+      (UserService.createUserProfile as vi.Mock).mockResolvedValue(created);
       const req = createMockReq({ user: { id: "u1" }, body: { nickname: "smash" } });
       const res = createMockRes();
 
@@ -139,7 +140,7 @@ describe("UserController", () => {
     });
 
     it("returns 400 when validation fails", async () => {
-      (UserService.validateProfileData as jest.Mock).mockReturnValue({ isValid: false, errors: ["Invalid"] });
+      (UserService.validateProfileData as vi.Mock).mockReturnValue({ isValid: false, errors: ["Invalid"] });
       const req = createMockReq({ user: { id: "u1" }, body: { nickname: "no" } });
       const res = createMockRes();
 
@@ -152,8 +153,8 @@ describe("UserController", () => {
     });
 
     it("returns 409 when nickname conflict", async () => {
-      (UserService.validateProfileData as jest.Mock).mockReturnValue({ isValid: true, errors: [] });
-      (UserService.updateUserProfile as jest.Mock).mockRejectedValue(new Error("nickname already taken"));
+      (UserService.validateProfileData as vi.Mock).mockReturnValue({ isValid: true, errors: [] });
+      (UserService.updateUserProfile as vi.Mock).mockRejectedValue(new Error("nickname already taken"));
       const req = createMockReq({ user: { id: "u1" }, body: { nickname: "newnick" } });
       const res = createMockRes();
 
@@ -166,9 +167,9 @@ describe("UserController", () => {
     });
 
     it("updates profile successfully", async () => {
-      (UserService.validateProfileData as jest.Mock).mockReturnValue({ isValid: true, errors: [] });
+      (UserService.validateProfileData as vi.Mock).mockReturnValue({ isValid: true, errors: [] });
       const updated = { id: "p1", user_id: "u1", nickname: "new" };
-      (UserService.updateUserProfile as jest.Mock).mockResolvedValue(updated);
+      (UserService.updateUserProfile as vi.Mock).mockResolvedValue(updated);
       const req = createMockReq({ user: { id: "u1" }, body: { nickname: "new" } });
       const res = createMockRes();
 
@@ -196,7 +197,7 @@ describe("UserController", () => {
     });
 
     it("deletes profile successfully", async () => {
-      (UserService.deleteUserProfile as jest.Mock).mockResolvedValue(undefined);
+      (UserService.deleteUserProfile as vi.Mock).mockResolvedValue(undefined);
       const req = createMockReq({ user: { id: "u1" } });
       const res = createMockRes();
 
@@ -224,7 +225,7 @@ describe("UserController", () => {
     });
 
     it("returns available true", async () => {
-      (UserService.isNicknameAvailable as jest.Mock).mockResolvedValue(true);
+      (UserService.isNicknameAvailable as vi.Mock).mockResolvedValue(true);
       const req = createMockReq({ params: { nickname: "smash" }, query: {} });
       const res = createMockRes();
 
@@ -238,7 +239,7 @@ describe("UserController", () => {
     });
 
     it("returns available false with excludeUserId", async () => {
-      (UserService.isNicknameAvailable as jest.Mock).mockResolvedValue(false);
+      (UserService.isNicknameAvailable as vi.Mock).mockResolvedValue(false);
       const req = createMockReq({ params: { nickname: "smash" }, query: { excludeUserId: "u1" } });
       const res = createMockRes();
 
@@ -267,7 +268,7 @@ describe("UserController", () => {
 
     it("returns users list", async () => {
       const users = [{ id: "u2", nickname: "ace" }];
-      (UserService.searchUsersByNickname as jest.Mock).mockResolvedValue(users);
+      (UserService.searchUsersByNickname as vi.Mock).mockResolvedValue(users);
       const req = createMockReq({ query: { q: "ac", limit: "5" } });
       const res = createMockRes();
 
@@ -284,7 +285,7 @@ describe("UserController", () => {
   describe("getUserStats", () => {
     it("returns stats successfully", async () => {
       const stats = { totalUsers: 10 };
-      (UserService.getUserStats as jest.Mock).mockResolvedValue(stats);
+      (UserService.getUserStats as vi.Mock).mockResolvedValue(stats);
       const req = createMockReq({});
       const res = createMockRes();
 
