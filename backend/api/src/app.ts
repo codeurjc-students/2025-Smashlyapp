@@ -40,14 +40,11 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'"],
+        scriptSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:'],
-        // Permitir conexiones a la API desde el frontend
-        // En producción, mantener mismo origen (self) y localhost:443
-        // En desarrollo, permitir orígenes de Vite (5173) y websockets
         connectSrc:
           process.env.NODE_ENV === 'production'
-            ? ["'self'", 'https://localhost:443']
+            ? ["'self'"]
             : [
                 "'self'",
                 'https://localhost:443',
