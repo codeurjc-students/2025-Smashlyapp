@@ -40,13 +40,15 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'"],
-        imgSrc: ["'self'", 'data:', 'https:'],
+        scriptSrc: ["'self'", "'unsafe-inline'", 'https://accounts.google.com'],
+        imgSrc: ["'self'", 'data:', 'https:', 'https://lh3.googleusercontent.com'],
+        frameSrc: ["'self'", 'https://accounts.google.com'],
         connectSrc:
           process.env.NODE_ENV === 'production'
-            ? ["'self'"]
+            ? ["'self'", 'https://accounts.google.com']
             : [
                 "'self'",
+                'https://accounts.google.com',
                 'https://localhost:443',
                 'http://localhost:5173',
                 'https://localhost:5173',

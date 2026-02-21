@@ -107,7 +107,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Detectar tokens huérfanos al inicializar (solo en desarrollo)
-    if (process.env.NODE_ENV === 'development') {
+    if (import.meta.env.DEV) {
       const orphanedTokens = detectOrphanedTokens();
       if (orphanedTokens.length > 0) {
         console.warn('🚨 Orphaned tokens detected during init:', orphanedTokens);
@@ -211,7 +211,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       console.log('Attempting to sign in with email:', email);
 
       if (!email || !password) {
-        return { data: null, error: 'Email y contraseña son requeridos', errorCode: 'MISSING_CREDENTIALS' };
+        return {
+          data: null,
+          error: 'Email y contraseña son requeridos',
+          errorCode: 'MISSING_CREDENTIALS',
+        };
       }
 
       const url = buildApiUrl(API_ENDPOINTS.AUTH_LOGIN);
@@ -239,8 +243,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           friendlyErrorMessage = 'No tienes una cuenta con este email. ¿Quieres registrarte?';
         } else if (errorCode === 'INVALID_PASSWORD') {
           friendlyErrorMessage = 'La contraseña es incorrecta. Inténtalo de nuevo.';
-        } else if (errorMessage.toLowerCase().includes('invalid') ||
-                   errorMessage.toLowerCase().includes('incorrect')) {
+        } else if (
+          errorMessage.toLowerCase().includes('invalid') ||
+          errorMessage.toLowerCase().includes('incorrect')
+        ) {
           friendlyErrorMessage = 'Credenciales inválidas. Verifica tu email y contraseña.';
         } else if (errorMessage.toLowerCase().includes('not found')) {
           friendlyErrorMessage = 'No tienes una cuenta con este email. ¿Quieres registrarte?';
