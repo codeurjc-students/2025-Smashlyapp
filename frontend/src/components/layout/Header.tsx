@@ -130,7 +130,8 @@ const MobileMenuDropdown = styled.div<{ isOpen: boolean }>`
   opacity: ${props => (props.isOpen ? '1' : '0')};
   visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
   transition: all 0.3s ease;
-  z-index: 50;
+  z-index: 100;
+  overflow: visible;
 `;
 
 // Mobile Search Container
@@ -140,6 +141,9 @@ const MobileSearchContainer = styled.div<{ isOpen: boolean }>`
   transform: translateY(${props => (props.isOpen ? '0' : '-10px')});
   opacity: ${props => (props.isOpen ? '1' : '0')};
   transition: all 0.3s ease 0.1s;
+  overflow: visible;
+  position: relative;
+  z-index: 100;
 
   @media (min-width: 1025px) {
     display: none;
@@ -482,7 +486,7 @@ const Header: React.FC = () => {
 
         {/* Central Search Bar (Desktop) */}
         <CentralSearchContainer>
-          <GlobalSearch onSearchToggle={() => {}} isInHeader={true} />
+          <GlobalSearch onSearchToggle={() => {}} isInHeader={true} isMobileContext={false} />
         </CentralSearchContainer>
 
         <AuthButtons>
@@ -550,7 +554,7 @@ const Header: React.FC = () => {
         <MobileMenuDropdown isOpen={isMenuOpen || isMobileSearchOpen}>
           {/* Mobile Search Section */}
           <MobileSearchContainer isOpen={isMobileSearchOpen}>
-            <GlobalSearch onSearchToggle={setIsMobileSearchOpen} isInHeader={true} />
+            <GlobalSearch onSearchToggle={setIsMobileSearchOpen} isInHeader={true} isMobileContext={true} />
           </MobileSearchContainer>
 
           {/* Navigation Section */}

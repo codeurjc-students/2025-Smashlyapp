@@ -20,47 +20,79 @@ const SearchWrapper = styled.div`
   width: 100%;
 `;
 
-const SearchInputContainer = styled(motion.div)<{ $isInHeader?: boolean }>`
+const SearchInputContainer = styled(motion.div)<{
+  $isInHeader?: boolean;
+  $isMobileContext?: boolean;
+}>`
   position: relative;
-  background: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.12)' : '#f8fafc')};
+  background: ${props => {
+    if (props.$isMobileContext) return '#f8fafc';
+    if (props.$isInHeader) return 'rgba(255, 255, 255, 0.12)';
+    return '#f8fafc';
+  }};
   border-radius: 24px;
   overflow: hidden;
   width: ${props => (props.$isInHeader ? '100%' : '280px')};
-  border: 1px solid ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.15)' : 'transparent')};
+  border: 1px solid
+    ${props => {
+      if (props.$isMobileContext) return '#e2e8f0';
+      if (props.$isInHeader) return 'rgba(255, 255, 255, 0.15)';
+      return 'transparent';
+    }};
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.16)' : '#f1f5f9')};
+    background: ${props => {
+      if (props.$isMobileContext) return '#f1f5f9';
+      if (props.$isInHeader) return 'rgba(255, 255, 255, 0.16)';
+      return '#f1f5f9';
+    }};
   }
 
   &:focus-within {
-    background: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.2)' : 'white')};
-    border-color: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.25)' : '#16a34a20')};
-    box-shadow: 0 0 0 3px ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.1)' : '#16a34a10')};
+    background: ${props => {
+      if (props.$isMobileContext) return 'white';
+      if (props.$isInHeader) return 'rgba(255, 255, 255, 0.2)';
+      return 'white';
+    }};
+    border-color: ${props => {
+      if (props.$isMobileContext) return '#16a34a';
+      if (props.$isInHeader) return 'rgba(255, 255, 255, 0.25)';
+      return '#16a34a20';
+    }};
+    box-shadow: ${props => {
+      if (props.$isMobileContext) return '0 0 0 3px #16a34a20';
+      if (props.$isInHeader) return '0 0 0 3px rgba(255, 255, 255, 0.1)';
+      return '0 0 0 3px #16a34a10';
+    }};
   }
 
   @media (max-width: 600px) {
     border-radius: 16px;
-    width: ${props => (props.$isInHeader ? '100%' : '100%')};
-  }
-
-  @media (max-width: 480px) {
-    width: ${props => (props.$isInHeader ? '100%' : '100%')};
+    width: 100%;
   }
 `;
 
-const SearchInput = styled.input<{ $isInHeader?: boolean }>`
+const SearchInput = styled.input<{ $isInHeader?: boolean; $isMobileContext?: boolean }>`
   width: 100%;
   padding: 10px 44px 10px 16px;
   border: none;
   outline: none;
   font-size: 14px;
-  color: ${props => (props.$isInHeader ? 'white' : '#1e293b')};
+  color: ${props => {
+    if (props.$isMobileContext) return '#1e293b';
+    if (props.$isInHeader) return 'white';
+    return '#1e293b';
+  }};
   background: transparent;
   font-weight: 400;
 
   &::placeholder {
-    color: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.6)' : '#94a3b8')};
+    color: ${props => {
+      if (props.$isMobileContext) return '#94a3b8';
+      if (props.$isInHeader) return 'rgba(255, 255, 255, 0.6)';
+      return '#94a3b8';
+    }};
   }
 
   @media (max-width: 480px) {
@@ -69,14 +101,18 @@ const SearchInput = styled.input<{ $isInHeader?: boolean }>`
   }
 `;
 
-const ClearButton = styled.button<{ $isInHeader?: boolean }>`
+const ClearButton = styled.button<{ $isInHeader?: boolean; $isMobileContext?: boolean }>`
   position: absolute;
   right: 12px;
   top: 50%;
   transform: translateY(-50%);
   background: none;
   border: none;
-  color: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.7)' : '#94a3b8')};
+  color: ${props => {
+    if (props.$isMobileContext) return '#94a3b8';
+    if (props.$isInHeader) return 'rgba(255, 255, 255, 0.7)';
+    return '#94a3b8';
+  }};
   cursor: pointer;
   padding: 4px;
   border-radius: 50%;
@@ -86,8 +122,16 @@ const ClearButton = styled.button<{ $isInHeader?: boolean }>`
   transition: all 0.2s ease;
 
   &:hover {
-    background: ${props => (props.$isInHeader ? 'rgba(255, 255, 255, 0.15)' : '#f1f5f9')};
-    color: ${props => (props.$isInHeader ? 'white' : '#64748b')};
+    background: ${props => {
+      if (props.$isMobileContext) return '#f1f5f9';
+      if (props.$isInHeader) return 'rgba(255, 255, 255, 0.15)';
+      return '#f1f5f9';
+    }};
+    color: ${props => {
+      if (props.$isMobileContext) return '#64748b';
+      if (props.$isInHeader) return 'white';
+      return '#64748b';
+    }};
   }
 
   @media (max-width: 480px) {
@@ -110,14 +154,13 @@ const SearchResultsDropdown = styled(motion.div)`
   z-index: 1001;
 
   @media (max-width: 600px) {
-    position: fixed;
-    top: auto;
-    bottom: 0;
+    position: absolute;
+    top: calc(100% + 4px);
     left: 0;
     right: 0;
-    max-height: 70vh;
-    border-radius: 24px 24px 0 0;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   }
 `;
 
@@ -152,10 +195,6 @@ const ResultsGroupCount = styled.span`
 const SearchResultsList = styled.div`
   max-height: 320px;
   overflow-y: auto;
-
-  @media (max-width: 600px) {
-    max-height: 50vh;
-  }
 `;
 
 const SearchResultItem = styled(motion.div)<{ $variant?: 'racket' | 'brand' | 'category' }>`
@@ -177,6 +216,7 @@ const SearchResultItem = styled(motion.div)<{ $variant?: 'racket' | 'brand' | 'c
   @media (max-width: 600px) {
     padding: 14px 16px;
     gap: 14px;
+    position: relative;
   }
 `;
 
@@ -190,19 +230,25 @@ const ResultIcon = styled.div<{ $variant?: 'racket' | 'brand' | 'category' }>`
   flex-shrink: 0;
   background: ${props => {
     switch (props.$variant) {
-      case 'brand': return '#16a34a10';
-      case 'category': return '#0d948810';
-      default: return '#f1f5f9';
+      case 'brand':
+        return '#16a34a10';
+      case 'category':
+        return '#0d948810';
+      default:
+        return '#f1f5f9';
     }
   }};
   color: ${props => {
     switch (props.$variant) {
-      case 'brand': return '#16a34a';
-      case 'category': return '#0d9488';
-      default: return 'transparent';
+      case 'brand':
+        return '#16a34a';
+      case 'category':
+        return '#0d9488';
+      default:
+        return 'transparent';
     }
   }};
-  
+
   img {
     width: 100%;
     height: 100%;
@@ -257,12 +303,7 @@ const ResultPrice = styled.span`
   font-weight: 600;
   color: #16a34a;
   white-space: nowrap;
-
-  @media (max-width: 480px) {
-    font-size: 13px;
-    position: absolute;
-    right: 16px;
-  }
+  margin-left: auto;
 `;
 
 const NoResults = styled.div`
@@ -309,11 +350,13 @@ interface SearchResult {
 interface GlobalSearchProps {
   onSearchToggle?: (isOpen: boolean) => void;
   isInHeader?: boolean;
+  isMobileContext?: boolean;
 }
 
 export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   onSearchToggle,
   isInHeader = false,
+  isMobileContext = false,
 }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(isInHeader);
   const [searchQuery, setSearchQuery] = useState('');
@@ -330,13 +373,12 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   );
 
   const uniqueShapes = useMemo(
-    () => Array.from(
-      new Set(
-        rackets
-          .map(r => r.caracteristicas_forma || r.especificaciones?.forma)
-          .filter(Boolean)
-      )
-    ).sort(),
+    () =>
+      Array.from(
+        new Set(
+          rackets.map(r => r.caracteristicas_forma || r.especificaciones?.forma).filter(Boolean)
+        )
+      ).sort(),
     [rackets]
   );
 
@@ -362,27 +404,29 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 
       const results: SearchResult[] = [];
 
-      const brandResults = uniqueBrands.filter(brand => 
-        brand.toLowerCase().includes(query)
-      ).slice(0, 4);
+      const brandResults = uniqueBrands
+        .filter(brand => brand.toLowerCase().includes(query))
+        .slice(0, 4);
       brandResults.forEach(brand => {
         results.push({ type: 'brand', data: brand });
       });
 
-      const categoryResults = uniqueShapes.filter(shape => 
-        shape.toLowerCase().includes(query)
-      ).slice(0, 4);
+      const categoryResults = uniqueShapes
+        .filter(shape => shape.toLowerCase().includes(query))
+        .slice(0, 4);
       categoryResults.forEach(shape => {
         results.push({ type: 'category', data: shape });
       });
 
-      const racketResults = rackets.filter((racket: Racket) => {
-        const nombre = racket.nombre.toLowerCase();
-        const marca = (racket.marca || '').toLowerCase();
-        const modelo = (racket.modelo || '').toLowerCase();
-        const combinedText = `${nombre} ${marca} ${modelo}`;
-        return queryWords.every(word => combinedText.includes(word));
-      }).slice(0, 6);
+      const racketResults = rackets
+        .filter((racket: Racket) => {
+          const nombre = racket.nombre.toLowerCase();
+          const marca = (racket.marca || '').toLowerCase();
+          const modelo = (racket.modelo || '').toLowerCase();
+          const combinedText = `${nombre} ${marca} ${modelo}`;
+          return queryWords.every(word => combinedText.includes(word));
+        })
+        .slice(0, 6);
 
       racketResults.forEach(racket => {
         results.push({ type: 'racket', data: racket });
@@ -495,7 +539,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     const groups: { [key: string]: SearchResult[] } = {
       racket: [],
       brand: [],
-      category: []
+      category: [],
     };
 
     searchResults.forEach(result => {
@@ -515,6 +559,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
           {(isSearchOpen || isInHeader) && (
             <SearchInputContainer
               $isInHeader={isInHeader}
+              $isMobileContext={isMobileContext}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -527,9 +572,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyPress}
                 $isInHeader={isInHeader}
+                $isMobileContext={isMobileContext}
               />
               {searchQuery && (
-                <ClearButton onClick={clearSearch} $isInHeader={isInHeader}>
+                <ClearButton
+                  onClick={clearSearch}
+                  $isInHeader={isInHeader}
+                  $isMobileContext={isMobileContext}
+                >
                   <FiX size={14} />
                 </ClearButton>
               )}
@@ -568,17 +618,19 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                       {groupedResults.brand.map((result, index) => (
                         <SearchResultItem
                           key={`brand-${result.data}-${index}`}
-                          $variant="brand"
+                          $variant='brand'
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.03 }}
                           onClick={() => handleBrandSelect(result.data as string)}
                         >
-                          <ResultIcon $variant="brand">
+                          <ResultIcon $variant='brand'>
                             <FiTag size={16} />
                           </ResultIcon>
                           <ResultInfo>
-                            <ResultName $variant="brand">{toTitleCase(result.data as string)}</ResultName>
+                            <ResultName $variant='brand'>
+                              {toTitleCase(result.data as string)}
+                            </ResultName>
                           </ResultInfo>
                         </SearchResultItem>
                       ))}
@@ -597,17 +649,17 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                       {groupedResults.category.map((result, index) => (
                         <SearchResultItem
                           key={`category-${result.data}-${index}`}
-                          $variant="category"
+                          $variant='category'
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: index * 0.03 }}
                           onClick={() => handleCategorySelect(result.data as string)}
                         >
-                          <ResultIcon $variant="category">
+                          <ResultIcon $variant='category'>
                             <FiGrid size={16} />
                           </ResultIcon>
                           <ResultInfo>
-                            <ResultName $variant="category">{result.data as string}</ResultName>
+                            <ResultName $variant='category'>{result.data as string}</ResultName>
                             <ResultSubtext>Forma de pala</ResultSubtext>
                           </ResultInfo>
                         </SearchResultItem>
@@ -629,7 +681,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                         return (
                           <SearchResultItem
                             key={`racket-${racket.nombre}-${index}`}
-                            $variant="racket"
+                            $variant='racket'
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.03 }}
@@ -643,12 +695,14 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                                 target.style.display = 'none';
                               }}
                             />
-                            <ResultIcon $variant="racket">
-                              <FiBox size={16} />
-                            </ResultIcon>
                             <ResultInfo>
-                              <ResultName $variant="racket">{toTitleCase(racket.modelo || racket.nombre)}</ResultName>
-                              <ResultSubtext>{toTitleCase(racket.marca)} • {racket.caracteristicas_forma || 'forma'}</ResultSubtext>
+                              <ResultName $variant='racket'>
+                                {toTitleCase(racket.modelo || racket.nombre)}
+                              </ResultName>
+                              <ResultSubtext>
+                                {toTitleCase(racket.marca)} •{' '}
+                                {racket.caracteristicas_forma || 'forma'}
+                              </ResultSubtext>
                             </ResultInfo>
                             {racket.precio_actual && (
                               <ResultPrice>€{racket.precio_actual}</ResultPrice>
