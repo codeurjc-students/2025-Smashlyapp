@@ -6,19 +6,19 @@ import styled from "styled-components";
 const FooterContainer = styled.footer`
   background: #1f2937;
   color: white;
-  padding: 3rem 0 1rem;
+  padding: 3rem 0 1.5rem;
   margin-top: auto;
 `;
 
 const FooterContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 clamp(16px, 4vw, 40px);
 `;
 
 const FooterBottom = styled.div`
   border-top: 1px solid #374151;
-  padding-top: 1rem;
+  padding-top: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -28,6 +28,7 @@ const FooterBottom = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     text-align: center;
+    gap: 1.25rem;
   }
 `;
 
@@ -37,6 +38,13 @@ const Copyright = styled.p`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-size: 0.9rem;
+
+  @media (max-width: 480px) {
+    font-size: 0.8rem;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
 `;
 
 const SocialLinks = styled.div`
@@ -46,10 +54,22 @@ const SocialLinks = styled.div`
   a {
     color: #9ca3af;
     font-size: 1.25rem;
-    transition: color 0.2s ease;
+    transition: all 0.2s ease;
+    padding: 8px;
+    border-radius: 8px;
 
     &:hover {
       color: #16a34a;
+      background: rgba(255, 255, 255, 0.05);
+    }
+  }
+
+  @media (max-width: 480px) {
+    gap: 0.75rem;
+    
+    a {
+      font-size: 1.1rem;
+      padding: 6px;
     }
   }
 `;
