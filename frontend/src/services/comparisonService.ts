@@ -66,26 +66,17 @@ export const ComparisonService = {
     const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
     const url = `${baseUrl}/api/v1/comparison/save`;
 
-    console.log('🔍 saveComparison - URL:', url);
-    console.log('🔍 saveComparison - headers:', getCommonHeaders());
-
     const response = await fetch(url, {
       method: 'POST',
       headers: getCommonHeaders(),
       body: JSON.stringify({
         racketIds,
-        comparisonText: JSON.stringify(comparison), // Serialize structured comparison
+        comparisonText: JSON.stringify(comparison),
         metrics: comparison.metrics,
       }),
     });
 
-    console.log('🔍 saveComparison - response.status:', response.status);
-    console.log('🔍 saveComparison - response.ok:', response.ok);
-    
     const responseText = await response.text();
-    console.log('🔍 saveComparison - response body:', responseText);
-
-    // Re-parse the JSON since we read it as text
     const responseJson = JSON.parse(responseText);
 
     if (!response.ok) {
@@ -99,17 +90,12 @@ export const ComparisonService = {
     const baseUrl = API_URL.endsWith('/') ? API_URL.slice(0, -1) : API_URL;
     const url = `${baseUrl}/api/v1/comparison/user`;
 
-    console.log('🔍 getUserComparisons - URL:', url);
-    console.log('🔍 getUserComparisons - headers:', getCommonHeaders());
-
     const response = await fetch(url, {
       method: 'GET',
       headers: getCommonHeaders(),
     });
 
-    console.log('🔍 getUserComparisons - response.status:', response.status);
     const responseText = await response.text();
-    console.log('🔍 getUserComparisons - response body:', responseText);
     const responseJson = JSON.parse(responseText);
 
     if (!response.ok) {

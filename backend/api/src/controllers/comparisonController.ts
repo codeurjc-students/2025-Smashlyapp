@@ -52,13 +52,7 @@ export class ComparisonController {
       const userId = req.user?.id;
       const { racketIds, comparisonText, metrics } = req.body;
 
-      logger.info('🔍 saveComparison - userId:', userId);
-      logger.info('🔍 saveComparison - racketIds:', racketIds);
-      logger.info('🔍 saveComparison - comparisonText length:', comparisonText?.length);
-      logger.info('🔍 saveComparison - metrics:', metrics ? 'provided' : 'not provided');
-
       if (!userId) {
-        logger.error('❌ saveComparison - userId es undefined!');
         return res.status(401).json({
           error: 'Usuario no autenticado',
         });
@@ -76,15 +70,12 @@ export class ComparisonController {
         });
       }
 
-      logger.info('🔍 saveComparison - creando comparación...');
       const comparison = await ComparisonService.createComparison({
         user_id: userId,
         racket_ids: racketIds,
         comparison_text: comparisonText,
         metrics: metrics || undefined,
       });
-
-      logger.info('✅ saveComparison - comparación creada:', comparison.id);
 
       return res.status(201).json({
         success: true,
@@ -104,19 +95,13 @@ export class ComparisonController {
     try {
       const userId = req.user?.id;
 
-      logger.info('🔍 getUserComparisons - userId:', userId);
-
       if (!userId) {
-        logger.error('❌ getUserComparisons - userId es undefined!');
         return res.status(401).json({
           error: 'Usuario no autenticado',
         });
       }
 
-      logger.info('🔍 getUserComparisons - buscando comparaciones para usuario...');
       const comparisons = await ComparisonService.getUserComparisons(userId);
-
-      logger.info('✅ getUserComparisons - encontradas:', comparisons.length);
 
       return res.json({
         success: true,

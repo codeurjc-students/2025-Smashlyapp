@@ -479,14 +479,10 @@ const MyComparisonsPage: React.FC = () => {
   }, [isAuthenticated, navigate]);
 
   const loadComparisons = async () => {
-    console.log('🔍 loadComparisons - iniziando carga...');
     try {
       setLoading(true);
 
-      console.log('🔍 loadComparisons - haciendo llamada al servicio...');
       const data = await ComparisonService.getUserComparisons();
-      
-      console.log('🔍 loadComparisons - datos recibidos:', data);
       setAllComparisons(data);
 
       // Mostrar las primeras 9

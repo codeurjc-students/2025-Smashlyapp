@@ -21,6 +21,7 @@ const CatalogPage = lazy(() => import('./pages/CatalogPage'));
 const RacketDetailPage = lazy(() => import('./pages/RacketDetailPage'));
 const ComparePage = lazy(() => import('./pages/ComparePage'));
 const CompareRacketsPage = lazy(() => import('./pages/CompareRacketsPage'));
+const SavedComparisonPage = lazy(() => import('./pages/SavedComparisonPage'));
 const MyComparisonsPage = lazy(() => import('./pages/MyComparisonsPage'));
 const SharedComparisonPage = lazy(() => import('./pages/SharedComparisonPage'));
 const BestRacketPage = lazy(() => import('./pages/BestRacketPage').then(m => ({ default: m.BestRacketPage })));
@@ -123,6 +124,14 @@ export default function App() {
                         element={
                           <Suspense fallback={<RouteLoadingFallback />}>
                             <CompareRacketsPage />
+                          </Suspense>
+                        }
+                      />
+                      <Route
+                        path='/compare/:id'
+                        element={
+                          <Suspense fallback={<RouteLoadingFallback />}>
+                            <SavedComparisonPage />
                           </Suspense>
                         }
                       />

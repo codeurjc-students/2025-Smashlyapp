@@ -33,19 +33,10 @@ export class ComparisonService {
         comparison_text: data.comparison_text,
       };
 
-      logger.info('🔍 createComparison - insertData:', {
-        user_id: data.user_id,
-        racket_ids: data.racket_ids,
-        comparison_text_length: data.comparison_text?.length,
-      });
-
-      // Add metrics if provided
       if (data.metrics && data.metrics.length > 0) {
         insertData.metrics = data.metrics;
-        logger.info('🔍 createComparison - metrics included:', data.metrics.length);
       }
 
-      logger.info('🔍 createComparison - ejecutando insert en Supabase...');
       const { data: comparison, error } = await supabase
         .from('comparisons')
         .insert([insertData])
@@ -53,14 +44,10 @@ export class ComparisonService {
         .single();
 
       if (error) {
-        logger.error('❌ Supabase insert error:', error);
-        logger.error('❌ Error code:', error.code);
-        logger.error('❌ Error details:', error.details);
-        logger.error('❌ Error hint:', error.hint);
+        logger.error('Error creating comparison:', error);
         throw new Error(error.message);
       }
 
-      logger.info('✅ createComparison - insert exitoso, comparison:', comparison);
       return comparison as Comparison;
     } catch (error: any) {
       logger.error('Error in createComparison service:', error);
@@ -73,8 +60,6 @@ export class ComparisonService {
    */
   static async getUserComparisons(userId: string): Promise<Comparison[]> {
     try {
-      logger.info('🔍 getUserComparisons service - userId:', userId);
-      
       const { data: comparisons, error } = await supabase
         .from('comparisons')
         .select('*')
@@ -82,11 +67,10 @@ export class ComparisonService {
         .order('created_at', { ascending: false });
 
       if (error) {
-        logger.error('❌ Error fetching user comparisons:', error);
+        logger.error('Error fetching user comparisons:', error);
         throw new Error(error.message);
       }
 
-      logger.info('✅ getUserComparisons service - encontradas:', comparisons?.length || 0);
       return comparisons as Comparison[];
     } catch (error: any) {
       logger.error('Error in getUserComparisons service:', error);
