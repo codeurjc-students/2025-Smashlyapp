@@ -251,7 +251,7 @@ RESPONDE SOLO CON EL JSON:`;
           id: racket.id,
           name: racket.nombre,
           brand: racket.marca,
-          image: racket.imagen,
+          image: racket.imagenes?.[0] || null,
           price: racket.precio_actual,
           match_score: rec.match_score,
           reason: rec.reason,

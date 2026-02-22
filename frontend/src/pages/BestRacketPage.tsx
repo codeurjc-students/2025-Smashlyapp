@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../contexts/AuthContext';
 import { useNotifications } from '../contexts/NotificationContext';
-import { BasicForm } from '../components/recommendation/BasicForm';
-import { AdvancedForm } from '../components/recommendation/AdvancedForm';
+import { WizardForm } from '../components/recommendation/WizardForm';
+import { PalaRotatingScene } from '../components/recommendation/PalaRotatingScene';
 import { RecommendationResult } from '../components/recommendation/RecommendationResult';
 import { RecommendationService } from '../services/recommendationService';
 import { NotificationService } from '../services/notificationService';
@@ -111,7 +111,7 @@ const AlertButton = styled.button`
 export const BestRacketPage: React.FC = () => {
   const { user } = useAuth();
   const { addNotification } = useNotifications();
-  const [step, setStep] = useState<'form' | 'loading' | 'result'>('form');
+  const [step, setStep] = useState<'form' | 'loading' | 'completing' | 'result'>('form');
   const [formType, setFormType] = useState<'basic' | 'advanced'>('basic');
   const [result, setResult] = useState<ResultType | null>(null);
   const [isSaving, setIsSaving] = useState(false);
@@ -226,7 +226,7 @@ export const BestRacketPage: React.FC = () => {
       const res = await RecommendationService.generate('basic', data);
 
       setResult(res);
-      setStep('result');
+      setStep('completing');
 
       sessionStorage.setItem('smashly_last_recommendation', JSON.stringify({
         result: res,
@@ -234,23 +234,25 @@ export const BestRacketPage: React.FC = () => {
         timestamp: Date.now()
       }));
 
-      const notification = await NotificationService.createNotification(
-        'recommendation_complete',
-        'Recomendación lista',
-        'Tu recomendación básica está lista. ¡Descúbrela!',
-        { formType: 'basic' }
-      );
-      
-      if (notification) {
-        addNotification(notification);
-      } else {
-        console.error('Error: No se pudo crear la notificación');
-      }
-      
-      sileo.success({ 
-        title: '¡Recomendación lista!', 
-        description: 'Tu recomendación está lista. ¡Descúbrela!'
-      });
+      setTimeout(async () => {
+        const notification = await NotificationService.createNotification(
+          'recommendation_complete',
+          'Recomendación lista',
+          'Tu recomendación básica está lista. ¡Descúbrela!',
+          { formType: 'basic' }
+        );
+        
+        if (notification) {
+          addNotification(notification);
+        }
+        
+        sileo.success({ 
+          title: '¡Recomendación lista!', 
+          description: 'Tu recomendación está lista. ¡Descúbrela!'
+        });
+        
+        setStep('result');
+      }, 2500);
     } catch (error) {
       console.error(error);
       sileo.error({ title: 'Error', description: 'Error al generar la recomendación' });
@@ -266,7 +268,7 @@ export const BestRacketPage: React.FC = () => {
       const res = await RecommendationService.generate('advanced', data);
 
       setResult(res);
-      setStep('result');
+      setStep('completing');
 
       sessionStorage.setItem('smashly_last_recommendation', JSON.stringify({
         result: res,
@@ -274,23 +276,25 @@ export const BestRacketPage: React.FC = () => {
         timestamp: Date.now()
       }));
 
-      const notification = await NotificationService.createNotification(
-        'recommendation_complete',
-        'Recomendación lista',
-        'Tu recomendación avanzada está lista. ¡Descúbrela!',
-        { formType: 'advanced' }
-      );
-      
-      if (notification) {
-        addNotification(notification);
-      } else {
-        console.error('Error: No se pudo crear la notificación');
-      }
-      
-      sileo.success({ 
-        title: '¡Recomendación lista!', 
-        description: 'Tu recomendación está lista. ¡Descúbrela!'
-      });
+      setTimeout(async () => {
+        const notification = await NotificationService.createNotification(
+          'recommendation_complete',
+          'Recomendación lista',
+          'Tu recomendación avanzada está lista. ¡Descúbrela!',
+          { formType: 'advanced' }
+        );
+        
+        if (notification) {
+          addNotification(notification);
+        }
+        
+        sileo.success({ 
+          title: '¡Recomendación lista!', 
+          description: 'Tu recomendación está lista. ¡Descúbrela!'
+        });
+        
+        setStep('result');
+      }, 2500);
     } catch (error) {
       console.error(error);
       sileo.error({ title: 'Error', description: 'Error al generar la recomendación' });
@@ -318,13 +322,16 @@ export const BestRacketPage: React.FC = () => {
   const handleReset = () => {
     setStep('form');
     setResult(null);
+    setBasicData({});
+    setAdvancedData({});
     // Clear sessionStorage when explicitly resetting
     sessionStorage.removeItem('bestRacketPageState');
+    sessionStorage.removeItem('smashly_last_recommendation');
   };
 
   return (
     <PageContainer>
-      {step !== 'result' && (
+      {step !== 'result' && step !== 'completing' && (
         <HeroSection>
           <h1>Encuentra tu Pala Ideal</h1>
           <p>
@@ -378,18 +385,23 @@ export const BestRacketPage: React.FC = () => {
           </ModeSelector>
 
           {formType === 'basic' ? (
-            <BasicForm initialData={basicData} onSubmit={handleBasicSubmit} />
+            <WizardForm mode="basic" onSubmit={(data) => handleBasicSubmit(data as BasicFormData)} isLoading={false} />
           ) : (
-            <AdvancedForm initialData={advancedData} onSubmit={handleAdvancedSubmit} />
+            <WizardForm mode="advanced" onSubmit={(data) => handleAdvancedSubmit(data as AdvancedFormData)} isLoading={false} />
           )}
         </>
       )}
 
       {step === 'loading' && (
         <div style={{ textAlign: 'center', padding: '4rem' }}>
-          <h2>Analizando tu perfil...</h2>
-          <p>Nuestra IA está buscando las mejores coincidencias en nuestra base de datos.</p>
-          {/* Add a spinner here if available */}
+          <PalaRotatingScene isComplete={false} />
+        </div>
+      )}
+
+      {step === 'completing' && (
+        <div style={{ textAlign: 'center', padding: '4rem' }}>
+          <PalaRotatingScene isComplete={true} />
+          <h2 style={{ marginTop: '2rem', color: '#16a34a' }}>¡Análisis completado!</h2>
         </div>
       )}
 
