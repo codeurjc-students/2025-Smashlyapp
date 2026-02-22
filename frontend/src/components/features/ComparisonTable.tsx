@@ -15,29 +15,59 @@ const TableContainer = styled.div`
   border-radius: 16px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   background: white;
+  -webkit-overflow-scrolling: touch;
+  
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 3px;
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+    
+    &:hover {
+      background: #a8a8a8;
+    }
+  }
 `;
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  min-width: 600px;
+  min-width: 400px;
+
+  @media (max-width: 480px) {
+    min-width: 300px;
+  }
 `;
 
 const Th = styled.th`
   text-align: left;
-  padding: 1.25rem 1.5rem;
+  padding: 1rem 1rem;
   background: #f9fafb;
   color: #374151;
   font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   border-bottom: 2px solid #e5e7eb;
   position: sticky;
   top: 0;
   z-index: 10;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
+  }
 
   &:first-child {
     border-top-left-radius: 16px;
     width: 25%;
+    min-width: 100px;
   }
 
   &:last-child {
@@ -61,11 +91,17 @@ const Tr = styled.tr`
 `;
 
 const Td = styled.td`
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1rem;
   border-bottom: 1px solid #e5e7eb;
   color: #4b5563;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   line-height: 1.5;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.75rem;
+  }
 
   &:first-child {
     font-weight: 600;

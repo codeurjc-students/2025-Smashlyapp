@@ -389,12 +389,16 @@ export class UserController {
         .limit(5);
 
       // Obtener comparaciones recientes
-      const { data: recentComparisons } = await supabase
+      const { data: recentComparisons, error: comparisonsError } = await supabase
         .from('comparisons')
-        .select('id, name, is_public, created_at')
+        .select('id, racket_ids, is_public, created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false })
         .limit(5);
+
+      if (comparisonsError) {
+        logger.error('Error fetching recent comparisons:', comparisonsError);
+      }
 
       res.json({
         success: true,

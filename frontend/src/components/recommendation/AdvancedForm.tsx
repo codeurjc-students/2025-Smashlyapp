@@ -18,6 +18,7 @@ import {
   useSortable,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { PriceRangeSlider } from './PriceRangeSlider';
 
 const FormContainer = styled.div`
   max-width: 900px;
@@ -344,11 +345,11 @@ const SortableItem: React.FC<SortableItemProps> = ({ id, index }) => {
 };
 
 export const AdvancedForm: React.FC<Props> = ({ initialData, onSubmit, onCancel, isLoading }) => {
-  const [formData, setFormData] = useState<AdvancedFormData>({
+const [formData, setFormData] = useState<AdvancedFormData>({
     level: '',
     frequency: '',
     injuries: '',
-    budget: 0,
+    budget: { min: 30, max: 300 },
     current_racket: '',
     style: '',
     years_playing: '',
@@ -391,13 +392,11 @@ export const AdvancedForm: React.FC<Props> = ({ initialData, onSubmit, onCancel,
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
 
-    // Convert budget to number
-    if (name === 'budget') {
-      setFormData(prev => ({ ...prev, [name]: Number(value) }));
-    } else {
-      setFormData(prev => ({ ...prev, [name]: value }));
-    }
+  const handleBudgetChange = (value: { min: number; max: number }) => {
+    setFormData(prev => ({ ...prev, budget: value }));
   };
 
   const handleGoalChange = (goal: string) => {
@@ -603,14 +602,13 @@ export const AdvancedForm: React.FC<Props> = ({ initialData, onSubmit, onCancel,
           </FullWidth>
 
           <FormGroup>
-            <Label>Presupuesto máximo (€)</Label>
-            <Input
-              type='number'
-              name='budget'
+            <Label>Presupuesto (€)</Label>
+            <PriceRangeSlider
+              min={30}
+              max={700}
+              step={10}
               value={formData.budget}
-              onChange={handleChange}
-              placeholder='Ej: 200'
-              required
+              onChange={handleBudgetChange}
             />
           </FormGroup>
 

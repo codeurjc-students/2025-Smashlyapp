@@ -170,7 +170,8 @@ interface ActivityStatsProps {
   }>;
   recentComparisons?: Array<{
     id: string;
-    name: string;
+    racket_ids: number[];
+    racket_names: string;
     is_public: boolean;
     created_at: string;
   }>;
@@ -293,7 +294,7 @@ const ActivityStats: React.FC<ActivityStatsProps> = ({
                     <FiGitBranch size={16} />
                   </RecentItemIcon>
                   <RecentItemText>
-                    <RecentItemTitle>{comp.name || 'Comparación'}</RecentItemTitle>
+                    <RecentItemTitle>{comp.racket_names || 'Comparación'}</RecentItemTitle>
                     <RecentItemMeta>{comp.is_public ? 'Compartida' : 'Privada'} • {formatDate(comp.created_at)}</RecentItemMeta>
                   </RecentItemText>
                 </RecentItemInfo>

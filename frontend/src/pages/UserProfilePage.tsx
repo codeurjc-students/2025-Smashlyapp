@@ -17,6 +17,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { UserProfileService } from '../services/userProfileService';
 import { UploadService } from '../services/uploadService';
+import { RacketService } from '../services/racketService';
 import { sileo } from 'sileo';
 import ProfileAvatar from '../components/features/ProfileAvatar';
 import ActivityStats from '../components/features/ActivityStats';
@@ -348,7 +349,7 @@ interface UserProfileFormData {
 }
 
 const UserProfilePage: React.FC = () => {
-  const { user, userProfile, refreshUserProfile } = useAuth();
+  const { user, userProfile, refreshUserProfile, loading } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>('profile');
@@ -385,10 +386,13 @@ const UserProfilePage: React.FC = () => {
   }, [userProfile]);
 
   useEffect(() => {
+    // No redirigir mientras está cargando la sesión
+    if (loading) return;
+    
     if (!user) {
       navigate('/login');
     }
-  }, [user, navigate]);
+  }, [user, navigate, loading]);
 
   useEffect(() => {
     if (activeTab === 'activity') {
@@ -405,6 +409,34 @@ const UserProfilePage: React.FC = () => {
       });
       if (response.ok) {
         const data = await response.json();
+        
+        // Cargar nombres de palas para las comparaciones
+        const comparisons = data.data.recentComparisons || [];
+        if (comparisons.length > 0) {
+          const allRacketIds = [...new Set(comparisons.flatMap((c: any) => c.racket_ids || []))];
+          const racketsCache: Record<number, any> = {};
+          
+          await Promise.all(
+            allRacketIds.map(async (id) => {
+              try {
+                const racket = await RacketService.getRacketById(id as number);
+                racketsCache[id as number] = racket;
+              } catch {
+                racketsCache[id as number] = { nombre: `Pala ${id}`, marca: '' };
+              }
+            })
+          );
+          
+          // Agregar nombres a las comparaciones
+          data.data.recentComparisons = comparisons.map((comp: any) => ({
+            ...comp,
+            racket_names: comp.racket_ids?.map((id: number) => {
+              const racket = racketsCache[id];
+              return racket ? `${racket.marca} ${racket.nombre}` : `Pala ${id}`;
+            }).join(' vs ') || 'Comparación',
+          }));
+        }
+        
         setActivityData(data.data);
       }
     } catch (error) {

@@ -14,6 +14,8 @@ import {
 import { Link } from 'react-router-dom';
 import { sileo } from 'sileo';
 import { ListService } from '../../services/listService';
+import { ComparisonService, SavedComparison } from '../../services/comparisonService';
+import { RacketService } from '../../services/racketService';
 
 const Container = styled.div`
   display: flex;
@@ -253,7 +255,8 @@ const Button = styled.button<{ $primary?: boolean }>`
 const UserCollections: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'lists' | 'comparisons'>('lists');
   const [lists, setLists] = useState<any[]>([]);
-  const [comparisons, setComparisons] = useState<any[]>([]);
+  const [comparisons, setComparisons] = useState<SavedComparison[]>([]);
+  const [racketsCache, setRacketsCache] = useState<Record<number, any>>({});
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [newListName, setNewListName] = useState('');
   const [newListPublic, setNewListPublic] = useState(false);
@@ -267,8 +270,22 @@ const UserCollections: React.FC = () => {
       const listsData = await ListService.getUserLists();
       setLists(listsData as any);
       
-      // TODO: Cargar comparaciones cuando esté disponible
-      setComparisons([]);
+      const comparisonsData = await ComparisonService.getUserComparisons();
+      
+      const allRacketIds = [...new Set(comparisonsData.flatMap(c => c.racket_ids))];
+      const rackets: Record<number, any> = {};
+      await Promise.all(
+        allRacketIds.map(async (id: number) => {
+          try {
+            const racket = await RacketService.getRacketById(id);
+            rackets[id] = racket;
+          } catch {
+            rackets[id] = { nombre: `Pala ${id}` };
+          }
+        })
+      );
+      setRacketsCache(rackets);
+      setComparisons(comparisonsData);
     } catch (error) {
       console.error('Error loading collections:', error);
     }
@@ -452,24 +469,29 @@ const UserCollections: React.FC = () => {
                   </EmptyState>
                 ) : (
                   <ListGrid>
-                    {comparisons.map(comp => (
-                      <ListCard
-                        key={comp.id}
-                        as={Link}
-                        to={`/compare/${comp.id}`}
-                        whileHover={{ y: -2 }}
-                      >
-                        <ListHeader>
-                          <ListInfo>
-                            <ListName>{comp.name || 'Comparación'}</ListName>
-                            <ListMeta>
-                              {comp.is_public ? <FiGlobe size={12} /> : <FiLock size={12} />}
-                              {comp.is_public ? 'Compartida' : 'Privada'}
-                            </ListMeta>
-                          </ListInfo>
-                        </ListHeader>
-                      </ListCard>
-                    ))}
+                    {comparisons.map(comp => {
+                      const racketNames = comp.racket_ids
+                        .map((id: number) => racketsCache[id]?.nombre || `Pala ${id}`)
+                        .join(' vs ');
+                      return (
+                        <ListCard
+                          key={comp.id}
+                          as={Link}
+                          to={`/compare/${comp.id}`}
+                          whileHover={{ y: -2 }}
+                        >
+                          <ListHeader>
+                            <ListInfo>
+                              <ListName>{racketNames || 'Comparación'}</ListName>
+                              <ListMeta>
+                                {comp.is_public ? <FiGlobe size={12} /> : <FiLock size={12} />}
+                                {comp.is_public ? 'Compartida' : 'Privada'}
+                              </ListMeta>
+                            </ListInfo>
+                          </ListHeader>
+                        </ListCard>
+                      );
+                    })}
                   </ListGrid>
                 )}
               </CardContent>

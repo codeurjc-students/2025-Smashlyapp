@@ -229,6 +229,19 @@ const ResultSection = styled(motion.div)`
   padding: 3rem;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   position: relative;
+  overflow-x: hidden;
+
+  @media (max-width: 768px) {
+    padding: 1.5rem;
+    border-radius: 16px;
+    margin: 0 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 1rem;
+    border-radius: 12px;
+    margin: 0 0.25rem;
+  }
 `;
 
 const ResultHeader = styled.div`
@@ -238,6 +251,16 @@ const ResultHeader = styled.div`
   margin-bottom: 2rem;
   border-bottom: 1px solid #e5e7eb;
   padding-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+  }
 `;
 
 const ResultTitle = styled.h2`
@@ -247,11 +270,28 @@ const ResultTitle = styled.h2`
   display: flex;
   align-items: center;
   gap: 0.75rem;
+
+  @media (max-width: 480px) {
+    font-size: 1.125rem;
+    gap: 0.5rem;
+  }
 `;
 
 const ActionButtons = styled.div`
   display: flex;
   gap: 1rem;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+
+  @media (max-width: 480px) {
+    flex-direction: column;
+    gap: 0.75rem;
+    
+    & > button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
 `;
 
 const ActionButton = styled.button<{ variant?: 'secondary' }>`
@@ -264,6 +304,12 @@ const ActionButton = styled.button<{ variant?: 'secondary' }>`
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    padding: 0.75rem 1rem;
+    font-size: 0.8125rem;
+  }
 
   ${props =>
     props.variant === 'secondary'

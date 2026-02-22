@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiChevronRight, FiChevronLeft, FiCheck } from 'react-icons/fi';
@@ -19,26 +19,35 @@ const WizardContainer = styled.div`
 const ProgressBar = styled.div`
   display: flex;
   align-items: center;
-  justify-content: space-between;
   margin-bottom: 2rem;
   position: relative;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding: 8px 4px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  
+  &::-webkit-scrollbar {
+    display: none;
+  }
 `;
 
 const ProgressTrack = styled.div`
   position: absolute;
   top: 50%;
-  left: 0;
-  right: 0;
+  left: 16px;
+  right: 16px;
   height: 4px;
   background: #e5e7eb;
   transform: translateY(-50%);
   z-index: 0;
+  border-radius: 2px;
 `;
 
 const ProgressFill = styled(motion.div)`
   position: absolute;
   top: 50%;
-  left: 0;
+  left: 16px;
   height: 4px;
   background: linear-gradient(90deg, #16a34a, #22c55e);
   transform: translateY(-50%);
@@ -47,14 +56,14 @@ const ProgressFill = styled(motion.div)`
 `;
 
 const ProgressStep = styled.div<{ $active: boolean; $completed: boolean }>`
-  width: 36px;
+  min-width: 36px;
   height: 36px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   z-index: 2;
   transition: all 0.3s ease;
   background: ${props => (props.$active || props.$completed ? '#16a34a' : 'white')};
@@ -535,6 +544,16 @@ const ADVANCED_QUESTIONS: Question[] = [
 export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoading }) => {
   const questions = mode === 'basic' ? BASIC_QUESTIONS : ADVANCED_QUESTIONS;
   const [currentIndex, setCurrentIndex] = useState(0);
+  const progressBarRef = useRef<HTMLDivElement>(null);
+  
+  useEffect(() => {
+    if (progressBarRef.current) {
+      const activeElement = progressBarRef.current.children[currentIndex + 2] as HTMLElement;
+      if (activeElement) {
+        activeElement.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+      }
+    }
+  }, [currentIndex]);
   
   const getInitialData = () => {
     if (mode === 'basic') {
@@ -553,7 +572,7 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
       level: '',
       frequency: '',
       injuries: '',
-      budget: 200,
+      budget: { min: 30, max: 300 },
       current_racket: '',
       style: '',
       years_playing: '',
@@ -620,7 +639,7 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
 
   return (
     <WizardContainer>
-      <ProgressBar>
+      <ProgressBar ref={progressBarRef}>
         <ProgressTrack />
         <ProgressFill style={{ width: `${progress}%` }} />
         {questions.map((q, idx) => (
@@ -730,11 +749,12 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
                   onChange={range => handleValueChange(range)}
                 />
               ) : (
-                <Input
-                  type="number"
-                  value={(getValue() as number) || ''}
-                  onChange={e => handleValueChange(Number(e.target.value))}
-                  placeholder="Ej: 200"
+                <PriceRangeSlider
+                  min={30}
+                  max={700}
+                  step={10}
+                  value={(getValue() as { min: number; max: number }) || { min: 30, max: 300 }}
+                  onChange={range => handleValueChange(range)}
                 />
               )}
             </SliderContainer>
