@@ -256,4 +256,33 @@ export class RacketService {
       throw error;
     }
   }
+
+  /**
+   * Actualiza masivamente un campo para todas las palas que coincidan con un valor antiguo
+   */
+  static async bulkUpdateRackets(
+    field: string,
+    oldValue: any,
+    newValue: any
+  ): Promise<{ updatedCount: number }> {
+    try {
+      const url = buildApiUrl(API_ENDPOINTS.RACKETS_BULK_UPDATE);
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: getCommonHeaders(),
+        body: JSON.stringify({ field, oldValue, newValue }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Error al realizar la actualización masiva');
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (error: any) {
+      console.error('Error in bulkUpdateRackets:', error);
+      throw error;
+    }
+  }
 }

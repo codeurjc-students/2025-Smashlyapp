@@ -100,7 +100,7 @@ export function mapToFrontendFormat(racket: any): any {
     nombre: racket.name,
     marca: racket.brand,
     modelo: racket.model,
-    imagenes: typeof racket.images === 'string' ? JSON.parse(racket.images) : (racket.images || []),
+    imagenes: typeof racket.images === 'string' ? JSON.parse(racket.images) : racket.images || [],
     es_bestseller: false, // This field doesn't exist in current DB
     en_oferta: racket.on_offer,
     scrapeado_en: racket.created_at,
@@ -168,7 +168,8 @@ export function mapToBackendFormat(frontendRacket: any): any {
   if (frontendRacket.nombre !== undefined) backendData.name = frontendRacket.nombre;
   if (frontendRacket.marca !== undefined) backendData.brand = frontendRacket.marca;
   if (frontendRacket.modelo !== undefined) backendData.model = frontendRacket.modelo;
-  if (frontendRacket.imagenes !== undefined) backendData.images = JSON.stringify(frontendRacket.imagenes);
+  if (frontendRacket.imagenes !== undefined)
+    backendData.images = JSON.stringify(frontendRacket.imagenes);
   if (frontendRacket.en_oferta !== undefined) backendData.on_offer = frontendRacket.en_oferta;
   if (frontendRacket.descripcion !== undefined)
     backendData.description = frontendRacket.descripcion;
@@ -686,5 +687,37 @@ export class RacketService {
       onSale: onSaleResult.count || 0,
       brands: uniqueBrands.length,
     };
+  }
+
+  /**
+   * Realiza una actualización masiva de un campo para todas las palas que coincidan con un valor
+   */
+  static async bulkUpdateRackets(field: string, oldValue: any, newValue: any): Promise<number> {
+    const backendUpdates = mapToBackendFormat({ [field]: newValue });
+    const fieldNames = Object.keys(backendUpdates);
+
+    if (fieldNames.length === 0) {
+      throw new Error(`Campo no válido para actualización masiva: ${field}`);
+    }
+
+    const fieldName = fieldNames[0];
+    const value = backendUpdates[fieldName];
+
+    // Para el filtro de búsqueda usamos el formato de backend del campo
+    const searchFilter = mapToBackendFormat({ [field]: oldValue });
+    const searchField = Object.keys(searchFilter)[0];
+
+    const { data, error } = await supabase
+      .from('rackets')
+      .update({ [fieldName]: value, updated_at: new Date().toISOString() })
+      .eq(searchField, oldValue)
+      .select('id');
+
+    if (error) {
+      logger.error(`Error in bulk update for field ${fieldName}:`, error);
+      throw new Error(`Error al realizar la actualización masiva: ${error.message}`);
+    }
+
+    return data?.length || 0;
   }
 }

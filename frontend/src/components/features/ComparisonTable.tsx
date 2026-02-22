@@ -119,8 +119,56 @@ const EmptyMark = styled(FiMinus)`
   color: #d1d5db;
 `;
 
+const normalizeString = (str: string): string => {
+  return str.toLowerCase().replace(/\s+/g, ' ').replace(/\d{4}/g, '').trim();
+};
+
+const findMatchingValue = (row: any, racketName: string): any => {
+  const normalizedRacketName = normalizeString(racketName);
+  const racketKey = racketName.split(' ')[0].toLowerCase();
+  
+  for (const key of Object.keys(row)) {
+    if (key === 'feature') continue;
+    
+    const normalizedKey = normalizeString(key);
+    
+    // Coincidencia exacta
+    if (normalizedKey === normalizedRacketName) {
+      return row[key];
+    }
+    
+    // Coincidencia por primera palabra (AT10 = AT10 2024)
+    if (normalizedKey.includes(racketKey) || racketKey.includes(normalizedKey)) {
+      return row[key];
+    }
+    
+    // Coincidencia parcial
+    const keyParts = normalizedKey.split(' ');
+    const nameParts = normalizedRacketName.split(' ');
+    const commonParts = keyParts.filter((part: string) => 
+      nameParts.some((namePart: string) => namePart.includes(part) || part.includes(namePart))
+    );
+    if (commonParts.length > 0) {
+      return row[key];
+    }
+  }
+  
+  return null;
+};
+
+// Filas a excluir de la tabla
+const EXCLUDED_FEATURES = ['peso', 'weight'];
+
 const ComparisonTable: React.FC<ComparisonTableProps> = ({ data, metrics }) => {
-  if (!data || data.length === 0) return null;
+  if (!data || data.length === 0 || !metrics || metrics.length === 0) return null;
+
+  // Filtrar filas excluidas
+  const filteredData = data.filter((row) => {
+    const featureLower = row.feature?.toLowerCase() || '';
+    return !EXCLUDED_FEATURES.some((excluded) => featureLower.includes(excluded));
+  });
+
+  if (filteredData.length === 0) return null;
 
   return (
     <div style={{ marginBottom: '2rem' }}>
@@ -145,12 +193,16 @@ const ComparisonTable: React.FC<ComparisonTableProps> = ({ data, metrics }) => {
             </tr>
           </thead>
           <tbody>
-            {data.map((row, rowIndex) => (
+            {filteredData.map((row, rowIndex) => (
               <Tr key={rowIndex}>
                 <Td>{row.feature}</Td>
                 {metrics.map((racket, colIndex) => {
-                  const cellValue = row[racket.racketName] || row[`pala_${colIndex + 1}`];
-                  return <Td key={colIndex}>{cellValue || <EmptyMark />}</Td>;
+                  const cellValue = findMatchingValue(row, racket.racketName);
+                  return (
+                    <Td key={colIndex}>
+                      {cellValue !== null && cellValue !== undefined ? cellValue : <EmptyMark />}
+                    </Td>
+                  );
                 })}
               </Tr>
             ))}

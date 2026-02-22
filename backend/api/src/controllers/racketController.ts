@@ -405,4 +405,41 @@ export class RacketController {
       } as ApiResponse);
     }
   }
+
+  /**
+   * POST /api/rackets/bulk-update
+   * Realiza una actualización masiva de palas
+   */
+  static async bulkUpdateRackets(req: Request, res: Response): Promise<void> {
+    try {
+      const { field, oldValue, newValue } = req.body;
+
+      if (!field || oldValue === undefined || newValue === undefined) {
+        res.status(400).json({
+          success: false,
+          error: 'Missing fields',
+          message: 'field, oldValue and newValue are required',
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      const updatedCount = await RacketService.bulkUpdateRackets(field, oldValue, newValue);
+
+      res.json({
+        success: true,
+        data: { updatedCount },
+        message: `${updatedCount} palas actualizadas correctamente`,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error('Error in bulkUpdateRackets:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Error interno del servidor',
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
 }

@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { Link } from 'react-router-dom';
-import { FiArrowLeft, FiEdit2, FiTrash2, FiSearch, FiPackage, FiTag } from 'react-icons/fi';
+import { FiArrowLeft, FiEdit2, FiTrash2, FiSearch, FiPackage, FiTag, FiX } from 'react-icons/fi';
 import { Racket } from '@/types/racket';
 import { RacketService } from '@/services/racketService';
 import { EditRacketModal } from '@/components/admin/EditRacketModal';
@@ -82,6 +82,103 @@ const SearchIcon = styled.div`
   color: #9ca3af;
   display: flex;
   align-items: center;
+`;
+
+const FiltersContainer = styled.div`
+  max-width: 1400px;
+  margin: 0 auto 1rem;
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  padding: 1rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+`;
+
+const FilterGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+`;
+
+const FilterLabel = styled.label`
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const FilterSelect = styled.select`
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #374151;
+  background: white;
+  min-width: 140px;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 2px rgba(22, 163, 74, 0.1);
+  }
+`;
+
+const ClearFiltersButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: #f3f4f6;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: #6b7280;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #e5e7eb;
+    color: #374151;
+  }
+`;
+
+const ResultsInfo = styled.span`
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-left: auto;
+  align-self: flex-end;
+  white-space: nowrap;
+`;
+
+const BulkReplaceButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: #16a34a;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  color: white;
+  cursor: pointer;
+  align-self: flex-end;
+  transition: all 0.2s;
+  font-weight: 500;
+
+  &:hover {
+    background: #15803d;
+  }
+
+  &:disabled {
+    background: #9ca3af;
+    cursor: not-allowed;
+  }
 `;
 
 const Content = styled.div`
@@ -256,26 +353,82 @@ const AdminRacketsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [editingRacket, setEditingRacket] = useState<Racket | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  // Filtros
+  const [filterMarca, setFilterMarca] = useState('');
+  const [filterForma, setFilterForma] = useState('');
+  const [filterNivel, setFilterNivel] = useState('');
+  const [filterOferta, setFilterOferta] = useState('');
+
+  // Obtener valores únicos para los filtros
+  const uniqueMarcas = useMemo(() => {
+    const marcas = new Set(rackets.map(r => r.marca).filter(Boolean));
+    return Array.from(marcas).sort();
+  }, [rackets]);
+
+  const uniqueFormas = useMemo(() => {
+    const formas = new Set(rackets.map(r => r.caracteristicas_forma).filter(Boolean));
+    return Array.from(formas).sort();
+  }, [rackets]);
+
+  const uniqueNiveles = useMemo(() => {
+    const niveles = new Set(rackets.map(r => r.caracteristicas_nivel_de_juego).filter(Boolean));
+    return Array.from(niveles).sort();
+  }, [rackets]);
+
+  const clearFilters = () => {
+    setFilterMarca('');
+    setFilterForma('');
+    setFilterNivel('');
+    setFilterOferta('');
+    setSearchQuery('');
+  };
+
+  const hasActiveFilters = filterMarca || filterForma || filterNivel || filterOferta || searchQuery;
 
   useEffect(() => {
     loadRackets();
   }, []);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredRackets(rackets);
-    } else {
+    let result = [...rackets];
+
+    // Filtro por búsqueda
+    if (searchQuery.trim() !== '') {
       const query = searchQuery.toLowerCase();
-      setFilteredRackets(
-        rackets.filter(
-          r =>
-            r.marca?.toLowerCase().includes(query) ||
-            r.modelo?.toLowerCase().includes(query) ||
-            r.nombre?.toLowerCase().includes(query)
-        )
+      result = result.filter(
+        r =>
+          r.marca?.toLowerCase().includes(query) ||
+          r.modelo?.toLowerCase().includes(query) ||
+          r.nombre?.toLowerCase().includes(query)
       );
     }
-  }, [searchQuery, rackets]);
+
+    // Filtro por marca
+    if (filterMarca) {
+      result = result.filter(r => r.marca === filterMarca);
+    }
+
+    // Filtro por forma
+    if (filterForma) {
+      result = result.filter(r => r.caracteristicas_forma === filterForma);
+    }
+
+    // Filtro por nivel
+    if (filterNivel) {
+      result = result.filter(r => r.caracteristicas_nivel_de_juego === filterNivel);
+    }
+
+    // Filtro por oferta
+    if (filterOferta === 'oferta') {
+      result = result.filter(r => r.en_oferta === true);
+    } else if (filterOferta === 'no-oferta') {
+      result = result.filter(r => r.en_oferta !== true);
+    }
+
+    setFilteredRackets(result);
+  }, [searchQuery, rackets, filterMarca, filterForma, filterNivel, filterOferta]);
 
   const loadRackets = async () => {
     try {
@@ -323,6 +476,43 @@ const AdminRacketsPage: React.FC = () => {
     }
   };
 
+  const handleBulkReplace = async (field: string, oldValue: string) => {
+    if (!oldValue) return;
+
+    const newValue = window.prompt(
+      `Reemplazar todas las palas donde "${field}" es "${oldValue}" por:`,
+      oldValue
+    );
+
+    if (newValue === null || newValue === oldValue) return;
+
+    try {
+      setIsUpdating(true);
+      const fieldMapping: Record<string, string> = {
+        Marca: 'marca',
+        Forma: 'caracteristicas_forma',
+        Nivel: 'caracteristicas_nivel_de_juego',
+      };
+
+      const backendField = fieldMapping[field];
+      if (!backendField) return;
+
+      const result = await RacketService.bulkUpdateRackets(backendField, oldValue, newValue);
+      sileo.success({
+        title: 'Éxito',
+        description: `${result.updatedCount} palas actualizadas de "${oldValue}" a "${newValue}"`,
+      });
+
+      // Recargar palas para ver los cambios
+      await loadRackets();
+    } catch (error) {
+      console.error('Error in bulk replace:', error);
+      sileo.error({ title: 'Error', description: 'Error al realizar la actualización masiva' });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const totalOnSale = rackets.filter(r => r.en_oferta).length;
   const totalBrands = new Set(rackets.map(r => r.marca).filter(Boolean)).size;
 
@@ -354,6 +544,90 @@ const AdminRacketsPage: React.FC = () => {
           />
         </SearchContainer>
       </Header>
+
+      <FiltersContainer>
+        <FilterGroup>
+          <FilterLabel>Marca</FilterLabel>
+          <FilterSelect value={filterMarca} onChange={e => setFilterMarca(e.target.value)}>
+            <option value=''>Todas</option>
+            {uniqueMarcas.map(marca => (
+              <option key={marca} value={marca}>
+                {marca}
+              </option>
+            ))}
+          </FilterSelect>
+        </FilterGroup>
+
+        <FilterGroup>
+          <FilterLabel>Forma</FilterLabel>
+          <FilterSelect value={filterForma || ''} onChange={e => setFilterForma(e.target.value)}>
+            <option value=''>Todas</option>
+            {uniqueFormas.map(forma => (
+              <option key={forma} value={forma || ''}>
+                {forma}
+              </option>
+            ))}
+          </FilterSelect>
+        </FilterGroup>
+
+        <FilterGroup>
+          <FilterLabel>Nivel</FilterLabel>
+          <FilterSelect value={filterNivel || ''} onChange={e => setFilterNivel(e.target.value)}>
+            <option value=''>Todos</option>
+            {uniqueNiveles.map(nivel => (
+              <option key={nivel} value={nivel || ''}>
+                {nivel}
+              </option>
+            ))}
+          </FilterSelect>
+        </FilterGroup>
+
+        <FilterGroup>
+          <FilterLabel>Oferta</FilterLabel>
+          <FilterSelect value={filterOferta} onChange={e => setFilterOferta(e.target.value)}>
+            <option value=''>Todas</option>
+            <option value='oferta'>En oferta</option>
+            <option value='no-oferta'>Sin oferta</option>
+          </FilterSelect>
+        </FilterGroup>
+
+        {filterForma && (
+          <BulkReplaceButton
+            onClick={() => handleBulkReplace('Forma', filterForma)}
+            disabled={isUpdating}
+          >
+            Reemplazar Todo ({filterForma})
+          </BulkReplaceButton>
+        )}
+
+        {filterMarca && (
+          <BulkReplaceButton
+            onClick={() => handleBulkReplace('Marca', filterMarca)}
+            disabled={isUpdating}
+          >
+            Reemplazar Todo ({filterMarca})
+          </BulkReplaceButton>
+        )}
+
+        {filterNivel && (
+          <BulkReplaceButton
+            onClick={() => handleBulkReplace('Nivel', filterNivel)}
+            disabled={isUpdating}
+          >
+            Reemplazar Todo ({filterNivel})
+          </BulkReplaceButton>
+        )}
+
+        {hasActiveFilters && (
+          <ClearFiltersButton onClick={clearFilters}>
+            <FiX size={14} /> Limpiar
+          </ClearFiltersButton>
+        )}
+
+        <ResultsInfo>
+          {filteredRackets.length} de {rackets.length} palas
+        </ResultsInfo>
+      </FiltersContainer>
 
       <Content>
         <StatsBar>
@@ -406,7 +680,8 @@ const AdminRacketsPage: React.FC = () => {
                         <div>
                           <RacketName>{racket.nombre || racket.modelo || 'Sin nombre'}</RacketName>
                           <RacketDetails>
-                            {racket.caracteristicas_forma || '-'} • {racket.caracteristicas_balance || '-'}
+                            {racket.caracteristicas_forma || '-'} •{' '}
+                            {racket.caracteristicas_balance || '-'}
                           </RacketDetails>
                         </div>
                       </RacketInfo>
@@ -432,10 +707,18 @@ const AdminRacketsPage: React.FC = () => {
                     </Td>
                     <Td>
                       <Actions>
-                        <ActionButton variant='edit' onClick={() => handleEdit(racket)} title='Editar'>
+                        <ActionButton
+                          variant='edit'
+                          onClick={() => handleEdit(racket)}
+                          title='Editar'
+                        >
                           <FiEdit2 size={16} />
                         </ActionButton>
-                        <ActionButton variant='delete' onClick={() => handleDelete(racket)} title='Eliminar'>
+                        <ActionButton
+                          variant='delete'
+                          onClick={() => handleDelete(racket)}
+                          title='Eliminar'
+                        >
                           <FiTrash2 size={16} />
                         </ActionButton>
                       </Actions>

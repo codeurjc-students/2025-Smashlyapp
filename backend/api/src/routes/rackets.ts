@@ -50,4 +50,7 @@ router.put('/:id', optionalAuth, validateIdParam(), RacketController.updateRacke
 // DELETE /api/rackets/:id - Deletes a racket by ID
 router.delete('/:id', optionalAuth, validateIdParam(), RacketController.deleteRacket);
 
+// POST /api/rackets/bulk-update - Bulk updates rackets
+router.post('/bulk-update', optionalAuth, RacketController.bulkUpdateRackets);
+
 export default router;

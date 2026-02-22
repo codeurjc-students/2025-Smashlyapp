@@ -23,6 +23,7 @@ export const API_ENDPOINTS = {
   RACKETS_OFFERS: '/api/v1/rackets/offers',
   RACKETS_BRANDS: '/api/v1/rackets/brands',
   RACKETS_STATS: '/api/v1/rackets/stats',
+  RACKETS_BULK_UPDATE: '/api/v1/rackets/bulk-update',
   RACKETS_BY_BRAND: (brand: string) => `/api/v1/rackets/brands/${brand}`,
 
   // Users

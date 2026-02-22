@@ -159,7 +159,7 @@ export class OpenRouterService {
         );
 
         const response = await this.client.post<OpenRouterResponse>('/chat/completions', {
-          model: model,
+          model,
           messages: [
             {
               role: 'user',
@@ -305,7 +305,7 @@ export class OpenRouterService {
         );
 
         const response = await this.client.post<OpenRouterResponse>('/chat/completions', {
-          model: model,
+          model,
           messages: [
             {
               role: 'user',
@@ -526,6 +526,9 @@ RESPONDE SOLO CON EL JSON.`;
         parsed.comparisonTable = [];
       }
 
+      // Normalizar comparisonTable para que las keys coincidan con metrics.racketName
+      parsed.comparisonTable = this.normalizeComparisonTable(parsed.comparisonTable, parsed.metrics);
+
       return {
         executiveSummary: parsed.executiveSummary || '',
         technicalAnalysis: parsed.technicalAnalysis || [],
@@ -554,5 +557,79 @@ RESPONDE SOLO CON EL JSON.`;
         conclusion: '',
       };
     }
+  }
+
+  /**
+   * Normaliza las keys de comparisonTable para que coincidan exactamente con metrics.racketName
+   */
+  private normalizeComparisonTable(comparisonTable: any[], metrics: any[]): any[] {
+    if (!comparisonTable || !metrics || metrics.length === 0) {
+      return comparisonTable || [];
+    }
+
+    // Obtener los nombres exactos de las palas desde metrics
+    const racketNames = metrics.map((m: any) => m.racketName);
+
+    return comparisonTable.map((row: any) => {
+      if (!row || typeof row !== 'object') return row;
+
+      const newRow: any = { feature: row.feature };
+
+      // Para cada pala en metrics, buscar la key que coincida
+      metrics.forEach((metric: any, index: number) => {
+        const exactName = metric.racketName;
+        newRow[exactName] = null; // Valor por defecto
+
+        // Buscar en las keys existentes del row
+        Object.keys(row).forEach((key: string) => {
+          if (key === 'feature') return;
+
+          // Verificar coincidencia exacta o parcial
+          const keyLower = key.toLowerCase().trim();
+          const exactLower = exactName.toLowerCase().trim();
+
+          // Coincidencia exacta
+          if (keyLower === exactLower) {
+            newRow[exactName] = row[key];
+          }
+          // Coincidencia parcial (la key contiene el nombre o viceversa)
+          else if (
+            keyLower.includes(exactLower) ||
+            exactLower.includes(keyLower) ||
+            this.areSimilarStrings(keyLower, exactLower)
+          ) {
+            // Solo asignar si no hay valor todavía
+            if (!newRow[exactName]) {
+              newRow[exactName] = row[key];
+            }
+          }
+        });
+      });
+
+      return newRow;
+    });
+  }
+
+  /**
+   * Compara dos strings y determina si son similares (para maneja variantes de nombres)
+   */
+  private areSimilarStrings(a: string, b: string): boolean {
+    // Eliminar números de año y espacios extra
+    const normalize = (s: string) => s.replace(/\d{4}/g, '').replace(/\s+/g, ' ').trim();
+    const na = normalize(a);
+    const nb = normalize(b);
+
+    // Si son iguales después de normalizar
+    if (na === nb) return true;
+
+    // Si una contiene a la otra
+    if (na.includes(nb) || nb.includes(na)) return true;
+
+    // Verificar primeras palabras (para "AT10" vs "AT10 2024")
+    const wordsA = na.split(' ');
+    const wordsB = nb.split(' ');
+    if (wordsA[0] === wordsB[0]) return true;
+
+    return false;
   }
 }

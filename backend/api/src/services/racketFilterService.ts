@@ -195,7 +195,7 @@ export class RacketFilterService {
       baselineMax = 360;
     }
 
-    let min = 340; // Absolute minimum for adults
+    const min = 340; // Absolute minimum for adults
     let max = baselineMax;
 
     // Adjust for physical condition

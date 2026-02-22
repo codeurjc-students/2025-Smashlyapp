@@ -36,7 +36,7 @@ export class RecommendationService {
       }
 
       // 2. Fetch all rackets from database to build catalog
-      let allRackets = await RacketService.getAllRackets();
+      const allRackets = await RacketService.getAllRackets();
       logger.info(`📊 Loaded ${allRackets.length} rackets from database`);
 
       // Log Testea certification coverage
@@ -323,7 +323,7 @@ RESPONDE SOLO CON EL JSON:`;
       baselineMax = 360;
     }
 
-    let min = 340;
+    const min = 340;
     let max = baselineMax;
 
     if (profile.physical_condition === 'ocasional') {

@@ -1,4 +1,11 @@
-import React, { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import React, {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 import { Notification } from '../types/notification';
 import { NotificationService } from '../services/notificationService';
 import { useAuth } from './AuthContext';
@@ -38,29 +45,32 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchNotifications = useCallback(async (unreadOnly: boolean = false) => {
-    if (!isAuthenticated) {
-      setNotifications([]);
-      setUnreadCount(0);
-      return;
-    }
+  const fetchNotifications = useCallback(
+    async (unreadOnly: boolean = false) => {
+      if (!isAuthenticated) {
+        setNotifications([]);
+        setUnreadCount(0);
+        return;
+      }
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      const fetchedNotifications = await NotificationService.fetchNotifications({
-        limit: 50,
-        unreadOnly,
-      });
-      setNotifications(fetchedNotifications);
-    } catch (err) {
-      console.error('Error fetching notifications:', err);
-      setError('Error al cargar las notificaciones');
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated]);
+      try {
+        const fetchedNotifications = await NotificationService.fetchNotifications({
+          limit: 50,
+          unreadOnly,
+        });
+        setNotifications(fetchedNotifications);
+      } catch (err) {
+        console.error('Error fetching notifications:', err);
+        setError('Error al cargar las notificaciones');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [isAuthenticated]
+  );
 
   const fetchUnreadCount = useCallback(async () => {
     if (!isAuthenticated) {
@@ -79,13 +89,11 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const markAsRead = useCallback(async (notificationId: string) => {
     try {
       await NotificationService.markAsRead(notificationId);
-      
-      setNotifications(prev => 
-        prev.map(n => 
-          n.id === notificationId ? { ...n, is_read: true } : n
-        )
+
+      setNotifications(prev =>
+        prev.map(n => (n.id === notificationId ? { ...n, is_read: true } : n))
       );
-      
+
       setUnreadCount(prev => Math.max(0, prev - 1));
     } catch (err) {
       console.error('Error marking notification as read:', err);
@@ -95,7 +103,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
   const markAllAsRead = useCallback(async () => {
     try {
       await NotificationService.markAllAsRead();
-      
+
       setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
       setUnreadCount(0);
     } catch (err) {
@@ -103,21 +111,24 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     }
   }, []);
 
-  const deleteNotification = useCallback(async (notificationId: string) => {
-    try {
-      await NotificationService.deleteNotification(notificationId);
-      
-      const notificationToDelete = notifications.find(n => n.id === notificationId);
-      
-      setNotifications(prev => prev.filter(n => n.id !== notificationId));
-      
-      if (notificationToDelete && !notificationToDelete.is_read) {
-        setUnreadCount(prev => Math.max(0, prev - 1));
+  const deleteNotification = useCallback(
+    async (notificationId: string) => {
+      try {
+        await NotificationService.deleteNotification(notificationId);
+
+        const notificationToDelete = notifications.find(n => n.id === notificationId);
+
+        setNotifications(prev => prev.filter(n => n.id !== notificationId));
+
+        if (notificationToDelete && !notificationToDelete.is_read) {
+          setUnreadCount(prev => Math.max(0, prev - 1));
+        }
+      } catch (err) {
+        console.error('Error deleting notification:', err);
       }
-    } catch (err) {
-      console.error('Error deleting notification:', err);
-    }
-  }, [notifications]);
+    },
+    [notifications]
+  );
 
   const incrementUnreadCount = useCallback(() => {
     setUnreadCount(prev => prev + 1);
@@ -143,7 +154,10 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     if (!isAuthenticated || !user) return;
 
     const interval = setInterval(() => {
-      fetchUnreadCount();
+      // Solo realizar la petición si la pestaña está visible
+      if (document.visibilityState === 'visible') {
+        fetchUnreadCount();
+      }
     }, 60000);
 
     return () => clearInterval(interval);
@@ -163,9 +177,5 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     addNotification,
   };
 
-  return (
-    <NotificationContext.Provider value={value}>
-      {children}
-    </NotificationContext.Provider>
-  );
+  return <NotificationContext.Provider value={value}>{children}</NotificationContext.Provider>;
 };
