@@ -76,14 +76,13 @@ export const ComparisonService = {
       }),
     });
 
-    const responseText = await response.text();
-    const responseJson = JSON.parse(responseText);
-
     if (!response.ok) {
-      throw new Error(responseJson.error || responseJson.message || 'Error al guardar la comparación');
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error || errorData.message || 'Error al guardar la comparación');
     }
 
-    return responseJson.data;
+    const result = await response.json();
+    return result.data;
   },
 
   getUserComparisons: async (): Promise<SavedComparison[]> => {
@@ -95,15 +94,13 @@ export const ComparisonService = {
       headers: getCommonHeaders(),
     });
 
-    const responseText = await response.text();
-    const responseJson = JSON.parse(responseText);
-
     if (!response.ok) {
-      const errorData = responseJson;
+      const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || errorData.message || 'Error al obtener las comparaciones');
     }
 
-    return responseJson.data;
+    const result = await response.json();
+    return result.data;
   },
 
   getComparisonById: async (id: string): Promise<SavedComparison> => {
