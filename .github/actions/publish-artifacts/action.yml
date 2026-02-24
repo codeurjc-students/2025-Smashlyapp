@@ -33,6 +33,10 @@ inputs:
   token:
     description: Registry access token/password
     required: true
+  build_args:
+    description: Build arguments for Docker (space-separated list of key=value)
+    required: false
+    default: ""
 
 runs:
   using: composite
@@ -58,7 +62,13 @@ runs:
     - name: Build Docker image (single build)
       shell: bash
       run: |
-        docker build -f "${{ inputs.dockerfile_path }}" -t local-smashly:build "${{ inputs.context }}"
+        # Convert space-separated build args to --build-arg flag format
+        BUILD_ARGS_FLAGS=""
+        for arg in ${{ inputs.build_args }}; do
+          BUILD_ARGS_FLAGS="$BUILD_ARGS_FLAGS --build-arg $arg"
+        done
+
+        docker build -f "${{ inputs.dockerfile_path }}" $BUILD_ARGS_FLAGS -t local-smashly:build "${{ inputs.context }}"
 
     - name: Tag and push Docker image tags
       shell: bash
