@@ -61,11 +61,15 @@ runs:
 
     - name: Build Docker image (single build)
       shell: bash
+      env:
+        BUILD_ARGS: ${{ inputs.build_args }}
       run: |
-        # Convert space-separated build args to --build-arg flag format
+        # Convert space-separated (or multi-line) build args to --build-arg flag format
         BUILD_ARGS_FLAGS=""
-        for arg in ${{ inputs.build_args }}; do
-          BUILD_ARGS_FLAGS="$BUILD_ARGS_FLAGS --build-arg $arg"
+        for arg in ${BUILD_ARGS}; do
+          if [ -n "$arg" ]; then
+            BUILD_ARGS_FLAGS="$BUILD_ARGS_FLAGS --build-arg $arg"
+          fi
         done
 
         docker build -f "${{ inputs.dockerfile_path }}" $BUILD_ARGS_FLAGS -t local-smashly:build "${{ inputs.context }}"
