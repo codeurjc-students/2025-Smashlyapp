@@ -65,14 +65,17 @@ runs:
         BUILD_ARGS: ${{ inputs.build_args }}
       run: |
         # Convert space-separated (or multi-line) build args to --build-arg flag format
-        BUILD_ARGS_FLAGS=""
-        for arg in ${BUILD_ARGS}; do
-          if [ -n "$arg" ]; then
-            BUILD_ARGS_FLAGS="$BUILD_ARGS_FLAGS --build-arg $arg"
+        # Using an array to handle potential special characters in values safely
+        DECLARE_ARGS=()
+        for env_var in ${BUILD_ARGS}; do
+          if [ -n "$env_var" ]; then
+            key=$(echo "$env_var" | cut -d'=' -f1)
+            echo "Adding build argument: $key"
+            DECLARE_ARGS+=("--build-arg" "$env_var")
           fi
         done
 
-        docker build -f "${{ inputs.dockerfile_path }}" $BUILD_ARGS_FLAGS -t local-smashly:build "${{ inputs.context }}"
+        docker build -f "${{ inputs.dockerfile_path }}" "${DECLARE_ARGS[@]}" -t local-smashly:build "${{ inputs.context }}"
 
     - name: Tag and push Docker image tags
       shell: bash
