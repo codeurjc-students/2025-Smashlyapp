@@ -16,9 +16,19 @@ ARG VITE_GOOGLE_CLIENT_ID
 
 # Pass build arguments to environment variables
 ENV VITE_API_URL=$VITE_API_URL \
-    VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
-    VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
-    VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+  VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
+  VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
+  VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+
+# Create a .env file for Vite build and print debug info (masked)
+RUN echo "VITE_API_URL=$VITE_API_URL" > .env && \
+  echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env && \
+  echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env && \
+  echo "VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID" >> .env && \
+  echo "--- Build Debug Info ---" && \
+  echo "VITE_GOOGLE_CLIENT_ID length: ${#VITE_GOOGLE_CLIENT_ID}" && \
+  if [ -n "$VITE_GOOGLE_CLIENT_ID" ]; then echo "VITE_GOOGLE_CLIENT_ID starts with: ${VITE_GOOGLE_CLIENT_ID:0:5}..."; else echo "VITE_GOOGLE_CLIENT_ID is EMPTY!"; fi && \
+  echo "------------------------"
 
 # Copy source and public assets (vite publicDir is at ../public)
 COPY frontend/ ./
@@ -67,15 +77,15 @@ COPY --from=frontend-builder /app/frontend/dist ./static
 # Generate self-signed SSL certs for HTTPS in container
 RUN mkdir -p certs \
   && openssl req -x509 -newkey rsa:2048 -nodes \
-       -keyout certs/key.pem -out certs/cert.pem -days 365 \
-       -subj "/CN=localhost" \
-       -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
+  -keyout certs/key.pem -out certs/cert.pem -days 365 \
+  -subj "/CN=localhost" \
+  -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 
 # Environment defaults (can be overridden by docker-compose)
 ENV NODE_ENV=production \
-    USE_HTTPS=true \
-    PORT=443 \
-    FRONTEND_URL=https://localhost
+  USE_HTTPS=true \
+  PORT=443 \
+  FRONTEND_URL=https://localhost
 
 # Expose HTTPS port
 EXPOSE 443
