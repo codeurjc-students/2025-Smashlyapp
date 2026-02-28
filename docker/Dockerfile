@@ -9,20 +9,17 @@ COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci
 
 # Set build arguments for Vite
-ARG VITE_API_URL
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 ARG VITE_GOOGLE_CLIENT_ID
 
 # Pass build arguments to environment variables
-ENV VITE_API_URL=$VITE_API_URL \
-  VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
   VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
   VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 
 # Create a .env file for Vite build and print debug info (masked)
-RUN echo "VITE_API_URL=$VITE_API_URL" > .env && \
-  echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" >> .env && \
+RUN echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" > .env && \
   echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env && \
   echo "VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID" >> .env && \
   echo "--- Build Debug Info ---" && \

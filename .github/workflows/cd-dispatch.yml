@@ -165,7 +165,6 @@ jobs:
           context: .
           tags: ${{ steps.tag.outputs.tag }}
           build_args: |
-            VITE_API_URL=${{ secrets.API_URL }}
             VITE_SUPABASE_URL=${{ secrets.SUPABASE_URL }}
             VITE_SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
             VITE_GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}
