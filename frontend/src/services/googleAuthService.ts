@@ -159,6 +159,19 @@ export class GoogleAuthService {
               reject(new Error('No access token received from Google'));
             }
           },
+          error_callback: (error: any) => {
+            if (error.type === 'popup_closed') {
+              reject(new Error('Login cancelado: Ventana emergente cerrada'));
+            } else if (error.type === 'popup_blocked_by_browser') {
+              reject(new Error('El navegador bloqueó la ventana emergente de Google'));
+            } else {
+              reject(
+                new Error(
+                  `La validación de Google falló. Revisa los dominios autorizados de AWS. Detalle: ${error.type || 'Desconocido'}`
+                )
+              );
+            }
+          },
         });
 
         // Request an access token
