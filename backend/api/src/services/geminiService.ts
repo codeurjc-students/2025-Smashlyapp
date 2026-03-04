@@ -1,21 +1,14 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { Racket, UserFormData } from '../types/racket';
-
-// Interfaz para las métricas de cada pala
-export interface RacketMetrics {
-  racketName: string;
-  potencia: number;
-  control: number;
-  salidaDeBola: number;
-  manejabilidad: number;
-  puntoDulce: number;
-}
-
-// Interfaz para la respuesta de comparación completa
-export interface ComparisonResult {
-  textComparison: string;
-  metrics: RacketMetrics[];
-}
+import {
+  Racket,
+  UserFormData,
+  ComparisonResult,
+  ComparisonSection,
+  ComparisonTableItem,
+  RacketComparisonData,
+  RadarMetrics,
+} from '../types/racket';
+import logger from '../config/logger';
 
 export class GeminiService {
   private genAI: GoogleGenerativeAI;
@@ -60,10 +53,10 @@ export class GeminiService {
         const fullText = response.text();
 
         // Separar la comparación textual de las métricas JSON
-        const { textComparison, metrics } = this.parseResponse(fullText, rackets);
+        const comparisonResult = this.parseResponse(fullText, rackets);
 
         console.log('Comparación generada exitosamente');
-        return { textComparison, metrics };
+        return comparisonResult;
       } catch (error: any) {
         lastError = error;
         const errorMessage = error.message || 'Error desconocido';
@@ -103,7 +96,7 @@ export class GeminiService {
     return rackets
       .map(
         (r: any, index) => `PALA ${index + 1}:
-Nombre: ${r.nombre}
+Nombre: ${(r as any).nombre || (r as any).name}
 Marca: ${r.marca || r.caracteristicas_marca || 'N/A'}
 Modelo: ${r.modelo || 'N/A'}
 Forma: ${r.caracteristicas_forma || r.caracteristicas_formato || 'N/A'}
@@ -111,7 +104,8 @@ Goma: ${r.caracteristicas_nucleo || 'N/A'}
 Cara/Fibra: ${r.caracteristicas_cara || 'N/A'}
 Balance: ${r.caracteristicas_balance || 'N/A'}
 Dureza: ${r.caracteristicas_dureza || 'N/A'}
-Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}`
+Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}
+Métricas Reales (Radar): ${r.radar_potencia ? `Potencia:${r.radar_potencia}, Control:${r.radar_control}, Manejabilidad:${r.radar_manejabilidad}, Punto Dulce:${r.radar_punto_dulce}, Salida de Bola:${r.radar_salida_bola}` : 'No disponibles (usar estimación lógica)'}`
       )
       .join('\n\n');
   }
@@ -134,165 +128,119 @@ Por favor, ten en cuenta estas características en la sección "Veredicto Situac
   }
 
   private buildCombinedPrompt(rackets: Racket[], racketsInfo: string, userContext: string): string {
-    const numCols = rackets.length > 2 ? 'Pala 3 |' : '';
-    const numSep = rackets.length > 2 ? ':--- |' : '';
-    const numVals = rackets.length > 2 ? '... |' : '';
+    return `CONTEXTO DEL SISTEMA:
+Eres "Smashly AI", un ex-jugador profesional de pádel, entrenador de élite y experto en biomecánica y materiales de palas (carbono 3K/12K/18K, fibra de vidrio, gomas EVA Soft/Hard).
+Tu objetivo es realizar un análisis técnico profundo y comparativo entre las palas solicitadas.
 
-    return `Eres un analista profesional de pádel. Proporciona una comparación técnica objetiva basada en materiales y geometría.
+REGLAS DE DOMINIO (PÁDEL):
+- Palas Diamante: Balance alto, máximo estrés en el brazo (riesgo de epicondilitis), potencia pura, punto dulce pequeño y superior. Para jugadores ofensivos.
+- Palas Redondas: Balance bajo, máxima manejabilidad y control, punto dulce amplio y centrado.
+- Palas Lágrima/Gota: Polivalentes, balance medio.
+- Materiales: Carbono 18K es más rígido (menos salida de bola a baja velocidad, más potencia en golpes fuertes) que el 3K o Fibra de Vidrio. Gomas Hard aportan control y potencia en bloqueos; Soft aportan salida de bola y confort.
+- PRIORIDAD DE DATOS: Si se proporcionan "Métricas Reales (Radar)", son valores técnicos exactos de nuestra base de datos. Úsalos como la VERDAD ABSOLUTA para tu análisis y para rellenar la sección "radarData" del JSON. Si no están, estima basándote en materiales y forma.
 
-### 📊 RESUMEN EJECUTIVO
-[2-3 líneas: diferencias clave y para qué jugador es cada pala]
-
-### 🔬 ANÁLISIS TÉCNICO DE MATERIALES
-
-#### ${(rackets[0] as any)?.nombre || 'Pala 1'}
-**Núcleo:** [Tipo de goma y densidad]
-**Caras:** [Tipo de fibra y rigidez]
-**Geometría:** [Forma y balance]
-**Comportamiento:** Tacto [Blando/Medio/Duro], Punto Dulce [Pequeño/Medio/Grande], Transmisión [Baja/Media/Alta]
-
-#### ${(rackets[1] as any)?.nombre || 'Pala 2'}
-**Núcleo:** [Tipo de goma y densidad]
-**Caras:** [Tipo de fibra y rigidez]
-**Geometría:** [Forma y balance]
-**Comportamiento:** Tacto [Blando/Medio/Duro], Punto Dulce [Pequeño/Medio/Grande], Transmisión [Baja/Media/Alta]
-
-${rackets.length > 2 ? `#### ${(rackets[2] as any)?.nombre || 'Pala 3'}\n**Núcleo:** [Tipo de goma]\n**Caras:** [Tipo de fibra]\n**Geometría:** [Forma y balance]\n**Comportamiento:** Tacto, Punto Dulce, Transmisión\n` : ''}
-
-### 📋 TABLA COMPARATIVA
-
-| Característica | ${(rackets[0] as any)?.nombre || 'Pala 1'} | ${(rackets[1] as any)?.nombre || 'Pala 2'} | ${numCols}
-| :--- | :--- | :--- | ${numSep}
-| **Tacto/Dureza** | ... | ... | ${numVals}
-| **Balance** | ... | ... | ${numVals}
-| **Punto Dulce** | ... | ... | ${numVals}
-| **Salida de Bola** | ... | ... | ${numVals}
-| **Potencia** | ... | ... | ${numVals}
-| **Manejabilidad** | ... | ... | ${numVals}
-| **Nivel Requerido** | ... | ... | ${numVals}
-
-### 🎯 ANÁLISIS POR CATEGORÍAS
-
-#### Potencia y Velocidad
-[Comparación basada en rigidez y balance]
-
-#### Control y Precisión
-[Comparación basada en punto dulce y tacto]
-
-#### Manejabilidad y Defensa
-[Comparación basada en peso y balance]
-
-#### Confort
-[Comparación de absorción de vibraciones]
-
-### 👤 PERFILES RECOMENDADOS
-
-#### ${(rackets[0] as any)?.nombre || 'Pala 1'}
-**Nivel:** [Nivel]
-**Estilo:** [Estilo de juego]
-**Características:** [Físicas recomendadas]
-
-#### ${(rackets[1] as any)?.nombre || 'Pala 2'}
-**Nivel:** [Nivel]
-**Estilo:** [Estilo de juego]
-**Características:** [Físicas recomendadas]
-
-${rackets.length > 2 ? `#### ${(rackets[2] as any)?.nombre || 'Pala 3'}\n**Nivel:** [Nivel]\n**Estilo:** [Estilo]\n**Características:** [Físicas]\n` : ''}
-
-### 🏆 VEREDICTOS
-
-#### Jugador Defensivo
-**Ganadora:** [Pala]
-**Por qué:** [Justificación técnica]
-
-#### Jugador Ofensivo
-**Ganadora:** [Pala]
-**Por qué:** [Justificación técnica]
-
-#### Confort/Prevención Lesiones
-**Ganadora:** [Pala]
-**Por qué:** [Justificación técnica]
-
-${userContext ? `\n#### Tu Perfil Específico\n**Recomendación:** [Pala]\n**Por qué:** [Justificación personalizada]\n` : ''}
-
-### 🎓 CONCLUSIÓN
-[2-3 líneas: "La [Pala A] es ideal para [tipo jugador X], mientras que la [Pala B] es mejor para [tipo jugador Y]"]
+DATOS DE ENTRADA:
+${racketsInfo}
 
 ${userContext}
 
-DATOS TÉCNICOS:
-${racketsInfo}
+INSTRUCCIONES DE SALIDA (JSON ESTRICTO):
+Debes generar un único objeto JSON válido sin texto markdown adicional fuera de él. Su estructura DEBE ser EXACTAMENTE esta:
 
-===METRICS===
-Asigna valores 1-10 para:
-- Potencia: Velocidad de bola
-- Control: Precisión
-- Salida de Bola: Facilidad impulsión
-- Manejabilidad: Agilidad
-- Punto Dulce: Área efectiva
-
-JSON (sin markdown):
-[
-  {"racketName": "Nombre pala 1", "potencia": 8, "control": 7, "salidaDeBola": 6, "manejabilidad": 9, "puntoDulce": 7},
-  {"racketName": "Nombre pala 2", "potencia": 9, "control": 6, "salidaDeBola": 5, "manejabilidad": 7, "puntoDulce": 6}
-]`;
-  }
-
-  private parseResponse(
-    fullText: string,
-    rackets: Racket[]
-  ): { textComparison: string; metrics: RacketMetrics[] } {
-    // Intentar separar la comparación textual de las métricas JSON
-    const metricsMarkerIndex = fullText.lastIndexOf('===METRICS===');
-    let textComparison: string;
-    let metricsText: string;
-
-    if (metricsMarkerIndex !== -1) {
-      textComparison = fullText.substring(0, metricsMarkerIndex).trim();
-      metricsText = fullText.substring(metricsMarkerIndex + '===METRICS==='.length).trim();
-    } else {
-      // Si no encuentra el marcador, buscar el último bloque JSON
-      const jsonMatch = fullText.match(/\[[\s\S]*\{[\s\S]*"racketName"[\s\S]*\}[\s\S]*\]/);
-      if (jsonMatch) {
-        const jsonStartIndex = jsonMatch.index!;
-        textComparison = fullText.substring(0, jsonStartIndex).trim();
-        metricsText = jsonMatch[0];
-      } else {
-        textComparison = fullText;
-        metricsText = '';
+{
+  "_reasoning": "ESPACIO PARA CHAIN-OF-THOUGHT. Analiza paso a paso los materiales, forma y nivel de cada pala. Deduce características faltantes basadas en el nombre (ej. 18K = tacto duro). Piensa cómo se adaptan al usuario antes de rellenar el resto del JSON.",
+  "executiveSummary": "2-3 frases resumiendo contundentemente la comparativa.",
+  "technicalAnalysis": [
+    { "title": "Potencia", "content": "Análisis comparativo de potencia basado en los materiales y forma." },
+    { "title": "Control", "content": "..." },
+    { "title": "Manejabilidad", "content": "..." },
+    { "title": "Confort", "content": "..." }
+  ],
+  "comparisonTable": [
+    { "feature": "Forma", "${rackets[0]?.name || (rackets[0] as any)?.nombre || 'Pala 1'}": "...", "${rackets[1]?.name || (rackets[1] as any)?.nombre || 'Pala 2'}": "..." }
+  ],
+  "metrics": [
+    {
+      "racketId": 0,
+      "racketName": "${rackets[0]?.name || (rackets[0] as any)?.nombre || 'Pala 1'}",
+      "isCertified": true,
+      "radarData": {
+        "potencia": 8,
+        "control": 7,
+        "manejabilidad": 6,
+        "puntoDulce": 5,
+        "salidaDeBola": 6
       }
     }
+  ],
+  "recommendedProfiles": "Describe qué tipo de jugador (nivel, agresivo/defensivo) se beneficia de cada pala.",
+  "biomechanicalConsiderations": "Menciona riesgos de lesiones (ej: codo de tenista) considerando el balance y la dureza de las palas.",
+  "conclusion": "Un veredicto final directo recomendando la pala más adecuada según el contexto del usuario (si se proporcionó)."
+}
 
-    // Limpiar y parsear las métricas
-    metricsText = metricsText
-      .replace(/```json\n?/g, '')
-      .replace(/```\n?/g, '')
-      .trim();
+IMPORTANTE: 
+1. El output debe ser parseable por JSON.parse(). No uses \`\`\`json al principio ni al final.
+2. NUNCA cambies los nombres de las claves en 'radarData' (usa puntoDulce y salidaDeBola SIEMPRE).
+3. Incluye al menos 6 características clave en 'comparisonTable' (Peso, Balance, Forma, Tacto, Punto Dulce, Precio).`;
+  }
 
-    // Extraer solo la parte del array JSON si hay texto adicional
-    const jsonArrayMatch = metricsText.match(/\[[\s\S]*\]/);
-    if (jsonArrayMatch) {
-      metricsText = jsonArrayMatch[0];
+  private parseResponse(fullText: string, rackets: Racket[]): ComparisonResult {
+    let cleanText = fullText.trim();
+    cleanText = cleanText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+
+    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+
+    if (!jsonMatch) {
+      console.error('No JSON found in response');
+      throw new Error('Invalid response format: No JSON found');
     }
 
-    let metrics: RacketMetrics[];
     try {
-      metrics = JSON.parse(metricsText);
-    } catch (parseError) {
-      console.error('Error parsing metrics JSON:', parseError);
-      console.error('Raw metrics text:', metricsText);
-      // Valores por defecto si falla el parsing
-      metrics = rackets.map((r: any) => ({
-        racketName: r.nombre || r.name || 'Pala',
-        potencia: 5,
-        control: 5,
-        salidaDeBola: 5,
-        manejabilidad: 5,
-        puntoDulce: 5,
-      }));
-    }
+      const parsed = JSON.parse(jsonMatch[0]);
 
-    return { textComparison, metrics };
+      // Validar estructura básica
+      if (!parsed.metrics || !Array.isArray(parsed.metrics)) {
+        parsed.metrics = rackets.map((r: any) => ({
+          racketId: r.id,
+          racketName: (r as any).nombre || (r as any).name,
+          isCertified: !!r.testea_potencia,
+          radarData: {
+            potencia: r.testea_potencia || 5,
+            control: r.testea_control || 5,
+            manejabilidad: r.testea_manejabilidad || 5,
+            puntoDulce: 5,
+            salidaDeBola: 5,
+          },
+        }));
+      }
+
+      return {
+        executiveSummary: parsed.executiveSummary || '',
+        technicalAnalysis: parsed.technicalAnalysis || [],
+        comparisonTable: parsed.comparisonTable || [],
+        metrics: parsed.metrics,
+        recommendedProfiles: parsed.recommendedProfiles || '',
+        biomechanicalConsiderations: parsed.biomechanicalConsiderations || '',
+        conclusion: parsed.conclusion || '',
+        _reasoning: parsed._reasoning,
+      };
+    } catch (parseError) {
+      console.error('Error parsing structured JSON in Gemini:', parseError);
+      return {
+        executiveSummary: 'Error al procesar la comparación.',
+        technicalAnalysis: [],
+        comparisonTable: [],
+        metrics: rackets.map((r: any) => ({
+          racketId: r.id,
+          racketName: (r as any).nombre || (r as any).name,
+          isCertified: false,
+          radarData: { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
+        })),
+        recommendedProfiles: '',
+        biomechanicalConsiderations: '',
+        conclusion: '',
+      };
+    }
   }
   static async generateContent(prompt: string): Promise<string> {
     const service = new GeminiService();

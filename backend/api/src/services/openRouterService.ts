@@ -1,53 +1,16 @@
 import axios, { AxiosInstance } from 'axios';
-import { Racket, UserFormData } from '../types/racket';
+import {
+  Racket,
+  UserFormData,
+  ComparisonResult,
+  ComparisonSection,
+  ComparisonTableItem,
+  RacketComparisonData,
+  RadarMetrics,
+} from '../types/racket';
 import logger from '../config/logger';
 import { freeAiService } from './freeAiService';
 import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Interfaz para las métricas de radar (0-10)
-export interface RadarMetrics {
-  potencia: number;
-  control: number;
-  manejabilidad: number;
-  puntoDulce: number;
-  salidaDeBola: number;
-}
-
-// Interfaz para los datos de cada pala en la comparación
-export interface RacketComparisonData {
-  racketId: number; // Mapear al ID original
-  racketName: string;
-  radarData: RadarMetrics;
-  isCertified: boolean; // Si los datos vienen de Testea Pádel
-}
-
-// Elemento de la tabla comparativa
-export interface ComparisonTableItem {
-  feature: string; // "Peso", "Balance", "Precio", etc.
-  [key: string]: string; // "Pala 1": "365g", "Pala 2": "370g"
-}
-
-// Interfaz para subsecciones de la comparación
-export interface ComparisonSection {
-  title: string;
-  content: string;
-}
-
-// Interfaz para la respuesta de comparación completa (estructurada)
-export interface ComparisonResult {
-  executiveSummary: string;
-  technicalAnalysis: ComparisonSection[];
-
-  // Tabla dinámica para frontend
-  comparisonTable: ComparisonTableItem[];
-
-  // Datos para gráfico de radar
-  metrics: RacketComparisonData[];
-
-  recommendedProfiles: string;
-  biomechanicalConsiderations: string;
-  conclusion: string;
-}
 
 // Interfaz para la respuesta de OpenRouter
 interface OpenRouterResponse {
@@ -418,7 +381,7 @@ export class OpenRouterService {
     return rackets
       .map(
         (r: any, index) => `PALA ${index + 1}:
-Nombre: ${r.nombre}
+Nombre: ${r.nombre || r.name}
 Marca: ${r.marca || r.caracteristicas_marca || 'N/A'}
 Modelo: ${r.modelo || 'N/A'}
 Forma: ${r.caracteristicas_forma || r.caracteristicas_formato || 'N/A'}
@@ -428,7 +391,7 @@ Balance: ${r.caracteristicas_balance || 'N/A'}
 Dureza: ${r.caracteristicas_dureza || 'N/A'}
 Peso: ${r.peso ? `${r.peso}g` : 'N/A'}
 Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}
-Precio: ${r.precio_actual ? `€${r.precio_actual}` : 'N/A'}
+Métricas Reales (Radar): ${r.radar_potencia ? `Pot:${r.radar_potencia}, Con:${r.radar_control}, Man:${r.radar_manejabilidad}, PD:${r.radar_punto_dulce}, SB:${r.radar_salida_bola}` : 'No disponibles (usar estimación lógica)'}
 Testea Certificado: ${r.testea_potencia ? 'SÍ' : 'NO'}`
       )
       .join('\n\n');
@@ -448,43 +411,59 @@ Preferencias: ${userProfile.preferences || 'No especificadas'}
   }
 
   private buildCombinedPrompt(rackets: Racket[], racketsInfo: string, userContext: string): string {
-    const racketNames = rackets
-      .map((r: any, i) => `${i + 1}. ${r.nombre || `Pala ${i + 1}`}`)
-      .join('\n');
-
     return `CONTEXTO DEL SISTEMA:
-Eres el motor de comparación "Smashly". Tu objetivo es proporcionar un análisis técnico, biomecánico y comparativo de alto nivel.
+Eres "Smashly AI", un ex-jugador profesional de pádel, entrenador de élite y experto en biomecánica y materiales de palas (carbono 3K/12K/18K, fibra de vidrio, gomas EVA Soft/Hard).
+Tu objetivo es realizar un análisis técnico profundo y comparativo entre las palas solicitadas.
+
+REGLAS DE DOMINIO (PÁDEL):
+- Palas Diamante: Balance alto, máximo estrés en el brazo (riesgo de epicondilitis), potencia pura, punto dulce pequeño y superior. Para jugadores ofensivos.
+- Palas Redondas: Balance bajo, máxima manejabilidad y control, punto dulce amplio y centrado.
+- Palas Lágrima/Gota: Polivalentes, balance medio.
+- Materiales: Carbono 18K es más rígido (menos salida de bola a baja velocidad, más potencia en golpes fuertes) que el 3K o Fibra de Vidrio. Gomas Hard aportan control y potencia en bloqueos; Soft aportan salida de bola y confort.
 
 DATOS DE ENTRADA:
 ${racketsInfo}
 
 ${userContext}
 
-INSTRUCCIONES DE SALIDA:
-Genera un objeto JSON estricto con esta estructura:
+INSTRUCCIONES DE SALIDA (JSON ESTRICTO):
+Debes generar un único objeto JSON válido sin texto markdown adicional fuera de él. Su estructura DEBE ser EXACTAMENTE esta:
 
-1. **executiveSummary**: String. 2-3 frases resumiendo la comparación.
-2. **technicalAnalysis**: Array de objetos { title, content }. Categorías: "Potencia", "Control", "Manejabilidad", "Confort". Markdown permitido en content.
-3. **comparisonTable**: Array de objetos representando filas para una tabla dinámica. Cada objeto debe tener la propiedad "feature" (ej: "Peso", "Balance", "Punto Dulce") y luego una propiedad por cada pala con su nombre EXACTO como clave y el valor como string. Incluye al menos 6 características clave.
-4. **metrics**: Array de objetos para graficar un RADAR CHART PENTAGONAL.
-   - Para cada pala, un objeto con:
-     - "racketId": (number) ID de la pala si lo tienes, o índice.
-     - "racketName": (string) Nombre exacto.
-     - "isCertified": (boolean) true si tiene datos Testea, false si son estimados.
-     - "radarData": Objeto con 5 ejes numéricos (0-10): { potencia, control, manejabilidad, puntoDulce, salidaDeBola }.
-5. **recommendedProfiles**: String (Markdown).
-6. **biomechanicalConsiderations**: String (Markdown). Avisos de salud.
-7. **conclusion**: String (Markdown). Veredicto final.
+{
+  "_reasoning": "ESPACIO PARA CHAIN-OF-THOUGHT. Analiza paso a paso los materiales, forma y nivel de cada pala. Deduce características faltantes basadas en el nombre (ej. 18K = tacto duro). Piensa cómo se adaptan al usuario antes de rellenar el resto del JSON.",
+  "executiveSummary": "2-3 frases resumiendo contundentemente la comparativa.",
+  "technicalAnalysis": [
+    { "title": "Potencia", "content": "Análisis comparativo de potencia basado en los materiales y forma." },
+    { "title": "Control", "content": "..." },
+    { "title": "Manejabilidad", "content": "..." },
+    { "title": "Confort", "content": "..." }
+  ],
+  "comparisonTable": [
+    { "feature": "Forma", "${(rackets[0] as any)?.nombre || (rackets[0] as any)?.name || 'Pala 1'}": "...", "${(rackets[1] as any)?.nombre || (rackets[1] as any)?.name || 'Pala 2'}": "..." }
+  ],
+  "metrics": [
+    {
+      "racketId": 0,
+      "racketName": "${(rackets[0] as any)?.nombre || (rackets[0] as any)?.name || 'Pala 1'}",
+      "isCertified": true,
+      "radarData": {
+        "potencia": 8,
+        "control": 7,
+        "manejabilidad": 6,
+        "puntoDulce": 5,
+        "salidaDeBola": 6
+      }
+    }
+  ],
+  "recommendedProfiles": "Describe qué tipo de jugador (nivel, agresivo/defensivo) se beneficia de cada pala.",
+  "biomechanicalConsiderations": "Menciona riesgos de lesiones (ej: codo de tenista) considerando el balance y la dureza de las palas.",
+  "conclusion": "Un veredicto final directo recomendando la pala más adecuada según el contexto del usuario (si se proporcionó)."
+}
 
 IMPORTANTE: 
-- El campo "comparisonTable" debe ser un array de objetos, NO un string markdown. Ejemplo:
-  [
-    { "feature": "Forma", "Vertex 04": "Diamante", "Hack 03": "Híbrida" },
-    { "feature": "Tacto", "Vertex 04": "Duro", "Hack 03": "Medio" }
-  ]
-- El campo "metrics" alimenta un gráfico de radar. Sé preciso con los números 0-10.
-
-RESPONDE SOLO CON EL JSON.`;
+1. El output debe ser parseable por JSON.parse(). No uses \`\`\`json al principio ni al final.
+2. NUNCA cambies los nombres de las claves en 'radarData' (usa puntoDulce y salidaDeBola SIEMPRE).
+3. Incluye al menos 6 características clave en 'comparisonTable' (Peso, Balance, Forma, Tacto, Punto Dulce, Precio).`;
   }
 
   /**
@@ -527,7 +506,10 @@ RESPONDE SOLO CON EL JSON.`;
       }
 
       // Normalizar comparisonTable para que las keys coincidan con metrics.racketName
-      parsed.comparisonTable = this.normalizeComparisonTable(parsed.comparisonTable, parsed.metrics);
+      parsed.comparisonTable = this.normalizeComparisonTable(
+        parsed.comparisonTable,
+        parsed.metrics
+      );
 
       return {
         executiveSummary: parsed.executiveSummary || '',
