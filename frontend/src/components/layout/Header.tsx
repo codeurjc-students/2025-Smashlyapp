@@ -25,15 +25,15 @@ const HeaderContent = styled.div`
   justify-content: space-between;
   height: 70px;
   width: 100%;
-  
+
   @media (max-width: 1600px) {
     padding: 0 clamp(20px, 3vw, 60px);
   }
-  
+
   @media (max-width: 1200px) {
     padding: 0 clamp(20px, 2vw, 40px);
   }
-  
+
   @media (max-width: 768px) {
     padding: 0 20px;
   }
@@ -245,7 +245,6 @@ const AuthButton = styled.button<{
   border: 1px solid rgba(255, 255, 255, 0.3);
   font-size: 1rem; // Ensure font size consistency
   font-family: inherit; // Inherit font
-
 
   ${props => {
     if (props.isMobile) {
@@ -481,7 +480,7 @@ const Header: React.FC = () => {
     <HeaderContainer>
       <HeaderContent>
         <Logo to='/' onClick={closeAllMenus}>
-          <img src='https://lrdgyfmkkboyhoycrnov.supabase.co/storage/v1/object/sign/images/smashly-large-icon.ico?token=eyJraWQiOiJzdG9yYWdlLXVybC1zaWduaW5nLWtleV9jY2NkNjhmMi03NDg2LTQzNGUtYjE0ZC1mYmE0YzJkM2RiNzMiLCJhbGciOiJIUzI1NiJ9.eyJ1cmwiOiJpbWFnZXMvc21hc2hseS1sYXJnZS1pY29uLmljbyIsImlhdCI6MTc3MTU3OTQ4NCwiZXhwIjoxODAzMTE1NDg0fQ.gccmibb2sAt_EekW0HRgQEBFfsKKwc_3GoO75SVqbJc' alt='Smashly' />
+          <img src='/images/icons/smashly-large-icon.ico' alt='Smashly' />
         </Logo>
 
         {/* Central Search Bar (Desktop) */}
@@ -491,7 +490,10 @@ const Header: React.FC = () => {
 
         <AuthButtons>
           {userProfile ? (
-            <UserMenuContainer ref={userMenuRef} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <UserMenuContainer
+              ref={userMenuRef}
+              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+            >
               <NotificationBell />
               <AvatarButton onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}>
                 {userProfile.avatar_url ? (
@@ -524,16 +526,10 @@ const Header: React.FC = () => {
             </UserMenuContainer>
           ) : (
             <>
-              <AuthButton
-                onClick={openLogin}
-                variant='secondary'
-              >
+              <AuthButton onClick={openLogin} variant='secondary'>
                 Iniciar sesión
               </AuthButton>
-              <AuthButton
-                onClick={openRegister}
-                variant='primary'
-              >
+              <AuthButton onClick={openRegister} variant='primary'>
                 Registrarse
               </AuthButton>
             </>
@@ -554,7 +550,11 @@ const Header: React.FC = () => {
         <MobileMenuDropdown isOpen={isMenuOpen || isMobileSearchOpen}>
           {/* Mobile Search Section */}
           <MobileSearchContainer isOpen={isMobileSearchOpen}>
-            <GlobalSearch onSearchToggle={setIsMobileSearchOpen} isInHeader={true} isMobileContext={true} />
+            <GlobalSearch
+              onSearchToggle={setIsMobileSearchOpen}
+              isInHeader={true}
+              isMobileContext={true}
+            />
           </MobileSearchContainer>
 
           {/* Navigation Section */}

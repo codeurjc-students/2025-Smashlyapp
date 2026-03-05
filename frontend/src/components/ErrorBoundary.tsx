@@ -25,7 +25,10 @@ class ErrorBoundaryClass extends Component<Props & { navigate: (to: string) => v
   }
 
   private handleGoToError = () => {
-    this.props.navigate('/error?type=500&message=' + encodeURIComponent(this.state.error?.message || 'Error desconocido'));
+    this.props.navigate(
+      '/error?type=500&message=' +
+        encodeURIComponent(this.state.error?.message || 'Error desconocido')
+    );
   };
 
   private handleRetry = () => {
@@ -39,53 +42,66 @@ class ErrorBoundaryClass extends Component<Props & { navigate: (to: string) => v
       }
 
       return (
-        <div style={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          minHeight: '100vh',
-          padding: '2rem',
-          textAlign: 'center',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '12px',
-            padding: '3rem 2rem',
-            maxWidth: '500px',
-            width: '100%',
-            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)',
-          }}>
-            <h1 style={{
-              fontSize: '3rem',
-              margin: '0',
-              color: '#dc2626',
-              fontWeight: '700',
-            }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: '100vh',
+            padding: '2rem',
+            textAlign: 'center',
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+          }}
+        >
+          <div
+            style={{
+              background: 'white',
+              borderRadius: '16px',
+              padding: '3rem 2rem',
+              maxWidth: '500px',
+              width: '100%',
+              boxShadow: '0 10px 40px rgba(22, 163, 74, 0.12)',
+            }}
+          >
+            <h1
+              style={{
+                fontSize: '3rem',
+                margin: '0',
+                color: '#dc2626',
+                fontWeight: '700',
+              }}
+            >
               ¡Ups!
             </h1>
-            <h2 style={{
-              fontSize: '1.5rem',
-              margin: '1rem 0',
-              color: '#2d3748',
-            }}>
+            <h2
+              style={{
+                fontSize: '1.5rem',
+                margin: '1rem 0',
+                color: '#1f2937',
+              }}
+            >
               Algo salió mal
             </h2>
-            <p style={{
-              fontSize: '1rem',
-              color: '#4a5568',
-              margin: '1.5rem 0',
-              lineHeight: '1.6',
-            }}>
-              Ha ocurrido un error inesperado. Puedes intentar recargar la página o volver al inicio.
+            <p
+              style={{
+                fontSize: '1rem',
+                color: '#6b7280',
+                margin: '1.5rem 0',
+                lineHeight: '1.6',
+              }}
+            >
+              Ha ocurrido un error inesperado. Puedes intentar recargar la página o volver al
+              inicio.
             </p>
-            <div style={{
-              display: 'flex',
-              gap: '1rem',
-              justifyContent: 'center',
-              marginTop: '2rem',
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                gap: '1rem',
+                justifyContent: 'center',
+                marginTop: '2rem',
+              }}
+            >
               <button
                 onClick={this.handleRetry}
                 style={{
@@ -94,9 +110,9 @@ class ErrorBoundaryClass extends Component<Props & { navigate: (to: string) => v
                   fontSize: '1rem',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
+                  transition: 'all 0.2s ease',
                   border: 'none',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  background: '#16a34a',
                   color: 'white',
                 }}
               >
@@ -110,10 +126,10 @@ class ErrorBoundaryClass extends Component<Props & { navigate: (to: string) => v
                   fontSize: '1rem',
                   fontWeight: '600',
                   cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  border: 'none',
-                  background: '#e2e8f0',
-                  color: '#2d3748',
+                  transition: 'all 0.2s ease',
+                  border: '1px solid #d1d5db',
+                  background: 'white',
+                  color: '#374151',
                 }}
               >
                 Ver Detalles

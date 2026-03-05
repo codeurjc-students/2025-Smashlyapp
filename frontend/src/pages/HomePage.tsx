@@ -26,8 +26,9 @@ const HeroSection = styled.section`
     left: 0;
     right: 0;
     bottom: 0;
-    background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
-                radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+    background:
+      radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
     pointer-events: none;
   }
 `;
@@ -349,7 +350,7 @@ const HomePage: React.FC = () => {
               <FiSearch size={20} />
               Explorar catálogo
             </PrimaryButton>
-            <SecondaryButton to='/rackets'>
+            <SecondaryButton to='/compare'>
               <FiTarget size={20} />
               Encontrar mi pala ideal
             </SecondaryButton>

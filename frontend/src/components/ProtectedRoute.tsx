@@ -1,6 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import LoadingSpinner from './common/LoadingSpinner';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,22 +12,12 @@ interface ProtectedRouteProps {
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children,
   requireAdmin = false,
-  redirectTo
+  redirectTo,
 }) => {
   const { user, loading } = useAuth();
 
-  // Mostrar un loader mientras se verifica la autenticación
   if (loading) {
-    return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh'
-      }}>
-        Cargando...
-      </div>
-    );
+    return <LoadingSpinner fullScreen text='Verificando sesión...' />;
   }
 
   // Si no hay usuario, redirigir a página de error de no autorizado

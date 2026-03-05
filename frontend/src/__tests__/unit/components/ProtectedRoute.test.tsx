@@ -17,10 +17,7 @@ vi.mock('react-router-dom', async () => {
 });
 
 describe('ProtectedRoute', () => {
-  const renderWithAuth = (
-    children: React.ReactNode,
-    authValue: any
-  ) => {
+  const renderWithAuth = (children: React.ReactNode, authValue: any) => {
     return render(
       <BrowserRouter>
         <AuthContext.Provider value={authValue}>
@@ -31,28 +28,22 @@ describe('ProtectedRoute', () => {
   };
 
   it('should show loading state', () => {
-    renderWithAuth(
-      <div>Protected Content</div>,
-      { user: null, loading: true }
-    );
+    renderWithAuth(<div>Protected Content</div>, { user: null, loading: true });
 
-    expect(screen.getByText('Cargando...')).toBeInTheDocument();
+    expect(screen.getByText('Verificando sesión...')).toBeInTheDocument();
   });
 
   it('should redirect when not authenticated', () => {
-    renderWithAuth(
-      <div>Protected Content</div>,
-      { user: null, loading: false }
-    );
+    renderWithAuth(<div>Protected Content</div>, { user: null, loading: false });
 
     expect(mockNavigate).toHaveBeenCalledWith('/error?type=unauthorized');
   });
 
   it('should render children when authenticated', () => {
-    renderWithAuth(
-      <div>Protected Content</div>,
-      { user: { id: '1', email: 'test@test.com', role: 'player' }, loading: false }
-    );
+    renderWithAuth(<div>Protected Content</div>, {
+      user: { id: '1', email: 'test@test.com', role: 'player' },
+      loading: false,
+    });
 
     expect(screen.getByText('Protected Content')).toBeInTheDocument();
   });
@@ -60,10 +51,12 @@ describe('ProtectedRoute', () => {
   it('should redirect non-admin from admin route', () => {
     render(
       <BrowserRouter>
-        <AuthContext.Provider value={{
-          user: { id: '1', email: 'test@test.com', role: 'player' },
-          loading: false
-        }}>
+        <AuthContext.Provider
+          value={{
+            user: { id: '1', email: 'test@test.com', role: 'player' },
+            loading: false,
+          }}
+        >
           <ProtectedRoute requireAdmin={true}>
             <div>Admin Content</div>
           </ProtectedRoute>
@@ -77,10 +70,12 @@ describe('ProtectedRoute', () => {
   it('should allow admin to access admin route', () => {
     render(
       <BrowserRouter>
-        <AuthContext.Provider value={{
-          user: { id: '1', email: 'admin@test.com', role: 'admin' },
-          loading: false
-        }}>
+        <AuthContext.Provider
+          value={{
+            user: { id: '1', email: 'admin@test.com', role: 'admin' },
+            loading: false,
+          }}
+        >
           <ProtectedRoute requireAdmin={true}>
             <div>Admin Content</div>
           </ProtectedRoute>

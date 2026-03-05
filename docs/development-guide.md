@@ -108,6 +108,18 @@ Smashly es una **aplicación web SPA (Single Page Application)** que separa la p
 | Frontend | Backend  | HTTP/HTTPS (API REST)     |
 | Backend  | Supabase | PostgreSQL (SDK Supabase) |
 
+Smashly utiliza **Docker** y **Docker Compose** para orquestar los servicios tanto en desarrollo como en producción.
+
+#### 🏗️ Orquestación con Docker Compose
+
+Existen dos configuraciones principales según el entorno:
+
+- **Producción (`docker/docker-compose.yml`)**: Configuración optimizada para el despliegue final.
+- **Local (`docker/docker-compose-local.yml`)**: Incluye una base de datos **MySQL 8.0** local para pruebas y desarrollo sin dependencia directa de la nube.
+
+> [!IMPORTANT]
+> En el entorno local, se utilizan **volúmenes de persistencia** (`mysql_data_local:/var/lib/mysql`) para asegurar que los datos de la base de datos MySQL no se pierdan al reiniciar los contenedores.
+
 #### 🗺️ Diagrama (alto nivel)
 
 ```mermaid
@@ -122,6 +134,17 @@ flowchart LR
 #### 🗺️ Diagrama De Arquitectura del Servidor
 
 ## ![Arquitectura Servidor](../public/images/readme-images/arquitecturaServidor.svg)
+
+#### 🔑 Conexión Remota y SSH
+
+Para el mantenimiento del servidor remoto y el despliegue en el entorno externo:
+
+1. **Acceso:** Se realiza mediante SSH utilizando claves públicas/privadas.
+2. **Configuración:** Asegúrate de tener tu clave SSH agregada al `authorized_keys` del servidor.
+3. **Comando base:** `ssh usuario@ip-del-servidor`
+
+> [!TIP]
+> Consulta con el administrador del sistema para obtener las credenciales y la IP específica del entorno de pruebas externo.
 
 ---
 
@@ -179,10 +202,11 @@ flowchart LR
 - 📋 Gestión de tareas: _GitHub Issues + Projects (Kanban)._
 - 🌿 Ramas: `feature/...`, `fix/...`, PRs hacia `main`.
 - 🤖 **CI/CD (GitHub Actions):**
-
-  - `basic-quality-check.yml` → compilación, tests, cobertura, Sonar.
-  - `complete-quality-check.yml` → E2E (Chrome/Firefox), seguridad, CodeQL.
-  - `deploy-production.yml` → despliegue con contenedores.
+  - `basic-quality-check.yml`: Compilación, tests unitarios e integración, cobertura y análisis con SonarCloud.
+  - `complete-quality-check.yml`: Tests E2E (Chrome/Firefox) y análisis de seguridad con CodeQL.
+  - `cd-dev.yml`: Continuous Delivery al entorno de desarrollo. Construye y publica la imagen en DockerHub con el tag `dev`.
+  - `cd-release.yml`: Se dispara al publicar una release en GitHub. Valida versiones y publica la imagen con tags de versión y `latest`.
+  - `cd-dispatch.yml`: Permite el despliegue manual desde cualquier rama a través de `workflow_dispatch`.
 
 > 🎯 Cobertura mínima exigida: **70%**
 

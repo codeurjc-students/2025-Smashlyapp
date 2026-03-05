@@ -2,7 +2,11 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
+  // Strip console.* in production builds
+  esbuild: {
+    drop: mode === 'production' ? ['console', 'debugger'] : [],
+  },
   plugins: [react()],
   publicDir: path.resolve(__dirname, '../public'),
   resolve: {
@@ -29,13 +33,24 @@ export default defineConfig({
     },
   },
   build: {
-    // Optimize chunk size warning limit
-    chunkSizeWarningLimit: 1000,
-    // Enable source maps for production debugging
-    sourcemap: true,
+    // No sourcemaps in production (avoids leaking source code)
+    sourcemap: false,
     // Minify output with esbuild (faster than terser)
     minify: 'esbuild',
     target: 'es2015',
+    rollupOptions: {
+      output: {
+        // Split heavy vendor libs into separate cacheable chunks
+        manualChunks: {
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          'vendor-ui': ['styled-components', 'framer-motion'],
+          'vendor-charts': ['recharts'],
+          'vendor-pdf': ['jspdf', 'jspdf-autotable', 'html2canvas'],
+          'vendor-supabase': ['@supabase/supabase-js'],
+          'vendor-dnd': ['@dnd-kit/core', '@dnd-kit/sortable', '@dnd-kit/utilities'],
+        },
+      },
+    },
   },
   // Optimize dependencies
   optimizeDeps: {
@@ -51,4 +66,4 @@ export default defineConfig({
       reportsDirectory: './coverage',
     },
   },
-});
+}));
