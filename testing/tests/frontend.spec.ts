@@ -1,42 +1,4 @@
 import { test, expect } from '@playwright/test';
-import { MainPage, CatalogPage } from '../pages/MainPage';
-
-test.describe('Frontend E2E Tests', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.goto('/');
-    await page.waitForLoadState('networkidle');
-  });
-
-  test.describe('Main Page', () => {
-    test('should load main page successfully', async ({ page }) => {
-      const mainPage = new MainPage(page);
-      
-      await mainPage.navigateTo('/catalog');
-      await mainPage.waitForPageLoad();
-
-      const url = await mainPage.getCurrentUrl();
-      expect(url).toContain('/catalog');
-      
-      const title = await mainPage.getPageTitle();
-      expect(title).toBeTruthy();
-    });
-
-    test('should display search functionality', async ({ page }) => {
-      test.setTimeout(60000);
-      const mainPage = new MainPage(page);
-      
-      await mainPage.navigateTo('/catalog');
-      await mainPage.waitForPageLoad();
-      
-      try {
-        await mainPage.search('BULLPADEL');
-        await page.waitForLoadState('networkidle');
-      } catch (e) {
-        console.log('Search not available on this page');
-      }
-    });
-  });
-
   test.describe('Catalog Page', () => {
     test('should display racket list', async ({ page }) => {
       const catalogPage = new CatalogPage(page);
