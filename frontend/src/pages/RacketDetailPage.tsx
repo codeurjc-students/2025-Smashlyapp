@@ -314,13 +314,13 @@ const ScrollButton = styled.button`
   }
 `;
 
-const Thumbnail = styled.img<{ isActive: boolean }>`
+const Thumbnail = styled.img<{ $isActive: boolean }>`
   width: 70px;
   height: 70px;
   object-fit: contain;
   border-radius: 12px;
-  border: 2px solid ${props => (props.isActive ? 'var(--color-primary)' : 'var(--color-gray-200)')};
-  background: ${props => (props.isActive ? '#f0fdf4' : 'white')};
+  border: 2px solid ${props => (props.$isActive ? 'var(--color-primary)' : 'var(--color-gray-200)')};
+  background: ${props => (props.$isActive ? '#f0fdf4' : 'white')};
   cursor: pointer;
   transition: all 0.2s;
   padding: 0.25rem;
@@ -1062,8 +1062,9 @@ const RacketDetailPage: React.FC = () => {
           </WishlistButton>
           <MainImage
             src={
-              racket.imagenes?.[selectedImageIndex] ||
-              racket.imagenes?.[0] ||
+              ((racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0])?.startsWith('http')
+                ? `${import.meta.env.VITE_API_URL}/api/v1/proxy/image?url=${encodeURIComponent(racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0])}`
+                : racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0]) ||
               '/placeholder-racket.svg'
             }
             alt={racket.modelo}
@@ -1092,9 +1093,13 @@ const RacketDetailPage: React.FC = () => {
                     {racket.imagenes.map((img, index) => (
                       <Thumbnail
                         key={index}
-                        src={img}
+                        src={
+                          img.startsWith('http')
+                            ? `${import.meta.env.VITE_API_URL}/api/v1/proxy/image?url=${encodeURIComponent(img)}`
+                            : img
+                        }
                         alt={`${racket.modelo} - imagen ${index + 1}`}
-                        isActive={index === selectedImageIndex}
+                        $isActive={index === selectedImageIndex}
                         onClick={() => setSelectedImageIndex(index)}
                         loading='lazy'
                       />

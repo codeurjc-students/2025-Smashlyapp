@@ -7,13 +7,12 @@ import { RacketsProvider } from './contexts/RacketsContext';
 import { ListsProvider } from './contexts/ListsContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import ProtectedRoute from './components/ProtectedRoute';
-import LoadingSpinner from './components/common/LoadingSpinner';
-import PageSkeleton from './components/common/PageSkeleton';
 import { FloatingCompareButton } from './components/common/FloatingCompareButton';
 import { AuthProvider } from './contexts/AuthContext';
 import { AuthModalProvider } from './contexts/AuthModalContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import AuthModal from './components/auth/AuthModal';
+import { RouteLoadingFallback, CatalogSkeleton } from './components/common/LoadingFallbacks';
 
 // Code split routes - load on demand
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -39,24 +38,6 @@ const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
 const AdminStoresPage = lazy(() => import('./pages/AdminStoresPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
-
-// Loading fallback component
-const RouteLoadingFallback = () => (
-  <div
-    style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%)' }}
-  >
-    <LoadingSpinner fullScreen text='Cargando página...' />
-  </div>
-);
-
-// Catalog skeleton for better UX
-const CatalogSkeleton = () => (
-  <div
-    style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%)' }}
-  >
-    <PageSkeleton count={9} showHeader />
-  </div>
-);
 
 export default function App() {
   return (

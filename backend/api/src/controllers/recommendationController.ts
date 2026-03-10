@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { RecommendationService } from '../services/recommendationService';
+import { RagService } from '../services/ragService';
 import logger from '../config/logger';
 import { AuthRequest } from '../types';
 
@@ -19,6 +20,28 @@ export class RecommendationController {
 
       const message = error instanceof Error ? error.message : 'Unknown error';
       if (message.includes('No rackets match') || message.includes('adjust your filters')) {
+        return res.status(404).json({ error: message });
+      }
+
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+  }
+
+  static async generateWithRAG(req: Request, res: Response) {
+    try {
+      const { type, data } = req.body;
+
+      if (!type || !data) {
+        return res.status(400).json({ error: 'Missing type or data' });
+      }
+
+      const result = await RagService.generateRecommendation(type, data);
+      return res.json(result);
+    } catch (error: unknown) {
+      logger.error('Error in generate RAG recommendation controller:', error);
+
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      if (message.includes('No safe rackets')) {
         return res.status(404).json({ error: message });
       }
 

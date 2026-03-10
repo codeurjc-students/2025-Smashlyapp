@@ -84,6 +84,7 @@ export interface RecommendationResult {
     discarded_biomechanical: number;
     safe_evaluated: number;
     main_criterion: string;
+    rag_retrieved_count?: number;
   };
   transparency_note?: string;
 }

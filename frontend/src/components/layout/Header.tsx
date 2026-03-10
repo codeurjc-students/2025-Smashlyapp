@@ -118,7 +118,7 @@ const MobileSearchButton = styled.button`
 `;
 
 // Mobile Menu Dropdown
-const MobileMenuDropdown = styled.div<{ isOpen: boolean }>`
+const MobileMenuDropdown = styled.div<{ $isOpen: boolean }>`
   position: absolute;
   top: 100%;
   left: 0;
@@ -126,20 +126,20 @@ const MobileMenuDropdown = styled.div<{ isOpen: boolean }>`
   background: white;
   border-radius: 0 0 16px 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  transform: translateY(${props => (props.isOpen ? '0' : '-10px')});
-  opacity: ${props => (props.isOpen ? '1' : '0')};
-  visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
+  transform: translateY(${props => (props.$isOpen ? '0' : '-10px')});
+  opacity: ${props => (props.$isOpen ? '1' : '0')};
+  visibility: ${props => (props.$isOpen ? 'visible' : 'hidden')};
   transition: all 0.3s ease;
   z-index: 100;
   overflow: visible;
 `;
 
 // Mobile Search Container
-const MobileSearchContainer = styled.div<{ isOpen: boolean }>`
+const MobileSearchContainer = styled.div<{ $isOpen: boolean }>`
   padding: 1rem;
   border-bottom: 1px solid #e5e7eb;
-  transform: translateY(${props => (props.isOpen ? '0' : '-10px')});
-  opacity: ${props => (props.isOpen ? '1' : '0')};
+  transform: translateY(${props => (props.$isOpen ? '0' : '-10px')});
+  opacity: ${props => (props.$isOpen ? '1' : '0')};
   transition: all 0.3s ease 0.1s;
   overflow: visible;
   position: relative;
@@ -165,30 +165,30 @@ const MobileNavTitle = styled.h4`
   letter-spacing: 0.5px;
 `;
 
-const NavLink = styled(Link)<{ isActive: boolean; isMobile?: boolean }>`
-  color: ${props => (props.isMobile ? '#374151' : 'white')};
+const NavLink = styled(Link)<{ $isActive: boolean; $isMobile?: boolean }>`
+  color: ${props => (props.$isMobile ? '#374151' : 'white')};
   text-decoration: none;
   font-weight: 500;
-  padding: ${props => (props.isMobile ? '12px 0' : '8px 16px')};
-  border-radius: ${props => (props.isMobile ? '0' : '8px')};
+  padding: ${props => (props.$isMobile ? '12px 0' : '8px 16px')};
+  border-radius: ${props => (props.$isMobile ? '0' : '8px')};
   transition: all 0.2s ease;
   background: ${props =>
-    props.isActive && !props.isMobile ? 'rgba(255, 255, 255, 0.15)' : 'transparent'};
+    props.$isActive && !props.$isMobile ? 'rgba(255, 255, 255, 0.15)' : 'transparent'};
   display: block;
   position: relative;
-  border: ${props => (props.isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.3)')};
+  border: ${props => (props.$isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.3)')};
 
   ${props =>
-    props.isMobile &&
+    props.$isMobile &&
     `
-    border-left: 3px solid ${props.isActive ? '#16a34a' : 'transparent'};
+    border-left: 3px solid ${props.$isActive ? '#16a34a' : 'transparent'};
     padding-left: 16px;
     margin-left: -1rem;
   `}
 
   &:hover {
-    background: ${props => (props.isMobile ? '#f9fafb' : 'rgba(255, 255, 255, 0.1)')};
-    color: ${props => (props.isMobile ? '#16a34a' : 'white')};
+    background: ${props => (props.$isMobile ? '#f9fafb' : 'rgba(255, 255, 255, 0.1)')};
+    color: ${props => (props.$isMobile ? '#16a34a' : 'white')};
     text-decoration: none;
   }
 `;
@@ -231,11 +231,11 @@ const AuthButtons = styled.div`
 `;
 
 const AuthButton = styled.button<{
-  variant?: 'primary' | 'secondary';
-  isMobile?: boolean;
+  $variant?: 'primary' | 'secondary';
+  $isMobile?: boolean;
 }>`
-  padding: ${props => (props.isMobile ? '12px 16px' : '8px 20px')};
-  border-radius: ${props => (props.isMobile ? '12px' : '8px')};
+  padding: ${props => (props.$isMobile ? '12px 16px' : '8px 20px')};
+  border-radius: ${props => (props.$isMobile ? '12px' : '8px')};
   font-weight: 500;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -247,8 +247,8 @@ const AuthButton = styled.button<{
   font-family: inherit; // Inherit font
 
   ${props => {
-    if (props.isMobile) {
-      return props.variant === 'primary'
+    if (props.$isMobile) {
+      return props.$variant === 'primary'
         ? `
         background: #16a34a;
         color: white;
@@ -272,7 +272,7 @@ const AuthButton = styled.button<{
         }
       `;
     } else {
-      return props.variant === 'primary'
+      return props.$variant === 'primary'
         ? `
         background: white;
         color: #16a34a;
@@ -299,11 +299,11 @@ const AuthButton = styled.button<{
 `;
 
 const LogoutButton = styled.button<{
-  variant?: 'primary' | 'secondary';
-  isMobile?: boolean;
+  $variant?: 'primary' | 'secondary';
+  $isMobile?: boolean;
 }>`
-  padding: ${props => (props.isMobile ? '12px 16px' : '8px 20px')};
-  border-radius: ${props => (props.isMobile ? '12px' : '8px')};
+  padding: ${props => (props.$isMobile ? '12px 16px' : '8px 20px')};
+  border-radius: ${props => (props.$isMobile ? '12px' : '8px')};
   font-weight: 500;
   text-decoration: none;
   transition: all 0.2s ease;
@@ -321,7 +321,7 @@ const LogoutButton = styled.button<{
   }
 
   ${props =>
-    props.isMobile &&
+    props.$isMobile &&
     `
     background: transparent;
     color: #374151;
@@ -372,7 +372,7 @@ const AvatarButton = styled.button`
   }
 `;
 
-const UserDropdown = styled.div<{ isOpen: boolean }>`
+const UserDropdown = styled.div<{ $isOpen: boolean }>`
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
@@ -380,9 +380,9 @@ const UserDropdown = styled.div<{ isOpen: boolean }>`
   border-radius: 12px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
   min-width: 200px;
-  opacity: ${props => (props.isOpen ? '1' : '0')};
-  visibility: ${props => (props.isOpen ? 'visible' : 'hidden')};
-  transform: translateY(${props => (props.isOpen ? '0' : '-10px')});
+  opacity: ${props => (props.$isOpen ? '1' : '0')};
+  visibility: ${props => (props.$isOpen ? 'visible' : 'hidden')};
+  transform: translateY(${props => (props.$isOpen ? '0' : '-10px')});
   transition: all 0.2s ease;
   z-index: 1000;
   overflow: hidden;
@@ -502,7 +502,7 @@ const Header: React.FC = () => {
                   <FiUser />
                 )}
               </AvatarButton>
-              <UserDropdown isOpen={isUserMenuOpen}>
+              <UserDropdown $isOpen={isUserMenuOpen}>
                 <DropdownItem
                   onClick={() => {
                     navigate('/profile');
@@ -526,10 +526,10 @@ const Header: React.FC = () => {
             </UserMenuContainer>
           ) : (
             <>
-              <AuthButton onClick={openLogin} variant='secondary'>
+              <AuthButton onClick={openLogin} $variant='secondary'>
                 Iniciar sesión
               </AuthButton>
-              <AuthButton onClick={openRegister} variant='primary'>
+              <AuthButton onClick={openRegister} $variant='primary'>
                 Registrarse
               </AuthButton>
             </>
@@ -547,9 +547,9 @@ const Header: React.FC = () => {
         </MobileElements>
 
         {/* Mobile Menu Dropdown */}
-        <MobileMenuDropdown isOpen={isMenuOpen || isMobileSearchOpen}>
+        <MobileMenuDropdown $isOpen={isMenuOpen || isMobileSearchOpen}>
           {/* Mobile Search Section */}
-          <MobileSearchContainer isOpen={isMobileSearchOpen}>
+          <MobileSearchContainer $isOpen={isMobileSearchOpen}>
             <GlobalSearch
               onSearchToggle={setIsMobileSearchOpen}
               isInHeader={true}
@@ -562,26 +562,26 @@ const Header: React.FC = () => {
             <>
               <MobileNavSection>
                 <MobileNavTitle>Navegación</MobileNavTitle>
-                <NavLink to='/' isActive={isActive('/')} isMobile onClick={closeAllMenus}>
+                <NavLink to='/' $isActive={isActive('/')} $isMobile onClick={closeAllMenus}>
                   Inicio
                 </NavLink>
                 <NavLink
                   to='/catalog'
-                  isActive={isActive('/catalog')}
-                  isMobile
+                  $isActive={isActive('/catalog')}
+                  $isMobile
                   onClick={closeAllMenus}
                 >
                   Catálogo de Palas
                 </NavLink>
                 <NavLink
                   to='/compare'
-                  isActive={isActive('/compare')}
-                  isMobile
+                  $isActive={isActive('/compare')}
+                  $isMobile
                   onClick={closeAllMenus}
                 >
                   Comparar palas
                 </NavLink>
-                <NavLink to='/faq' isActive={isActive('/faq')} isMobile onClick={closeAllMenus}>
+                <NavLink to='/faq' $isActive={isActive('/faq')} $isMobile onClick={closeAllMenus}>
                   FAQ
                 </NavLink>
               </MobileNavSection>
@@ -593,16 +593,16 @@ const Header: React.FC = () => {
                   <>
                     <NavLink
                       to='/profile'
-                      isActive={isActive('/profile')}
-                      isMobile
+                      $isActive={isActive('/profile')}
+                      $isMobile
                       onClick={closeAllMenus}
                     >
                       <FiUser style={{ marginRight: '8px' }} />
                       Mi cuenta
                     </NavLink>
                     <LogoutButton
-                      variant='secondary'
-                      isMobile
+                      $variant='secondary'
+                      $isMobile
                       onClick={async () => {
                         await signOut();
                         closeAllMenus();
@@ -617,8 +617,8 @@ const Header: React.FC = () => {
                 ) : (
                   <>
                     <AuthButton
-                      variant='secondary'
-                      isMobile
+                      $variant='secondary'
+                      $isMobile
                       onClick={() => {
                         closeAllMenus();
                         openLogin();
@@ -627,8 +627,8 @@ const Header: React.FC = () => {
                       Iniciar sesión
                     </AuthButton>
                     <AuthButton
-                      variant='primary'
-                      isMobile
+                      $variant='primary'
+                      $isMobile
                       onClick={() => {
                         closeAllMenus();
                         openRegister();

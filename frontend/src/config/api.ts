@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   RACKETS_STATS: '/api/v1/rackets/stats',
   RACKETS_BULK_UPDATE: '/api/v1/rackets/bulk-update',
   RACKETS_BY_BRAND: (brand: string) => `/api/v1/rackets/brands/${brand}`,
+  RECOMMENDATION_RAG: '/api/v1/recommendations/generate-rag',
 
   // Users
   USERS_PROFILE: '/api/v1/users/profile',
@@ -56,6 +57,8 @@ export const API_ENDPOINTS = {
     REJECT_STORE: (id: string) => `/api/v1/admin/stores/${id}/reject`,
     CONFLICTS: '/api/v1/admin/rackets/conflicts',
     RESOLVE_CONFLICT: (id: number) => `/api/v1/admin/rackets/${id}/resolve`,
+    EMBEDDING_STATS: '/api/v1/admin/embeddings/stats',
+    REINDEX_KNOWLEDGE: '/api/v1/admin/embeddings/reindex-knowledge',
   },
 
   // Racket Views
@@ -76,6 +79,11 @@ export const API_ENDPOINTS = {
   NOTIFICATIONS_MARK_ALL_READ: '/api/v1/notifications/read-all',
   NOTIFICATIONS_DELETE: (id: string) => `/api/v1/notifications/${id}`,
 } as const;
+
+// Feature Flags
+export const FEATURE_FLAGS = {
+  USE_RAG_RECOMMENDATIONS: (import.meta as any).env?.VITE_USE_RAG === 'true' || true, // Enabling by default for testing
+};
 
 /**
  * Helper para construir URLs completas de la API

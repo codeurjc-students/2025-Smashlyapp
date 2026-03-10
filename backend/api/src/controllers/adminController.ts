@@ -1,8 +1,12 @@
-import { Response } from "express";
-import { RequestWithUser, ApiResponse } from "../types";
-import logger from "../config/logger";
-import { supabase } from "../config/supabase";
-import { storeService } from "../services/storeService";
+import { Response } from 'express';
+import { RequestWithUser, ApiResponse } from '../types';
+import logger from '../config/logger';
+import { supabase } from '../config/supabase';
+import { storeService } from '../services/storeService';
+import { VectorStoreService } from '../services/vectorStoreService';
+import { KnowledgeBaseService } from '../services/knowledgeBaseService';
+import { EmbeddingService } from '../services/embeddingService';
+import { RacketService } from '../services/racketService';
 
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
@@ -12,9 +16,7 @@ function getErrorMessage(error: unknown): string {
 }
 
 async function getTableCount(tableName: string): Promise<number> {
-  const { count } = await supabase
-    .from(tableName)
-    .select("*", { count: "exact", head: true });
+  const { count } = await supabase.from(tableName).select('*', { count: 'exact', head: true });
   return count || 0;
 }
 
@@ -23,47 +25,47 @@ async function getActiveUsersCount(): Promise<number> {
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
   const { count } = await supabase
-    .from("user_profiles")
-    .select("*", { count: "exact", head: true })
-    .gte("updated_at", thirtyDaysAgo.toISOString());
+    .from('user_profiles')
+    .select('*', { count: 'exact', head: true })
+    .gte('updated_at', thirtyDaysAgo.toISOString());
 
   return count || 0;
 }
 
 async function getVerifiedStoresCount(): Promise<number> {
   const { count } = await supabase
-    .from("stores")
-    .select("*", { count: "exact", head: true })
-    .eq("verified", true);
+    .from('stores')
+    .select('*', { count: 'exact', head: true })
+    .eq('verified', true);
 
   return count || 0;
 }
 
 async function getPendingStoresCount(): Promise<number> {
   const { count } = await supabase
-    .from("stores")
-    .select("*", { count: "exact", head: true })
-    .eq("verified", false);
+    .from('stores')
+    .select('*', { count: 'exact', head: true })
+    .eq('verified', false);
 
   return count || 0;
 }
 
 async function getFavoritesCount(): Promise<number> {
   const { data: favoritesLists } = await supabase
-    .from("lists")
-    .select("id")
-    .eq("name", "Favoritas");
+    .from('lists')
+    .select('id')
+    .eq('name', 'Favoritas');
 
   if (!favoritesLists || favoritesLists.length === 0) {
     return 0;
   }
 
   const listIds = favoritesLists.map(list => list.id);
-  
+
   const { count } = await supabase
-    .from("list_rackets")
-    .select("*", { count: "exact", head: true })
-    .in("list_id", listIds);
+    .from('list_rackets')
+    .select('*', { count: 'exact', head: true })
+    .in('list_id', listIds);
 
   return count || 0;
 }
@@ -76,15 +78,15 @@ async function collectMetricsData() {
     activeUsers,
     totalStores,
     pendingRequests,
-    totalFavorites
+    totalFavorites,
   ] = await Promise.all([
-    getTableCount("user_profiles"),
-    getTableCount("rackets"),
-    getTableCount("reviews"),
+    getTableCount('user_profiles'),
+    getTableCount('rackets'),
+    getTableCount('reviews'),
     getActiveUsersCount(),
     getVerifiedStoresCount(),
     getPendingStoresCount(),
-    getFavoritesCount()
+    getFavoritesCount(),
   ]);
 
   return {
@@ -110,10 +112,10 @@ export class AdminController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getMetrics:", error);
+      logger.error('Error in getMetrics:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -123,9 +125,9 @@ export class AdminController {
   static async getAllUsers(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const { data: users, error } = await supabase
-        .from("user_profiles")
-        .select("id, email, nickname, full_name, role, created_at")
-        .order("created_at", { ascending: false });
+        .from('user_profiles')
+        .select('id, email, nickname, full_name, role, created_at')
+        .order('created_at', { ascending: false });
 
       if (error) {
         throw error;
@@ -137,28 +139,25 @@ export class AdminController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getAllUsers:", error);
+      logger.error('Error in getAllUsers:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async updateUserRole(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async updateUserRole(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const { userId } = req.params;
       const { role } = req.body;
 
-      if (!role || !["admin", "player"].includes(role.toLowerCase())) {
+      if (!role || !['admin', 'player'].includes(role.toLowerCase())) {
         res.status(400).json({
           success: false,
-          error: "Rol inválido",
+          error: 'Rol inválido',
           message: "El rol debe ser 'admin' o 'player'",
           timestamp: new Date().toISOString(),
         } as ApiResponse);
@@ -166,9 +165,9 @@ export class AdminController {
       }
 
       const { data: updatedUser, error } = await supabase
-        .from("user_profiles")
+        .from('user_profiles')
         .update({ role: role.toLowerCase() })
-        .eq("id", userId)
+        .eq('id', userId)
         .select()
         .single();
 
@@ -179,14 +178,14 @@ export class AdminController {
       res.json({
         success: true,
         data: updatedUser,
-        message: "Rol actualizado correctamente",
+        message: 'Rol actualizado correctamente',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in updateUserRole:", error);
+      logger.error('Error in updateUserRole:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
@@ -200,17 +199,14 @@ export class AdminController {
       if (userId === req.user?.id) {
         res.status(400).json({
           success: false,
-          error: "Operación no permitida",
-          message: "No puedes eliminar tu propia cuenta",
+          error: 'Operación no permitida',
+          message: 'No puedes eliminar tu propia cuenta',
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
       }
 
-      const { error } = await supabase
-        .from("user_profiles")
-        .delete()
-        .eq("id", userId);
+      const { error } = await supabase.from('user_profiles').delete().eq('id', userId);
 
       if (error) {
         throw error;
@@ -218,24 +214,21 @@ export class AdminController {
 
       res.json({
         success: true,
-        message: "Usuario eliminado correctamente",
+        message: 'Usuario eliminado correctamente',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in deleteUser:", error);
+      logger.error('Error in deleteUser:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async getRacketRequests(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async getRacketRequests(req: RequestWithUser, res: Response): Promise<void> {
     try {
       res.json({
         success: true,
@@ -243,169 +236,160 @@ export class AdminController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getRacketRequests:", error);
+      logger.error('Error in getRacketRequests:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async getStoreRequests(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async getStoreRequests(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const pendingStores = await storeService.getAllStores(false);
-      
+
       res.json({
         success: true,
         data: pendingStores,
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getStoreRequests:", error);
+      logger.error('Error in getStoreRequests:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async verifyStore(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async verifyStore(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       const store = await storeService.verifyStore(id);
-      
+
       res.json({
         success: true,
         data: store,
-        message: "Tienda verificada exitosamente",
+        message: 'Tienda verificada exitosamente',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in verifyStore:", error);
+      logger.error('Error in verifyStore:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async rejectStore(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async rejectStore(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const { id } = req.params;
-      
+
       await storeService.rejectStore(id);
-      
+
       res.json({
         success: true,
-        message: "Solicitud de tienda rechazada",
+        message: 'Solicitud de tienda rechazada',
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in rejectStore:", error);
+      logger.error('Error in rejectStore:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async getRecentActivity(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async getRecentActivity(req: RequestWithUser, res: Response): Promise<void> {
     try {
       const limit = parseInt(req.query.limit as string) || 10;
 
       const { data: recentUsers } = await supabase
-        .from("user_profiles")
-        .select("id, full_name, nickname, email, created_at")
-        .order("created_at", { ascending: false })
+        .from('user_profiles')
+        .select('id, full_name, nickname, email, created_at')
+        .order('created_at', { ascending: false })
         .limit(5);
 
       const { data: recentRackets } = await supabase
-        .from("rackets")
-        .select("id, nombre, marca, created_at")
-        .order("created_at", { ascending: false })
+        .from('rackets')
+        .select('id, nombre, marca, created_at')
+        .order('created_at', { ascending: false })
         .limit(5);
 
       const { data: recentReviews } = await supabase
-        .from("reviews")
-        .select(`
+        .from('reviews')
+        .select(
+          `
           id, 
           rating, 
           created_at,
           user_profiles!inner(full_name, nickname),
           rackets!inner(nombre)
-        `)
-        .order("created_at", { ascending: false })
+        `
+        )
+        .order('created_at', { ascending: false })
         .limit(5);
 
       const { data: recentStores } = await supabase
-        .from("stores")
-        .select("id, store_name, verified, created_at")
-        .order("created_at", { ascending: false })
+        .from('stores')
+        .select('id, store_name, verified, created_at')
+        .order('created_at', { ascending: false })
         .limit(5);
 
       const activities: any[] = [];
 
-      recentUsers?.forEach((user) => {
+      recentUsers?.forEach(user => {
         activities.push({
           id: `user-${user.id}`,
-          type: "user",
+          type: 'user',
           title: `Nuevo usuario: ${user.full_name || user.nickname || user.email}`,
           time: user.created_at,
-          icon: "user",
+          icon: 'user',
         });
       });
 
-      recentRackets?.forEach((racket) => {
+      recentRackets?.forEach(racket => {
         activities.push({
           id: `racket-${racket.id}`,
-          type: "racket",
+          type: 'racket',
           title: `Nueva pala: ${racket.marca} ${racket.nombre}`,
           time: racket.created_at,
-          icon: "package",
+          icon: 'package',
         });
       });
 
       recentReviews?.forEach((review: any) => {
-        const userName = review.user_profiles?.full_name || review.user_profiles?.nickname || "Usuario";
-        const racketName = review.rackets?.nombre || "Pala";
+        const userName =
+          review.user_profiles?.full_name || review.user_profiles?.nickname || 'Usuario';
+        const racketName = review.rackets?.nombre || 'Pala';
         activities.push({
           id: `review-${review.id}`,
-          type: "review",
+          type: 'review',
           title: `${userName} valoró ${racketName} con ${review.rating} estrellas`,
           time: review.created_at,
-          icon: "star",
+          icon: 'star',
         });
       });
 
-      recentStores?.forEach((store) => {
-        const status = store.verified ? "verificada" : "pendiente de verificación";
+      recentStores?.forEach(store => {
+        const status = store.verified ? 'verificada' : 'pendiente de verificación';
         activities.push({
           id: `store-${store.id}`,
-          type: "store",
+          type: 'store',
           title: `Tienda ${store.store_name} - ${status}`,
           time: store.created_at,
-          icon: "shopping-bag",
+          icon: 'shopping-bag',
         });
       });
 
@@ -418,28 +402,25 @@ export class AdminController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getRecentActivity:", error);
+      logger.error('Error in getRecentActivity:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async getBrands(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async getBrands(req: RequestWithUser, res: Response): Promise<void> {
     try {
-      logger.info("Fetching brands from database...");
+      logger.info('Fetching brands from database...');
       const { data: rackets, error } = await supabase
-        .from("rackets")
-        .select("brand, characteristics_brand");
+        .from('rackets')
+        .select('brand, characteristics_brand');
 
       if (error) {
-        logger.error("Error fetching rackets for brands:", error);
+        logger.error('Error fetching rackets for brands:', error);
         throw error;
       }
 
@@ -457,7 +438,7 @@ export class AdminController {
         .map(([name, racketCount]) => ({
           name,
           racketCount,
-          country: "España"
+          country: 'España',
         }))
         .sort((a, b) => b.racketCount - a.racketCount);
 
@@ -468,28 +449,25 @@ export class AdminController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getBrands:", error);
+      logger.error('Error in getBrands:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
   }
 
-  static async getCategories(
-    req: RequestWithUser,
-    res: Response
-  ): Promise<void> {
+  static async getCategories(req: RequestWithUser, res: Response): Promise<void> {
     try {
-      logger.info("Fetching categories from database...");
+      logger.info('Fetching categories from database...');
       const { data: rackets, error } = await supabase
-        .from("rackets")
-        .select("characteristics_shape");
+        .from('rackets')
+        .select('characteristics_shape');
 
       if (error) {
-        logger.error("Error fetching rackets for categories:", error);
+        logger.error('Error fetching rackets for categories:', error);
         throw error;
       }
 
@@ -504,17 +482,17 @@ export class AdminController {
       });
 
       const formaDescriptions: Record<string, string> = {
-        "Redonda": "Forma clásica, mayor control",
-        "Diamante": "Forma de diamante, mayor potencia y balance alto",
-        "Lágrima": "Forma de gota, balance entre potencia y control",
-        "Ovalada": "Forma ovalada, control optimizado",
-        "Híbrida": "Forma híbrida, combinación de características",
+        Redonda: 'Forma clásica, mayor control',
+        Diamante: 'Forma de diamante, mayor potencia y balance alto',
+        Lágrima: 'Forma de gota, balance entre potencia y control',
+        Ovalada: 'Forma ovalada, control optimizado',
+        Híbrida: 'Forma híbrida, combinación de características',
       };
 
       const categories = Array.from(formaMap.entries())
         .map(([name, racketCount]) => ({
           name,
-          description: formaDescriptions[name] || "Forma de pala de pádel",
+          description: formaDescriptions[name] || 'Forma de pala de pádel',
           racketCount,
         }))
         .sort((a, b) => b.racketCount - a.racketCount);
@@ -526,10 +504,60 @@ export class AdminController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     } catch (error: unknown) {
-      logger.error("Error in getCategories:", error);
+      logger.error('Error in getCategories:', error);
       res.status(500).json({
         success: false,
-        error: "Error del servidor",
+        error: 'Error del servidor',
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * Obtiene estadísticas de los embeddings (RAG)
+   */
+  static async getEmbeddingStats(req: RequestWithUser, res: Response): Promise<void> {
+    try {
+      const stats = await VectorStoreService.getStats();
+      res.json({
+        success: true,
+        data: stats,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error('Error in getEmbeddingStats:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Error del servidor',
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * Reindexa los embeddings de conocimiento (Markdown)
+   */
+  static async reindexKnowledge(req: RequestWithUser, res: Response): Promise<void> {
+    try {
+      logger.info('Admin: Starting knowledge reindexing...');
+      // Esto es asíncrono y puede tardar, en producción quizás mejor un worker
+      // Por ahora lo ejecutamos y respondemos al acabar (o lanzamos en background)
+      KnowledgeBaseService.indexAll()
+        .then(() => logger.info('Admin: Knowledge reindexing completed'))
+        .catch(err => logger.error('Admin: Knowledge reindexing failed', err));
+
+      res.json({
+        success: true,
+        message: 'Reindexación de conocimiento iniciada en segundo plano',
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error('Error in reindexKnowledge:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Error del servidor',
         message: getErrorMessage(error),
         timestamp: new Date().toISOString(),
       } as ApiResponse);

@@ -145,15 +145,15 @@ const SearchIcon = styled(FiSearch)`
   color: #6b7280;
 `;
 
-const FilterButton = styled.button<{ active?: boolean }>`
+const FilterButton = styled.button<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
   padding: 0.875rem 1rem;
-  border: 2px solid ${props => (props.active ? '#16a34a' : '#e5e7eb')};
+  border: 2px solid ${props => (props.$active ? '#16a34a' : '#e5e7eb')};
   border-radius: 12px;
-  background: ${props => (props.active ? '#f0f9ff' : 'white')};
-  color: ${props => (props.active ? '#16a34a' : '#6b7280')};
+  background: ${props => (props.$active ? '#f0f9ff' : 'white')};
+  color: ${props => (props.$active ? '#16a34a' : '#6b7280')};
   font-size: 0.875rem;
   font-weight: 500;
   cursor: pointer;
@@ -271,12 +271,12 @@ const ViewToggle = styled.div`
   background: white;
 `;
 
-const ViewButton = styled.button<{ active: boolean }>`
+const ViewButton = styled.button<{ $active: boolean }>`
   padding: 0.5rem;
   border: none;
   border-radius: 6px;
-  background: ${props => (props.active ? '#16a34a' : 'transparent')};
-  color: ${props => (props.active ? 'white' : '#6b7280')};
+  background: ${props => (props.$active ? '#16a34a' : 'transparent')};
+  color: ${props => (props.$active ? 'white' : '#6b7280')};
   cursor: pointer;
   transition: all 0.2s ease;
 
@@ -466,7 +466,7 @@ const CatalogPage: React.FC = () => {
   // Update URL when filters change
   useEffect(() => {
     const params = new URLSearchParams();
-    
+
     if (searchQuery) params.set('search', searchQuery);
     if (selectedBrand !== 'Todas') params.set('brand', selectedBrand);
     if (selectedShape !== 'Todas') params.set('shape', selectedShape);
@@ -482,7 +482,21 @@ const CatalogPage: React.FC = () => {
 
     const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
     navigate(newUrl, { replace: true });
-  }, [searchQuery, selectedBrand, selectedShape, selectedBalance, selectedCore, selectedFace, selectedLevel, selectedGameType, selectedHardness, showOffers, showMostViewed, sortBy, navigate]);
+  }, [
+    searchQuery,
+    selectedBrand,
+    selectedShape,
+    selectedBalance,
+    selectedCore,
+    selectedFace,
+    selectedLevel,
+    selectedGameType,
+    selectedHardness,
+    showOffers,
+    showMostViewed,
+    sortBy,
+    navigate,
+  ]);
 
   // Fetch server-side total count
   useEffect(() => {
@@ -876,7 +890,7 @@ const CatalogPage: React.FC = () => {
               />
             </SearchContainer>
 
-            <FilterButton active={showOffers} onClick={() => setShowOffers(!showOffers)}>
+            <FilterButton $active={showOffers} onClick={() => setShowOffers(!showOffers)}>
               <FiTag />
               Ofertas
             </FilterButton>
@@ -1014,10 +1028,10 @@ const CatalogPage: React.FC = () => {
             </SortSelect>
 
             <ViewToggle>
-              <ViewButton active={viewMode === 'grid'} onClick={() => setViewMode('grid')}>
+              <ViewButton $active={viewMode === 'grid'} onClick={() => setViewMode('grid')}>
                 <FiGrid />
               </ViewButton>
-              <ViewButton active={viewMode === 'list'} onClick={() => setViewMode('list')}>
+              <ViewButton $active={viewMode === 'list'} onClick={() => setViewMode('list')}>
                 <FiList />
               </ViewButton>
             </ViewToggle>

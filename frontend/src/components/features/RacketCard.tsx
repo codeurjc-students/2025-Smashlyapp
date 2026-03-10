@@ -6,7 +6,7 @@ import { Racket } from '../../types/racket';
 import { getLowestPrice } from '../../utils/priceUtils';
 
 // Styled Components
-const RacketCardContainer = styled(motion.li)<{ view: 'grid' | 'list' }>`
+const RacketCardContainer = styled(motion.li)<{ $view: 'grid' | 'list' }>`
   background: white;
   border-radius: 16px;
   overflow: hidden;
@@ -15,9 +15,9 @@ const RacketCardContainer = styled(motion.li)<{ view: 'grid' | 'list' }>`
   transition: all 0.3s ease;
   border: 1px solid rgba(22, 163, 74, 0.1);
 
-  display: ${props => (props.view === 'list' ? 'flex' : 'flex')};
-  flex-direction: ${props => (props.view === 'list' ? 'row' : 'column')};
-  height: ${props => (props.view === 'grid' ? '100%' : 'auto')};
+  display: ${props => (props.$view === 'list' ? 'flex' : 'flex')};
+  flex-direction: ${props => (props.$view === 'list' ? 'row' : 'column')};
+  height: ${props => (props.$view === 'grid' ? '100%' : 'auto')};
 
   &:hover {
     transform: translateY(-4px);
@@ -26,10 +26,10 @@ const RacketCardContainer = styled(motion.li)<{ view: 'grid' | 'list' }>`
   }
 `;
 
-const RacketImageContainer = styled.div<{ view: 'grid' | 'list' }>`
+const RacketImageContainer = styled.div<{ $view: 'grid' | 'list' }>`
   position: relative;
-  height: ${props => (props.view === 'grid' ? '220px' : '120px')};
-  width: ${props => (props.view === 'list' ? '120px' : '100%')};
+  height: ${props => (props.$view === 'grid' ? '220px' : '120px')};
+  width: ${props => (props.$view === 'list' ? '120px' : '100%')};
   background: white;
   display: flex;
   align-items: center;
@@ -44,11 +44,11 @@ const RacketImage = styled(motion.img)`
   object-fit: contain;
 `;
 
-const RacketBadge = styled.div<{ variant: 'bestseller' | 'offer' }>`
+const RacketBadge = styled.div<{ $variant: 'bestseller' | 'offer' }>`
   position: absolute;
   top: 0.75rem;
-  ${props => (props.variant === 'bestseller' ? 'right: 0.75rem;' : 'left: 0.75rem;')}
-  background: ${props => (props.variant === 'bestseller' ? '#f59e0b' : '#ef4444')};
+  ${props => (props.$variant === 'bestseller' ? 'right: 0.75rem;' : 'left: 0.75rem;')}
+  background: ${props => (props.$variant === 'bestseller' ? '#f59e0b' : '#ef4444')};
   color: white;
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
@@ -60,8 +60,8 @@ const RacketBadge = styled.div<{ variant: 'bestseller' | 'offer' }>`
   z-index: 2;
 `;
 
-const RacketInfo = styled.div<{ view: 'grid' | 'list' }>`
-  padding: ${props => (props.view === 'grid' ? '1.5rem' : '1rem')};
+const RacketInfo = styled.div<{ $view: 'grid' | 'list' }>`
+  padding: ${props => (props.$view === 'grid' ? '1.5rem' : '1rem')};
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -76,8 +76,8 @@ const RacketBrand = styled.div`
   margin-bottom: 0.25rem;
 `;
 
-const RacketName = styled.h3<{ view: 'grid' | 'list' }>`
-  font-size: ${props => (props.view === 'grid' ? '1.125rem' : '1rem')};
+const RacketName = styled.h3<{ $view: 'grid' | 'list' }>`
+  font-size: ${props => (props.$view === 'grid' ? '1.125rem' : '1rem')};
   font-weight: 600;
   color: #1f2937;
   margin-bottom: 0.75rem;
@@ -88,11 +88,11 @@ const RacketName = styled.h3<{ view: 'grid' | 'list' }>`
   overflow: hidden;
 `;
 
-const PriceContainer = styled.div<{ view: 'grid' | 'list' }>`
+const PriceContainer = styled.div<{ $view: 'grid' | 'list' }>`
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  margin-bottom: ${props => (props.view === 'grid' ? '0.5rem' : '0.5rem')};
+  margin-bottom: ${props => (props.$view === 'grid' ? '0.5rem' : '0.5rem')};
   flex-wrap: wrap;
   min-height: auto;
   margin-top: auto;
@@ -119,10 +119,10 @@ const DiscountBadge = styled.div`
   font-weight: 600;
 `;
 
-const ActionButtons = styled.div<{ view: 'grid' | 'list' }>`
+const ActionButtons = styled.div<{ $view: 'grid' | 'list' }>`
   display: flex;
   gap: 0.5rem;
-  flex-direction: ${props => (props.view === 'list' ? 'row' : 'column')};
+  flex-direction: ${props => (props.$view === 'list' ? 'row' : 'column')};
 
   @media (max-width: 768px) {
     flex-direction: column;
@@ -169,137 +169,127 @@ interface RacketCardProps {
   isAuthenticated?: boolean;
 }
 
-const RacketCardComponent: React.FC<RacketCardProps> = memo(({
-  racket,
-  view,
-  index,
-  onClick,
-  onAddToList,
-  isAuthenticated = false
-}) => {
-  const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const [isHovered, setIsHovered] = useState(false);
+const RacketCardComponent: React.FC<RacketCardProps> = memo(
+  ({ racket, view, index, onClick, onAddToList, isAuthenticated = false }) => {
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isHovered, setIsHovered] = useState(false);
 
-  // Efecto para cambiar imágenes automáticamente en hover
-  useEffect(() => {
-    if (!isHovered || !racket.imagenes || racket.imagenes.length <= 1) {
-      return;
+    // Efecto para cambiar imágenes automáticamente en hover
+    useEffect(() => {
+      if (!isHovered || !racket.imagenes || racket.imagenes.length <= 1) {
+        return;
+      }
+
+      const interval = setInterval(() => {
+        setCurrentImageIndex(prev => (prev + 1 >= racket.imagenes!.length ? 0 : prev + 1));
+      }, 2000); // Cambia cada 2 segundos
+
+      return () => clearInterval(interval);
+    }, [isHovered, racket.imagenes]);
+
+    // Reset al índice 0 cuando se sale del hover
+    useEffect(() => {
+      if (!isHovered) {
+        setCurrentImageIndex(0);
+      }
+    }, [isHovered]);
+
+    if (!racket || !racket.nombre) {
+      return null;
     }
 
-    const interval = setInterval(() => {
-      setCurrentImageIndex((prev) => 
-        prev + 1 >= racket.imagenes!.length ? 0 : prev + 1
-      );
-    }, 2000); // Cambia cada 2 segundos
+    const lowestPrice = getLowestPrice(racket);
 
-    return () => clearInterval(interval);
-  }, [isHovered, racket.imagenes]);
+    const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const target = e.target as HTMLImageElement;
+      target.src = '/placeholder-racket.svg';
+    };
 
-  // Reset al índice 0 cuando se sale del hover
-  useEffect(() => {
-    if (!isHovered) {
-      setCurrentImageIndex(0);
-    }
-  }, [isHovered]);
+    const handleAddToList = (e: React.MouseEvent) => {
+      e.stopPropagation();
+      onAddToList?.(racket);
+    };
 
-  if (!racket || !racket.nombre) {
-    return null;
+    return (
+      <RacketCardContainer
+        $view={view}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        onClick={() => onClick(racket)}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        <RacketImageContainer $view={view}>
+          <RacketImage
+            key={currentImageIndex}
+            src={
+              (racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0])?.startsWith('http')
+                ? `${import.meta.env.VITE_API_URL}/api/v1/proxy/image?url=${encodeURIComponent(racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0])}`
+                : racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0]
+            }
+            alt={racket.modelo}
+            onError={handleImageError}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{
+              duration: 0.6,
+              ease: 'easeInOut',
+            }}
+          />
+          {racket.view_count !== undefined && racket.view_count > 10 && (
+            <RacketBadge $variant='bestseller'>
+              <FiEye size={12} />
+              Popular
+            </RacketBadge>
+          )}
+          {racket.en_oferta && (
+            <RacketBadge $variant='offer'>
+              <FiTag size={12} />
+              Oferta
+            </RacketBadge>
+          )}
+        </RacketImageContainer>
+
+        <RacketInfo $view={view}>
+          <div>
+            <RacketBrand>{racket.marca}</RacketBrand>
+            <RacketName $view={view}>{toTitleCase(racket.modelo)}</RacketName>
+          </div>
+
+          <PriceContainer $view={view}>
+            {lowestPrice ? (
+              <>
+                <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
+                {lowestPrice.originalPrice > lowestPrice.price && (
+                  <>
+                    <OriginalPrice>€{lowestPrice.originalPrice.toFixed(2)}</OriginalPrice>
+                    {lowestPrice.discount > 0 && (
+                      <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
+                    )}
+                  </>
+                )}
+              </>
+            ) : (
+              <CurrentPrice>€{racket.precio_actual}</CurrentPrice>
+            )}
+          </PriceContainer>
+
+          <ActionButtons $view={view}>
+            <ViewDetailsButton onClick={() => onClick(racket)}>Ver detalles</ViewDetailsButton>
+            {isAuthenticated && onAddToList && (
+              <ViewDetailsButton onClick={handleAddToList} style={{ background: '#15803d' }}>
+                <FiHeart size={14} />
+                Mis listas
+              </ViewDetailsButton>
+            )}
+          </ActionButtons>
+        </RacketInfo>
+      </RacketCardContainer>
+    );
   }
-
-  const lowestPrice = getLowestPrice(racket);
-
-  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    const target = e.target as HTMLImageElement;
-    target.src = '/placeholder-racket.svg';
-  };
-
-  const handleAddToList = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    onAddToList?.(racket);
-  };
-
-  return (
-    <RacketCardContainer
-      view={view}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      onClick={() => onClick(racket)}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      <RacketImageContainer view={view}>
-        <RacketImage
-          key={currentImageIndex}
-          src={racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0]}
-          alt={racket.modelo}
-          onError={handleImageError}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ 
-            duration: 0.6,
-            ease: "easeInOut"
-          }}
-        />
-        {racket.view_count !== undefined && racket.view_count > 10 && (
-          <RacketBadge variant='bestseller'>
-            <FiEye size={12} />
-            Popular
-          </RacketBadge>
-        )}
-        {racket.en_oferta && (
-          <RacketBadge variant='offer'>
-            <FiTag size={12} />
-            Oferta
-          </RacketBadge>
-        )}
-      </RacketImageContainer>
-
-      <RacketInfo view={view}>
-        <div>
-          <RacketBrand>{racket.marca}</RacketBrand>
-          <RacketName view={view}>{toTitleCase(racket.modelo)}</RacketName>
-        </div>
-
-        <PriceContainer view={view}>
-          {lowestPrice ? (
-            <>
-              <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
-              {lowestPrice.originalPrice > lowestPrice.price && (
-                <>
-                  <OriginalPrice>
-                    €{lowestPrice.originalPrice.toFixed(2)}
-                  </OriginalPrice>
-                  {lowestPrice.discount > 0 && (
-                    <DiscountBadge>-{lowestPrice.discount}%</DiscountBadge>
-                  )}
-                </>
-              )}
-            </>
-          ) : (
-            <CurrentPrice>€{racket.precio_actual}</CurrentPrice>
-          )}
-        </PriceContainer>
-
-        <ActionButtons view={view}>
-          <ViewDetailsButton onClick={() => onClick(racket)}>
-            Ver detalles
-          </ViewDetailsButton>
-          {isAuthenticated && onAddToList && (
-            <ViewDetailsButton
-              onClick={handleAddToList}
-              style={{ background: '#15803d' }}
-            >
-              <FiHeart size={14} />
-              Mis listas
-            </ViewDetailsButton>
-          )}
-        </ActionButtons>
-      </RacketInfo>
-    </RacketCardContainer>
-  );
-});
+);
 
 RacketCardComponent.displayName = 'RacketCard';
 
