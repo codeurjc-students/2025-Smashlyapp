@@ -76,19 +76,6 @@ export interface CommunityData {
   is_bestseller?: boolean;
 }
 
-export interface RecommendationResult {
-  rackets: RecommendedRacket[];
-  analysis: string;
-  process_summary?: {
-    total_catalog: number;
-    discarded_biomechanical: number;
-    safe_evaluated: number;
-    main_criterion: string;
-    rag_retrieved_count?: number;
-  };
-  transparency_note?: string;
-}
-
 export interface RecommendedRacket {
   // Basic identification
   id: string;
@@ -101,6 +88,12 @@ export interface RecommendedRacket {
   match_score: number;
   reason: string;
 
+  // Rich per-racket explanations (new - from improved prompt)
+  what_it_gives_you?: string;    // Concrete benefits in-game
+  what_it_sacrifices?: string;   // Honest trade-offs vs other options
+  ideal_for_moment?: string;     // When/where this racket shines on court
+  coaching_tip?: string;         // Only on RecommendationResult level, but kept here for flexibility
+
   // Strategic additions: Datos Duros (Testea Pádel)
   testea_metrics?: TesteaMetrics;
 
@@ -112,8 +105,23 @@ export interface RecommendedRacket {
 
   // Strategic additions: Detailed match explanation
   match_details?: {
-    priority_alignment: string; // How it matches user's priorities
-    biomechanical_fit: string; // Why it's safe for user's profile
-    preference_match: string; // How it matches touch/aesthetic preferences
+    priority_alignment: string; // How it matches user's priorities (with numeric values)
+    biomechanical_fit: string;  // Why it's safe for user's profile
+    preference_match?: string;  // How it matches touch/aesthetic preferences
   };
+}
+
+// Top-level coaching tip added to RecommendationResult
+export interface RecommendationResult {
+  rackets: RecommendedRacket[];
+  analysis: string;
+  coaching_tip?: string; // One concrete tip for this player's profile
+  process_summary?: {
+    total_catalog: number;
+    discarded_biomechanical: number;
+    safe_evaluated: number;
+    main_criterion: string;
+    rag_retrieved_count?: number;
+  };
+  transparency_note?: string;
 }

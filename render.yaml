@@ -1,0 +1,44 @@
+services:
+  - type: web
+    name: smashly-app
+    runtime: docker
+    dockerfilePath: ./docker/Dockerfile
+    # Render inyecta $PORT automáticamente, el servidor lo recoge vía process.env.PORT
+    envVars:
+      # --- Runtime: comportamiento del servidor ---
+      - key: NODE_ENV
+        value: production
+      - key: USE_HTTPS
+        value: "false"          # Render termina TLS en su edge; el contenedor usa HTTP
+      - key: FRONTEND_URL
+        value: https://smashly-app.onrender.com   # Cambia esto por tu URL real tras el primer deploy
+
+      # --- Supabase ---
+      - key: SUPABASE_URL
+        sync: false             # sync:false = Render te pedirá el valor en el dashboard (no se sube al repo)
+      - key: SUPABASE_ANON_KEY
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+
+      # --- Auth ---
+      - key: JWT_SECRET
+        sync: false
+
+      # --- IA ---
+      - key: GEMINI_API_KEY
+        sync: false
+
+    # Variables de BUILD (se pasan al Dockerfile como ARG para compilar el frontend de Vite)
+    # Render las usa durante el docker build
+    buildArgs:
+      - name: VITE_SUPABASE_URL
+        value: ""               # Rellena esto en el dashboard de Render (Environment > Build Vars)
+      - name: VITE_SUPABASE_ANON_KEY
+        value: ""
+      - name: VITE_GOOGLE_CLIENT_ID
+        value: ""
+
+    # Plan gratuito
+    plan: free
+    region: frankfurt           # O 'oregon' si prefieres US. Frankfurt suele ir mejor desde España.
