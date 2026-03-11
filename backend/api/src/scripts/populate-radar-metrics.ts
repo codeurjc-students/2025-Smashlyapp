@@ -78,7 +78,8 @@ function calculateRadarValues(racket: any): RadarValues {
   const balance   = String(racket.characteristics_balance  || '').toLowerCase();
   const dureza    = String(racket.characteristics_hardness || '').toLowerCase();
   const peso      = extractWeight(racket);
-  const antiVib   = Boolean(racket.has_antivibration);
+  // antivibracion: intentar múltiples nombres de columna posibles
+  const antiVib   = Boolean(racket.has_antivibration || racket.tiene_antivibracion || false);
 
   // ── POTENCIA (diamante+alto balance = más potencia) ──────────────────
   let potencia = 5.0;
@@ -142,19 +143,33 @@ async function main() {
   console.log('║   Smashly – Populate Radar Metrics       ║');
   console.log('╚══════════════════════════════════════════╝\n');
 
-  // 1. Obtener todos los IDs y características necesarias
+  // 1. Obtener TODAS las palas paginando (Supabase limita a 1000 por query)
   console.log('⏳ Obteniendo palas de la base de datos...');
-  const { data: rackets, error } = await supabase
-    .from('rackets')
-    .select('id, name, characteristics_shape, characteristics_balance, characteristics_hardness, specs, has_antivibration')
-    .order('id', { ascending: true });
+  const PAGE_SIZE = 1000;
+  const allRackets: any[] = [];
+  let page = 0;
 
-  if (error) {
-    console.error('ERROR al obtener palas:', error.message);
-    process.exit(1);
+  while (true) {
+    const { data, error } = await supabase
+      .from('rackets')
+      .select('id, name, characteristics_shape, characteristics_balance, characteristics_hardness, specs')
+      .order('id', { ascending: true })
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+    if (error) {
+      console.error('ERROR al obtener palas:', error.message);
+      process.exit(1);
+    }
+
+    if (!data || data.length === 0) break;
+    allRackets.push(...data);
+    if (data.length < PAGE_SIZE) break; // última página
+    page++;
   }
 
-  if (!rackets || rackets.length === 0) {
+  const rackets = allRackets;
+
+  if (rackets.length === 0) {
     console.warn('⚠️  No se encontraron palas en la base de datos.');
     process.exit(0);
   }
@@ -168,32 +183,44 @@ async function main() {
   // Estadísticas de distribución para validación
   const stats = { potencia: [] as number[], control: [] as number[], manejabilidad: [] as number[] };
 
-  // Procesar en lotes
+  // Procesar en lotes usando UPDATE (los registros ya existen, no queremos INSERT)
   for (let i = 0; i < rackets.length; i += BATCH_SIZE) {
     const batch = rackets.slice(i, i + BATCH_SIZE);
 
-    // Calcular valores para cada pala del lote
-    const updates = batch.map((racket: any) => {
-      const values = calculateRadarValues(racket);
-      stats.potencia.push(values.radar_potencia);
-      stats.control.push(values.radar_control);
-      stats.manejabilidad.push(values.radar_manejabilidad);
-      return { id: racket.id, ...values };
-    });
+    // Calcular valores y lanzar un UPDATE individual por pala en paralelo
+    const results = await Promise.all(
+      batch.map(async (racket: any) => {
+        const values = calculateRadarValues(racket);
+        stats.potencia.push(values.radar_potencia);
+        stats.control.push(values.radar_control);
+        stats.manejabilidad.push(values.radar_manejabilidad);
 
-    // Actualizar en Supabase (upsert por id)
-    const { error: updateError } = await supabase
-      .from('rackets')
-      .upsert(updates, { onConflict: 'id' });
+        const { error: updateError } = await supabase
+          .from('rackets')
+          .update({
+            radar_potencia:       values.radar_potencia,
+            radar_control:        values.radar_control,
+            radar_manejabilidad:  values.radar_manejabilidad,
+            radar_punto_dulce:    values.radar_punto_dulce,
+            radar_salida_bola:    values.radar_salida_bola,
+          })
+          .eq('id', racket.id);
 
-    if (updateError) {
-      console.error(`  ❌ Error en lote ${Math.floor(i / BATCH_SIZE) + 1}: ${updateError.message}`);
-      errors += batch.length;
+        return updateError ? updateError.message : null;
+      })
+    );
+
+    const batchErrors = results.filter(r => r !== null);
+    if (batchErrors.length > 0) {
+      console.error(`  ❌ Error en lote ${Math.floor(i / BATCH_SIZE) + 1}: ${batchErrors[0]}`);
+      errors += batchErrors.length;
+      processed += batch.length - batchErrors.length;
     } else {
       processed += batch.length;
-      const progress = Math.round((processed / rackets.length) * 100);
-      process.stdout.write(`\r  📊 Progreso: ${processed}/${rackets.length} palas (${progress}%)`);
     }
+
+    const progress = Math.round((processed / rackets.length) * 100);
+    process.stdout.write(`\r  📊 Progreso: ${processed}/${rackets.length} palas (${progress}%)`);
   }
 
   console.log('\n');
