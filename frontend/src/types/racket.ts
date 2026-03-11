@@ -112,6 +112,13 @@ export interface Racket {
   testea_confort?: number | null;
   testea_iniciacion?: number | null;
   peso?: number | null;
+
+  // New Padelful/Radar metrics
+  radar_potencia?: number | null;
+  radar_control?: number | null;
+  radar_manejabilidad?: number | null;
+  radar_punto_dulce?: number | null;
+  radar_salida_bola?: number | null;
 }
 
 // Tipos para formularios y recomendaciones AI

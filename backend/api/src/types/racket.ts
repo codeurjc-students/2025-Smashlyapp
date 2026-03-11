@@ -88,6 +88,13 @@ export interface Racket {
   discount_percentage?: number;
   link?: string;
   source?: string;
+
+  // Radar Metrics
+  radar_potencia?: number | null;
+  radar_control?: number | null;
+  radar_manejabilidad?: number | null;
+  radar_punto_dulce?: number | null;
+  radar_salida_bola?: number | null;
 }
 
 // Types for basic user forms

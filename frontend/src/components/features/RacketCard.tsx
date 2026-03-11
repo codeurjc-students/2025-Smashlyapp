@@ -151,6 +151,36 @@ const ViewDetailsButton = styled.button`
   }
 `;
 
+const MetricsSummary = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  padding: 0.75rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
+`;
+
+const MetricBadge = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-width: 60px;
+`;
+
+const MetricLabel = styled.span`
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+`;
+
+const MetricValue = styled.span`
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #1f2937;
+`;
+
 // Helper function to capitalize first letter of each word
 const toTitleCase = (str: string): string => {
   return str
@@ -275,6 +305,31 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(
               <CurrentPrice>€{racket.precio_actual}</CurrentPrice>
             )}
           </PriceContainer>
+
+          {racket.radar_potencia && (
+            <MetricsSummary>
+              <MetricBadge title="Potencia">
+                <MetricLabel>⚡ Pot</MetricLabel>
+                <MetricValue>{racket.radar_potencia.toFixed(1)}</MetricValue>
+              </MetricBadge>
+              <MetricBadge title="Control">
+                <MetricLabel>🎯 Ctrl</MetricLabel>
+                <MetricValue>{racket.radar_control?.toFixed(1)}</MetricValue>
+              </MetricBadge>
+              <MetricBadge title="Manejabilidad">
+                <MetricLabel>☁️ Man</MetricLabel>
+                <MetricValue>{racket.radar_manejabilidad?.toFixed(1)}</MetricValue>
+              </MetricBadge>
+              <MetricBadge title="Salida de Bola">
+                <MetricLabel>🚀 Sal</MetricLabel>
+                <MetricValue>{racket.radar_salida_bola?.toFixed(1)}</MetricValue>
+              </MetricBadge>
+              <MetricBadge title="Punto Dulce">
+                <MetricLabel>✨ Dul</MetricLabel>
+                <MetricValue>{racket.radar_punto_dulce?.toFixed(1)}</MetricValue>
+              </MetricBadge>
+            </MetricsSummary>
+          )}
 
           <ActionButtons $view={view}>
             <ViewDetailsButton onClick={() => onClick(racket)}>Ver detalles</ViewDetailsButton>

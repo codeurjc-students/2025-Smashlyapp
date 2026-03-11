@@ -37,6 +37,7 @@ import {
   NivelIcon,
   StoreLabel,
 } from '../components/common/SpecIcons';
+import RacketRadarChart from '../components/features/RacketRadarChart';
 
 // --- Styled Components ---
 
@@ -753,6 +754,78 @@ const H3 = styled.h3`
   }
 `;
 
+const PerformanceContainer = styled.div`
+  background: white;
+  border-radius: 24px;
+  padding: 2rem;
+  margin-top: 3rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+`;
+
+const PerformanceGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  align-items: center;
+
+  @media (max-width: 1024px) {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+`;
+
+const ChartWrapper = styled.div`
+  width: 100%;
+  height: 100%;
+  min-height: 400px;
+`;
+
+const ProgressWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+`;
+
+const ProgressBarContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const ProgressHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const ProgressBarLabel = styled.span`
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-gray-700);
+`;
+
+const ProgressBarValue = styled.span`
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+`;
+
+const ProgressBarRoot = styled.div`
+  width: 100%;
+  height: 8px;
+  background: var(--color-gray-100);
+  border-radius: 4px;
+  overflow: hidden;
+`;
+
+const ProgressBarFill = styled.div<{ $value: number }>`
+  height: 100%;
+  width: ${props => props.$value * 10}%;
+  background: var(--color-primary);
+  border-radius: 4px;
+  transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+`;
+
 const CompareTable = styled.div`
   background: white;
   border-radius: 16px;
@@ -1039,6 +1112,24 @@ const RacketDetailPage: React.FC = () => {
     }
   };
 
+  const radarData = React.useMemo(() => {
+    if (!racket || !racket.radar_potencia) return null;
+    return [
+      {
+        racketId: racket.id || 0,
+        racketName: racket.modelo,
+        isCertified: false,
+        radarData: {
+          potencia: racket.radar_potencia || 0,
+          control: racket.radar_control || 0,
+          manejabilidad: racket.radar_manejabilidad || 0,
+          puntoDulce: racket.radar_punto_dulce || 0,
+          salidaDeBola: racket.radar_salida_bola || 0,
+        },
+      },
+    ];
+  }, [racket]);
+
   if (loading) return <RacketDetailSkeleton />;
 
   if (error || !racket) return <div>Error: {error}</div>;
@@ -1277,6 +1368,70 @@ const RacketDetailPage: React.FC = () => {
           </div>
         )}
       </LowerGrid>
+
+      {radarData && (
+        <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
+          <PerformanceContainer>
+            <H3>Análisis de Rendimiento</H3>
+            <PerformanceGrid>
+              <ChartWrapper>
+                <RacketRadarChart metrics={radarData} />
+              </ChartWrapper>
+              <ProgressWrapper>
+                <ProgressBarContainer>
+                  <ProgressHeader>
+                    <ProgressBarLabel>Potencia</ProgressBarLabel>
+                    <ProgressBarValue>{racket?.radar_potencia?.toFixed(1)}/10</ProgressBarValue>
+                  </ProgressHeader>
+                  <ProgressBarRoot>
+                    <ProgressBarFill $value={racket?.radar_potencia || 0} />
+                  </ProgressBarRoot>
+                </ProgressBarContainer>
+                
+                <ProgressBarContainer>
+                  <ProgressHeader>
+                    <ProgressBarLabel>Control</ProgressBarLabel>
+                    <ProgressBarValue>{racket?.radar_control?.toFixed(1)}/10</ProgressBarValue>
+                  </ProgressHeader>
+                  <ProgressBarRoot>
+                    <ProgressBarFill $value={racket?.radar_control || 0} />
+                  </ProgressBarRoot>
+                </ProgressBarContainer>
+
+                <ProgressBarContainer>
+                  <ProgressHeader>
+                    <ProgressBarLabel>Manejabilidad</ProgressBarLabel>
+                    <ProgressBarValue>{racket?.radar_manejabilidad?.toFixed(1)}/10</ProgressBarValue>
+                  </ProgressHeader>
+                  <ProgressBarRoot>
+                    <ProgressBarFill $value={racket?.radar_manejabilidad || 0} />
+                  </ProgressBarRoot>
+                </ProgressBarContainer>
+
+                <ProgressBarContainer>
+                  <ProgressHeader>
+                    <ProgressBarLabel>Salida de Bola</ProgressBarLabel>
+                    <ProgressBarValue>{racket?.radar_salida_bola?.toFixed(1)}/10</ProgressBarValue>
+                  </ProgressHeader>
+                  <ProgressBarRoot>
+                    <ProgressBarFill $value={racket?.radar_salida_bola || 0} />
+                  </ProgressBarRoot>
+                </ProgressBarContainer>
+
+                <ProgressBarContainer>
+                  <ProgressHeader>
+                    <ProgressBarLabel>Punto Dulce</ProgressBarLabel>
+                    <ProgressBarValue>{racket?.radar_punto_dulce?.toFixed(1)}/10</ProgressBarValue>
+                  </ProgressHeader>
+                  <ProgressBarRoot>
+                    <ProgressBarFill $value={racket?.radar_punto_dulce || 0} />
+                  </ProgressBarRoot>
+                </ProgressBarContainer>
+              </ProgressWrapper>
+            </PerformanceGrid>
+          </PerformanceContainer>
+        </div>
+      )}
 
       {/* Price Comparison - Only show for authenticated users */}
       {isAuthenticated && (
