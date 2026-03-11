@@ -1,58 +1,48 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import axios from 'axios';
 import {
   Racket,
   UserFormData,
   ComparisonResult,
-  ComparisonSection,
-  ComparisonTableItem,
-  RacketComparisonData,
-  RadarMetrics,
 } from '../types/racket';
 import logger from '../config/logger';
 
 export class GeminiService {
-  private genAI: GoogleGenerativeAI;
-  private model: any;
-
   constructor() {
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      console.warn('GEMINI_API_KEY is not set in environment variables');
+    if (!process.env.FREE_AI_API_URL) {
+      console.warn('FREE_AI_API_URL is not set in environment variables, using default');
     }
-    this.genAI = new GoogleGenerativeAI(apiKey || '');
-    this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+  }
+
+  private get baseUrl(): string {
+    return process.env.FREE_AI_API_URL || 'http://localhost:3001';
   }
 
   async compareRackets(rackets: Racket[], userProfile?: UserFormData): Promise<ComparisonResult> {
-    if (!process.env.GEMINI_API_KEY) {
-      throw new Error('GEMINI_API_KEY no está configurada en el servidor');
-    }
-
     if (!rackets || rackets.length < 2) {
       throw new Error('Se necesitan al menos 2 palas para comparar');
     }
 
-    // Construir información de las palas de forma optimizada
     const racketsInfo = this.buildRacketsInfo(rackets);
     const userContext = this.buildUserContext(userProfile);
-
-    // Construir un único prompt que incluya tanto la comparación textual como las métricas
     const combinedPrompt = this.buildCombinedPrompt(rackets, racketsInfo, userContext);
 
-    // Implementar reintentos con backoff exponencial
     const maxRetries = 3;
     let lastError: any;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
-        console.log(`Intento ${attempt + 1} de ${maxRetries} para generar comparación...`);
+        console.log(`Intento ${attempt + 1} de ${maxRetries} para generar comparación vía Free AI API...`);
 
-        // Una única llamada a la API para obtener ambos resultados
-        const result = await this.model.generateContent(combinedPrompt);
-        const response = await result.response;
-        const fullText = response.text();
+        const response = await axios.post(
+          `${this.baseUrl}/chat`,
+          {
+            messages: [{ role: 'user', content: combinedPrompt }],
+            stream: false // Using non-stream for simpler integration here
+          },
+          { timeout: 120000 }
+        );
 
-        // Separar la comparación textual de las métricas JSON
+        const fullText = response.data.content || response.data;
         const comparisonResult = this.parseResponse(fullText, rackets);
 
         console.log('Comparación generada exitosamente');
@@ -61,34 +51,29 @@ export class GeminiService {
         lastError = error;
         const errorMessage = error.message || 'Error desconocido';
 
-        // Verificar si es un error de sobrecarga (503) o rate limit (429)
         const isRetryableError =
           errorMessage.includes('503') ||
           errorMessage.includes('overloaded') ||
           errorMessage.includes('429') ||
-          errorMessage.includes('rate limit');
+          errorMessage.includes('rate limit') ||
+          error.code === 'ECONNABORTED';
 
         if (isRetryableError && attempt < maxRetries - 1) {
-          // Calcular tiempo de espera con backoff exponencial: 1s, 2s, 4s
           const waitTime = Math.pow(2, attempt) * 1000;
           console.warn(
-            `Gemini API temporalmente no disponible (intento ${attempt + 1}/${maxRetries}). ` +
+            `Free AI API temporalmente no disponible (intento ${attempt + 1}/${maxRetries}). ` +
               `Reintentando en ${waitTime / 1000}s...`
           );
-
-          // Esperar antes de reintentar
           await new Promise(resolve => setTimeout(resolve, waitTime));
           continue;
         }
 
-        // Si no es un error reintentable o ya agotamos los intentos, lanzar el error
-        console.error('Error calling Gemini API:', error);
+        console.error('Error calling Free AI API:', error);
         break;
       }
     }
 
-    // Si llegamos aquí, todos los intentos fallaron
-    const errorMessage = lastError?.message || 'Error desconocido de Gemini';
+    const errorMessage = lastError?.message || 'Error desconocido de Free AI API';
     throw new Error(`Error al generar la comparación con IA: ${errorMessage}`);
   }
 
@@ -96,7 +81,7 @@ export class GeminiService {
     return rackets
       .map(
         (r: any, index) => `PALA ${index + 1}:
-Nombre: ${(r as any).nombre || (r as any).name}
+Nombre: ${r.nombre || r.name}
 Marca: ${r.marca || r.caracteristicas_marca || 'N/A'}
 Modelo: ${r.modelo || 'N/A'}
 Forma: ${r.caracteristicas_forma || r.caracteristicas_formato || 'N/A'}
@@ -115,102 +100,53 @@ Métricas Reales (Radar): ${r.radar_potencia ? `Potencia:${r.radar_potencia}, Co
 
     return `
 CONTEXTO DEL USUARIO:
-El usuario que solicita la comparación tiene las siguientes características:
-Nivel de juego: ${userProfile.gameLevel || 'No especificado'}
-Estilo de juego: ${userProfile.playingStyle || 'No especificado'}
-Peso: ${userProfile.weight || 'No especificado'}
-Altura: ${userProfile.height || 'No especificado'}
-Edad: ${userProfile.age || 'No especificado'}
-Experiencia: ${userProfile.experience || 'No especificado'}
-Preferencias: ${userProfile.preferences || 'No especificado'}
-
-Por favor, ten en cuenta estas características en la sección "Veredicto Situacional" y "Conclusión Final" para recomendar qué pala se ajusta mejor a este usuario específico.`;
+Nivel: ${userProfile.gameLevel || 'No especificado'}
+Estilo: ${userProfile.playingStyle || 'No especificado'}
+Preferencias: ${userProfile.preferences || 'No especificado'}`;
   }
 
   private buildCombinedPrompt(rackets: Racket[], racketsInfo: string, userContext: string): string {
-    return `CONTEXTO DEL SISTEMA:
-Eres "Smashly AI", un ex-jugador profesional de pádel, entrenador de élite y experto en biomecánica y materiales de palas (carbono 3K/12K/18K, fibra de vidrio, gomas EVA Soft/Hard).
-Tu objetivo es realizar un análisis técnico profundo y comparativo entre las palas solicitadas.
+    return `Eres "Smashly AI", un experto en materiales de palas de pádel.
+Realiza un análisis técnico comparativo.
 
-REGLAS DE DOMINIO (PÁDEL):
-- Palas Diamante: Balance alto, máximo estrés en el brazo (riesgo de epicondilitis), potencia pura, punto dulce pequeño y superior. Para jugadores ofensivos.
-- Palas Redondas: Balance bajo, máxima manejabilidad y control, punto dulce amplio y centrado.
-- Palas Lágrima/Gota: Polivalentes, balance medio.
-- Materiales: Carbono 18K es más rígido (menos salida de bola a baja velocidad, más potencia en golpes fuertes) que el 3K o Fibra de Vidrio. Gomas Hard aportan control y potencia en bloqueos; Soft aportan salida de bola y confort.
-- PRIORIDAD DE DATOS: Si se proporcionan "Métricas Reales (Radar)", son valores técnicos exactos de nuestra base de datos. Úsalos como la VERDAD ABSOLUTA para tu análisis y para rellenar la sección "radarData" del JSON. Si no están, estima basándote en materiales y forma.
-
-DATOS DE ENTRADA:
+DATOS:
 ${racketsInfo}
-
 ${userContext}
 
-INSTRUCCIONES DE SALIDA (JSON ESTRICTO):
-Debes generar un único objeto JSON válido sin texto markdown adicional fuera de él. Su estructura DEBE ser EXACTAMENTE esta:
-
+SALIDA (JSON ESTRICTO):
 {
-  "_reasoning": "ESPACIO PARA CHAIN-OF-THOUGHT. Analiza paso a paso los materiales, forma y nivel de cada pala. Deduce características faltantes basadas en el nombre (ej. 18K = tacto duro). Piensa cómo se adaptan al usuario antes de rellenar el resto del JSON.",
-  "executiveSummary": "2-3 frases resumiendo contundentemente la comparativa.",
-  "technicalAnalysis": [
-    { "title": "Potencia", "content": "Análisis comparativo de potencia basado en los materiales y forma." },
-    { "title": "Control", "content": "..." },
-    { "title": "Manejabilidad", "content": "..." },
-    { "title": "Confort", "content": "..." }
-  ],
-  "comparisonTable": [
-    { "feature": "Forma", "${rackets[0]?.name || (rackets[0] as any)?.nombre || 'Pala 1'}": "...", "${rackets[1]?.name || (rackets[1] as any)?.nombre || 'Pala 2'}": "..." }
-  ],
-  "metrics": [
-    {
-      "racketId": 0,
-      "racketName": "${rackets[0]?.name || (rackets[0] as any)?.nombre || 'Pala 1'}",
-      "isCertified": true,
-      "radarData": {
-        "potencia": 8,
-        "control": 7,
-        "manejabilidad": 6,
-        "puntoDulce": 5,
-        "salidaDeBola": 6
-      }
-    }
-  ],
-  "recommendedProfiles": "Describe qué tipo de jugador (nivel, agresivo/defensivo) se beneficia de cada pala.",
-  "biomechanicalConsiderations": "Menciona riesgos de lesiones (ej: codo de tenista) considerando el balance y la dureza de las palas.",
-  "conclusion": "Un veredicto final directo recomendando la pala más adecuada según el contexto del usuario (si se proporcionó)."
+  "_reasoning": "Análisis interno...",
+  "executiveSummary": "Resumen...",
+  "technicalAnalysis": [{ "title": "Potencia", "content": "..." }, ...],
+  "comparisonTable": [{ "feature": "Forma", "${rackets[0]?.nombre || 'Pala 1'}": "...", "${rackets[1]?.nombre || 'Pala 2'}": "..." }],
+  "metrics": [{ "racketId": 0, "racketName": "...", "radarData": { "potencia": 8, "control": 7, "manejabilidad": 6, "puntoDulce": 5, "salidaDeBola": 6 } }],
+  "recommendedProfiles": "...",
+  "biomechanicalConsiderations": "...",
+  "conclusion": "..."
 }
 
-IMPORTANTE: 
-1. El output debe ser parseable por JSON.parse(). No uses \`\`\`json al principio ni al final.
-2. NUNCA cambies los nombres de las claves en 'radarData' (usa puntoDulce y salidaDeBola SIEMPRE).
-3. Incluye al menos 6 características clave en 'comparisonTable' (Peso, Balance, Forma, Tacto, Punto Dulce, Precio).`;
+IMPORTANTE: Solo JSON, sin bloques de código markdown.`;
   }
 
   private parseResponse(fullText: string, rackets: Racket[]): ComparisonResult {
     let cleanText = fullText.trim();
     cleanText = cleanText.replace(/```json\n?/g, '').replace(/```\n?/g, '');
 
-    const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
-
-    if (!jsonMatch) {
-      console.error('No JSON found in response');
-      throw new Error('Invalid response format: No JSON found');
-    }
-
     try {
+      const jsonMatch = cleanText.match(/\{[\s\S]*\}/);
+
+      if (!jsonMatch) {
+        throw new Error('No JSON found in response');
+      }
+
       const parsed = JSON.parse(jsonMatch[0]);
 
-      // Validar estructura básica
       if (!parsed.metrics || !Array.isArray(parsed.metrics)) {
         parsed.metrics = rackets.map((r: any) => ({
           racketId: r.id,
-          racketName: (r as any).nombre || (r as any).name,
-          isCertified: !!r.testea_potencia,
-          radarData: {
-            potencia: r.testea_potencia || 5,
-            control: r.testea_control || 5,
-            manejabilidad: r.testea_manejabilidad || 5,
-            puntoDulce: 5,
-            salidaDeBola: 5,
-          },
+          racketName: r.nombre || r.name,
+          isCertified: false,
+          radarData: { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
         }));
       }
 
@@ -225,14 +161,14 @@ IMPORTANTE:
         _reasoning: parsed._reasoning,
       };
     } catch (parseError) {
-      console.error('Error parsing structured JSON in Gemini:', parseError);
+      console.error('Error parsing JSON:', parseError);
       return {
         executiveSummary: 'Error al procesar la comparación.',
         technicalAnalysis: [],
         comparisonTable: [],
         metrics: rackets.map((r: any) => ({
           racketId: r.id,
-          racketName: (r as any).nombre || (r as any).name,
+          racketName: r.nombre || r.name,
           isCertified: false,
           radarData: { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
         })),
@@ -242,16 +178,17 @@ IMPORTANTE:
       };
     }
   }
+
   static async generateContent(prompt: string): Promise<string> {
     const service = new GeminiService();
     try {
-      const result = await service.model.generateContent(prompt);
-      const response = await result.response;
-      return response.text();
+      const response = await axios.post(`${service.baseUrl}/chat`, {
+        messages: [{ role: 'user', content: prompt }],
+        stream: false
+      });
+      return response.data.content || response.data;
     } catch (error: any) {
-      console.error('Error calling Gemini API:', error);
-      const errorMessage = error.message || 'Error desconocido de Gemini';
-      throw new Error(`Error al generar contenido con IA: ${errorMessage}`);
+      throw new Error(`Error al generar contenido con IA: ${error.message}`);
     }
   }
 }
