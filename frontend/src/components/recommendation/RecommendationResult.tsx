@@ -467,33 +467,48 @@ export const RecommendationResult: React.FC<Props> = ({
                 </Section>
               )}
 
-              {/* Match Details */}
-              {racket.match_details && (
-                <>
-                  {racket.match_details.priority_alignment && (
-                    <Section>
-                      <SectionTitle>🎯 Por qué es ideal para ti</SectionTitle>
-                      <SectionContent>{racket.match_details.priority_alignment}</SectionContent>
-                    </Section>
-                  )}
-
-                  {racket.match_details.biomechanical_fit &&
-                    racket.match_details.biomechanical_fit !== 'Pala segura para tu perfil' && (
-                      <Section>
-                        <SectionTitle>💪 Ajuste Biomecánico</SectionTitle>
-                        <SectionContent>{racket.match_details.biomechanical_fit}</SectionContent>
-                      </Section>
-                    )}
-
-                  {racket.match_details.preference_match &&
-                    racket.match_details.preference_match !== 'Compatible con tus preferencias' && (
-                      <Section>
-                        <SectionTitle>⚙️ Preferencias</SectionTitle>
-                        <SectionContent>{racket.match_details.preference_match}</SectionContent>
-                      </Section>
-                    )}
-                </>
+              {/* Main reason */}
+              {racket.reason && (
+                <Section>
+                  <SectionTitle>🎯 Por qué es ideal para ti</SectionTitle>
+                  <SectionContent>{racket.reason}</SectionContent>
+                </Section>
               )}
+
+              {/* What this racket gives you (new) */}
+              {racket.what_it_gives_you && (
+                <Section>
+                  <SectionTitle>✅ Lo que te aporta en pista</SectionTitle>
+                  <SectionContent>{racket.what_it_gives_you}</SectionContent>
+                </Section>
+              )}
+
+              {/* What it sacrifices (new) */}
+              {racket.what_it_sacrifices && (
+                <Section>
+                  <SectionTitle>⚖️ Qué cede frente a las otras opciones</SectionTitle>
+                  <SectionContent style={{ color: '#6b7280', fontStyle: 'italic' }}>
+                    {racket.what_it_sacrifices}
+                  </SectionContent>
+                </Section>
+              )}
+
+              {/* Ideal moment (new) */}
+              {racket.ideal_for_moment && (
+                <Section>
+                  <SectionTitle>⚡ Cuándo brilla más</SectionTitle>
+                  <SectionContent>{racket.ideal_for_moment}</SectionContent>
+                </Section>
+              )}
+
+              {/* Biomechanical fit from match_details */}
+              {racket.match_details?.biomechanical_fit &&
+                racket.match_details.biomechanical_fit !== 'Pala segura para tu perfil' && (
+                  <Section>
+                    <SectionTitle>💪 Ajuste Biomecánico</SectionTitle>
+                    <SectionContent>{racket.match_details.biomechanical_fit}</SectionContent>
+                  </Section>
+                )}
 
               {/* Community Data */}
               {racket.community_data && racket.community_data.user_rating && (
@@ -511,6 +526,23 @@ export const RecommendationResult: React.FC<Props> = ({
           </RacketCard>
         ))}
       </RacketsGrid>
+
+      {/* Coaching tip (new) */}
+      {result.coaching_tip && (
+        <AnalysisCard style={{ borderLeftColor: '#2563eb', marginBottom: '2rem' }}>
+          <AnalysisHeader>
+            <IconWrapper style={{ background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)' }}>
+              <svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' strokeWidth={2} stroke='currentColor'>
+                <path strokeLinecap='round' strokeLinejoin='round' d='M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443m-7.007 11.55A5.981 5.981 0 006.75 15.75v-1.5' />
+              </svg>
+            </IconWrapper>
+            <AnalysisTitle>Consejo del Entrenador</AnalysisTitle>
+          </AnalysisHeader>
+          <AnalysisContent>
+            <AnalysisParagraph>{result.coaching_tip}</AnalysisParagraph>
+          </AnalysisContent>
+        </AnalysisCard>
+      )}
 
       <Actions>
         <Button onClick={onReset}>Nueva Búsqueda</Button>

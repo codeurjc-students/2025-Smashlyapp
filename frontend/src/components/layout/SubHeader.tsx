@@ -23,11 +23,11 @@ const SubHeaderContent = styled.div`
   justify-content: center;
   height: 48px;
   width: 100%;
-  
+
   @media (max-width: 1600px) {
     padding: 0 clamp(20px, 3vw, 60px);
   }
-  
+
   @media (max-width: 1200px) {
     padding: 0 clamp(20px, 2vw, 40px);
   }
@@ -43,13 +43,13 @@ const Navigation = styled.nav`
   gap: 1.5rem;
 `;
 
-const NavItem = styled(Link)<{ isActive: boolean }>`
+const NavItem = styled(Link)<{ $isActive: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: ${props => (props.isActive ? '#16a34a' : '#6b7280')};
+  color: ${props => (props.$isActive ? '#16a34a' : '#6b7280')};
   text-decoration: none;
-  font-weight: ${props => (props.isActive ? '600' : '500')};
+  font-weight: ${props => (props.$isActive ? '600' : '500')};
   font-size: 0.875rem;
   padding: 6px 12px;
   border-radius: 6px;
@@ -63,7 +63,7 @@ const NavItem = styled(Link)<{ isActive: boolean }>`
   }
 
   ${props =>
-    props.isActive &&
+    props.$isActive &&
     `
     background: #f0f9f0;
     
@@ -133,7 +133,7 @@ const SubHeader: React.FC = () => {
       <SubHeaderContent>
         <Navigation>
           {navigationItems.map(item => (
-            <NavItem key={item.to} to={item.to} isActive={item.isActive}>
+            <NavItem key={item.to} to={item.to} $isActive={item.isActive}>
               <NavIcon>{item.icon}</NavIcon>
               <NavText>{item.text}</NavText>
             </NavItem>

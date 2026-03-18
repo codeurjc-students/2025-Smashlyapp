@@ -39,8 +39,14 @@ router.get('/image', async (req: Request, res: Response) => {
     res.set({
       'Content-Type': contentType,
       'Access-Control-Allow-Origin': '*',
+      'Cross-Origin-Resource-Policy': 'cross-origin',
       'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
     });
+
+    // Remove CSP for the image proxy to avoid interference with the parent page
+    res.removeHeader('Content-Security-Policy');
+    res.removeHeader('X-Content-Security-Policy');
+    res.removeHeader('X-WebKit-CSP');
 
     return res.send(response.data);
   } catch (error: any) {

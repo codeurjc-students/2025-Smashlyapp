@@ -1,9 +1,4 @@
-import {
-  API_ENDPOINTS,
-  buildApiUrl,
-  getCommonHeaders,
-  ApiResponse,
-} from "../config/api";
+import { API_ENDPOINTS, buildApiUrl, getCommonHeaders, ApiResponse } from '../config/api';
 
 // Interfaz para el perfil de usuario
 export interface UserProfile {
@@ -28,15 +23,13 @@ export interface UserProfile {
 async function handleApiResponse<T>(response: Response): Promise<T> {
   if (!response.ok) {
     const errorData = await response.json().catch(() => ({}));
-    throw new Error(
-      errorData.message || `Error: ${response.status} ${response.statusText}`
-    );
+    throw new Error(errorData.message || `Error: ${response.status} ${response.statusText}`);
   }
 
   const data: ApiResponse<T> = await response.json();
 
   if (!data.success) {
-    throw new Error(data.message || data.error || "Error desconocido");
+    throw new Error(data.message || data.error || 'Error desconocido');
   }
 
   return data.data as T;
@@ -48,32 +41,27 @@ export class UserProfileService {
    * Nota: El backend ya maneja la verificación de perfiles existentes y nicknames
    * El userId se obtiene del token JWT en el backend
    */
-  static async createUserProfile(
-    nickname: string,
-    fullName?: string
-  ): Promise<UserProfile> {
+  static async createUserProfile(nickname: string, fullName?: string): Promise<UserProfile> {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers: getCommonHeaders(),
         body: JSON.stringify({
           nickname,
-          full_name: fullName || "",
+          full_name: fullName || '',
         }),
       });
 
       const profile = await handleApiResponse<UserProfile>(response);
-      console.log("User profile created successfully:", profile);
+      console.log('User profile created successfully:', profile);
       return profile;
     } catch (error: any) {
-      console.error("Error creating user profile:", error);
-      if (error.message?.includes("nickname")) {
+      console.error('Error creating user profile:', error);
+      if (error.message?.includes('nickname')) {
         throw new Error(`El nickname '${nickname}' ya no está disponible`);
       }
-      throw new Error(
-        error.message || "Error inesperado al crear el perfil de usuario"
-      );
+      throw new Error(error.message || 'Error inesperado al crear el perfil de usuario');
     }
   }
 
@@ -85,24 +73,31 @@ export class UserProfileService {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
-        method: "GET",
+        method: 'GET',
         headers: getCommonHeaders(),
       });
 
       if (response.status === 404) {
-        console.log("User profile not found");
+        console.log('User profile not found');
         return null;
       }
 
       return await handleApiResponse<UserProfile>(response);
     } catch (error: any) {
-      console.error("Error fetching user profile:", error);
-      if (error.message?.includes("404")) {
+      const isAuthError =
+        error.message &&
+        (error.message.includes('401') ||
+          error.message.toLowerCase().includes('token is invalid') ||
+          error.message.toLowerCase().includes('expired'));
+
+      if (!isAuthError) {
+        console.error('Error fetching user profile:', error);
+      }
+
+      if (error.message?.includes('404')) {
         return null;
       }
-      throw new Error(
-        error.message || "Error inesperado al obtener el perfil de usuario"
-      );
+      throw new Error(error.message || 'Error inesperado al obtener el perfil de usuario');
     }
   }
 
@@ -111,22 +106,20 @@ export class UserProfileService {
    * El userId se obtiene del token JWT en el backend
    */
   static async updateUserProfile(
-    updates: Partial<Omit<UserProfile, "id" | "created_at">>
+    updates: Partial<Omit<UserProfile, 'id' | 'created_at'>>
   ): Promise<UserProfile> {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
-        method: "PUT",
+        method: 'PUT',
         headers: getCommonHeaders(),
         body: JSON.stringify(updates),
       });
 
       return await handleApiResponse<UserProfile>(response);
     } catch (error: any) {
-      console.error("Error updating user profile:", error);
-      throw new Error(
-        error.message || "Error inesperado al actualizar el perfil de usuario"
-      );
+      console.error('Error updating user profile:', error);
+      throw new Error(error.message || 'Error inesperado al actualizar el perfil de usuario');
     }
   }
 
@@ -139,15 +132,11 @@ export class UserProfileService {
     try {
       // TODO: Implementar endpoint en backend para verificar disponibilidad
       // Por ahora asumimos que está disponible hasta que se intente usar
-      console.warn(
-        "isNicknameAvailable: Esta funcionalidad debe implementarse en el backend"
-      );
+      console.warn('isNicknameAvailable: Esta funcionalidad debe implementarse en el backend');
       return true;
     } catch (error: any) {
-      console.error("Error checking nickname availability:", error);
-      throw new Error(
-        error.message || "Error al verificar disponibilidad del nickname"
-      );
+      console.error('Error checking nickname availability:', error);
+      throw new Error(error.message || 'Error al verificar disponibilidad del nickname');
     }
   }
 
@@ -160,16 +149,14 @@ export class UserProfileService {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
-        method: "DELETE",
+        method: 'DELETE',
         headers: getCommonHeaders(),
       });
 
       await handleApiResponse<void>(response);
     } catch (error: any) {
-      console.error("Error deleting user profile:", error);
-      throw new Error(
-        error.message || "Error al eliminar el perfil de usuario"
-      );
+      console.error('Error deleting user profile:', error);
+      throw new Error(error.message || 'Error al eliminar el perfil de usuario');
     }
   }
 }

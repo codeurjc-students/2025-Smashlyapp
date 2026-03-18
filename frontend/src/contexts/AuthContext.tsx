@@ -71,7 +71,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Función para cargar el perfil del usuario desde la API
   const loadUserProfile = async () => {
     try {
-      console.log('Loading user profile from API...');
+      // console.log('Loading user profile from API...');
       const profile = await UserProfileService.getUserProfile();
 
       if (!profile) {
@@ -86,18 +86,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       setUser(profile);
       setUserProfile(profile);
-      console.log('User profile loaded successfully:', profile);
+      // console.log('User profile loaded successfully:', profile);
     } catch (error) {
-      console.error('Error loading user profile:', error);
       // Solo limpiamos en caso de error de autenticación, no si falta el perfil
       if (
         error instanceof Error &&
-        (error.message.includes('401') || error.message.includes('Token'))
+        (error.message.includes('401') ||
+          error.message.toLowerCase().includes('token') ||
+          error.message.toLowerCase().includes('expired'))
       ) {
+        // Silencio en consola para expereciones esperadas
         setUser(null);
         setUserProfile(null);
         clearAuthStorage();
       } else {
+        console.error('Error loading user profile:', error);
         // Otros errores no deberían cerrar la sesión
         setUser(null);
         setUserProfile(null);
@@ -119,10 +122,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       try {
         const token = getAuthToken();
         if (token) {
-          console.log('Auth token found, loading user profile...');
+          // console.log('Auth token found, loading user profile...');
           await loadUserProfile();
         } else {
-          console.log('No auth token found, user not authenticated.');
+          // console.log('No auth token found, user not authenticated.');
           clearAuthStorage();
           setUser(null);
           setUserProfile(null);

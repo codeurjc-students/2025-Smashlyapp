@@ -7,6 +7,7 @@ const router = Router();
 // Public route (or semi-public, basic form doesn't require auth but saving does)
 // Actually, generating recommendation might not require auth for basic form.
 router.post('/generate', RecommendationController.generate);
+router.post('/generate-rag', RecommendationController.generateWithRAG);
 
 // Protected routes
 router.post('/save', authenticate, RecommendationController.save);

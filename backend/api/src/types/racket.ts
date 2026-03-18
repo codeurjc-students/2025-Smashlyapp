@@ -88,43 +88,13 @@ export interface Racket {
   discount_percentage?: number;
   link?: string;
   source?: string;
-  nombre?: string;
-}
 
-export interface RadarMetrics {
-  potencia: number;
-  control: number;
-  manejabilidad: number;
-  puntoDulce: number;
-  salidaDeBola: number;
-}
-
-export interface RacketComparisonData {
-  racketId: number;
-  racketName: string;
-  isCertified: boolean;
-  radarData: RadarMetrics;
-}
-
-export interface ComparisonSection {
-  title: string;
-  content: string;
-}
-
-export interface ComparisonTableItem {
-  feature: string;
-  [racketName: string]: string | number;
-}
-
-export interface ComparisonResult {
-  executiveSummary: string;
-  technicalAnalysis: ComparisonSection[];
-  comparisonTable: ComparisonTableItem[];
-  metrics: RacketComparisonData[];
-  recommendedProfiles: string;
-  biomechanicalConsiderations: string;
-  conclusion: string;
-  _reasoning?: string;
+  // Radar Metrics
+  radar_potencia?: number | null;
+  radar_control?: number | null;
+  radar_manejabilidad?: number | null;
+  radar_punto_dulce?: number | null;
+  radar_salida_bola?: number | null;
 }
 
 // Types for basic user forms

@@ -84,6 +84,7 @@ export class RecommendationService {
       const result: RecommendationResult = {
         rackets: enrichedRackets,
         analysis: aiResult.analysis,
+        coaching_tip: aiResult.coaching_tip || undefined,
         process_summary: {
           total_catalog: allRackets.length,
           discarded_biomechanical: allRackets.length - filteredRackets.length,
@@ -91,7 +92,7 @@ export class RecommendationService {
           main_criterion: this.getMainCriterion(data),
         },
         transparency_note:
-          'Todas las puntuaciones de rendimiento (Potencia, Control, Manejabilidad, Confort) provienen de ensayos certificados por Testea Pádel o son estimaciones basadas en especificaciones físicas. Las valoraciones de usuarios reflejan la experiencia de la comunidad Smashly.',
+          'Las puntuaciones de Potencia, Control, Manejabilidad, Punto Dulce y Salida de Bola son calculadas de forma determinista a partir de las características físicas de cada pala (forma, balance, dureza) y permanecen fijas para cada modelo. Las valoraciones de usuarios reflejan la experiencia de la comunidad Smashly.',
       };
 
       // 8. Cache the result
@@ -188,28 +189,30 @@ MAPEO DE PRIORIDADES A MÉTRICAS:
 
 INSTRUCCIONES:
 1. Selecciona EXACTAMENTE 3 palas del catálogo
-2. Usa SOLO los IDs del catálogo
-3. Ordena por Puntuación_Final descendente
-4. Para cada pala, proporciona:
-   - match_score: Puntuación_Final calculada (0-100)
-   - reason: Explicación concisa (máx 50 palabras) que vincule las prioridades del usuario con las métricas Testea
-   - priority_alignment: Cómo cumple con las prioridades específicas del usuario
-   - biomechanical_fit: Por qué es segura para su perfil (ej: "Balance medio y dureza blanda, ideal para prevenir lesiones")
-   - preference_match: Cómo coincide con tacto/estética preferidos
+2. Usa SOLO los IDs del catálogo proporcionado
+3. Ordena por Puntuación_Final descendente (la mejor recomendación primero)
+4. Para cada pala, proporciona explicaciones ESPECÍFICAS y CONCRETAS:
+   - NO uses frases genéricas como "buena pala para tu nivel"
+   - SÍ menciona datos concretos: materiales, valores P/C/M/Conf, balance, forma y su impacto real en juego
+   - SÍ relaciona cada característica con el perfil exacto del usuario
+   - El usuario debe entender QUÉ le da CONCRETAMENTE esta pala y POR QUÉ es mejor que las otras para ÉL
 
 FORMATO DE RESPUESTA (JSON puro, sin markdown):
 {
   "rackets": [
     {
-      "id": <número>,
-      "match_score": <0-100>,
-      "reason": "<explicación concisa>",
-      "priority_alignment": "<cómo cumple prioridades>",
-      "biomechanical_fit": "<por qué es segura>",
-      "preference_match": "<coincidencia con preferencias>"
+      "id": <número entero del catálogo>,
+      "match_score": <número 0-100 según fórmula>,
+      "reason": "<2-3 frases específicas: qué materiales/características tiene y cómo resuelven las necesidades de este usuario concreto>",
+      "what_it_gives_you": "<3-4 beneficios concretos que el usuario notará en pista: ej. 'Manejabilidad 8/10 te da más tiempo de reacción en defensa', 'Goma blanda reduce fatiga en sesiones largas', 'Punto dulce amplio perdona los golpes menos centrados'>",
+      "what_it_sacrifices": "<qué cede esta pala honestamente comparada con las otras opciones: ej. 'Menos explosividad en smash que la opción 2', 'Precio más elevado'>",
+      "priority_alignment": "<cómo satisface la 1ª y 2ª prioridad del usuario con valores numéricos: ej. 'Control 8/10 (tu prioridad #1), Manejabilidad 7/10 (#2)'>",
+      "biomechanical_fit": "<por qué es segura/óptima para su perfil físico: forma+balance+dureza y su impacto biomecánico>",
+      "ideal_for_moment": "<en qué situaciones de juego brilla: ej. 'En bandeja y víbora desde posición de resto', 'En rallies largos de fondo de pista'>"
     }
   ],
-  "analysis": "<análisis general del perfil y recomendaciones, máx 150 palabras>"
+  "analysis": "<3-4 frases: resumen del perfil del usuario, lógica de la selección, y qué diferencia a la pala #1 de las demás. Menciona si hay opción calidad-precio destacada>",
+  "coaching_tip": "<1 consejo técnico específico para este jugador sobre cómo aprovechar su nueva pala según su nivel y estilo de juego>"
 }
 
 RESPONDE SOLO CON EL JSON:`;
@@ -255,13 +258,17 @@ RESPONDE SOLO CON EL JSON:`;
           price: racket.precio_actual,
           match_score: rec.match_score,
           reason: rec.reason,
+          // New rich explanation fields from improved prompt
+          what_it_gives_you: rec.what_it_gives_you || null,
+          what_it_sacrifices: rec.what_it_sacrifices || null,
+          ideal_for_moment: rec.ideal_for_moment || null,
           testea_metrics: testeaMetrics,
           biomechanical_safety: biomechanicalSafety,
           community_data: communityData,
           match_details: {
             priority_alignment: rec.priority_alignment || rec.reason,
             biomechanical_fit: rec.biomechanical_fit || 'Pala segura para tu perfil',
-            preference_match: rec.preference_match || 'Compatible con tus preferencias',
+            preference_match: rec.preference_match || null,
           },
         };
       })

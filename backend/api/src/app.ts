@@ -40,7 +40,10 @@ app.use(
       directives: {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
-        scriptSrc: ["'self'", "'unsafe-inline'", 'https://accounts.google.com'],
+        scriptSrc:
+          process.env.NODE_ENV === 'production'
+            ? ["'self'", 'https://accounts.google.com']
+            : ["'self'", "'unsafe-inline'", 'https://accounts.google.com'],
         imgSrc: ["'self'", 'data:', 'https:', 'https://lh3.googleusercontent.com'],
         frameSrc: ["'self'", 'https://accounts.google.com'],
         connectSrc:
@@ -57,6 +60,7 @@ app.use(
               ],
       },
     },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
   })
 );
 
@@ -81,7 +85,7 @@ app.use(
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 500, // aumentado de 100 a 500 para evitar errores 429 en desarrollo/uso normal
+  max: 500, // Límite general razonable
   message: {
     error: 'Too many requests from this IP, please try again later.',
     code: 'RATE_LIMIT_EXCEEDED',
@@ -90,13 +94,26 @@ const limiter = rateLimit({
   legacyHeaders: false,
 });
 
+// Stricter rate limiting for auth endpoints to prevent brute force
+const authLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000, // 1 minuto
+  max: 10, // Máximo 10 intentos por minuto
+  message: {
+    error: 'Demasiados intentos. Por favor, espere un minuto.',
+    code: 'AUTH_RATE_LIMIT_EXCEEDED',
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 app.use('/api/v1/', limiter);
+app.use('/api/v1/auth/', authLimiter);
 
 // Middleware general
 app.use(compression());
 app.use(morgan('combined'));
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '1mb' })); // Reduced from 10mb to prevent DoS
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Rutas principales
 app.use('/api/v1/health', healthRoutes);
@@ -206,11 +223,26 @@ app.use('*', (req, res) => {
 // Middleware global de manejo de errores
 app.use(
   (
-    err: Error & { isJoi?: boolean; details?: Array<{ message: string }>; code?: string },
+    err: Error & {
+      isJoi?: boolean;
+      details?: Array<{ message: string }>;
+      code?: string;
+      status?: number;
+    },
     req: express.Request,
-    res: express.Response
+    res: express.Response,
+    next: express.NextFunction
   ) => {
-    logger.error('❌ Error:', err);
+    // Sanitize error logging - don't dump the whole object if it contains sensitive data
+    const errorDetails = {
+      message: err.message,
+      code: err.code,
+      path: req.path,
+      method: req.method,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+    };
+
+    logger.error('❌ Error:', errorDetails);
 
     // Error de validación de Joi
     if (err.isJoi && err.details) {
@@ -230,7 +262,7 @@ app.use(
     }
 
     // Error genérico
-    return res.status((err as any).status || 500).json({
+    return res.status(err.status || 500).json({
       error: err.message || 'Internal server error',
       ...(process.env.NODE_ENV === 'development' && { stack: err.stack }),
     });

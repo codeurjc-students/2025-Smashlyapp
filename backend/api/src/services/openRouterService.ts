@@ -377,22 +377,52 @@ export class OpenRouterService {
     }
   }
 
+  /**
+   * Extrae los valores radar de la BD si existen.
+   * Soporta tanto el formato frontend (español) como el formato raw de BD (inglés).
+   */
+  private getDbRadarValues(r: any): {
+    potencia: number; control: number; manejabilidad: number;
+    puntoDulce: number; salidaDeBola: number;
+  } | null {
+    const pot = r.radar_potencia ?? null;
+    const con = r.radar_control ?? null;
+    const man = r.radar_manejabilidad ?? null;
+    const pd  = r.radar_punto_dulce ?? null;
+    const sb  = r.radar_salida_bola ?? null;
+
+    if (pot === null || con === null || man === null) return null;
+
+    return {
+      potencia:      Number(pot),
+      control:       Number(con),
+      manejabilidad: Number(man),
+      puntoDulce:    pd !== null ? Number(pd) : 5,
+      salidaDeBola:  sb !== null ? Number(sb) : 5,
+    };
+  }
+
   private buildRacketsInfo(rackets: Racket[]): string {
     return rackets
       .map(
-        (r: any, index) => `PALA ${index + 1}:
+        (r: any, index) => {
+          const dbRadar = this.getDbRadarValues(r);
+          const radarLine = dbRadar
+            ? `⚠️ VALORES RADAR FIJOS DE BD (NO MODIFICAR): Pot:${dbRadar.potencia}, Con:${dbRadar.control}, Man:${dbRadar.manejabilidad}, PD:${dbRadar.puntoDulce}, SB:${dbRadar.salidaDeBola}`
+            : 'Métricas Radar: No disponibles (estima basándote en forma y materiales)';
+
+          return `PALA ${index + 1}:
 Nombre: ${r.nombre || r.name}
-Marca: ${r.marca || r.caracteristicas_marca || 'N/A'}
-Modelo: ${r.modelo || 'N/A'}
-Forma: ${r.caracteristicas_forma || r.caracteristicas_formato || 'N/A'}
-Goma: ${r.caracteristicas_nucleo || 'N/A'}
-Cara/Fibra: ${r.caracteristicas_cara || 'N/A'}
-Balance: ${r.caracteristicas_balance || 'N/A'}
-Dureza: ${r.caracteristicas_dureza || 'N/A'}
-Peso: ${r.peso ? `${r.peso}g` : 'N/A'}
-Nivel: ${r.caracteristicas_nivel_de_juego || 'N/A'}
-Métricas Reales (Radar): ${r.radar_potencia ? `Pot:${r.radar_potencia}, Con:${r.radar_control}, Man:${r.radar_manejabilidad}, PD:${r.radar_punto_dulce}, SB:${r.radar_salida_bola}` : 'No disponibles (usar estimación lógica)'}
-Testea Certificado: ${r.testea_potencia ? 'SÍ' : 'NO'}`
+Marca: ${r.marca || r.caracteristicas_marca || r.brand || 'N/A'}
+Modelo: ${r.modelo || r.model || 'N/A'}
+Forma: ${r.caracteristicas_forma || r.characteristics_shape || 'N/A'}
+Goma: ${r.caracteristicas_nucleo || r.characteristics_core || 'N/A'}
+Cara/Fibra: ${r.caracteristicas_cara || r.characteristics_face || 'N/A'}
+Balance: ${r.caracteristicas_balance || r.characteristics_balance || 'N/A'}
+Dureza: ${r.caracteristicas_dureza || r.characteristics_hardness || 'N/A'}
+Nivel: ${r.caracteristicas_nivel_de_juego || r.characteristics_game_level || 'N/A'}
+${radarLine}`;
+        }
       )
       .join('\n\n');
   }
@@ -485,20 +515,39 @@ IMPORTANTE:
 
       // Validar estructura básica
       if (!parsed.metrics || !Array.isArray(parsed.metrics)) {
-        // Fallback si falla metrics
         parsed.metrics = rackets.map((r: any) => ({
           racketId: r.id,
-          racketName: r.nombre,
-          isCertified: !!r.testea_potencia,
-          radarData: {
-            potencia: r.testea_potencia || 5,
-            control: r.testea_control || 5,
-            manejabilidad: r.testea_manejabilidad || 5,
-            puntoDulce: 5,
-            salidaDeBola: 5,
-          },
+          racketName: r.nombre || r.name,
+          isCertified: false,
+          radarData: { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
         }));
       }
+
+      // ─────────────────────────────────────────────────────────────────────
+      // OVERRIDE DE SEGURIDAD: Si la pala tiene valores radar en la BD,
+      // los usamos SIEMPRE, ignorando lo que haya generado el LLM.
+      // Esto garantiza consistencia entre comparaciones.
+      // ─────────────────────────────────────────────────────────────────────
+      parsed.metrics = parsed.metrics.map((metric: any, index: number) => {
+        const racket = rackets[index] as any;
+        if (!racket) return metric;
+
+        const dbRadar = this.getDbRadarValues(racket);
+        if (dbRadar) {
+          return {
+            ...metric,
+            isCertified: true,
+            radarData: {
+              potencia:      dbRadar.potencia,
+              control:       dbRadar.control,
+              manejabilidad: dbRadar.manejabilidad,
+              puntoDulce:    dbRadar.puntoDulce,
+              salidaDeBola:  dbRadar.salidaDeBola,
+            },
+          };
+        }
+        return metric;
+      });
 
       // Validar comparisonTable (asegurar array)
       if (!parsed.comparisonTable || !Array.isArray(parsed.comparisonTable)) {
@@ -523,17 +572,21 @@ IMPORTANTE:
     } catch (parseError) {
       logger.error('Error parsing structured JSON:', parseError);
 
-      // Return bare minimum structure on crash
       return {
         executiveSummary: 'Error al procesar la comparación.',
         technicalAnalysis: [],
         comparisonTable: [],
-        metrics: rackets.map((r: any) => ({
-          racketId: r.id,
-          racketName: r.nombre,
-          isCertified: false,
-          radarData: { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
-        })),
+        metrics: rackets.map((r: any) => {
+          const dbRadar = this.getDbRadarValues(r);
+          return {
+            racketId:    r.id,
+            racketName:  r.nombre || r.name,
+            isCertified: !!dbRadar,
+            radarData: dbRadar
+              ? { potencia: dbRadar.potencia, control: dbRadar.control, manejabilidad: dbRadar.manejabilidad, puntoDulce: dbRadar.puntoDulce, salidaDeBola: dbRadar.salidaDeBola }
+              : { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
+          };
+        }),
         recommendedProfiles: '',
         biomechanicalConsiderations: '',
         conclusion: '',

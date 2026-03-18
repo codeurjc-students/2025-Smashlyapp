@@ -73,6 +73,11 @@ export interface RacketRecommendation {
   brand?: string | null;
   price?: number | null;
 
+  // Rich per-racket explanations (new)
+  what_it_gives_you?: string | null;   // Concrete in-game benefits
+  what_it_sacrifices?: string | null;  // Honest trade-offs vs other options
+  ideal_for_moment?: string | null;    // When/where it shines on court
+
   // Strategic additions
   testea_metrics?: TesteaMetrics;
   biomechanical_safety?: BiomechanicalSafety;
@@ -80,13 +85,14 @@ export interface RacketRecommendation {
   match_details?: {
     priority_alignment: string;
     biomechanical_fit: string;
-    preference_match: string;
+    preference_match?: string | null;
   };
 }
 
 export interface RecommendationResult {
   rackets: RacketRecommendation[];
   analysis: string;
+  coaching_tip?: string; // One concrete tip for this player
   process_summary?: {
     total_catalog: number;
     discarded_biomechanical: number;

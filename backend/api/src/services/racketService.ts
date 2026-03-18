@@ -155,6 +155,13 @@ export function mapToFrontendFormat(racket: any): any {
     descuento_porcentaje: racket.descuento_porcentaje,
     enlace: racket.enlace,
     fuente: racket.fuente,
+
+    // Radar Metrics
+    radar_potencia: racket.radar_potencia,
+    radar_control: racket.radar_control,
+    radar_manejabilidad: racket.radar_manejabilidad,
+    radar_punto_dulce: racket.radar_punto_dulce,
+    radar_salida_bola: racket.radar_salida_bola,
   };
 }
 
@@ -242,6 +249,18 @@ export function mapToBackendFormat(frontendRacket: any): any {
     backendData.padelproshop_discount_percentage = frontendRacket.padelproshop_descuento_porcentaje;
   if (frontendRacket.padelproshop_enlace !== undefined)
     backendData.padelproshop_link = frontendRacket.padelproshop_enlace;
+
+  // Radar Metrics
+  if (frontendRacket.radar_potencia !== undefined)
+    backendData.radar_potencia = frontendRacket.radar_potencia;
+  if (frontendRacket.radar_control !== undefined)
+    backendData.radar_control = frontendRacket.radar_control;
+  if (frontendRacket.radar_manejabilidad !== undefined)
+    backendData.radar_manejabilidad = frontendRacket.radar_manejabilidad;
+  if (frontendRacket.radar_punto_dulce !== undefined)
+    backendData.radar_punto_dulce = frontendRacket.radar_punto_dulce;
+  if (frontendRacket.radar_salida_bola !== undefined)
+    backendData.radar_salida_bola = frontendRacket.radar_salida_bola;
 
   return backendData;
 }

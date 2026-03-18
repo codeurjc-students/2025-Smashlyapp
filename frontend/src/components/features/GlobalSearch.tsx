@@ -362,6 +362,8 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
@@ -439,6 +441,16 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     return () => clearTimeout(timeoutId);
   }, [searchQuery, rackets, uniqueBrands, uniqueShapes]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const toggleSearch = () => {
     if (isInHeader) {
       setSearchQuery('');
@@ -497,16 +509,19 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
+    setShowDropdown(true);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Escape') {
+      setShowDropdown(false);
       if (isInHeader) {
         onSearchToggle?.(false);
       } else {
         toggleSearch();
       }
     } else if (e.key === 'Enter' && searchQuery.trim()) {
+      setShowDropdown(false);
       if (isInHeader) {
         onSearchToggle?.(false);
       } else {
@@ -553,7 +568,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   const hasResults = searchResults.length > 0;
 
   return (
-    <SearchContainer>
+    <SearchContainer ref={containerRef}>
       <SearchWrapper>
         <AnimatePresence>
           {(isSearchOpen || isInHeader) && (
@@ -571,6 +586,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                 value={searchQuery}
                 onChange={handleSearchChange}
                 onKeyDown={handleKeyPress}
+                onFocus={() => {
+                  if (searchQuery.trim().length > 0) setShowDropdown(true);
+                }}
                 $isInHeader={isInHeader}
                 $isMobileContext={isMobileContext}
               />
@@ -589,7 +607,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
       </SearchWrapper>
 
       <AnimatePresence>
-        {(isSearchOpen || isInHeader) && searchQuery.trim().length > 0 && (
+        {(isSearchOpen || isInHeader) && showDropdown && searchQuery.trim().length > 0 && (
           <SearchResultsDropdown
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
