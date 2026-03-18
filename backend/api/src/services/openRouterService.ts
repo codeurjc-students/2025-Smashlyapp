@@ -382,36 +382,46 @@ export class OpenRouterService {
    * Soporta tanto el formato frontend (español) como el formato raw de BD (inglés).
    */
   private getDbRadarValues(r: any): {
-    potencia: number; control: number; manejabilidad: number;
-    puntoDulce: number; salidaDeBola: number;
+    potencia: number;
+    control: number;
+    manejabilidad: number;
+    puntoDulce: number;
+    salidaDeBola: number;
   } | null {
     const pot = r.radar_potencia ?? null;
     const con = r.radar_control ?? null;
     const man = r.radar_manejabilidad ?? null;
-    const pd  = r.radar_punto_dulce ?? null;
-    const sb  = r.radar_salida_bola ?? null;
+    const pd = r.radar_punto_dulce ?? null;
+    const sb = r.radar_salida_bola ?? null;
 
     if (pot === null || con === null || man === null) return null;
 
     return {
-      potencia:      Number(pot),
-      control:       Number(con),
+      potencia: Number(pot),
+      control: Number(con),
       manejabilidad: Number(man),
-      puntoDulce:    pd !== null ? Number(pd) : 5,
-      salidaDeBola:  sb !== null ? Number(sb) : 5,
+      puntoDulce: pd !== null ? Number(pd) : 5,
+      salidaDeBola: sb !== null ? Number(sb) : 5,
     };
   }
 
   private buildRacketsInfo(rackets: Racket[]): string {
     return rackets
-      .map(
-        (r: any, index) => {
-          const dbRadar = this.getDbRadarValues(r);
-          const radarLine = dbRadar
-            ? `⚠️ VALORES RADAR FIJOS DE BD (NO MODIFICAR): Pot:${dbRadar.potencia}, Con:${dbRadar.control}, Man:${dbRadar.manejabilidad}, PD:${dbRadar.puntoDulce}, SB:${dbRadar.salidaDeBola}`
-            : 'Métricas Radar: No disponibles (estima basándote en forma y materiales)';
+      .map((r: any, index) => {
+        const hasTesteaMetrics = [
+          r.testea_potencia,
+          r.testea_control,
+          r.testea_manejabilidad,
+          r.testea_confort,
+        ].some(value => value !== null && value !== undefined);
+        const testeaLine = `Testea Certificado: ${hasTesteaMetrics ? 'SÍ' : 'NO'}`;
 
-          return `PALA ${index + 1}:
+        const dbRadar = this.getDbRadarValues(r);
+        const radarLine = dbRadar
+          ? `⚠️ VALORES RADAR FIJOS DE BD (NO MODIFICAR): Pot:${dbRadar.potencia}, Con:${dbRadar.control}, Man:${dbRadar.manejabilidad}, PD:${dbRadar.puntoDulce}, SB:${dbRadar.salidaDeBola}`
+          : 'Métricas Radar: No disponibles (estima basándote en forma y materiales)';
+
+        return `PALA ${index + 1}:
 Nombre: ${r.nombre || r.name}
 Marca: ${r.marca || r.caracteristicas_marca || r.brand || 'N/A'}
 Modelo: ${r.modelo || r.model || 'N/A'}
@@ -421,9 +431,9 @@ Cara/Fibra: ${r.caracteristicas_cara || r.characteristics_face || 'N/A'}
 Balance: ${r.caracteristicas_balance || r.characteristics_balance || 'N/A'}
 Dureza: ${r.caracteristicas_dureza || r.characteristics_hardness || 'N/A'}
 Nivel: ${r.caracteristicas_nivel_de_juego || r.characteristics_game_level || 'N/A'}
+${testeaLine}
 ${radarLine}`;
-        }
-      )
+      })
       .join('\n\n');
   }
 
@@ -538,11 +548,11 @@ IMPORTANTE:
             ...metric,
             isCertified: true,
             radarData: {
-              potencia:      dbRadar.potencia,
-              control:       dbRadar.control,
+              potencia: dbRadar.potencia,
+              control: dbRadar.control,
               manejabilidad: dbRadar.manejabilidad,
-              puntoDulce:    dbRadar.puntoDulce,
-              salidaDeBola:  dbRadar.salidaDeBola,
+              puntoDulce: dbRadar.puntoDulce,
+              salidaDeBola: dbRadar.salidaDeBola,
             },
           };
         }
@@ -579,11 +589,17 @@ IMPORTANTE:
         metrics: rackets.map((r: any) => {
           const dbRadar = this.getDbRadarValues(r);
           return {
-            racketId:    r.id,
-            racketName:  r.nombre || r.name,
+            racketId: r.id,
+            racketName: r.nombre || r.name,
             isCertified: !!dbRadar,
             radarData: dbRadar
-              ? { potencia: dbRadar.potencia, control: dbRadar.control, manejabilidad: dbRadar.manejabilidad, puntoDulce: dbRadar.puntoDulce, salidaDeBola: dbRadar.salidaDeBola }
+              ? {
+                  potencia: dbRadar.potencia,
+                  control: dbRadar.control,
+                  manejabilidad: dbRadar.manejabilidad,
+                  puntoDulce: dbRadar.puntoDulce,
+                  salidaDeBola: dbRadar.salidaDeBola,
+                }
               : { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
           };
         }),
