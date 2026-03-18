@@ -1,8 +1,9 @@
 import 'dotenv/config';
 import { EmbeddingService } from '../services/embeddingService';
-import { supabaseAdmin } from '../config/supabase';
+import { getSupabaseAdmin } from '../config/supabase';
 
 async function debugSearch() {
+  const admin = getSupabaseAdmin();
   const query = 'pala de control para nivel intermedio con epicondilitis';
   console.log(`🔍 Debugging search for: "${query}"`);
 
@@ -10,7 +11,7 @@ async function debugSearch() {
   console.log(`📏 Embedding dim: ${embedding.length}`);
 
   // Test match_rackets with 0 threshold
-  const { data, error } = await supabaseAdmin.rpc('match_rackets', {
+  const { data, error } = await admin.rpc('match_rackets', {
     query_embedding: embedding,
     match_threshold: 0.0, // Low threshold to see anything
     match_count: 5,
@@ -29,7 +30,7 @@ async function debugSearch() {
   }
 
   // Test match_knowledge
-  const { data: kData, error: kError } = await supabaseAdmin.rpc('match_knowledge', {
+  const { data: kData, error: kError } = await admin.rpc('match_knowledge', {
     query_embedding: embedding,
     match_threshold: 0.0,
     match_count: 3,
