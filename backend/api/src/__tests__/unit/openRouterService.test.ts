@@ -245,7 +245,7 @@ describe('OpenRouterService', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/chat/completions',
         expect.objectContaining({
-          model: 'google/gemini-2.0-flash-exp:free',
+          model: 'anthropic/claude-3.5-sonnet',
           messages: [{ role: 'user', content: 'Test prompt' }],
         })
       );
@@ -430,7 +430,7 @@ describe('OpenRouterService', () => {
 
       // Verify second model was used
       const secondCall = mockAxiosInstance.post.mock.calls[1][1];
-      expect(secondCall.model).toBe('deepseek/deepseek-r1:free');
+      expect(secondCall.model).toBe('openai/gpt-4-turbo');
     });
 
     it('should handle JSON response wrapped in markdown code blocks', async () => {
@@ -534,11 +534,11 @@ ${JSON.stringify(mockStructuredResponse)}
 
     describe('model fallback behavior', () => {
       const freeModels = [
-        'google/gemini-2.0-flash-exp:free',
-        'deepseek/deepseek-r1:free',
-        'meta-llama/llama-3.3-70b-instruct:free',
-        'mistralai/mistral-nemo:free',
-        'qwen/qwen-2.5-7b-instruct:free',
+        'anthropic/claude-3.5-sonnet',
+        'openai/gpt-4-turbo',
+        'google/gemini-2.0-flash-001',
+        'meta-llama/llama-3.1-70b-instruct',
+        'deepseek/deepseek-chat',
       ];
 
       it('should try all 5 free models in sequence', async () => {
