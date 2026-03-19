@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 
 async function openCatalog(page: Page) {
   await page.goto('/catalog', { waitUntil: 'domcontentloaded' });
-  await expect(page.getByRole('heading', { name: /catalogo de palas/i })).toBeVisible();
+  await expect(page.getByRole('heading', { name: /cat[aá]logo de palas/i })).toBeVisible();
 }
 
 test.describe('Catalog Page', () => {
