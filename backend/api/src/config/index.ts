@@ -17,9 +17,6 @@ export const config: ApiConfig = {
       process.env.SUPABASE_ANON_KEY ||
       "",
   },
-  gemini: {
-    apiKey: process.env.GEMINI_API_KEY || "",
-  },
   openrouter: {
     apiKey: process.env.OPENROUTER_API_KEY || "",
     appName: process.env.OPENROUTER_APP_NAME || "Smashly",

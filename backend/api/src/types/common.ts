@@ -87,9 +87,6 @@ export interface ApiConfig {
   corsOrigin: string[];
   jwtSecret?: string;
   database: DatabaseConfig;
-  gemini?: {
-    apiKey: string;
-  };
   openrouter?: {
     apiKey: string;
     appName: string;

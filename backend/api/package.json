@@ -39,7 +39,6 @@
   "author": "Smashly Team",
   "license": "MIT",
   "dependencies": {
-    "@google/generative-ai": "^0.24.1",
     "@supabase/supabase-js": "^2.50.2",
     "@types/multer": "^2.0.0",
     "axios": "^1.13.2",
