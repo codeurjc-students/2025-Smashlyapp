@@ -1,11 +1,12 @@
 import 'dotenv/config';
-import { supabaseAdmin } from '../config/supabase';
+import { getSupabaseAdmin } from '../config/supabase';
 
 async function checkCounts() {
+  const admin = getSupabaseAdmin();
   const [rackets, reviews, knowledge] = await Promise.all([
-    supabaseAdmin.from('racket_embeddings').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('review_embeddings').select('*', { count: 'exact', head: true }),
-    supabaseAdmin.from('knowledge_embeddings').select('*', { count: 'exact', head: true }),
+    admin.from('racket_embeddings').select('*', { count: 'exact', head: true }),
+    admin.from('review_embeddings').select('*', { count: 'exact', head: true }),
+    admin.from('knowledge_embeddings').select('*', { count: 'exact', head: true }),
   ]);
 
   console.log('--- Vector Store Stats ---');

@@ -33,8 +33,8 @@ function createHealthStatus(dbConnected: boolean, responseTime: number) {
         type: "Supabase",
       },
       ai: {
-        status: process.env.GEMINI_API_KEY ? "configured" : "not_configured",
-        type: "Google Gemini",
+        status: process.env.OPENROUTER_API_KEY ? "configured" : "not_configured",
+        type: "OpenRouter",
       },
     },
     performance: {
@@ -64,7 +64,7 @@ function checkEnvironmentVariables() {
     supabaseKey: !!(
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY
     ),
-    geminiApiKey: !!process.env.GEMINI_API_KEY,
+    openrouterApiKey: !!process.env.OPENROUTER_API_KEY,
     nodeEnv: process.env.NODE_ENV || "development",
   };
 }

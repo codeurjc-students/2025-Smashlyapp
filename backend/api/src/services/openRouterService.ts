@@ -1,16 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
-import {
-  Racket,
-  UserFormData,
-  ComparisonResult,
-  ComparisonSection,
-  ComparisonTableItem,
-  RacketComparisonData,
-  RadarMetrics,
-} from '../types/racket';
+import { Racket, UserFormData, ComparisonResult } from '../types/racket';
 import logger from '../config/logger';
 import { freeAiService } from './freeAiService';
-import { GoogleGenerativeAI } from '@google/generative-ai';
 
 // Interfaz para la respuesta de OpenRouter
 interface OpenRouterResponse {
@@ -36,13 +27,14 @@ export class OpenRouterService {
   private appName: string;
   private appUrl: string;
 
-  // Modelos gratuitos en orden de preferencia (para OpenRouter)
+  // Modelos disponibles en OpenRouter en orden de preferencia
+  // Nota: Evitamos modelos `:free` que ya no tienen endpoints
   private readonly FREE_MODELS = [
-    'google/gemini-2.0-flash-exp:free',
-    'deepseek/deepseek-r1:free',
-    'meta-llama/llama-3.3-70b-instruct:free',
-    'mistralai/mistral-nemo:free',
-    'qwen/qwen-2.5-7b-instruct:free',
+    'stepfun/step-3.5-flash:free',
+    'nvidia/nemotron-3-super-120b-a12b:free',
+    'arcee-ai/trinity-large-preview:free',
+    'z-ai/glm-4.5-air:free',
+    'qwen/qwen3-coder:free',
   ];
 
   constructor() {
@@ -74,7 +66,7 @@ export class OpenRouterService {
   }
 
   /**
-   * Estrategia híbrida: Intenta API local primero, luego OpenRouter
+   * Estrategia híbrida: Intenta Free AI API primero y OpenRouter como respaldo.
    */
   private async generateContentHybrid(prompt: string): Promise<string> {
     // 1. Intentar con Free AI API (Local/Custom)
@@ -84,22 +76,18 @@ export class OpenRouterService {
         return content;
       }
     } catch (error) {
-      logger.warn(`⚠️ Free AI API failed, falling back to OpenRouter: ${error}`);
+      logger.warn(`⚠️ Free AI API not available, falling back to OpenRouter: ${error}`);
     }
 
     // 2. Check if OpenRouter key is available
     if (!this.apiKey) {
-      logger.warn('⚠️ OPENROUTER_API_KEY missing, trying Gemini fallback');
-      return this.generateContentGeminiFallback(prompt);
+      throw new Error(
+        'Error al generar contenido con IA: Free AI API no disponible y OPENROUTER_API_KEY no está configurada'
+      );
     }
 
     // 3. Fallback a OpenRouter
-    try {
-      return await this.generateContentOpenRouterFallback(prompt);
-    } catch (error) {
-      logger.warn(`⚠️ OpenRouter fallback failed, trying Gemini: ${error}`);
-      return this.generateContentGeminiFallback(prompt);
-    }
+    return this.generateContentOpenRouterFallback(prompt);
   }
 
   /**
@@ -180,34 +168,6 @@ export class OpenRouterService {
   }
 
   /**
-   * Genera contenido usando Gemini como último recurso
-   */
-  private async generateContentGeminiFallback(prompt: string): Promise<string> {
-    const geminiKey = process.env.GEMINI_API_KEY;
-    if (!geminiKey) {
-      logger.error('❌ GEMINI_API_KEY missing in environment variables');
-      throw new Error(
-        'Error al generar contenido con IA: Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas'
-      );
-    }
-
-    try {
-      logger.info('🤖 Attempting fallback to Gemini API (gemini-1.5-flash)');
-      const genAI = new GoogleGenerativeAI(geminiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const text = response.text();
-      logger.info('✅ Gemini fallback success, response length:', text.length);
-      return text;
-    } catch (error: any) {
-      logger.error('❌ Gemini fallback failed:', error);
-      throw new Error(`Error generating content with Gemini fallback: ${error.message}`);
-    }
-  }
-
-  /**
    * Compara palas usando sistema híbrido con formato estructurado
    */
   async compareRackets(rackets: Racket[], userProfile?: UserFormData): Promise<ComparisonResult> {
@@ -231,22 +191,18 @@ export class OpenRouterService {
         return result;
       }
     } catch (error) {
-      logger.warn(`⚠️ Free AI API comparison failed, falling back to OpenRouter: ${error}`);
+      logger.warn(`⚠️ Free AI API not available, falling back to OpenRouter: ${error}`);
     }
 
     // 2. Check if OpenRouter key is available
     if (!this.apiKey) {
-      logger.warn('⚠️ OPENROUTER_API_KEY missing for comparison, trying Gemini fallback');
-      return this.compareRacketsGeminiFallback(combinedPrompt, rackets);
+      throw new Error(
+        'Error al generar la comparación con IA: Free AI API no disponible y OPENROUTER_API_KEY no está configurada'
+      );
     }
 
     // 3. Fallback a OpenRouter
-    try {
-      return await this.compareRacketsOpenRouterFallback(combinedPrompt, rackets);
-    } catch (error) {
-      logger.warn(`⚠️ OpenRouter comparison failed, trying Gemini: ${error}`);
-      return this.compareRacketsGeminiFallback(combinedPrompt, rackets);
-    }
+    return this.compareRacketsOpenRouterFallback(combinedPrompt, rackets);
   }
 
   private async compareRacketsOpenRouterFallback(
@@ -319,99 +275,50 @@ export class OpenRouterService {
   }
 
   /**
-   * Compara palas usando Gemini como último recurso
-   */
-  private async compareRacketsGeminiFallback(
-    prompt: string,
-    rackets: Racket[]
-  ): Promise<ComparisonResult> {
-    const geminiKey = process.env.GEMINI_API_KEY;
-    if (!geminiKey) {
-      logger.error('❌ GEMINI_API_KEY missing in environment variables');
-      throw new Error(
-        'Error al generar la comparación con IA: Ni OPENROUTER_API_KEY ni GEMINI_API_KEY están configuradas'
-      );
-    }
-
-    try {
-      logger.info('🤖 Attempting comparison fallback to Gemini API (gemini-1.5-flash)');
-      const genAI = new GoogleGenerativeAI(geminiKey);
-      const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
-
-      const result = await model.generateContent(prompt);
-      const response = await result.response;
-      const fullText = response.text();
-
-      if (!fullText) {
-        throw new Error('Empty response from Gemini');
-      }
-
-      logger.info('✅ Gemini raw response received, length:', fullText.length);
-
-      // Parsear la respuesta estructurada (reutilizamos la lógica existente)
-      const comparisonResult = this.parseStructuredResponse(fullText, rackets);
-
-      logger.info('✅ Comparison generated and parsed successfully with Gemini fallback');
-      return comparisonResult;
-    } catch (error: any) {
-      logger.error('❌ Gemini comparison fallback failed:', error);
-
-      // Intentar una vez más con modelo pro si falla el flash
-      try {
-        logger.info('🔄 Retrying with gemini-1.5-pro...');
-        const genAI = new GoogleGenerativeAI(geminiKey);
-        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
-
-        const result = await model.generateContent(prompt);
-        const response = await result.response;
-        const fullText = response.text();
-
-        if (!fullText) throw new Error('Empty response from Gemini Pro');
-
-        const comparisonResult = this.parseStructuredResponse(fullText, rackets);
-        logger.info('✅ Comparison generated successfully with Gemini Pro fallback');
-        return comparisonResult;
-      } catch (retryError: any) {
-        throw new Error(`Error al generar la comparación con IA (Gemini): ${error.message}`);
-      }
-    }
-  }
-
-  /**
    * Extrae los valores radar de la BD si existen.
    * Soporta tanto el formato frontend (español) como el formato raw de BD (inglés).
    */
   private getDbRadarValues(r: any): {
-    potencia: number; control: number; manejabilidad: number;
-    puntoDulce: number; salidaDeBola: number;
+    potencia: number;
+    control: number;
+    manejabilidad: number;
+    puntoDulce: number;
+    salidaDeBola: number;
   } | null {
     const pot = r.radar_potencia ?? null;
     const con = r.radar_control ?? null;
     const man = r.radar_manejabilidad ?? null;
-    const pd  = r.radar_punto_dulce ?? null;
-    const sb  = r.radar_salida_bola ?? null;
+    const pd = r.radar_punto_dulce ?? null;
+    const sb = r.radar_salida_bola ?? null;
 
     if (pot === null || con === null || man === null) return null;
 
     return {
-      potencia:      Number(pot),
-      control:       Number(con),
+      potencia: Number(pot),
+      control: Number(con),
       manejabilidad: Number(man),
-      puntoDulce:    pd !== null ? Number(pd) : 5,
-      salidaDeBola:  sb !== null ? Number(sb) : 5,
+      puntoDulce: pd !== null ? Number(pd) : 5,
+      salidaDeBola: sb !== null ? Number(sb) : 5,
     };
   }
 
   private buildRacketsInfo(rackets: Racket[]): string {
     return rackets
-      .map(
-        (r: any, index) => {
-          const dbRadar = this.getDbRadarValues(r);
-          const radarLine = dbRadar
-            ? `⚠️ VALORES RADAR FIJOS DE BD (NO MODIFICAR): Pot:${dbRadar.potencia}, Con:${dbRadar.control}, Man:${dbRadar.manejabilidad}, PD:${dbRadar.puntoDulce}, SB:${dbRadar.salidaDeBola}`
-            : 'Métricas Radar: No disponibles (estima basándote en forma y materiales)';
+      .map((r: any, index) => {
+        const hasTesteaMetrics = [
+          r.testea_potencia,
+          r.testea_control,
+          r.testea_manejabilidad,
+          r.testea_confort,
+        ].some(value => value !== null && value !== undefined);
+        const testeaLine = `Testea Certificado: ${hasTesteaMetrics ? 'SÍ' : 'NO'}`;
 
-          return `PALA ${index + 1}:
+        const dbRadar = this.getDbRadarValues(r);
+        const radarLine = dbRadar
+          ? `⚠️ VALORES RADAR FIJOS DE BD (NO MODIFICAR): Pot:${dbRadar.potencia}, Con:${dbRadar.control}, Man:${dbRadar.manejabilidad}, PD:${dbRadar.puntoDulce}, SB:${dbRadar.salidaDeBola}`
+          : 'Métricas Radar: No disponibles (estima basándote en forma y materiales)';
+
+        return `PALA ${index + 1}:
 Nombre: ${r.nombre || r.name}
 Marca: ${r.marca || r.caracteristicas_marca || r.brand || 'N/A'}
 Modelo: ${r.modelo || r.model || 'N/A'}
@@ -421,9 +328,9 @@ Cara/Fibra: ${r.caracteristicas_cara || r.characteristics_face || 'N/A'}
 Balance: ${r.caracteristicas_balance || r.characteristics_balance || 'N/A'}
 Dureza: ${r.caracteristicas_dureza || r.characteristics_hardness || 'N/A'}
 Nivel: ${r.caracteristicas_nivel_de_juego || r.characteristics_game_level || 'N/A'}
+${testeaLine}
 ${radarLine}`;
-        }
-      )
+      })
       .join('\n\n');
   }
 
@@ -538,11 +445,11 @@ IMPORTANTE:
             ...metric,
             isCertified: true,
             radarData: {
-              potencia:      dbRadar.potencia,
-              control:       dbRadar.control,
+              potencia: dbRadar.potencia,
+              control: dbRadar.control,
               manejabilidad: dbRadar.manejabilidad,
-              puntoDulce:    dbRadar.puntoDulce,
-              salidaDeBola:  dbRadar.salidaDeBola,
+              puntoDulce: dbRadar.puntoDulce,
+              salidaDeBola: dbRadar.salidaDeBola,
             },
           };
         }
@@ -579,11 +486,17 @@ IMPORTANTE:
         metrics: rackets.map((r: any) => {
           const dbRadar = this.getDbRadarValues(r);
           return {
-            racketId:    r.id,
-            racketName:  r.nombre || r.name,
+            racketId: r.id,
+            racketName: r.nombre || r.name,
             isCertified: !!dbRadar,
             radarData: dbRadar
-              ? { potencia: dbRadar.potencia, control: dbRadar.control, manejabilidad: dbRadar.manejabilidad, puntoDulce: dbRadar.puntoDulce, salidaDeBola: dbRadar.salidaDeBola }
+              ? {
+                  potencia: dbRadar.potencia,
+                  control: dbRadar.control,
+                  manejabilidad: dbRadar.manejabilidad,
+                  puntoDulce: dbRadar.puntoDulce,
+                  salidaDeBola: dbRadar.salidaDeBola,
+                }
               : { potencia: 5, control: 5, manejabilidad: 5, puntoDulce: 5, salidaDeBola: 5 },
           };
         }),

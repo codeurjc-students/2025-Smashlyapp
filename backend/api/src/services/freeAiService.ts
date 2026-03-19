@@ -56,7 +56,7 @@ export class FreeAiService {
                   const content = parsed.choices?.[0]?.delta?.content || '';
                   fullText += content;
                 } catch (e) {
-                  // If parse fails, treat as raw text?
+                  // If parse fails, treat as raw text
                   // No, if it looks like SSE but fails json parse, it's probably broken SSE.
                 }
               } else if (line.trim()) {
@@ -91,8 +91,9 @@ export class FreeAiService {
       });
     } catch (error: any) {
       const errorMessage = error.message || 'Unknown error contacting Free AI API';
-      logger.warn(`❌ Free AI API failed: ${errorMessage}`);
-      throw new Error(`Free AI API error: ${errorMessage}`);
+      const errorDetails = error.code || error.response?.status || 'Unknown';
+      logger.warn(`❌ Free AI API failed: ${errorMessage} (${errorDetails}). Falling back to OpenRouter.`);
+      throw new Error(`Free AI API unavailable (${errorDetails}): ${errorMessage}`);
     }
   }
 }

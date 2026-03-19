@@ -281,7 +281,7 @@ const ViewButton = styled.button<{ $active: boolean }>`
   transition: all 0.2s ease;
 
   &:hover {
-    color: ${props => (props.active ? 'white' : '#16a34a')};
+    color: ${props => (props.$active ? 'white' : '#16a34a')};
   }
 `;
 

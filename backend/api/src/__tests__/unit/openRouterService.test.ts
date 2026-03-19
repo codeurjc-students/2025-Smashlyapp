@@ -245,7 +245,7 @@ describe('OpenRouterService', () => {
       expect(mockAxiosInstance.post).toHaveBeenCalledWith(
         '/chat/completions',
         expect.objectContaining({
-          model: 'google/gemini-2.0-flash-exp:free',
+          model: 'stepfun/step-3.5-flash:free',
           messages: [{ role: 'user', content: 'Test prompt' }],
         })
       );
@@ -430,7 +430,7 @@ describe('OpenRouterService', () => {
 
       // Verify second model was used
       const secondCall = mockAxiosInstance.post.mock.calls[1][1];
-      expect(secondCall.model).toBe('deepseek/deepseek-r1:free');
+      expect(secondCall.model).toBe('nvidia/nemotron-3-super-120b-a12b:free');
     });
 
     it('should handle JSON response wrapped in markdown code blocks', async () => {
@@ -534,11 +534,11 @@ ${JSON.stringify(mockStructuredResponse)}
 
     describe('model fallback behavior', () => {
       const freeModels = [
-        'google/gemini-2.0-flash-exp:free',
-        'deepseek/deepseek-r1:free',
-        'meta-llama/llama-3.3-70b-instruct:free',
-        'mistralai/mistral-nemo:free',
-        'qwen/qwen-2.5-7b-instruct:free',
+        'stepfun/step-3.5-flash:free',
+        'nvidia/nemotron-3-super-120b-a12b:free',
+        'arcee-ai/trinity-large-preview:free',
+        'z-ai/glm-4.5-air:free',
+        'qwen/qwen3-coder:free',
       ];
 
       it('should try all 5 free models in sequence', async () => {

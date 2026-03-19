@@ -36,6 +36,7 @@ export interface StorePrice {
 export interface Racket {
   id?: number;
   name: string;
+  nombre?: string;
   brand?: string | null;
   model?: string | null;
   images?: string[] | null;
@@ -124,5 +125,42 @@ export interface SearchFilters {
 
 export interface SortOptions {
   field: string;
-  order: "asc" | "desc";
+  order: 'asc' | 'desc';
+}
+
+// Comparison DTOs shared by AI and comparison services
+export interface RadarMetrics {
+  potencia: number;
+  control: number;
+  manejabilidad: number;
+  puntoDulce: number;
+  salidaDeBola: number;
+}
+
+export interface RacketComparisonData {
+  racketId: number;
+  racketName: string;
+  radarData: RadarMetrics;
+  isCertified?: boolean;
+}
+
+export interface ComparisonSection {
+  title: string;
+  content: string;
+}
+
+export interface ComparisonTableItem {
+  feature: string;
+  [key: string]: string | number | null | undefined;
+}
+
+export interface ComparisonResult {
+  executiveSummary: string;
+  technicalAnalysis: ComparisonSection[];
+  comparisonTable: ComparisonTableItem[];
+  metrics: RacketComparisonData[];
+  recommendedProfiles: string;
+  biomechanicalConsiderations: string;
+  conclusion: string;
+  _reasoning?: string;
 }

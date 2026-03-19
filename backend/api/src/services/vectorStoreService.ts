@@ -1,4 +1,4 @@
-import { supabaseAdmin } from '../config/supabase';
+import { getSupabaseAdmin } from '../config/supabase';
 import logger from '../config/logger';
 
 export class VectorStoreService {
@@ -11,7 +11,8 @@ export class VectorStoreService {
     embedding: number[],
     metadata: Record<string, any>
   ): Promise<void> {
-    const { error } = await supabaseAdmin.from('racket_embeddings').upsert(
+    const admin = getSupabaseAdmin();
+    const { error } = await admin.from('racket_embeddings').upsert(
       {
         racket_id: racketId,
         content,
@@ -38,7 +39,8 @@ export class VectorStoreService {
     embedding: number[],
     metadata: Record<string, any>
   ): Promise<void> {
-    const { error } = await supabaseAdmin.from('review_embeddings').upsert(
+    const admin = getSupabaseAdmin();
+    const { error } = await admin.from('review_embeddings').upsert(
       {
         review_id: reviewId,
         racket_id: racketId,
@@ -65,7 +67,8 @@ export class VectorStoreService {
     embedding: number[],
     metadata: Record<string, any>
   ): Promise<void> {
-    const { error } = await supabaseAdmin.from('knowledge_embeddings').upsert(
+    const admin = getSupabaseAdmin();
+    const { error } = await admin.from('knowledge_embeddings').upsert(
       {
         source,
         chunk_index: chunkIndex,
@@ -103,7 +106,8 @@ export class VectorStoreService {
   > {
     const { threshold = 0.3, limit = 10, metadata = {}, safeRacketIds } = options;
 
-    const { data, error } = await supabaseAdmin.rpc('match_rackets', {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin.rpc('match_rackets', {
       query_embedding: queryEmbedding,
       match_threshold: threshold,
       match_count: 100, // Solicitamos más resultados para compensar el filtro biomecánico
@@ -150,7 +154,8 @@ export class VectorStoreService {
   > {
     const { threshold = 0.3, limit = 5, racketIds = null } = options;
 
-    const { data, error } = await supabaseAdmin.rpc('match_reviews', {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin.rpc('match_reviews', {
       query_embedding: queryEmbedding,
       match_threshold: threshold,
       match_count: limit,
@@ -191,7 +196,8 @@ export class VectorStoreService {
   > {
     const { threshold = 0.3, limit = 3 } = options;
 
-    const { data, error } = await supabaseAdmin.rpc('match_knowledge', {
+    const admin = getSupabaseAdmin();
+    const { data, error } = await admin.rpc('match_knowledge', {
       query_embedding: queryEmbedding,
       match_threshold: threshold,
       match_count: limit,
@@ -216,10 +222,11 @@ export class VectorStoreService {
    */
   static async getStats() {
     try {
+      const admin = getSupabaseAdmin();
       const [rackets, reviews, knowledge] = await Promise.all([
-        supabaseAdmin.from('racket_embeddings').select('*', { count: 'exact', head: true }),
-        supabaseAdmin.from('review_embeddings').select('*', { count: 'exact', head: true }),
-        supabaseAdmin.from('knowledge_embeddings').select('*', { count: 'exact', head: true }),
+        admin.from('racket_embeddings').select('*', { count: 'exact', head: true }),
+        admin.from('review_embeddings').select('*', { count: 'exact', head: true }),
+        admin.from('knowledge_embeddings').select('*', { count: 'exact', head: true }),
       ]);
 
       return {
