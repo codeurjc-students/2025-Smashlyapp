@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { API_URL } from '../config/api';
 import styled from 'styled-components';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiSearch, FiX, FiPlus, FiCpu, FiDownload, FiSave, FiCheck, FiHeart } from 'react-icons/fi';
@@ -850,7 +851,7 @@ const CompareRacketsPage: React.FC = () => {
         rackets: selectedRackets,
         comparison: comparisonResult,
         // Asegúrate de que esta URL base sea correcta para tu entorno
-        proxyUrlBase: import.meta.env.VITE_API_URL || '',
+        proxyUrlBase: API_URL,
       });
 
       sileo.success({ title: 'Éxito', description: 'PDF descargado con éxito' });

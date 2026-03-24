@@ -4,6 +4,7 @@ import { FiEye, FiTag, FiHeart } from 'react-icons/fi';
 import styled from 'styled-components';
 import { Racket } from '../../types/racket';
 import { getLowestPrice } from '../../utils/priceUtils';
+import { API_URL } from '../../config/api';
 
 // Styled Components
 const RacketCardContainer = styled(motion.li)<{ $view: 'grid' | 'list' }>`
@@ -255,7 +256,7 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(
             key={currentImageIndex}
             src={
               (racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0])?.startsWith('http')
-                ? `${import.meta.env.VITE_API_URL}/api/v1/proxy/image?url=${encodeURIComponent(racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0])}`
+                ? `${API_URL}/api/v1/proxy/image?url=${encodeURIComponent(racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0])}`
                 : racket.imagenes?.[currentImageIndex] || racket.imagenes?.[0]
             }
             alt={racket.modelo}

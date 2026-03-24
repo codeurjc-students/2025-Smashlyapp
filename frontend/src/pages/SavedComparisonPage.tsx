@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { API_URL } from '../config/api';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -354,7 +355,7 @@ const SavedComparisonPage: React.FC = () => {
       await generator.generatePDF({
         rackets: rackets,
         comparison: comparisonResult,
-        proxyUrlBase: import.meta.env.VITE_API_URL || '',
+        proxyUrlBase: API_URL,
       });
     } catch (err) {
       console.error('Error generating PDF:', err);
