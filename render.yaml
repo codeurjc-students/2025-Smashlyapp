@@ -29,15 +29,13 @@ services:
       - key: GEMINI_API_KEY
         sync: false
 
-    # Variables de BUILD (se pasan al Dockerfile como ARG para compilar el frontend de Vite)
-    # Render las usa durante el docker build
-    buildArgs:
-      - name: VITE_SUPABASE_URL
-        value: ""               # Rellena esto en el dashboard de Render (Environment > Build Vars)
-      - name: VITE_SUPABASE_ANON_KEY
-        value: ""
-      - name: VITE_GOOGLE_CLIENT_ID
-        value: ""
+      # --- Variables de BUILD para Vite (Render las pasa como --build-arg al docker build) ---
+      - key: VITE_SUPABASE_URL
+        sync: false
+      - key: VITE_SUPABASE_ANON_KEY
+        sync: false
+      - key: VITE_GOOGLE_CLIENT_ID
+        sync: false
 
     # Plan gratuito
     plan: free
