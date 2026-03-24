@@ -9,13 +9,13 @@ services:
       - key: NODE_ENV
         value: production
       - key: USE_HTTPS
-        value: "false"          # Render termina TLS en su edge; el contenedor usa HTTP
+        value: "false" # Render termina TLS en su edge; el contenedor usa HTTP
       - key: FRONTEND_URL
-        value: https://smashly-app.onrender.com   # Cambia esto por tu URL real tras el primer deploy
+        value: https://smashly-app.onrender.com # Cambia esto por tu URL real tras el primer deploy
 
       # --- Supabase ---
       - key: SUPABASE_URL
-        sync: false             # sync:false = Render te pedirá el valor en el dashboard (no se sube al repo)
+        sync: false # sync:false = Render te pedirá el valor en el dashboard (no se sube al repo)
       - key: SUPABASE_ANON_KEY
         sync: false
       - key: SUPABASE_SERVICE_ROLE_KEY
@@ -24,9 +24,15 @@ services:
       # --- Auth ---
       - key: JWT_SECRET
         sync: false
+      - key: GOOGLE_CLIENT_ID
+        sync: false
 
       # --- IA ---
       - key: GEMINI_API_KEY
+        sync: false
+      - key: FREE_AI_API_URL
+        sync: false
+      - key: FIRECRAWL_API_KEY
         sync: false
 
       # --- Variables de BUILD para Vite (Render las pasa como --build-arg al docker build) ---
@@ -39,4 +45,4 @@ services:
 
     # Plan gratuito
     plan: free
-    region: frankfurt           # O 'oregon' si prefieres US. Frankfurt suele ir mejor desde España.
+    region: frankfurt # O 'oregon' si prefieres US. Frankfurt suele ir mejor desde España.
