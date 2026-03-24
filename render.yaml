@@ -30,6 +30,8 @@ services:
       # --- IA ---
       - key: GEMINI_API_KEY
         sync: false
+      - key: OPENROUTER_API_KEY
+        sync: false
       - key: FREE_AI_API_URL
         sync: false
       - key: FIRECRAWL_API_KEY
