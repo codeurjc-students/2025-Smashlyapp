@@ -1,6 +1,7 @@
 import { useRackets } from '@/contexts/RacketsContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Racket } from '@/types/racket';
+import { API_URL } from '@/config/api';
 
 import React, { useEffect, useState, useRef } from 'react';
 import {
@@ -1154,7 +1155,7 @@ const RacketDetailPage: React.FC = () => {
           <MainImage
             src={
               ((racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0])?.startsWith('http')
-                ? `${import.meta.env.VITE_API_URL}/api/v1/proxy/image?url=${encodeURIComponent(racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0])}`
+                ? `${API_URL}/api/v1/proxy/image?url=${encodeURIComponent(racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0])}`
                 : racket.imagenes?.[selectedImageIndex] || racket.imagenes?.[0]) ||
               '/placeholder-racket.svg'
             }
@@ -1186,7 +1187,7 @@ const RacketDetailPage: React.FC = () => {
                         key={index}
                         src={
                           img.startsWith('http')
-                            ? `${import.meta.env.VITE_API_URL}/api/v1/proxy/image?url=${encodeURIComponent(img)}`
+                            ? `${API_URL}/api/v1/proxy/image?url=${encodeURIComponent(img)}`
                             : img
                         }
                         alt={`${racket.modelo} - imagen ${index + 1}`}

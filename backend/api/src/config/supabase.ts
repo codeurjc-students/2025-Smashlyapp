@@ -1,6 +1,6 @@
-import logger from "../config/logger";
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-import * as dotenv from "dotenv";
+import logger from '../config/logger';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import * as dotenv from 'dotenv';
 
 // Cargar variables de entorno
 dotenv.config();
@@ -11,17 +11,18 @@ const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
 
 // Allow tests to run without credentials (they will skip if not configured)
-const isTestEnvironment = process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
+const isTestEnvironment =
+  process.env.NODE_ENV === 'test' || process.env.JEST_WORKER_ID !== undefined;
 
 // Validate that environment variables are available (except in tests)
 if (!isTestEnvironment) {
   if (!supabaseUrl) {
-    throw new Error("SUPABASE_URL environment variable is required");
+    throw new Error('SUPABASE_URL environment variable is required');
   }
 
   if (!supabaseServiceKey && !supabaseAnonKey) {
     throw new Error(
-      "Either SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY environment variable is required"
+      'Either SUPABASE_SERVICE_ROLE_KEY or SUPABASE_ANON_KEY environment variable is required'
     );
   }
 }
@@ -32,44 +33,53 @@ const supabaseKey = supabaseServiceKey || supabaseAnonKey || '';
 
 // Create Supabase client with optimized configuration for the API
 // En entorno de test sin credenciales, crear un cliente dummy
-export const supabase: SupabaseClient = (supabaseUrl && supabaseKey)
-  ? createClient(supabaseUrl, supabaseKey, {
-      auth: {
-        autoRefreshToken: false, // No necesario en el servidor
-        persistSession: false, // No persistir sesiones en el servidor
-        detectSessionInUrl: false, // No detectar sesiones en URLs
-      },
-      global: {
-        headers: {
-          "X-Client-Info": "smashly-api@1.0.0",
+export const supabase: SupabaseClient =
+  supabaseUrl && supabaseKey
+    ? createClient(supabaseUrl, supabaseKey, {
+        auth: {
+          autoRefreshToken: false, // No necesario en el servidor
+          persistSession: false, // No persistir sesiones en el servidor
+          detectSessionInUrl: false, // No detectar sesiones en URLs
         },
-      },
-      // Optimized configuration for high volume
-      realtime: {
-        params: {
-          eventsPerSecond: 10,
+        global: {
+          headers: {
+            'X-Client-Info': 'smashly-api@1.0.0',
+          },
         },
-      },
-    })
-  : createClient('https://placeholder.supabase.co', 'placeholder-key', {
-      auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
-    });
+        // Optimized configuration for high volume
+        realtime: {
+          params: {
+            eventsPerSecond: 10,
+          },
+        },
+      })
+    : createClient('https://placeholder.supabase.co', 'placeholder-key', {
+        auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
+      });
 
 // Administrative client with service role (if available)
-export const supabaseAdmin: SupabaseClient | null = (supabaseUrl && supabaseServiceKey)
-  ? createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-        detectSessionInUrl: false,
-      },
-      global: {
-        headers: {
-          "X-Client-Info": "smashly-api-admin@1.0.0",
+export const supabaseAdmin: SupabaseClient | null =
+  supabaseUrl && supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey, {
+        auth: {
+          autoRefreshToken: false,
+          persistSession: false,
+          detectSessionInUrl: false,
         },
-      },
-    })
-  : null;
+        global: {
+          headers: {
+            'X-Client-Info': 'smashly-api-admin@1.0.0',
+          },
+        },
+      })
+    : null;
+
+export function getSupabaseAdmin(): SupabaseClient {
+  if (!supabaseAdmin) {
+    throw new Error('SUPABASE_SERVICE_ROLE_KEY is required for admin Supabase operations');
+  }
+  return supabaseAdmin;
+}
 
 // Function to verify Supabase connection
 export async function testSupabaseConnection(): Promise<{
@@ -79,35 +89,32 @@ export async function testSupabaseConnection(): Promise<{
 }> {
   try {
     // Try a simple query
-    const { data, error } = await supabase
-      .from("rackets")
-      .select("id")
-      .limit(1);
+    const { data, error } = await supabase.from('rackets').select('id').limit(1);
 
     if (error) {
       return {
         success: false,
-        message: "Database connection failed",
+        message: 'Database connection failed',
         details: error,
       };
     }
 
     return {
       success: true,
-      message: "Supabase connection successful",
+      message: 'Supabase connection successful',
       details: { recordsFound: data?.length || 0 },
     };
   } catch (error) {
     return {
       success: false,
-      message: "Connection test failed",
+      message: 'Connection test failed',
       details: error,
     };
   }
 }
 
 // Configuration logging
-logger.info("📊 Supabase config loaded:", {
+logger.info('📊 Supabase config loaded:', {
   url: supabaseUrl,
   hasServiceKey: !!supabaseServiceKey,
   hasAnonKey: !!supabaseAnonKey,

@@ -71,25 +71,27 @@ COPY docs/api-docs.yaml ./docs/api-docs.yaml
 RUN mkdir -p static
 COPY --from=frontend-builder /app/frontend/dist ./static
 
-# Generate self-signed SSL certs for HTTPS in container
+# Generate self-signed SSL certs (solo se usan si USE_HTTPS=true en local)
 RUN mkdir -p certs \
   && openssl req -x509 -newkey rsa:2048 -nodes \
   -keyout certs/key.pem -out certs/cert.pem -days 365 \
   -subj "/CN=localhost" \
   -addext "subjectAltName=DNS:localhost,IP:127.0.0.1"
 
-# Environment defaults (can be overridden by docker-compose)
+# Environment defaults
+# - USE_HTTPS=false: en producción el TLS lo termina el proxy de la plataforma (Render, Koyeb...)
+# - PORT=3000: valor por defecto local; en producción la plataforma inyecta su propio $PORT
+# - FRONTEND_URL: se sobreescribe en el dashboard de la plataforma con la URL real del deploy
 ENV NODE_ENV=production \
-  USE_HTTPS=true \
-  PORT=443 \
-  FRONTEND_URL=https://localhost
+  USE_HTTPS=false \
+  PORT=3000 \
+  FRONTEND_URL=http://localhost
 
-# Expose HTTPS port
-EXPOSE 443
+EXPOSE 3000
 
-# Healthcheck hitting API health endpoint (ignore self-signed cert)
+# Healthcheck usando HTTP (la plataforma gestiona HTTPS externamente)
 HEALTHCHECK --interval=10s --timeout=5s --start-period=20s --retries=5 \
-  CMD curl -k -fsS https://localhost:${PORT}/api/v1/health || exit 1
+  CMD curl -fsS http://localhost:${PORT}/api/v1/health || exit 1
 
 # Start backend
 CMD ["node", "dist/server.js"]

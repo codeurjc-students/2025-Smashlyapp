@@ -37,7 +37,6 @@ frontend/.vitestcache/
 
 # Frontend dependencies
 frontend/node_modules/
-frontend/package-lock.json
 
 # Frontend testing
 frontend/coverage/
@@ -52,7 +51,6 @@ backend/api/build/
 
 # Backend dependencies
 backend/api/node_modules/
-backend/api/package-lock.json
 
 # Backend testing & coverage
 backend/api/coverage/

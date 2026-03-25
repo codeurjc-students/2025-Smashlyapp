@@ -1,39 +1,14 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
 import axios from 'axios';
 import logger from '../config/logger';
 
 export class EmbeddingService {
-  private static readonly GEMINI_MODEL = 'text-embedding-004';
   private static readonly OPENROUTER_MODEL = 'openai/text-embedding-3-small';
 
   /**
-   * Genera un embedding para un texto individual.
-   * Intenta primero con Gemini, y si falla (o no está configurado), usa OpenRouter.
+   * Genera un embedding para un texto individual usando OpenRouter.
    */
   static async embed(text: string): Promise<number[]> {
-    // Intentar con OpenRouter primero ya que Gemini está dando 404 persistentes
-    // pero mantenemos la estructura para fácil cambio futuro.
     return this.embedWithOpenRouter(text);
-  }
-
-  /**
-   * Genera embedding usando Gemini.
-   */
-  private static async embedWithGemini(text: string): Promise<number[]> {
-    try {
-      if (!process.env.GEMINI_API_KEY) {
-        throw new Error('GEMINI_API_KEY is not configured');
-      }
-
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-      const model = genAI.getGenerativeModel({ model: this.GEMINI_MODEL });
-
-      const result = await model.embedContent(text);
-      return result.embedding.values;
-    } catch (error) {
-      logger.error('Error in Gemini embedding:', error);
-      throw error;
-    }
   }
 
   /**
