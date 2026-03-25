@@ -31,6 +31,7 @@ const BestRacketPage = lazy(() =>
 );
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
+const ListPage = lazy(() => import('./pages/ListPage'));
 const AdminPanelPage = lazy(() => import('./pages/AdminPanelPage'));
 const AdminRacketReviewPage = lazy(() => import('./pages/AdminRacketReviewPage'));
 const AdminRacketsPage = lazy(() => import('./pages/AdminRacketsPage'));
@@ -160,6 +161,17 @@ export default function App() {
                             <ProtectedRoute>
                               <Suspense fallback={<RouteLoadingFallback />}>
                                 <UserProfilePage />
+                              </Suspense>
+                            </ProtectedRoute>
+                          }
+                        />
+
+                        <Route
+                          path='/lists/:id'
+                          element={
+                            <ProtectedRoute>
+                              <Suspense fallback={<RouteLoadingFallback />}>
+                                <ListPage />
                               </Suspense>
                             </ProtectedRoute>
                           }

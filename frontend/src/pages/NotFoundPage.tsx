@@ -99,8 +99,8 @@ export default function NotFoundPage() {
         <Emoji>🎾</Emoji>
         <Title>Página no encontrada</Title>
         <Description>
-          Parece que esta pala no está en nuestro catálogo... o quizás la URL que buscas ya no
-          existe.
+          Parece que la página o el recurso que buscas no existe... o quizás la URL ha
+          cambiado.
         </Description>
         <Actions>
           <PrimaryBtn to='/'>
