@@ -20,6 +20,7 @@ interface ReviewItemProps {
       modelo?: string;
       imagenes?: string[];
     };
+    user_has_liked?: boolean;
   };
   onDelete: () => void;
   onUpdate: () => void;
@@ -35,43 +36,42 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [likes, setLikes] = useState(review.likes_count);
-  const [isLiked, setIsLiked] = useState(false); // TODO: Obtener del backend
+  const [isLiked, setIsLiked] = useState(review.user_has_liked || false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // ... (Keep existing handlers: handleLike, handleDelete, handleUpdateSuccess)
-  // Re-implementing them here to be safe with the replace block, or I can just target the render.
-  // Actually, I can just replace the whole file or large chunks. 
-  // Let's replace the Render + Styled Components.
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const isOwner = user?.id === review.user_id;
 
   const handleLike = async () => {
     if (!user) {
-      alert("Please log in to like reviews");
+      setErrorMsg("Inicia sesión para dar like");
       return;
     }
 
     try {
+      setErrorMsg(null);
       const result = await reviewService.toggleLike(review.id);
-      setLikes(result.likes_count);
+      setLikes(prev => result.liked ? prev + 1 : prev - 1);
       setIsLiked(result.liked);
     } catch (error) {
       console.error("Error al dar like:", error);
+      setErrorMsg("Error al procesar like");
     }
   };
 
   const handleDelete = async () => {
-    if (!confirm("Are you sure you want to delete this review?")) {
+    if (!confirm("¿Seguro que quieres eliminar esta reseña?")) {
       return;
     }
 
     try {
+      setErrorMsg(null);
       setIsDeleting(true);
       await reviewService.deleteReview(review.id);
       onDelete();
     } catch (error) {
       console.error("Error al eliminar review:", error);
-      alert("Error deleting review");
+      setErrorMsg("Fallo al borrar. Intenta de nuevo.");
       setIsDeleting(false);
     }
   };
@@ -175,7 +175,7 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
         <LikeButton onClick={handleLike} liked={isLiked} disabled={!user}>
           {isLiked ? "❤️" : "🤍"} {likes > 0 ? likes : "Te ha sido útil?"}
         </LikeButton>
-        {/* Removed comments count if not used per reference style, but can keep if needed. Keeping simple. */}
+        {errorMsg && <ErrorMessage>{errorMsg}</ErrorMessage>}
       </Footer>
     </Container>
   );
@@ -330,6 +330,18 @@ const LikeButton = styled.button<{ liked: boolean }>`
   &:hover {
     background: ${p => p.liked ? '#FEE2E2' : '#F9FAFB'};
     border-color: ${p => p.liked ? '#FECACA' : '#E5E7EB'};
+  }
+`;
+
+const ErrorMessage = styled.span`
+  color: #EF4444;
+  font-size: 0.75rem;
+  font-weight: 600;
+  animation: fadeIn 0.3s ease-in;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
 `;
 

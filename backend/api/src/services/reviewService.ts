@@ -409,6 +409,13 @@ export class ReviewService {
       throw new Error('No tienes permiso para eliminar esta review');
     }
 
+    // 1. Borrar likes asociados
+    await supabase.from('review_likes').delete().eq('review_id', reviewId);
+    
+    // 2. Borrar comentarios asociados
+    await supabase.from('review_comments').delete().eq('review_id', reviewId);
+
+    // 3. Borrar la review
     const { error } = await supabase.from('reviews').delete().eq('id', reviewId);
 
     if (error) throw error;
