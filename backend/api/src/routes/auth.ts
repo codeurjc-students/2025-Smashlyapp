@@ -24,4 +24,10 @@ router.post('/refresh', validateBody(schemas.refreshToken), AuthController.refre
 // GET /api/auth/me - Get current user
 router.get('/me', AuthController.getCurrentUser);
 
+// POST /api/auth/reset-password - Request password reset email
+router.post('/reset-password', AuthController.requestPasswordReset);
+
+// POST /api/auth/update-password - Update password
+router.post('/update-password', AuthController.updatePassword);
+
 export default router;

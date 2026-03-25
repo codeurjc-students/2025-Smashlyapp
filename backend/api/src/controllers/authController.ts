@@ -396,4 +396,138 @@ export class AuthController {
       } as ApiResponse);
     }
   }
+
+  /**
+   * POST /api/auth/reset-password
+   * Envia un email para restablecer la contraseña
+   */
+  static async requestPasswordReset(req: Request, res: Response): Promise<void> {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        res.status(400).json({
+          success: false,
+          error: "Email requerido",
+          message: "El email es obligatorio para restablecer la contraseña",
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      const normalizedEmail = email.toLowerCase().trim();
+      const rawFrontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
+      // Handle comma-separated URLs (often used for CORS)
+      const frontendUrl = rawFrontendUrl.split(',').find(url => url.includes('5173')) || rawFrontendUrl.split(',')[0];
+
+      const { error } = await supabase.auth.resetPasswordForEmail(normalizedEmail, {
+        redirectTo: `${frontendUrl}/update-password`,
+      });
+
+      if (error) {
+        logger.error("Error in resetPasswordForEmail:", error);
+        res.status(400).json({
+          success: false,
+          error: "Error al enviar email",
+          message: getErrorMessage(error),
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: {
+          message: "Email de restablecimiento enviado correctamente",
+        },
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error("Error in requestPasswordReset:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error interno del servidor",
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * POST /api/auth/update-password
+   * Actualiza la contraseña del usuario (requiere token de acceso)
+   */
+  static async updatePassword(req: Request, res: Response): Promise<void> {
+    try {
+      const { newPassword } = req.body;
+      const authHeader = req.headers.authorization;
+
+      if (!newPassword) {
+        res.status(400).json({
+          success: false,
+          error: "Contraseña requerida",
+          message: "La nueva contraseña es obligatoria",
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      if (!authHeader?.startsWith("Bearer ")) {
+        res.status(401).json({
+          success: false,
+          error: "Token requerido",
+          message: "Authorization header con Bearer token es requerido para actualizar la contraseña",
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      const token = authHeader.split(" ")[1];
+
+      // Verificamos el usuario con el token
+      const { data: userData, error: userError } = await supabase.auth.getUser(token);
+
+      if (userError || !userData.user) {
+        res.status(401).json({
+          success: false,
+          error: "Token inválido",
+          message: userError?.message || "Usuario no encontrado",
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      // Actualizamos la contraseña usando el API de administración
+      const { error: updateError } = await supabase.auth.admin.updateUserById(userData.user.id, {
+        password: newPassword,
+      });
+
+      if (updateError) {
+        logger.error("Error updating password:", updateError);
+        res.status(400).json({
+          success: false,
+          error: "Error al actualizar contraseña",
+          message: getErrorMessage(updateError),
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: {
+          message: "Contraseña actualizada exitosamente",
+        },
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error("Error in updatePassword:", error);
+      res.status(500).json({
+        success: false,
+        error: "Error interno del servidor",
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
 }

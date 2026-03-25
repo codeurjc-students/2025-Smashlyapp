@@ -38,6 +38,8 @@ const AdminRacketsPage = lazy(() => import('./pages/AdminRacketsPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
 const AdminStoresPage = lazy(() => import('./pages/AdminStoresPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const UpdatePasswordPage = lazy(() => import('./pages/UpdatePasswordPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 export default function App() {
@@ -141,6 +143,22 @@ export default function App() {
                           element={
                             <Suspense fallback={<RouteLoadingFallback />}>
                               <SharedComparisonPage />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/forgot-password'
+                          element={
+                            <Suspense fallback={<RouteLoadingFallback />}>
+                              <ForgotPasswordPage />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/update-password'
+                          element={
+                            <Suspense fallback={<RouteLoadingFallback />}>
+                              <UpdatePasswordPage />
                             </Suspense>
                           }
                         />
