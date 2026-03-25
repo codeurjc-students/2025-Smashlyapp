@@ -64,8 +64,9 @@ export const UserReviews: React.FC<UserReviewsProps> = ({ userId }) => {
     loadReviews();
   }, [userId, page]);
 
-  const handleReviewDeleted = () => {
+  const handleReviewDeleted = (deletedId: string) => {
     setSelectedReview(null);
+    setReviews(prev => prev.filter(r => r.id !== deletedId));
     loadReviews();
   };
 

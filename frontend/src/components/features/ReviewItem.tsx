@@ -22,7 +22,7 @@ interface ReviewItemProps {
     };
     user_has_liked?: boolean;
   };
-  onDelete: () => void;
+  onDelete: (id: string) => void;
   onUpdate: () => void;
   showProductInfo?: boolean;
 }
@@ -68,7 +68,7 @@ export const ReviewItem: React.FC<ReviewItemProps> = ({
       setErrorMsg(null);
       setIsDeleting(true);
       await reviewService.deleteReview(review.id);
-      onDelete();
+      onDelete(review.id);
     } catch (error) {
       console.error("Error al eliminar review:", error);
       setErrorMsg("Fallo al borrar. Intenta de nuevo.");
