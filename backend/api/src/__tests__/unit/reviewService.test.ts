@@ -720,7 +720,22 @@ describe('ReviewService', () => {
         user: mockUser,
       };
 
-      const mockQuery = {
+      const reviewLookupQuery = {
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            single: vi.fn().mockResolvedValue({
+              data: {
+                user_id: mockUserId,
+                racket_id: mockRacketId,
+                rackets: { name: 'Test Racket' },
+              },
+              error: null,
+            }),
+          }),
+        }),
+      };
+
+      const insertCommentQuery = {
         insert: vi.fn().mockReturnValue({
           select: vi.fn().mockReturnValue({
             single: vi.fn().mockResolvedValue({
@@ -731,7 +746,9 @@ describe('ReviewService', () => {
         }),
       };
 
-      (supabase.from as vi.Mock).mockReturnValue(mockQuery);
+      (supabase.from as vi.Mock)
+        .mockReturnValueOnce(reviewLookupQuery)
+        .mockReturnValueOnce(insertCommentQuery);
 
       const result = await ReviewService.addComment(mockReviewId, mockUserId, commentDTO);
 
