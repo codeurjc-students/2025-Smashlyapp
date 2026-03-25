@@ -5,34 +5,23 @@
 
 import { useState, useEffect } from "react";
 import styled from "styled-components";
-import { reviewService } from "../../services/reviewService";
-import type { ReviewWithUser } from "../../types/review";
+import { reviewService } from '../../services/reviewService';
+import type { ReviewWithDetails } from "../../types/review";
 import { ReviewItem } from "./ReviewItem";
 
 interface UserReviewsProps {
   userId: string;
 }
 
-// Tipo extendido que incluye la información de la pala
-interface ReviewWithUserAndRacket extends ReviewWithUser {
-  racket?: {
-    id: number;
-    nombre: string;
-    marca?: string;
-    modelo?: string;
-    imagenes?: string[];
-  };
-}
-
 export const UserReviews: React.FC<UserReviewsProps> = ({ userId }) => {
-  const [reviews, setReviews] = useState<ReviewWithUserAndRacket[]>([]);
+  const [reviews, setReviews] = useState<ReviewWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [total, setTotal] = useState(0);
   const [selectedReview, setSelectedReview] =
-    useState<ReviewWithUserAndRacket | null>(null);
+    useState<ReviewWithDetails | null>(null);
 
   console.log("🔍 UserReviews component mounted with userId:", userId);
 
@@ -47,7 +36,7 @@ export const UserReviews: React.FC<UserReviewsProps> = ({ userId }) => {
       });
       console.log("✅ Reviews loaded:", data);
       // El backend devuelve la información de la pala, hacemos cast al tipo correcto
-      setReviews(data.reviews as ReviewWithUserAndRacket[]);
+      setReviews(data.reviews as ReviewWithDetails[]);
       setTotalPages(data.pagination.totalPages);
       setTotal(data.pagination.total);
     } catch (err) {

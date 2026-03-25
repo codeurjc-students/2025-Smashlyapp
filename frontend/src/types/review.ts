@@ -24,12 +24,13 @@ export interface ReviewWithUser extends Review {
 }
 
 export interface ReviewWithDetails extends ReviewWithUser {
-  racket: {
+  racket?: {
     id: number;
     nombre: string;
     marca: string;
     modelo: string;
     imagen?: string | string[];
+    imagenes?: string[];
   };
   user_has_liked?: boolean;
   comments?: ReviewComment[];

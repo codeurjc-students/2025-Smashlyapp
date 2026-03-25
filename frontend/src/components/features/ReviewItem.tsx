@@ -7,25 +7,12 @@ import { useState, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { Link, useLocation } from 'react-router-dom';
 import { reviewService } from '../../services/reviewService';
-import type { ReviewComment, ReviewWithUser } from '../../types/review';
+import type { ReviewComment, ReviewWithDetails } from '../../types/review';
 import { useAuth } from '../../contexts/AuthContext';
 import { ReviewForm } from './ReviewForm';
 
-type ReviewItemData = ReviewWithUser & {
-  racket?: {
-    id: number;
-    nombre: string;
-    marca?: string;
-    modelo?: string;
-    imagen?: string | string[];
-    imagenes?: string[];
-  };
-  user_has_liked?: boolean;
-  comments?: ReviewComment[];
-};
-
 interface ReviewItemProps {
-  review: ReviewItemData;
+  review: ReviewWithDetails;
   onDelete: (id: string) => void;
   onUpdate: () => void;
   showProductInfo?: boolean;
