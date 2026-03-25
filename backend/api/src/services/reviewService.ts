@@ -459,6 +459,18 @@ export class ReviewService {
     userId: string,
     commentData: CreateCommentDTO
   ): Promise<ReviewComment> {
+    // 1. Obtener la review original para saber quién es el autor y de qué pala es
+    const { data: originalReview, error: reviewError } = await supabase
+      .from('reviews')
+      .select('user_id, racket_id, rackets(name)')
+      .eq('id', reviewId)
+      .single();
+
+    if (reviewError || !originalReview) {
+      throw new Error('Review no encontrada');
+    }
+
+    // 2. Insertar el comentario
     const { data: comment, error } = await supabase
       .from('review_comments')
       .insert({
@@ -479,6 +491,27 @@ export class ReviewService {
       .single();
 
     if (error) throw error;
+
+    // 3. Notificar al autor de la review si no es el mismo que comenta
+    if (originalReview.user_id !== userId) {
+      try {
+        const { NotificationService } = await import('./notificationService');
+        const racketName = (originalReview as any).rackets?.name || 'la pala';
+        const replierNickname = (comment as any).user?.nickname || 'Un usuario';
+        
+        await NotificationService.createReviewReplyNotification(
+          originalReview.user_id,
+          replierNickname,
+          reviewId,
+          originalReview.racket_id,
+          racketName,
+          commentData.content
+        );
+      } catch (notifError) {
+        // No bloqueamos la creación del comentario si falla la notificación
+        console.error('Error sending review reply notification:', notifError);
+      }
+    }
 
     return comment as ReviewComment;
   }

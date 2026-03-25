@@ -156,6 +156,23 @@ export class NotificationService {
     );
   }
 
+  static async createReviewReplyNotification(
+    targetUserId: string,
+    replierNickname: string,
+    reviewId: string,
+    racketId: number,
+    racketName: string,
+    commentText: string
+  ): Promise<Notification> {
+    return this.createNotification(
+      targetUserId,
+      "review_reply",
+      "Nueva respuesta en tu reseña",
+      `${replierNickname} ha respondido a tu reseña de "${racketName}": "${commentText}"`,
+      { reviewId, racketId, racketName, replierNickname }
+    );
+  }
+
   static async createReviewNotification(
     storeOwnerId: string,
     racketName: string,

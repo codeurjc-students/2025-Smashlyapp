@@ -113,6 +113,8 @@ const NotificationIcon = styled.div<{ type: NotificationType }>`
         return '#e0e7ff';
       case 'new_store':
         return '#f3e8ff';
+      case 'review_reply':
+        return '#e0f2fe';
       default:
         return '#f3f4f6';
     }
@@ -132,6 +134,8 @@ const NotificationIcon = styled.div<{ type: NotificationType }>`
         return '#4f46e5';
       case 'new_store':
         return '#9333ea';
+      case 'review_reply':
+        return '#0284c7';
       default:
         return '#6b7280';
     }
@@ -233,6 +237,8 @@ const getNotificationIcon = (type: NotificationType) => {
       return <FiUserPlus />;
     case 'new_store':
       return <FiShoppingBag />;
+    case 'review_reply':
+      return <FiStar />;
     default:
       return <FiBell />;
   }
@@ -277,6 +283,8 @@ const getNotificationLink = (notification: Notification): string => {
       return `/admin/users`;
     case 'new_store':
       return `/admin/stores`;
+    case 'review_reply':
+      return `/racket-detail?id=${data.racketId}&reviewId=${data.reviewId}`;
     default:
       return '/';
   }

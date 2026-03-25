@@ -29,7 +29,7 @@ export interface ReviewWithDetails extends ReviewWithUser {
     nombre: string;
     marca: string;
     modelo: string;
-    imagen?: string;
+    imagen?: string | string[];
   };
   user_has_liked?: boolean;
   comments?: ReviewComment[];

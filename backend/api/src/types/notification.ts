@@ -3,6 +3,7 @@ export type NotificationType =
   | 'comparison_complete'
   | 'recommendation_complete'
   | 'review'
+  | 'review_reply'
   | 'admin_update'
   | 'new_user'
   | 'new_store';
