@@ -235,6 +235,27 @@ export class GoogleAuthController {
         .eq('id', userId)
         .single();
 
+      // Set httpOnly auth cookies (same pattern as email/password login)
+      if (session?.access_token) {
+        const isProd = process.env.NODE_ENV === 'production';
+        const cookieOptions = {
+          httpOnly: true,
+          secure: isProd,
+          sameSite: 'lax' as const,
+          path: '/',
+        };
+        res.cookie('access_token', session.access_token, {
+          ...cookieOptions,
+          maxAge: 60 * 60 * 1000, // 1 hour
+        });
+        if (session.refresh_token) {
+          res.cookie('refresh_token', session.refresh_token, {
+            ...cookieOptions,
+            maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+          });
+        }
+      }
+
       res.status(200).json({
         success: true,
         data: {

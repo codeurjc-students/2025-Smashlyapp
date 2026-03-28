@@ -7,12 +7,16 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="/images/icons/smashly-icon.png" />
 
+    <!-- SEO: Canonical & robots -->
+    <link rel="canonical" href="https://smashly-app.onrender.com/" />
+    <meta name="robots" content="index, follow" />
+
     <!-- Primary Meta Tags -->
     <title>Smashly — Encuentra tu Pala de Pádel Perfecta</title>
     <meta name="title" content="Smashly — Encuentra tu Pala de Pádel Perfecta" />
     <meta
       name="description"
-      content="Smashly es la plataforma definitiva para encontrar, comparar y analizar palas de pádel. Más de 800 modelos, comparador inteligente con IA y precios actualizados en tiempo real."
+      content="Smashly - Comparador de palas de pádel con +800 modelos, IA y precios en tiempo real. Encuentra tu pala perfecta."
     />
     <meta name="author" content="Smashly" />
     <meta
@@ -20,25 +24,72 @@
       content="padel, pala padel, comparar palas, mejores palas padel, pádel, smashly, comparador padel"
     />
 
+    <!-- Schema.org structured data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://smashly-app.onrender.com/#website",
+          "url": "https://smashly-app.onrender.com/",
+          "name": "Smashly",
+          "description": "Comparador de palas de pádel con inteligencia artificial",
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://smashly-app.onrender.com/catalog?q={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          }
+        },
+        {
+          "@type": "Organization",
+          "@id": "https://smashly-app.onrender.com/#organization",
+          "name": "Smashly",
+          "url": "https://smashly-app.onrender.com/",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://smashly-app.onrender.com/images/icons/smashly-icon.png"
+          }
+        },
+        {
+          "@type": "SoftwareApplication",
+          "name": "Smashly",
+          "applicationCategory": "SportsApplication",
+          "operatingSystem": "Web",
+          "description": "Plataforma para comparar y analizar más de 800 palas de pádel con IA y precios actualizados en tiempo real.",
+          "url": "https://smashly-app.onrender.com/",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "EUR"
+          }
+        }
+      ]
+    }
+    </script>
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://smashly.app/" />
+    <meta property="og:url" content="https://smashly-app.onrender.com/" />
     <meta property="og:title" content="Smashly — Encuentra tu Pala de Pádel Perfecta" />
     <meta
       property="og:description"
       content="Compara más de 800 palas de pádel con IA. Encuentra la pala ideal para tu nivel y estilo de juego. Precios actualizados en tiempo real."
     />
-    <meta property="og:image" content="https://smashly.app/images/icons/smashly-banner.svg" />
+    <meta property="og:image" content="https://smashly-app.onrender.com/images/icons/smashly-banner.svg" />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://smashly.app/" />
+    <meta name="twitter:url" content="https://smashly-app.onrender.com/" />
     <meta name="twitter:title" content="Smashly — Encuentra tu Pala de Pádel Perfecta" />
     <meta
       name="twitter:description"
       content="Compara más de 800 palas de pádel con IA. Encuentra la pala ideal para tu nivel y estilo de juego."
     />
-    <meta name="twitter:image" content="https://smashly.app/images/icons/smashly-banner.svg" />
+    <meta name="twitter:image" content="https://smashly-app.onrender.com/images/icons/smashly-banner.svg" />
 
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

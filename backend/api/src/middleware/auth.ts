@@ -3,6 +3,24 @@ import { supabase } from "../config/supabase";
 import logger from "../config/logger";
 import { RequestWithUser, ApiResponse } from "../types";
 
+/**
+ * Extracts the auth token from the request.
+ * Priority: httpOnly cookie > Authorization header
+ * Cookie is preferred because it is inaccessible to JavaScript (XSS-safe).
+ */
+function extractToken(req: Request): string | null {
+  // 1st: httpOnly cookie (set by backend on login, invisible to JS)
+  if (req.cookies?.access_token) {
+    return req.cookies.access_token as string;
+  }
+  // 2nd: Authorization header (backward compat for API clients / mobile)
+  const authHeader = req.headers.authorization;
+  if (authHeader?.startsWith("Bearer ")) {
+    return authHeader.substring(7);
+  }
+  return null;
+}
+
 function getErrorMessage(error: unknown): string {
   if (error instanceof Error) {
     return error.message;
@@ -36,6 +54,8 @@ function validateAuthHeader(authHeader: string | undefined, res: Response): stri
   }
   return authHeader.substring(7);
 }
+
+// Keep for backward compat but prefer extractToken() below
 
 async function verifyToken(token: string, res: Response) {
   const {
@@ -94,9 +114,17 @@ export async function authenticateUser(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization as string;
-    const token = validateAuthHeader(authHeader, res);
-    if (!token) return;
+    // Use extractToken: prefers httpOnly cookie, falls back to Authorization header
+    const token = extractToken(req);
+    if (!token) {
+      res.status(401).json({
+        success: false,
+        error: "Authentication token required",
+        message: "You must provide a valid authentication token",
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+      return;
+    }
 
     const user = await verifyToken(token, res);
     if (!user) return;
@@ -125,15 +153,13 @@ export async function optionalAuth(
   next: NextFunction
 ): Promise<void> {
   try {
-    const authHeader = req.headers.authorization as string;
+    const token = extractToken(req);
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      // No token, continue without user
+    if (!token) {
+      // No token in cookie or header, continue without user
       next();
       return;
     }
-
-    const token = authHeader.substring(7);
 
     // Try to verify the token
     const {

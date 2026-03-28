@@ -1,19 +1,41 @@
 /**
  * Utilidades para el manejo de autenticación y limpieza de tokens
+ *
+ * SECURITY NOTE: Tokens are stored as httpOnly cookies set by the backend.
+ * JavaScript cannot read httpOnly cookies, which prevents XSS token theft.
+ * These functions are kept for interface compatibility but no longer touch localStorage.
  */
 
-export const setAuthToken = (token: string): void => {
-  localStorage.setItem('auth_token', token);
-  console.log('🔑 Auth token set.');
+// In-memory flag: true after a successful login in the current session.
+// Cannot hold the actual token (cookies are httpOnly and unreadable from JS).
+let _isAuthenticated = false;
+
+export const setAuthToken = (_token: string): void => {
+  // Token is set as httpOnly cookie by the backend. Nothing to store here.
+  _isAuthenticated = true;
 };
 
 export const removeAuthToken = (): void => {
-  localStorage.removeItem('auth_token');
-  console.log('🗑️ Auth token removed.');
+  _isAuthenticated = false;
+  // Also clean any legacy localStorage tokens from before this migration
+  try {
+    localStorage.removeItem('auth_token');
+  } catch (_) { /* ignore */ }
 };
 
+/**
+ * Returns a truthy value if the user authenticated during this session.
+ * NOTE: On page reload, the server validates the httpOnly cookie directly.
+ * Use this only for in-session checks; prefer server validation on init.
+ */
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('auth_token');
+  // Legacy: also accept tokens still in localStorage (migration period)
+  try {
+    const legacy = localStorage.getItem('auth_token');
+    if (legacy) return legacy;
+  } catch (_) { /* ignore */ }
+  // Return a placeholder so callers know the user may be authenticated via cookie
+  return _isAuthenticated ? '__cookie_auth__' : null;
 };
 
 /**

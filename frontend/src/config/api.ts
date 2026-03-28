@@ -112,27 +112,52 @@ export const buildApiUrl = (endpoint: string, params?: Record<string, any>): str
 };
 
 /**
- * Helper para obtener el token de autenticación
+ * Helper para obtener el token de autenticación.
+ * @deprecated El token vive en una cookie httpOnly inaccessible desde JS.
+ * Usa getCommonHeaders() + credentials:'include' en las llamadas fetch.
  */
 export const getAuthToken = (): string | null => {
-  return localStorage.getItem('auth_token');
+  // Legacy support during migration: check localStorage first
+  try {
+    const legacy = localStorage.getItem('auth_token');
+    if (legacy) return legacy;
+  } catch (_) { /* SSR or storage disabled */ }
+  return null;
 };
 
 /**
- * Helper para configurar headers comunes
+ * Helper para configurar headers comunes.
+ * SECURITY: El JWT viaja en una cookie httpOnly (invisible a JS, enviada automáticamente).
+ * El header Authorization solo se usa como fallback si hay un token legacy en localStorage.
  */
 export const getCommonHeaders = (): HeadersInit => {
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
   };
 
-  const token = getAuthToken();
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  // Legacy fallback: if there's a token in localStorage (pre-migration users), send it
+  const legacyToken = getAuthToken();
+  if (legacyToken) {
+    headers['Authorization'] = `Bearer ${legacyToken}`;
+    // Clean it up so the user migrates to cookie auth on next login
+    try { localStorage.removeItem('auth_token'); } catch (_) { /* ignore */ }
   }
 
   return headers;
 };
+
+/**
+ * Fetch options que incluyen credentials para enviar cookies httpOnly al backend.
+ * Úsalas en todos los fetch() que necesiten autenticación.
+ */
+export const getAuthFetchOptions = (options: RequestInit = {}): RequestInit => ({
+  ...options,
+  credentials: 'include',
+  headers: {
+    'Content-Type': 'application/json',
+    ...options.headers,
+  },
+});
 
 /**
  * Tipo para respuestas de la API

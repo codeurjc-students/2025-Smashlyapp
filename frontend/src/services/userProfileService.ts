@@ -45,6 +45,7 @@ export class UserProfileService {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
+        credentials: 'include',  // send httpOnly auth cookie
         method: 'POST',
         headers: getCommonHeaders(),
         body: JSON.stringify({
@@ -73,6 +74,7 @@ export class UserProfileService {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
+        credentials: 'include',  // send httpOnly auth cookie
         method: 'GET',
         headers: getCommonHeaders(),
       });
@@ -111,6 +113,7 @@ export class UserProfileService {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
+        credentials: 'include',  // send httpOnly auth cookie
         method: 'PUT',
         headers: getCommonHeaders(),
         body: JSON.stringify(updates),
@@ -149,6 +152,7 @@ export class UserProfileService {
     try {
       const url = buildApiUrl(API_ENDPOINTS.USERS_PROFILE);
       const response = await fetch(url, {
+        credentials: 'include',  // send httpOnly auth cookie
         method: 'DELETE',
         headers: getCommonHeaders(),
       });

@@ -26,9 +26,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   return (
     <LayoutContainer>
+      {/* Skip-to-content: visible only on keyboard focus (WCAG 2.1 AA - criterion 2.4.1) */}
+      <a href="#main-content" className="skip-to-content">
+        Saltar al contenido principal
+      </a>
       {!isAuthPage && <Header />}
       {!isAuthPage && <SubHeader />}
-      <Main>{children}</Main>
+      <Main id="main-content">{children}</Main>
       {!isAuthPage && <Footer />}
     </LayoutContainer>
   );

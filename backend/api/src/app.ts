@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
+import cookieParser from 'cookie-parser';
 import { validateConfig } from './config';
 import logger from './config/logger';
 
@@ -110,6 +111,9 @@ const authLimiter = rateLimit({
 app.use('/api/v1/', limiter);
 app.use('/api/v1/auth/', authLimiter);
 
+// Cookie parser (needed for httpOnly auth cookies)
+app.use(cookieParser());
+
 // Middleware general
 app.use(compression());
 app.use(morgan('combined'));
@@ -152,11 +156,29 @@ try {
 // Servir frontend estático (build de Vite) desde ../static si existe
 const staticDir = path.join(__dirname, '../static');
 if (fs.existsSync(staticDir)) {
-  // Archivos estáticos
-  app.use(express.static(staticDir));
+  // Archivos estáticos con caching diferenciado:
+  // - index.html: sin caché (el SPA necesita siempre la versión más reciente)
+  // - Assets con hash (JS/CSS/imágenes): caché agresiva (1 año), los nombres cambian en cada build
+  app.use(
+    express.static(staticDir, {
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith('.html')) {
+          // HTML nunca se cachea: asegura que el usuario siempre tiene el último index.html
+          res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+          res.setHeader('Pragma', 'no-cache');
+          res.setHeader('Expires', '0');
+        } else if (/\.(js|css|woff2?|ttf|eot|png|jpg|jpeg|gif|ico|webp|svg)$/.test(filePath)) {
+          // Assets con hash de Vite: inmutables, cachear 1 año
+          res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+        }
+      },
+    })
+  );
 
   // Fallback SPA: cualquier ruta que no empiece por /api/ devuelve index.html
   app.get(/^\/(?!api\/).*/, (req, res) => {
+    // index.html no se cachea en el fallback SPA tampoco
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.sendFile(path.join(staticDir, 'index.html'));
   });
 }

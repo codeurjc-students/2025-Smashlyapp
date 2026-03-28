@@ -1,0 +1,19 @@
+User-agent: *
+Allow: /
+Allow: /compare
+Disallow: /admin/
+Disallow: /admin
+Disallow: /profile
+Disallow: /comparisons
+Disallow: /comparisons/
+Disallow: /api/
+
+Sitemap: https://smashly-app.onrender.com/sitemap.xml
+
+# Google
+User-agent: Googlebot
+Allow: /
+
+# Bing
+User-agent: Bingbot
+Allow: /

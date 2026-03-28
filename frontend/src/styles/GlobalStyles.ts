@@ -96,7 +96,6 @@ export const GlobalStyles = createGlobalStyle`
     font-size: inherit;
     line-height: inherit;
     border: none;
-    outline: none;
     cursor: pointer;
     background: none;
     transition: all 0.2s ease;
@@ -262,9 +261,43 @@ export const GlobalStyles = createGlobalStyle`
     }
   }
 
-  /* Focus styles for accessibility */
+  /* Focus styles for accessibility (WCAG 2.1 AA)
+   * :focus-visible only shows for keyboard nav, not mouse clicks */
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Remove :focus outline for mouse users via :focus:not(:focus-visible) */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  /* Legacy class for components that use it explicitly */
   .focus-visible:focus {
-    outline: 2px solid var(--color-primary);
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+
+  /* Skip-to-content link (visible only on keyboard focus) */
+  .skip-to-content {
+    position: absolute;
+    top: -100%;
+    left: 0;
+    z-index: 9999;
+    padding: 12px 24px;
+    background: var(--color-primary);
+    color: white;
+    font-weight: 600;
+    text-decoration: none;
+    border-radius: 0 0 8px 0;
+    transition: top 0.1s ease;
+  }
+
+  .skip-to-content:focus {
+    top: 0;
+    outline: 3px solid white;
     outline-offset: 2px;
   }
 

@@ -33,36 +33,25 @@ export class AuthController {
 
       const normalizedEmail = email.toLowerCase().trim();
 
-      const { data: profileData, error: profileError } = await supabase
-        .from('user_profiles')
-        .select('id')
-        .eq('email', normalizedEmail)
-        .single();
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: normalizedEmail,
         password,
       });
 
-      if (error) {
-        if (!profileData) {
-          res.status(404).json({
-            success: false,
-            error: "USER_NOT_FOUND",
-            message: "No tienes una cuenta con este email. ¿Quieres registrarte?",
-            timestamp: new Date().toISOString(),
-          } as ApiResponse);
-          return;
-        }
-
+      if (error || !data.session) {
+        // SECURITY: Siempre el mismo mensaje genérico para no revelar si el email existe o no
+        // (evita user enumeration attacks)
         res.status(401).json({
           success: false,
-          error: "INVALID_PASSWORD",
-          message: "La contraseña es incorrecta. Inténtalo de nuevo.",
+          error: "INVALID_CREDENTIALS",
+          message: "Email o contraseña incorrectos.",
           timestamp: new Date().toISOString(),
         } as ApiResponse);
         return;
       }
+
+      // Set auth cookies as httpOnly to prevent XSS token theft
+      AuthController.setAuthCookies(res, data.session.access_token, data.session.refresh_token);
 
       res.json({
         success: true,
@@ -92,7 +81,11 @@ export class AuthController {
    */
   static async register(req: Request, res: Response): Promise<void> {
     try {
-      const { email, password, nickname, full_name, role, metadata } = req.body;
+      const { email, password, nickname, full_name } = req.body;
+      // SECURITY: 'role' y 'metadata' del body se ignoran deliberadamente.
+      // El rol siempre es 'player' al registrarse. Elevación de permisos solo vía admin.
+      const role = 'player';
+      const metadata = undefined;
 
       const validationError = AuthController.validateRegisterData(email, password);
       if (validationError) {
@@ -115,6 +108,11 @@ export class AuthController {
       const finalSession = await AuthController.ensureUserSession(email, password, signUpResult.session);
       const responseData = AuthController.buildRegisterResponse(signUpResult.user, finalSession);
 
+      // Set auth cookies as httpOnly to prevent XSS token theft
+      if (finalSession?.access_token) {
+        AuthController.setAuthCookies(res, finalSession.access_token, (finalSession as any).refresh_token);
+      }
+
       res.status(201).json(responseData);
     } catch (error: unknown) {
       logger.error("Error in register:", error);
@@ -125,6 +123,42 @@ export class AuthController {
         timestamp: new Date().toISOString(),
       } as ApiResponse);
     }
+  }
+
+  /**
+   * Sets httpOnly auth cookies to prevent XSS token theft.
+   * - access_token: 1 hour (matches Supabase default)
+   * - refresh_token: 30 days
+   */
+  private static setAuthCookies(res: Response, accessToken: string, refreshToken?: string): void {
+    const isProd = process.env.NODE_ENV === 'production';
+    const cookieOptions = {
+      httpOnly: true,       // Inaccessible to JavaScript
+      secure: isProd,       // HTTPS only in production
+      sameSite: 'lax' as const,  // CSRF protection while allowing navigation
+      path: '/',
+    };
+
+    res.cookie('access_token', accessToken, {
+      ...cookieOptions,
+      maxAge: 60 * 60 * 1000,  // 1 hour in ms
+    });
+
+    if (refreshToken) {
+      res.cookie('refresh_token', refreshToken, {
+        ...cookieOptions,
+        maxAge: 30 * 24 * 60 * 60 * 1000,  // 30 days in ms
+      });
+    }
+  }
+
+  /**
+   * Clears auth cookies on logout.
+   */
+  private static clearAuthCookies(res: Response): void {
+    const cookieOptions = { httpOnly: true, path: '/' };
+    res.clearCookie('access_token', cookieOptions);
+    res.clearCookie('refresh_token', cookieOptions);
   }
 
   private static validateRegisterData(email: string, password: string): ApiResponse | null {
@@ -265,6 +299,9 @@ export class AuthController {
   static async logout(req: Request, res: Response): Promise<void> {
     try {
       const { error } = await supabase.auth.signOut();
+
+      // Clear httpOnly cookies regardless of Supabase response
+      AuthController.clearAuthCookies(res);
 
       if (error) {
         res.status(400).json({

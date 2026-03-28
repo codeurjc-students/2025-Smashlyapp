@@ -109,30 +109,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   useEffect(() => {
-    // Detectar tokens huérfanos al inicializar (solo en desarrollo)
-    if (import.meta.env.DEV) {
-      const orphanedTokens = detectOrphanedTokens();
-      if (orphanedTokens.length > 0) {
-        console.warn('🚨 Orphaned tokens detected during init:', orphanedTokens);
-      }
-    }
-
-    // Inicializar autenticación
+    // Inicializar autenticación comprobando la sesión via cookie httpOnly.
+    // No leemos localStorage: el servidor valida la cookie y devuelve el perfil si la sesión es válida.
     const initializeAuth = async () => {
       try {
-        const token = getAuthToken();
-        if (token) {
-          // console.log('Auth token found, loading user profile...');
-          await loadUserProfile();
-        } else {
-          // console.log('No auth token found, user not authenticated.');
-          clearAuthStorage();
-          setUser(null);
-          setUserProfile(null);
-        }
+        await loadUserProfile();
       } catch (error) {
+        // loadUserProfile ya maneja 401 limpiando el estado
         console.error('Error during auth initialization:', error);
-        clearAuthStorage();
         setUser(null);
         setUserProfile(null);
       } finally {
@@ -157,13 +141,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const url = buildApiUrl(API_ENDPOINTS.AUTH_REGISTER);
       const response = await fetch(url, {
         method: 'POST',
+        credentials: 'include',  // sends/receives httpOnly cookies
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
           password,
           nickname,
           full_name: fullName,
-          role,
+          // NOTE: 'role' is intentionally omitted — backend always assigns 'player'
         }),
       });
 
@@ -224,6 +209,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const url = buildApiUrl(API_ENDPOINTS.AUTH_LOGIN);
       const response = await fetch(url, {
         method: 'POST',
+        credentials: 'include',  // sends/receives httpOnly cookies
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
@@ -284,14 +270,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  // Función para recargar el perfil del usuario
+  // Función para recargar el perfil del usuario.
+  // La autenticación se valida vía cookie httpOnly en el backend.
   const refreshUserProfile = async (): Promise<void> => {
-    const token = getAuthToken();
-    if (token) {
-      await loadUserProfile();
-    } else {
-      console.warn('Cannot refresh profile: No auth token found.');
-    }
+    await loadUserProfile();
   };
 
   // Función para iniciar sesión con Google
@@ -336,19 +318,14 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       console.log('Signing out...');
 
-      // Opcional: Si tu API tiene un endpoint de logout para invalidar el token en el servidor
+      // Llamar al endpoint de logout para que el backend limpie las cookies httpOnly
       try {
         const url = buildApiUrl(API_ENDPOINTS.AUTH_LOGOUT);
-        const token = getAuthToken();
-        if (token) {
-          await fetch(url, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${token}`,
-            },
-          });
-        }
+        await fetch(url, {
+          method: 'POST',
+          credentials: 'include',  // necesario para que el backend pueda limpiar la cookie
+          headers: { 'Content-Type': 'application/json' },
+        });
       } catch (logoutError) {
         console.warn('Error calling logout endpoint:', logoutError);
         // No fallar el logout local si el endpoint falla
