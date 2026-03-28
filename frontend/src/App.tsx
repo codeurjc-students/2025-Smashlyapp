@@ -31,12 +31,15 @@ const BestRacketPage = lazy(() =>
 );
 const FAQPage = lazy(() => import('./pages/FAQPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
+const ListPage = lazy(() => import('./pages/ListPage'));
 const AdminPanelPage = lazy(() => import('./pages/AdminPanelPage'));
 const AdminRacketReviewPage = lazy(() => import('./pages/AdminRacketReviewPage'));
 const AdminRacketsPage = lazy(() => import('./pages/AdminRacketsPage'));
 const AdminUsersPage = lazy(() => import('./pages/AdminUsersPage'));
 const AdminStoresPage = lazy(() => import('./pages/AdminStoresPage'));
 const AdminSettingsPage = lazy(() => import('./pages/AdminSettingsPage'));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const UpdatePasswordPage = lazy(() => import('./pages/UpdatePasswordPage'));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 
 export default function App() {
@@ -143,6 +146,22 @@ export default function App() {
                             </Suspense>
                           }
                         />
+                        <Route
+                          path='/forgot-password'
+                          element={
+                            <Suspense fallback={<RouteLoadingFallback />}>
+                              <ForgotPasswordPage />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/update-password'
+                          element={
+                            <Suspense fallback={<RouteLoadingFallback />}>
+                              <UpdatePasswordPage />
+                            </Suspense>
+                          }
+                        />
 
                         {/* User routes */}
                         <Route
@@ -160,6 +179,17 @@ export default function App() {
                             <ProtectedRoute>
                               <Suspense fallback={<RouteLoadingFallback />}>
                                 <UserProfilePage />
+                              </Suspense>
+                            </ProtectedRoute>
+                          }
+                        />
+
+                        <Route
+                          path='/lists/:id'
+                          element={
+                            <ProtectedRoute>
+                              <Suspense fallback={<RouteLoadingFallback />}>
+                                <ListPage />
                               </Suspense>
                             </ProtectedRoute>
                           }

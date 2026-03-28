@@ -38,6 +38,8 @@ export const API_ENDPOINTS = {
   AUTH_LOGOUT: '/api/v1/auth/logout',
   AUTH_ME: '/api/v1/auth/me',
   AUTH_GOOGLE: '/api/v1/auth/google',
+  AUTH_RESET_PASSWORD: '/api/v1/auth/reset-password',
+  AUTH_UPDATE_PASSWORD: '/api/v1/auth/update-password',
 
   // Stores
   STORES: '/api/v1/stores',

@@ -26,7 +26,7 @@ const ProgressBar = styled.div`
   padding: 8px 4px;
   -ms-overflow-style: none;
   scrollbar-width: none;
-  
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -347,7 +347,7 @@ const BASIC_QUESTIONS: Question[] = [
     id: 'current_racket',
     key: 'current_racket',
     title: '¿Cuál es tu pala actual?',
-    subtitle: 'Búsqudala en nuestro catálogo (opcional)',
+    subtitle: 'Búscala en nuestro catálogo (opcional)',
     type: 'racket-search',
     required: false,
     optional: true,
@@ -500,7 +500,7 @@ const ADVANCED_QUESTIONS: Question[] = [
     id: 'current_racket',
     key: 'current_racket',
     title: '¿Cuál es tu pala actual?',
-    subtitle: 'Búsqudala en nuestro catálogo (opcional)',
+    subtitle: 'Búscala en nuestro catálogo (opcional)',
     type: 'racket-search',
     required: false,
     optional: true,
@@ -545,7 +545,7 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
   const questions = mode === 'basic' ? BASIC_QUESTIONS : ADVANCED_QUESTIONS;
   const [currentIndex, setCurrentIndex] = useState(0);
   const progressBarRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (progressBarRef.current) {
       const activeElement = progressBarRef.current.children[currentIndex + 2] as HTMLElement;
@@ -554,7 +554,7 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
       }
     }
   }, [currentIndex]);
-  
+
   const getInitialData = () => {
     if (mode === 'basic') {
       return {
@@ -643,17 +643,13 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
         <ProgressTrack />
         <ProgressFill style={{ width: `${progress}%` }} />
         {questions.map((q, idx) => (
-          <ProgressStep
-            key={q.id}
-            $active={idx === currentIndex}
-            $completed={idx < currentIndex}
-          >
+          <ProgressStep key={q.id} $active={idx === currentIndex} $completed={idx < currentIndex}>
             {idx < currentIndex ? <FiCheck size={16} /> : idx + 1}
           </ProgressStep>
         ))}
       </ProgressBar>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence mode='wait'>
         <QuestionContainer
           key={currentQuestion.id}
           initial={{ opacity: 0, x: 20 }}
@@ -665,7 +661,9 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
             {currentQuestion.title}
             {currentQuestion.optional && <OptionalBadge>Opcional</OptionalBadge>}
           </QuestionTitle>
-          {currentQuestion.subtitle && <QuestionSubtitle>{currentQuestion.subtitle}</QuestionSubtitle>}
+          {currentQuestion.subtitle && (
+            <QuestionSubtitle>{currentQuestion.subtitle}</QuestionSubtitle>
+          )}
 
           {currentQuestion.type === 'single' && (
             <OptionsGrid>
@@ -674,7 +672,7 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
                   key={option.value}
                   $selected={getValue() === option.value}
                   onClick={() => handleValueChange(option.value)}
-                  type="button"
+                  type='button'
                 >
                   {option.label}
                 </OptionCard>
@@ -687,7 +685,7 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
               {currentQuestion.options?.map(option => (
                 <CheckboxLabel key={option.value}>
                   <input
-                    type="checkbox"
+                    type='checkbox'
                     checked={(getValue() as string[])?.includes(option.value) || false}
                     onChange={e => {
                       const current = (getValue() as string[]) || [];
@@ -706,19 +704,19 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
 
           {currentQuestion.type === 'number' && (
             <Input
-              type="number"
+              type='number'
               value={(getValue() as string) || ''}
               onChange={e => handleValueChange(e.target.value)}
-              placeholder="Ej: 2"
+              placeholder='Ej: 2'
             />
           )}
 
           {currentQuestion.type === 'text' && (
             <Input
-              type="text"
+              type='text'
               value={(getValue() as string) || ''}
               onChange={e => handleValueChange(e.target.value)}
-              placeholder="Escribe tu respuesta..."
+              placeholder='Escribe tu respuesta...'
             />
           )}
 
@@ -726,15 +724,15 @@ export const WizardForm: React.FC<WizardFormProps> = ({ mode, onSubmit, isLoadin
             <TextArea
               value={(getValue() as string) || ''}
               onChange={e => handleValueChange(e.target.value)}
-              placeholder="Escribe tu respuesta..."
+              placeholder='Escribe tu respuesta...'
             />
           )}
 
           {currentQuestion.type === 'racket-search' && (
             <RacketSearchInput
-              value={getValue() as RacketSearchResult || null}
+              value={(getValue() as RacketSearchResult) || null}
               onChange={racket => handleValueChange(racket)}
-              placeholder="Buscar en el catálogo..."
+              placeholder='Buscar en el catálogo...'
             />
           )}
 
