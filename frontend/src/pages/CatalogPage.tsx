@@ -429,6 +429,7 @@ const CatalogPage: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState('Todos');
   const [selectedGameType, setSelectedGameType] = useState('Todos');
   const [selectedHardness, setSelectedHardness] = useState('Todas');
+  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
 
   const observerTarget = useRef<HTMLDivElement>(null);
 
@@ -460,6 +461,7 @@ const CatalogPage: React.FC = () => {
     setSelectedHardness(hardnessParam);
     setShowOffers(offersParam === 'true');
     setShowMostViewed(mostViewedParam === 'true');
+    setShowAvailableOnly(searchParams.get('availableOnly') === 'true');
     setSortBy(sortParam);
   }, [searchParams]);
 
@@ -478,6 +480,7 @@ const CatalogPage: React.FC = () => {
     if (selectedHardness !== 'Todas') params.set('hardness', selectedHardness);
     if (showOffers) params.set('offers', 'true');
     if (showMostViewed) params.set('mostViewed', 'true');
+    if (showAvailableOnly) params.set('availableOnly', 'true');
     if (sortBy !== 'most-viewed') params.set('sort', sortBy);
 
     const newUrl = params.toString() ? `?${params.toString()}` : window.location.pathname;
@@ -545,6 +548,11 @@ const CatalogPage: React.FC = () => {
     // Apply offers filter
     if (showOffers) {
       filtered = filtered.filter(racket => racket.en_oferta);
+    }
+
+    // Apply available only filter
+    if (showAvailableOnly) {
+      filtered = filtered.filter(racket => !racket.solo_comparacion);
     }
 
     // Apply advanced filters
@@ -1018,6 +1026,14 @@ const CatalogPage: React.FC = () => {
           </ResultsCount>
 
           <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <FilterButton
+              $active={showAvailableOnly}
+              onClick={() => setShowAvailableOnly(!showAvailableOnly)}
+            >
+              <FiFilter size={18} />
+              En Stock
+            </FilterButton>
+
             <SortSelect value={sortBy} onChange={e => setSortBy(e.target.value)}>
               <option value='most-viewed'>Más vistas primero</option>
               <option value='name'>Ordenar por nombre</option>

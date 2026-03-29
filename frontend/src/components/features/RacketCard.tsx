@@ -45,11 +45,19 @@ const RacketImage = styled(motion.img)`
   object-fit: contain;
 `;
 
-const RacketBadge = styled.div<{ $variant: 'bestseller' | 'offer' }>`
+const RacketBadge = styled.div<{ $variant: 'bestseller' | 'offer' | 'comparison' }>`
   position: absolute;
   top: 0.75rem;
-  ${props => (props.$variant === 'bestseller' ? 'right: 0.75rem;' : 'left: 0.75rem;')}
-  background: ${props => (props.$variant === 'bestseller' ? '#f59e0b' : '#ef4444')};
+  ${props => {
+    if (props.$variant === 'bestseller') return 'right: 0.75rem;';
+    if (props.$variant === 'comparison') return 'right: 0.75rem;';
+    return 'left: 0.75rem;';
+  }}
+  background: ${props => {
+    if (props.$variant === 'bestseller') return '#f59e0b';
+    if (props.$variant === 'comparison') return '#64748b'; // Gray-Slate for comparison
+    return '#ef4444'; // Offer
+  }};
   color: white;
   padding: 0.375rem 0.75rem;
   border-radius: 6px;
@@ -275,10 +283,16 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(
               Popular
             </RacketBadge>
           )}
-          {racket.en_oferta && (
+          {racket.en_oferta && !racket.solo_comparacion && (
             <RacketBadge $variant='offer'>
               <FiTag size={12} />
               Oferta
+            </RacketBadge>
+          )}
+          {racket.solo_comparacion && (
+            <RacketBadge $variant='comparison'>
+              <FiTag size={12} />
+              Solo comparación
             </RacketBadge>
           )}
         </RacketImageContainer>
@@ -290,7 +304,11 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(
           </div>
 
           <PriceContainer $view={view}>
-            {lowestPrice ? (
+            {racket.solo_comparacion ? (
+              <CurrentPrice style={{ color: '#64748b', fontSize: '1rem' }}>
+                No disponible para venta
+              </CurrentPrice>
+            ) : lowestPrice ? (
               <>
                 <CurrentPrice>{lowestPrice.price.toFixed(2)}€</CurrentPrice>
                 {lowestPrice.originalPrice > lowestPrice.price && (
@@ -303,7 +321,9 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(
                 )}
               </>
             ) : (
-              <CurrentPrice>€{racket.precio_actual}</CurrentPrice>
+              <CurrentPrice>
+                {racket.precio_actual > 0 ? `${racket.precio_actual}€` : 'Consultar'}
+              </CurrentPrice>
             )}
           </PriceContainer>
 

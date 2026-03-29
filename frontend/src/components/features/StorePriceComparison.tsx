@@ -372,7 +372,17 @@ export const StorePriceComparison: React.FC<StorePriceComparisonProps> = ({
   const availablePrices = storePrices.filter(store => store.available && store.price);
 
   if (availablePrices.length === 0) {
-    return null;
+    return (
+      <Card $compact={compact}>
+        <Title $compact={compact}>
+          <FiTrendingDown />
+          Comparación de Precios
+        </Title>
+        <UnavailableText style={{ padding: '2rem', textAlign: 'center', fontSize: '1rem' }}>
+          Actualmente no hay precios disponibles para esta pala en ninguna de nuestras tiendas monitorizadas.
+        </UnavailableText>
+      </Card>
+    );
   }
 
   // Encontrar el precio más bajo para resaltarlo

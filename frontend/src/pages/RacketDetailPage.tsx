@@ -39,6 +39,7 @@ import {
   StoreLabel,
 } from '../components/common/SpecIcons';
 import RacketRadarChart from '../components/features/RacketRadarChart';
+import { StorePriceComparison } from '../components/features/StorePriceComparison';
 
 // --- Styled Components ---
 
@@ -653,6 +654,45 @@ const AlertButton = styled.button`
   }
 `;
 
+const ComparisonOnlyCard = styled.div`
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid var(--color-gray-200);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  align-items: center;
+`;
+
+const ComparisonOnlyTitle = styled.h3`
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-gray-700);
+  margin: 0;
+`;
+
+const ComparisonOnlyText = styled.p`
+  font-size: 0.9375rem;
+  color: var(--color-gray-500);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 400px;
+`;
+
+const ComparisonOnlyBadge = styled.div`
+  background: #64748b;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
 // Lower Section layout
 const LowerGrid = styled.div<{ $fullWidth?: boolean }>`
   display: grid;
@@ -1247,34 +1287,48 @@ const RacketDetailPage: React.FC = () => {
             )}
           </RatingRow>
 
-          <PriceCard>
-            <BestPriceLabel>Mejor Precio del Mercado</BestPriceLabel>
-            <PriceRow>
-              <BigPrice>
-                {lowestPrice ? `${lowestPrice.price.toFixed(2)}€` : `${racket.precio_actual}€`}
-              </BigPrice>
-              {lowestPrice && lowestPrice.originalPrice > lowestPrice.price && (
-                <OldPrice>{lowestPrice.originalPrice.toFixed(2)}€</OldPrice>
-              )}
-              {lowestPrice && lowestPrice.discount > 0 && (
-                <SaveBadge>-{Math.round(lowestPrice.discount)}%</SaveBadge>
-              )}
-            </PriceRow>
-            <UpdatedTime>Precio actualizado: hace un momento</UpdatedTime>
+            {racket.solo_comparacion ? (
+              <ComparisonOnlyCard>
+                <ComparisonOnlyBadge>Solo comparación</ComparisonOnlyBadge>
+                <ComparisonOnlyTitle>Pala no disponible para venta</ComparisonOnlyTitle>
+                <ComparisonOnlyText>
+                  Actualmente no hemos encontrado stock de esta pala en las tiendas que monitorizamos. 
+                  Sin embargo, puedes seguir consultando sus características y compararla con otros modelos.
+                </ComparisonOnlyText>
+                <AlertButton onClick={() => setShowAddToListModal(true)}>
+                  <FiHeart /> Guardar en mis listas
+                </AlertButton>
+              </ComparisonOnlyCard>
+            ) : (
+              <PriceCard>
+                <BestPriceLabel>Mejor Precio del Mercado</BestPriceLabel>
+                <PriceRow>
+                  <BigPrice>
+                    {lowestPrice ? `${lowestPrice.price.toFixed(2)}€` : `${racket.precio_actual}€`}
+                  </BigPrice>
+                  {lowestPrice && lowestPrice.originalPrice > lowestPrice.price && (
+                    <OldPrice>{lowestPrice.originalPrice.toFixed(2)}€</OldPrice>
+                  )}
+                  {lowestPrice && lowestPrice.discount > 0 && (
+                    <SaveBadge>-{Math.round(lowestPrice.discount)}%</SaveBadge>
+                  )}
+                </PriceRow>
+                <UpdatedTime>Precio actualizado: hace un momento</UpdatedTime>
 
-            <PrimaryButton
-              href={lowestPrice?.link || '#'}
-              target='_blank'
-              rel='noopener noreferrer'
-            >
-              Ver en {lowestPrice?.store || 'Tienda'}
-              <FiExternalLink />
-            </PrimaryButton>
+                <PrimaryButton
+                  href={lowestPrice?.link || '#'}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  Ver en {lowestPrice?.store || 'Tienda'}
+                  <FiExternalLink />
+                </PrimaryButton>
 
-            <AlertButton>
-              <FiBell /> Crear Alerta de Precio
-            </AlertButton>
-          </PriceCard>
+                <AlertButton>
+                  <FiBell /> Crear Alerta de Precio
+                </AlertButton>
+              </PriceCard>
+            )}
         </InfoSection>
       </MainGrid>
 
@@ -1434,6 +1488,13 @@ const RacketDetailPage: React.FC = () => {
               </ProgressWrapper>
             </PerformanceGrid>
           </PerformanceContainer>
+        </div>
+      )}
+
+      {/* Solo mostramos el comparador si la pala está disponible */}
+      {!racket.solo_comparacion && (
+        <div style={{ maxWidth: '1400px', margin: '3rem auto', padding: '0 2rem' }}>
+          <StorePriceComparison racket={racket} isAuthenticated={isAuthenticated} />
         </div>
       )}
 
