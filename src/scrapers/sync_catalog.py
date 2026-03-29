@@ -3,12 +3,13 @@
 sync_catalog.py — Script unificado de sincronización de catálogo para Smashly.
 
 Modos de ejecución:
-  --mode full     Scraping completo de catálogos (semanal, ~2-3h).
+  --mode full     Scraping completo de catálogos (mensual, ~20-30min con concurrencia).
                   Descubre palas nuevas, actualiza precios y detecta palas
                   descatalogadas (sin aparición en ninguna tienda en >30 días).
 
-  --mode prices   Solo actualiza precios de URLs ya conocidas (diario, ~20-30min).
+  --mode prices   Solo actualiza precios de URLs ya conocidas (semanal, ~10-15min).
                   Registra en price_history únicamente cuando el precio cambia.
+                  Si una pala pierde todos sus precios, se marca como 'comparison_only'.
 
 Uso:
   python -m src.scrapers.sync_catalog --mode full
@@ -210,9 +211,15 @@ def upsert_racket(client: Client, slug: str, racket: dict, slug_id_map: Dict[str
         payload[f"{store}_actual_price"]        = price
         payload[f"{store}_original_price"]      = original
         payload[f"{store}_discount_percentage"] = discount
-        payload[f"{store}_link"]                = url
+    payload[f"{store}_link"]                = url
 
     payload["on_offer"] = any_on_offer
+    
+    # Si estamos insertando/actualizando una pala con precio, asegurarnos de que NO sea comparison_only
+    # Solo si el modo actual es capaz de determinar que hay al menos un precio válido
+    has_any_price = any(payload.get(f"{s}_actual_price") is not None for s in STORE_CONFIGS.keys())
+    if has_any_price:
+        payload["comparison_only"] = False
 
     if dry_run:
         return slug_id_map.get(slug)
@@ -408,21 +415,27 @@ async def run_full_sync(
                 product_urls = product_urls[:limit]
                 print(f"  ⚙️  Limitado a {limit} productos.")
 
-            for i, url in enumerate(product_urls):
-                print(f"  [{i+1}/{len(product_urls)}] {url}")
-                try:
-                    product = await scraper.scrape_product(url)
-                    if product:
-                        slug = manager.merge_product(product, store_name)
-                        if slug:
-                            seen_slugs_per_store[store_name].add(slug)
-                        print(f"    ✅ {product.name}")
-                    else:
-                        print(f"    ⚠️  No se pudo extraer producto.")
-                except Exception as e:
-                    print(f"    ❌ Error: {e}")
+            # --- Procesamiento Concurrente ---
+            MAX_CONCURRENT_SCRAPES = 5
+            semaphore = asyncio.Semaphore(MAX_CONCURRENT_SCRAPES)
 
-                await asyncio.sleep(1)
+            async def ScrapeAndMerge(url, idx):
+                async with semaphore:
+                    print(f"  [{idx+1}/{len(product_urls)}] Scraping: {url}")
+                    try:
+                        product = await scraper.scrape_product(url)
+                        if product:
+                            slug = manager.merge_product(product, store_name)
+                            if slug:
+                                seen_slugs_per_store[store_name].add(slug)
+                            print(f"    ✅ {product.name}")
+                        else:
+                            print(f"    ⚠️  No se pudo extraer producto: {url}")
+                    except Exception as e:
+                        print(f"    ❌ Error en {url}: {e}")
+
+            tasks = [ScrapeAndMerge(url, i) for i, url in enumerate(product_urls)]
+            await asyncio.gather(*tasks)
 
         except Exception as e:
             print(f"  ❌ Error crítico en {store_name}: {e}")
@@ -621,15 +634,45 @@ async def run_prices_sync(
                 print(f"    ❌ Error: {e}")
                 errors += 1
 
+        # --- Lógica de Comparison Only ---
+        # Si TODAS las tiendas scrapeadas en este modo devolvieron Sin Precio,
+        # y antes tenía precios, marcar como comparison_only
+        all_prices_null = all(
+            db_updates.get(f"{s}_actual_price") is None 
+            for s in target_stores 
+            if f"{s}_actual_price" in db_updates
+        )
+        
+        if all_prices_null and db_id:
+            # Verificar si realmente no queda ni un solo precio en ninguna tienda (incluyendo las no elegidas)
+            current = current_db_prices.get(db_id, {})
+            # Solo si los precios que NO estamos actualizando también son null
+            other_stores_null = all(
+                current.get(s) is None 
+                for s in STORE_CONFIGS.keys() 
+                if s not in target_stores
+            )
+            
+            if other_stores_null:
+                db_updates["comparison_only"] = True
+                db_updates["on_offer"] = False
+                print(f"  🚩 Marcada como 'Solo comparación' (sin stock en ninguna tienda).")
+            else:
+                # Si hay otra tienda que no hemos scrapeado hoy que TIENE precio, 
+                # entonces la pala NO es solo_comparacion.
+                db_updates["comparison_only"] = False
+        elif db_id:
+            # Si al menos una tienda tiene precio, nos aseguramos de quitar el flag
+            db_updates["comparison_only"] = False
+
         # Actualizar Supabase
         if db_updates and supabase and not dry_run:
-            db_updates["on_offer"]   = any_on_offer
             db_updates["updated_at"] = now_utc()
 
             if db_id:
                 try:
                     supabase.table("rackets").update(db_updates).eq("id", db_id).execute()
-                    if racket_changed:
+                    if racket_changed or db_updates.get("comparison_only"):
                         print(f"  ✨ Supabase actualizado.")
                 except Exception as e:
                     print(f"  ❌ Supabase error: {e}")

@@ -1,9 +1,8 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Optional, List
-from playwright.async_api import async_playwright, Browser, Page, BrowserContext
-import asyncio
 import re
-
+import urllib.request
+import ssl
 
 # ============================================================================
 # Shared Utility Functions
@@ -128,56 +127,25 @@ class Product:
         }
 
 class BaseScraper(ABC):
+    """
+    Base class for all scrapers. 
+    Removed Playwright dependency as current scrapers use HTTP/urllib.
+    """
     def __init__(self):
-        self.browser: Optional[Browser] = None
-        self.context: Optional[BrowserContext] = None
-        self.page: Optional[Page] = None
-        self.playwright = None
+        self.user_agent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36'
 
     async def init(self):
-        if not self.browser:
-            self.playwright = await async_playwright().start()
-            self.browser = await self.playwright.chromium.launch(headless=True)
-            self.context = await self.browser.new_context(
-                user_agent='Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-                viewport={'width': 1920, 'height': 1080},
-                locale='es-ES'
-            )
-            self.page = await self.context.new_page()
+        """No-op for compatibility."""
+        pass
 
     async def close(self):
-        if self.browser:
-            await self.browser.close()
-            self.browser = None
-            self.context = None
-            self.page = None
-        if self.playwright:
-            await self.playwright.stop()
-            self.playwright = None
-
-    async def get_page(self, url: str) -> Page:
-        if not self.page: await self.init()
-        if self.page.url != url:
-            await self.page.goto(url, wait_until='domcontentloaded', timeout=30000)
-        return self.page
-
-    async def safe_get_text(self, selector: str, timeout: int = 1000) -> str:
-        if not self.page: return ""
-        try:
-            element = await self.page.query_selector(selector)
-            return (await element.inner_text()).strip() if element else ""
-        except: return ""
-
-    async def safe_get_attribute(self, selector: str, attr: str, timeout: int = 1000) -> str:
-        if not self.page: return ""
-        try:
-            element = await self.page.query_selector(selector)
-            val = await element.get_attribute(attr)
-            return val.strip() if val else ""
-        except: return ""
+        """No-op for compatibility."""
+        pass
 
     @abstractmethod
-    async def scrape_product(self, url: str) -> Product: pass
+    async def scrape_product(self, url: str) -> Optional[Product]: 
+        pass
 
     @abstractmethod
-    async def scrape_category(self, url: str) -> List[str]: pass
+    async def scrape_category(self, url: str) -> List[str]: 
+        pass
