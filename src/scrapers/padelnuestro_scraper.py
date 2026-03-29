@@ -117,8 +117,18 @@ class PadelNuestroScraper(BaseScraper):
             data=data,
             headers={
                 "Content-Type": "application/json",
+                "Accept": "application/json, text/plain, */*",
+                "Accept-Language": "es-ES,es;q=0.9,en;q=0.8",
+                "Accept-Encoding": "gzip, deflate, br",
                 "Store": "es",
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Origin": "https://www.padelnuestro.com",
+                "Referer": "https://www.padelnuestro.com/palas-padel",
+                "Connection": "keep-alive",
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/122.0.0.0 Safari/537.36"
+                ),
             },
         )
 
@@ -128,7 +138,19 @@ class PadelNuestroScraper(BaseScraper):
 
         try:
             with urllib.request.urlopen(req, timeout=30, context=ctx) as resp:
-                data = json.loads(resp.read().decode("utf-8"))
+                raw = resp.read()
+                # Descomprimir gzip si el servidor lo devuelve comprimido
+                encoding = resp.headers.get("Content-Encoding", "")
+                if encoding == "gzip":
+                    import gzip
+                    raw = gzip.decompress(raw)
+                elif encoding == "br":
+                    try:
+                        import brotli
+                        raw = brotli.decompress(raw)
+                    except ImportError:
+                        pass  # Si no está brotli, intentar decodificar igualmente
+                data = json.loads(raw.decode("utf-8"))
                 return data if data is not None else {}
         except Exception as e:
             print(f"[PadelNuestro] GraphQL Error: {e}")
@@ -215,6 +237,97 @@ class PadelNuestroScraper(BaseScraper):
 
         return specs
 
+    def _scrape_price_from_html(self, url: str) -> Optional[tuple]:
+        """
+        Fallback: extrae el precio directamente del HTML de la página del producto.
+        Se usa cuando la API GraphQL devuelve 403.
+        Devuelve (price, original_price) o None si no se encuentra.
+
+        Estrategias (en orden de prioridad):
+          1. JSON-LD schema.org (@type=Product → offers.price)
+          2. Atributo data-price-amount de Magento 2
+          3. Span con clase 'price' (texto con €)
+        """
+        req = urllib.request.Request(
+            url,
+            headers={
+                "User-Agent": (
+                    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/122.0.0.0 Safari/537.36"
+                ),
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "es-ES,es;q=0.9",
+                "Referer": "https://www.padelnuestro.com/palas-padel",
+            },
+        )
+        ctx = ssl.create_default_context()
+        ctx.check_hostname = False
+        ctx.verify_mode = ssl.CERT_NONE
+
+        try:
+            with urllib.request.urlopen(req, timeout=20, context=ctx) as resp:
+                raw = resp.read()
+                encoding = resp.headers.get("Content-Encoding", "")
+                if encoding == "gzip":
+                    import gzip as _gzip
+                    raw = _gzip.decompress(raw)
+                html = raw.decode("utf-8", errors="replace")
+        except Exception as e:
+            print(f"[PadelNuestro] HTML fetch error for {url}: {e}")
+            return None
+
+        price: Optional[float] = None
+        original_price: Optional[float] = None
+
+        # ── Estrategia 1: JSON-LD ──────────────────────────────────────────
+        for match in re.finditer(
+            r'<script[^>]+type=["\']application/ld\+json["\'][^>]*>(.*?)</script>',
+            html,
+            re.DOTALL | re.IGNORECASE,
+        ):
+            try:
+                data = json.loads(match.group(1))
+                items = data if isinstance(data, list) else [data]
+                for item in items:
+                    if item.get("@type") == "Product":
+                        offers = item.get("offers", {})
+                        if isinstance(offers, list):
+                            offers = offers[0]
+                        raw_price = offers.get("price")
+                        if raw_price:
+                            price = float(str(raw_price).replace(",", "."))
+                        break
+            except Exception:
+                continue
+            if price:
+                break
+
+        # ── Estrategia 2: atributo data-price-amount de Magento 2 ─────────
+        if not price:
+            m = re.search(
+                r'data-price-amount=["\']([0-9]+(?:[.,][0-9]+)?)["\']',
+                html,
+            )
+            if m:
+                price = float(m.group(1).replace(",", "."))
+
+        # ── Estrategia 3: span.price con símbolo € ─────────────────────────
+        if not price:
+            m = re.search(
+                r'<span[^>]*class="[^"]*\bprice\b[^"]*"[^>]*>\s*'
+                r'([0-9]+(?:[.,][0-9]+)?)\s*(?:€|EUR)',
+                html,
+                re.IGNORECASE,
+            )
+            if m:
+                price = float(m.group(1).replace(",", "."))
+
+        if price is None:
+            return None
+
+        return price, original_price
+
     async def scrape_product(self, url: str) -> Optional[Product]:
         """Scrape product data using GraphQL with structured spec fields."""
         try:
@@ -255,7 +368,26 @@ class PadelNuestroScraper(BaseScraper):
             response = await loop.run_in_executor(None, self._fetch_graphql, query)
 
             if not response:
-                print(f"[PadelNuestro] Empty response for {url_key}")
+                # GraphQL bloqueado (403) — intentar HTML fallback para obtener precio
+                print(f"[PadelNuestro] GraphQL vacío para {url_key}, intentando HTML...")
+                price_data = await loop.run_in_executor(
+                    None, self._scrape_price_from_html, url
+                )
+                if price_data:
+                    price_val, original_val = price_data
+                    print(f"[PadelNuestro] HTML fallback OK: {price_val} € ({url_key})")
+                    return Product(
+                        url=url,
+                        name=url_key.replace("-", " ").title(),
+                        price=float(price_val),
+                        original_price=float(original_val) if original_val else None,
+                        brand="Unknown",
+                        image="",
+                        images=[],
+                        specs={},
+                        description="",
+                    )
+                print(f"[PadelNuestro] Sin precio para {url_key}")
                 return None
 
             if "errors" in response:

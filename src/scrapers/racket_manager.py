@@ -297,3 +297,4 @@ class RacketManager:
             })
 
         self.save_db()
+        return slug
