@@ -1365,7 +1365,10 @@ const RacketDetailPage: React.FC = () => {
         {/* Lower Right: Price History - Only show for authenticated users */}
         {isAuthenticated && (
           <div>
-            <PriceHistoryChart currentPrice={lowestPrice?.price || racket.precio_actual || 0} />
+            <PriceHistoryChart
+              racketId={racket.id!}
+              currentPrice={lowestPrice?.price || racket.precio_actual || 0}
+            />
           </div>
         )}
       </LowerGrid>

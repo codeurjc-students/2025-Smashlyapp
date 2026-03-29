@@ -25,6 +25,7 @@ export const API_ENDPOINTS = {
   RACKETS_STATS: '/api/v1/rackets/stats',
   RACKETS_BULK_UPDATE: '/api/v1/rackets/bulk-update',
   RACKETS_BY_BRAND: (brand: string) => `/api/v1/rackets/brands/${brand}`,
+  RACKETS_PRICE_HISTORY: (id: number) => `/api/v1/rackets/${id}/price-history`,
   RECOMMENDATION_RAG: '/api/v1/recommendations/generate-rag',
 
   // Users

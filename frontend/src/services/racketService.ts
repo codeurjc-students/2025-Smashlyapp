@@ -1,6 +1,28 @@
 import { Racket } from '../types/racket';
 import { API_ENDPOINTS, buildApiUrl, getCommonHeaders, ApiResponse } from '../config/api';
 
+// ── Tipos para historial de precios ────────────────────────────────────────────
+export interface PricePoint {
+  date: string;
+  price: number;
+  store: string;
+}
+
+export interface StorePriceHistory {
+  store: string;
+  history: PricePoint[];
+  currentPrice: number | null;
+  minPrice: number | null;
+  maxPrice: number | null;
+}
+
+export interface PriceHistoryResult {
+  racketId: number;
+  days: number;
+  stores: StorePriceHistory[];
+  combined: PricePoint[];
+}
+
 /**
  * Helper para manejar respuestas de la API
  */
@@ -283,6 +305,34 @@ export class RacketService {
     } catch (error: any) {
       console.error('Error in bulkUpdateRackets:', error);
       throw error;
+    }
+  }
+
+  /**
+   * Obtiene el historial de precios de una pala.
+   * @param racketId  ID numérico de la pala
+   * @param days      Ventana temporal en días (default: 90)
+   * @param store     Filtrar por tienda (opcional)
+   */
+  static async getPriceHistory(
+    racketId: number,
+    days: number = 90,
+    store?: string
+  ): Promise<PriceHistoryResult | null> {
+    try {
+      const params: Record<string, any> = { days };
+      if (store) params.store = store;
+
+      const url = buildApiUrl(API_ENDPOINTS.RACKETS_PRICE_HISTORY(racketId), params);
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getCommonHeaders(),
+      });
+
+      return await handleApiResponse<PriceHistoryResult>(response);
+    } catch (error: any) {
+      console.error('Error fetching price history:', error);
+      return null;
     }
   }
 }
