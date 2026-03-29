@@ -6,6 +6,7 @@ from datetime import datetime
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 from typing import Dict, List, Optional, Any
 from thefuzz import fuzz
+from .paddle_normalizer import normalize_paddle_name, normalize_for_comparison, slugify_paddle
 
 class RacketManager:
     """Manages the centralized rackets database with rigorous deduplication."""
@@ -38,11 +39,14 @@ class RacketManager:
         self.url_map = self._build_url_map()
 
     def _slugify(self, text: str) -> str:
-        text = str(text).lower()
-        text = unicodedata.normalize('NFKD', text).encode('ascii', 'ignore').decode('utf-8')
-        text = re.sub(r'[^\w\s-]', '', text)
-        text = re.sub(r'[-\s]+', '-', text).strip('-')
-        return text
+        """Delegado en paddle_normalizer.slugify_paddle para consistencia."""
+        # Compatibilidad: el texto ya viene como "brand-model", lo pasamos tal cual
+        import unicodedata as _ud
+        t = str(text).lower()
+        t = _ud.normalize('NFKD', t).encode('ascii', 'ignore').decode('utf-8')
+        t = re.sub(r'[^\w\s-]', '', t)
+        t = re.sub(r'[-\s]+', '-', t).strip('-')
+        return t
 
     @staticmethod
     def _optimize_image_url(url: str) -> str:
@@ -79,36 +83,11 @@ class RacketManager:
         return "Unknown"
 
     def _normalize_name_for_comparison(self, name: str) -> str:
-        """Deep cleaning removing noise like player names and punctuation."""
-        name = name.lower()
-        
-        # 1. Remove Years
-        name = re.sub(r'\b202[0-9]\b', '', name)
-        
-        # 2. Remove Common Filler Words
-        ignore_words = ['pala', 'padel', 'racket', 'de', 'para', 'la', 'el']
-        for word in ignore_words:
-            name = name.replace(word, '')
-            
-        # 3. Remove Player Names (NOISE REDUCTION)
-        # Esto es crucial para que "Jon Sanz" no rompa el match
-        players = [
-            'jon sanz', 'paquito', 'navarro', 'lebron', 'galan', 'tapia', 'coello', 
-            'chingotto', 'stupa', 'di nenno', 'sanyo', 'bela', 'belasteguin', 
-            'momo', 'alex ruiz', 'tello', 'yanguas', 'garrido', 'ari sanchez', 
-            'paulita', 'josemaria', 'triay', 'salazar', 'bea gonzalez', 'martita', 'ortega'
-        ]
-        for player in players:
-            name = name.replace(player, '')
-
-        # 4. Handle Versions (1.0 -> 10, but keep consistent)
-        # remove decimals to treat 1.0 same as 1
-        name = re.sub(r'\.0\b', '', name) 
-        
-        # 5. Remove special chars
-        name = re.sub(r'[^\w\s]', '', name)
-        
-        return name.strip()
+        """
+        Delega en paddle_normalizer.normalize_for_comparison.
+        Se mantiene el método para compatibilidad con el código existente.
+        """
+        return normalize_for_comparison(name)
 
     # =========================================================================
     # CORE DEDUPLICATION LOGIC
@@ -155,7 +134,14 @@ class RacketManager:
     def merge_product(self, product: Any, store_name: str):
         """Merge product with rigorous checks and auto-correction."""
         p_dict = product.model_dump() if hasattr(product, 'model_dump') else product.to_dict()
-        p_name = p_dict.get('name', '')
+        p_name_raw = p_dict.get('name', '')
+        # ── NORMALIZACIÓN EN IMPORT TIME ──────────────────────────────────────
+        # Elimina "pala", "padel", capitalización variable, espacios extra, etc.
+        # Esto garantiza que "Noxat10", "NOXAT10" y "pala Noxat10" producen
+        # la misma clave y no generan entradas duplicadas en la BD.
+        p_name = normalize_paddle_name(p_name_raw)
+        if p_name != p_name_raw:
+            print(f"  [normalizer] '{p_name_raw}' → '{p_name}'")
         p_brand = p_dict.get('brand', 'Unknown')
         p_url = p_dict.get('url', '')
 

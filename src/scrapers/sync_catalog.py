@@ -49,6 +49,7 @@ from .padelnuestro_scraper import PadelNuestroScraper
 from .padelproshop_scraper import PadelProShopScraper
 from .padelmarket_scraper import PadelMarketScraper
 from .racket_manager import RacketManager
+from .paddle_normalizer import normalize_paddle_name, slugify_paddle
 
 # ── Configuración ─────────────────────────────────────────────────────────────
 
@@ -98,7 +99,10 @@ def _slugify(text: str) -> str:
 
 
 def _slug_from_model(brand: str, model: str) -> str:
-    return _slugify(f"{brand}-{model}")
+    # Normaliza el modelo antes de slugificar para evitar slugs distintos
+    # ante variaciones de capitalización o prefijos de tienda ("pala X" vs "X").
+    normalized_model = normalize_paddle_name(model)
+    return slugify_paddle(brand, normalized_model) if normalized_model else _slugify(f"{brand}-{model}")
 
 
 def now_utc() -> str:
@@ -543,17 +547,23 @@ async def run_prices_sync(
 
         print(f"\n📦 [{processed+1}/{len(racket_ids)}] {model_name}")
 
-        # Resolver db_id: primero por slug, luego fallback por model_name
+        # Resolver db_id: primero por slug, luego fallback por model_name normalizado
         db_id = slug_id_map.get(slug)
         if not db_id and supabase:
-            # Búsqueda en bloque propio — no se ve afectada por errores de slug
+            # Búsqueda en bloque propio — no se ve afectada por errores de slug.
+            # Se intenta primero con el nombre exacto almacenado en BD, luego
+            # con el nombre normalizado (por si fue importado con variante de tienda).
+            normalized_model = normalize_paddle_name(model_name)
             try:
                 fb = supabase.table("rackets").select("id").eq("model", model_name).execute()
+                if not fb.data and normalized_model != model_name:
+                    # Segundo intento con nombre normalizado
+                    fb = supabase.table("rackets").select("id").eq("model", normalized_model).execute()
                 if fb.data:
                     db_id = fb.data[0]["id"]
                     slug_id_map[slug] = db_id
                 else:
-                    print(f"  ⚠️  No encontrado en Supabase: '{model_name}'")
+                    print(f"  ⚠️  No encontrado en Supabase: '{model_name}' (normalizado: '{normalized_model}')")
             except Exception as e:
                 print(f"  ⚠️  Fallback lookup failed para '{model_name}': {e}")
 
