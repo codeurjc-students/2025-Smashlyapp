@@ -345,3 +345,6 @@ Thumbs.db
 .claude
 .venv
 .agents
+
+.github/hooks/rtk-rewrite.json
+.github/copilot-instructions.md
