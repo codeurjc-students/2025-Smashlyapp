@@ -1,0 +1,48 @@
+name: Catalog Full Sync (Monthly)
+
+on:
+  schedule:
+    # Ejecutar el día 1 de cada mes a las 04:00 UTC
+    - cron: '0 4 1 * *'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Limit products per store (for testing)'
+        required: false
+        default: ''
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r src/scrapers/requirements.txt
+
+      - name: Run Full Sync
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: |
+          LIMIT_ARG=""
+          if [ "${{ github.event.inputs.limit }}" != "" ]; then
+            LIMIT_ARG="--limit ${{ github.event.inputs.limit }}"
+          fi
+          python3 -m src.scrapers.sync_catalog --mode full $LIMIT_ARG
+
+      - name: Commit and push changes (rackets.json)
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/scrapers/rackets.json
+          git commit -m "chore: update rackets.json after monthly full scan [skip ci]" || echo "No changes to commit"
+          git push
