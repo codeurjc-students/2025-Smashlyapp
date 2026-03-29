@@ -96,6 +96,10 @@ export interface Racket {
   radar_manejabilidad?: number | null;
   radar_punto_dulce?: number | null;
   radar_salida_bola?: number | null;
+
+  // Availability status
+  comparison_only?: boolean;
+  solo_comparacion?: boolean;
 }
 
 // Types for basic user forms

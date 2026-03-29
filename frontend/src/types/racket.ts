@@ -119,6 +119,9 @@ export interface Racket {
   radar_manejabilidad?: number | null;
   radar_punto_dulce?: number | null;
   radar_salida_bola?: number | null;
+
+  // Estado de disponibilidad
+  solo_comparacion?: boolean;
 }
 
 // Tipos para formularios y recomendaciones AI
