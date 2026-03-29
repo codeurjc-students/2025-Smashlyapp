@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { RacketService } from '../services/racketService';
+import { getPriceHistory } from '../services/priceHistoryService';
 import logger from '../config/logger';
 import { SearchFilters, SortOptions, ApiResponse, PaginatedResponse, Racket } from '../types';
 
@@ -434,6 +435,58 @@ export class RacketController {
       } as ApiResponse);
     } catch (error: unknown) {
       logger.error('Error in bulkUpdateRackets:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Error interno del servidor',
+        message: getErrorMessage(error),
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    }
+  }
+
+  /**
+   * GET /api/rackets/:id/price-history
+   * Devuelve el historial de precios de una pala.
+   *
+   * Query params:
+   *   days  (number, default 90) — ventana temporal en días
+   *   store (string, optional)   — filtrar por tienda ('padelmarket', 'padelnuestro', 'padelproshop')
+   */
+  static async getRacketPriceHistory(req: Request, res: Response): Promise<void> {
+    try {
+      const id = parseInt(req.params.id);
+
+      if (isNaN(id)) {
+        res.status(400).json({
+          success: false,
+          error: 'ID inválido',
+          message: 'El ID debe ser un número',
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      const days  = parseInt(req.query.days as string) || 90;
+      const store = req.query.store as string | undefined;
+
+      const history = await getPriceHistory(id, days, store);
+
+      if (!history) {
+        res.status(500).json({
+          success: false,
+          error: 'Error al obtener historial',
+          timestamp: new Date().toISOString(),
+        } as ApiResponse);
+        return;
+      }
+
+      res.json({
+        success: true,
+        data: history,
+        timestamp: new Date().toISOString(),
+      } as ApiResponse);
+    } catch (error: unknown) {
+      logger.error('Error in getRacketPriceHistory:', error);
       res.status(500).json({
         success: false,
         error: 'Error interno del servidor',

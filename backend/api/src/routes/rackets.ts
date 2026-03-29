@@ -40,6 +40,10 @@ router.get('/stats', optionalAuth, RacketController.getStats);
 // GET /api/rackets/brands/:brand - Gets rackets by specific brand
 router.get('/brands/:brand', optionalAuth, RacketController.getRacketsByBrand);
 
+// GET /api/rackets/:id/price-history - Historial de precios de una pala
+// Query params: days (default 90), store (opcional)
+router.get('/:id/price-history', optionalAuth, validateIdParam(), RacketController.getRacketPriceHistory);
+
 // GET /api/rackets/:id - Gets a racket by ID (must go at the end)
 router.get('/:id', optionalAuth, validateIdParam(), RacketController.getRacketById);
 
