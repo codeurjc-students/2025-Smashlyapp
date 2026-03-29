@@ -1,11 +1,9 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { UserProfile, UserProfileService } from '../services/userProfileService';
 import {
-  detectOrphanedTokens,
   forceCleanAuthStorage,
   setAuthToken,
   removeAuthToken,
-  getAuthToken,
 } from '../utils/authUtils';
 import { API_ENDPOINTS, buildApiUrl } from '../config/api';
 import { GoogleAuthService } from '../services/googleAuthService';
@@ -20,7 +18,7 @@ interface AuthContextType {
     password: string,
     nickname: string,
     fullName?: string,
-    role?: 'player' | 'store_owner'
+    _role?: 'player' | 'store_owner'
   ) => Promise<{ data: UserProfile | null; error: string | null; token?: string }>;
   signIn: (
     email: string,
@@ -133,7 +131,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     password: string,
     nickname: string,
     fullName?: string,
-    role?: 'player' | 'store_owner'
+    _role?: 'player' | 'store_owner'
   ): Promise<{ data: UserProfile | null; error: string | null; token?: string }> => {
     try {
       console.log('Attempting to sign up with email:', email);
