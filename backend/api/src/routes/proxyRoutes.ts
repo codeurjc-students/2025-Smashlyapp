@@ -15,6 +15,10 @@ const ALLOWED_IMAGE_DOMAINS: string[] = [
   'padelnuestro.es',
   'static.padelnuestro.es',
   'cdn.padelnuestro.es',
+  'www.padelnuestro.com',
+  'padelnuestro.com',
+  'static.padelnuestro.com',
+  'cdn.padelnuestro.com',
   // Amazon product images
   'm.media-amazon.com',
   'images-na.ssl-images-amazon.com',
@@ -28,7 +32,11 @@ const ALLOWED_IMAGE_DOMAINS: string[] = [
   'www.totalpadel.es',
   'www.padelzoom.es',
   'www.padelmarket.com',
+  'padelmarket.com',
   'cdn.padelmarket.com',
+  'www.padelproshop.com',
+  'padelproshop.com',
+  'cdn.shopify.com',
   // Google CDN (for user avatars via Google OAuth)
   'lh3.googleusercontent.com',
   // Supabase storage
