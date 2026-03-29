@@ -66,17 +66,45 @@ function extractWeight(racket: any): number {
 }
 
 /**
+ * Extrae un valor de características desde columnas dedicadas o, como fallback,
+ * desde el campo specs JSONB (donde los scrapers guardan los datos con claves
+ * en español: "Forma", "Balance", "Dureza").
+ *
+ * Esto permite calcular métricas para palas nuevas importadas por los scrapers
+ * que aún no tienen las columnas characteristics_* rellenas.
+ */
+function extractCharacteristic(racket: any, column: string, specKeys: string[]): string {
+  // 1. Columna dedicada (fuente de verdad para palas antiguas)
+  const fromColumn = racket[column];
+  if (fromColumn && String(fromColumn).trim() !== '') return String(fromColumn);
+
+  // 2. Fallback: specs JSONB (palas nuevas importadas por scrapers)
+  if (racket.specs) {
+    const specs = typeof racket.specs === 'string' ? JSON.parse(racket.specs) : racket.specs;
+    for (const key of specKeys) {
+      const val = specs?.[key];
+      if (val && String(val).trim() !== '') return String(val);
+    }
+  }
+
+  return '';
+}
+
+/**
  * Calcula las 5 métricas radar de forma determinista a partir de las
  * características físicas de la pala.
  *
  * Escala: 0-10 donde 10 es el máximo.
+ *
+ * Fuentes de datos (en orden de prioridad):
+ *   1. Columnas characteristics_shape / characteristics_balance / characteristics_hardness
+ *   2. specs JSONB con claves en español: "Forma", "Balance", "Dureza"
  */
 function calculateRadarValues(racket: any): RadarValues {
-  // Normalizar a minúsculas para comparaciones seguras
-  // Los nombres de columna en DB son en inglés
-  const forma     = String(racket.characteristics_shape    || '').toLowerCase();
-  const balance   = String(racket.characteristics_balance  || '').toLowerCase();
-  const dureza    = String(racket.characteristics_hardness || '').toLowerCase();
+  // Leer características con fallback automático a specs JSONB
+  const forma   = extractCharacteristic(racket, 'characteristics_shape',    ['Forma',   'forma',   'Shape',   'shape']).toLowerCase();
+  const balance = extractCharacteristic(racket, 'characteristics_balance',  ['Balance', 'balance']).toLowerCase();
+  const dureza  = extractCharacteristic(racket, 'characteristics_hardness', ['Dureza',  'dureza',  'Hardness','hardness']).toLowerCase();
   const peso      = extractWeight(racket);
   // antivibracion: intentar múltiples nombres de columna posibles
   const antiVib   = Boolean(racket.has_antivibration || racket.tiene_antivibracion || false);
@@ -152,7 +180,7 @@ async function main() {
   while (true) {
     const { data, error } = await supabase
       .from('rackets')
-      .select('id, name, characteristics_shape, characteristics_balance, characteristics_hardness, specs')
+      .select('id, name, model, characteristics_shape, characteristics_balance, characteristics_hardness, specs')
       .order('id', { ascending: true })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
@@ -181,7 +209,13 @@ async function main() {
   let errors = 0;
 
   // Estadísticas de distribución para validación
-  const stats = { potencia: [] as number[], control: [] as number[], manejabilidad: [] as number[] };
+  const stats = {
+    potencia: [] as number[],
+    control: [] as number[],
+    manejabilidad: [] as number[],
+    usedSpecsFallback: 0,   // palas que usaron specs JSONB porque no tenían columnas dedicadas
+    usedDedicatedCols: 0,   // palas con columnas characteristics_* rellenas
+  };
 
   // Procesar en lotes usando UPDATE (los registros ya existen, no queremos INSERT)
   for (let i = 0; i < rackets.length; i += BATCH_SIZE) {
@@ -194,6 +228,13 @@ async function main() {
         stats.potencia.push(values.radar_potencia);
         stats.control.push(values.radar_control);
         stats.manejabilidad.push(values.radar_manejabilidad);
+
+        // Contabilizar fuente de datos usada
+        if (racket.characteristics_shape && String(racket.characteristics_shape).trim() !== '') {
+          stats.usedDedicatedCols++;
+        } else {
+          stats.usedSpecsFallback++;
+        }
 
         const { error: updateError } = await supabase
           .from('rackets')
@@ -231,8 +272,12 @@ async function main() {
   const max = (arr: number[]) => Math.max(...arr).toFixed(1);
 
   console.log('═══════════════════════ RESUMEN ═══════════════════════');
-  console.log(`  ✅ Palas actualizadas : ${processed}`);
-  console.log(`  ❌ Errores            : ${errors}`);
+  console.log(`  ✅ Palas actualizadas    : ${processed}`);
+  console.log(`  ❌ Errores               : ${errors}`);
+  console.log('');
+  console.log('  Fuente de características:');
+  console.log(`  Columnas dedicadas       : ${stats.usedDedicatedCols} palas`);
+  console.log(`  Fallback specs JSONB     : ${stats.usedSpecsFallback} palas (importadas por scrapers)`);
   console.log('');
   console.log('  Distribución de valores calculados:');
   console.log(`  Potencia      → min: ${min(stats.potencia)}  avg: ${avg(stats.potencia)}  max: ${max(stats.potencia)}`);
