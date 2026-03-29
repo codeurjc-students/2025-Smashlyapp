@@ -59,7 +59,7 @@ export function calculateBestPrice(racket: Racket): {
       precio_original: null,
       descuento_porcentaje: 0,
       enlace: '',
-      fuente: 'No price available',
+      fuente: (racket as any).comparison_only ? 'Solo comparación' : 'No disponible',
     };
   }
 
@@ -162,6 +162,10 @@ export function mapToFrontendFormat(racket: any): any {
     radar_manejabilidad: racket.radar_manejabilidad,
     radar_punto_dulce: racket.radar_punto_dulce,
     radar_salida_bola: racket.radar_salida_bola,
+
+    // Availability status mapping
+    solo_comparacion: racket.comparison_only ?? false,
+    comparison_only: racket.comparison_only ?? false,
   };
 }
 
@@ -261,6 +265,12 @@ export function mapToBackendFormat(frontendRacket: any): any {
     backendData.radar_punto_dulce = frontendRacket.radar_punto_dulce;
   if (frontendRacket.radar_salida_bola !== undefined)
     backendData.radar_salida_bola = frontendRacket.radar_salida_bola;
+
+  // Availability status mapping
+  if (frontendRacket.solo_comparacion !== undefined)
+    backendData.comparison_only = frontendRacket.solo_comparacion;
+  if (frontendRacket.comparison_only !== undefined)
+    backendData.comparison_only = frontendRacket.comparison_only;
 
   return backendData;
 }
