@@ -2,6 +2,66 @@ import { supabase } from '../config/supabase';
 import { Racket, SearchFilters, SortOptions, PaginatedResponse } from '../types';
 import logger from '../config/logger';
 
+function normalizeSpecKey(key: string): string {
+  return key
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
+function mapSpecsForFrontend(rawSpecs: any): Record<string, any> {
+  if (typeof rawSpecs === 'string') {
+    try {
+      rawSpecs = JSON.parse(rawSpecs);
+    } catch {
+      return {};
+    }
+  }
+
+  if (!rawSpecs || typeof rawSpecs !== 'object' || Array.isArray(rawSpecs)) {
+    return {};
+  }
+
+  const mapped: Record<string, any> = {};
+  const source = rawSpecs as Record<string, any>;
+
+  for (const [rawKey, value] of Object.entries(source)) {
+    const key = normalizeSpecKey(rawKey);
+    if (value == null || value === '') continue;
+
+    if (key === 'forma' || key === 'shape' || key === 'formato' || key === 'format') {
+      mapped.forma = value;
+      continue;
+    }
+    if (key === 'balance' || key === 'balanceo') {
+      mapped.balance = value;
+      continue;
+    }
+    if (key === 'peso' || key === 'weight') {
+      mapped.peso = value;
+      continue;
+    }
+    if (key === 'nucleo' || key === 'core' || key === 'goma') {
+      mapped.nucleo = value;
+      continue;
+    }
+    if (key === 'cara' || key === 'face') {
+      mapped.cara = value;
+      continue;
+    }
+    if (key === 'nivel' || key === 'nivel de juego' || key === 'game level') {
+      mapped.nivel_de_juego = value;
+      continue;
+    }
+
+    // Preserve extra specs, normalized, for secondary UIs.
+    mapped[key.replace(/\s+/g, '_')] = value;
+  }
+
+  return mapped;
+}
+
 /**
  * Helper function to calculate the best price among available stores
  */
@@ -95,6 +155,8 @@ export function processRacketData(rawData: any[]): Racket[] {
  * Maps database fields (English) to frontend expected fields (Spanish)
  */
 export function mapToFrontendFormat(racket: any): any {
+  const normalizedSpecs = mapSpecsForFrontend(racket.specs);
+
   return {
     id: racket.id,
     nombre: racket.name,
@@ -125,7 +187,7 @@ export function mapToFrontendFormat(racket: any): any {
     caracteristicas_jugador: racket.characteristics_player,
 
     // Especificaciones
-    especificaciones: racket.specs,
+    especificaciones: normalizedSpecs,
 
     // Precios por tienda
     padelnuestro_precio_actual: racket.padelnuestro_actual_price,
