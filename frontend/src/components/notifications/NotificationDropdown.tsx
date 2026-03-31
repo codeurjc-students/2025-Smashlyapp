@@ -20,8 +20,10 @@ const DropdownContainer = styled.div`
   overflow: hidden;
 
   @media (max-width: 480px) {
-    width: calc(100vw - 32px);
-    right: -60px;
+    left: 16px;
+    right: 16px;
+    width: auto;
+    max-width: calc(100dvw - 32px);
   }
 `;
 

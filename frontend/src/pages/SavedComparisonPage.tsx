@@ -12,7 +12,6 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import RacketRadarChart from '../components/features/RacketRadarChart';
 import ComparisonTable from '../components/features/ComparisonTable';
-import { RacketPdfGenerator } from '../services/pdfGenerator';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -88,12 +87,15 @@ const ActionButton = styled.button<{ variant?: 'primary' }>`
   transition: all 0.2s;
   white-space: nowrap;
 
-  ${props => props.variant === 'primary' ? `
+  ${props =>
+    props.variant === 'primary'
+      ? `
     background: #16a34a;
     border: none;
     color: white;
     &:hover { background: #15803d; }
-  ` : `
+  `
+      : `
     background: white;
     border: 1px solid #e5e7eb;
     color: #4b5563;
@@ -207,7 +209,8 @@ const SectionContent = styled.div`
     margin-bottom: 0.75rem;
   }
 
-  ul, ol {
+  ul,
+  ol {
     padding-left: 1.5rem;
     margin-bottom: 0.75rem;
   }
@@ -234,7 +237,9 @@ const LoadingSpinner = styled.div`
   animation: spin 1s linear infinite;
 
   @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+      transform: rotate(360deg);
+    }
   }
 `;
 
@@ -272,7 +277,7 @@ const formatDate = (dateString: string): string => {
 const SavedComparisonPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [comparison, setComparison] = useState<SavedComparison | null>(null);
   const [rackets, setRackets] = useState<Racket[]>([]);
   const [loading, setLoading] = useState(true);
@@ -288,7 +293,7 @@ const SavedComparisonPage: React.FC = () => {
 
       try {
         setLoading(true);
-        
+
         // Cargar comparación
         const comparisonData = await ComparisonService.getComparisonById(id);
         setComparison(comparisonData);
@@ -304,7 +309,6 @@ const SavedComparisonPage: React.FC = () => {
           })
         );
         setRackets(racketsData.filter((r): r is Racket => r !== null));
-        
       } catch (err: any) {
         console.error('Error loading comparison:', err);
         setError(err.message || 'Error al cargar la comparación');
@@ -334,11 +338,11 @@ const SavedComparisonPage: React.FC = () => {
 
   const handleShare = async () => {
     if (!comparison) return;
-    
+
     try {
       const shareToken = await ComparisonService.shareComparison(comparison.id);
       const shareUrl = `${window.location.origin}/shared/${shareToken}`;
-      
+
       await navigator.clipboard.writeText(shareUrl);
       alert('Enlace compartido copiado al portapapeles');
     } catch (err) {
@@ -351,6 +355,7 @@ const SavedComparisonPage: React.FC = () => {
     if (!comparisonResult || !rackets.length || !comparison) return;
 
     try {
+      const { RacketPdfGenerator } = await import('../services/pdfGenerator');
       const generator = new RacketPdfGenerator();
       await generator.generatePDF({
         rackets: rackets,
@@ -397,12 +402,12 @@ const SavedComparisonPage: React.FC = () => {
         <BackButton onClick={handleBack}>
           <FiArrowLeft /> Volver
         </BackButton>
-        
+
         <HeaderActions>
           <ActionButton onClick={handleShare}>
             <FiShare2 /> Compartir
           </ActionButton>
-          <ActionButton variant="primary" onClick={handleDownloadPDF}>
+          <ActionButton variant='primary' onClick={handleDownloadPDF}>
             <FiDownload /> Descargar PDF
           </ActionButton>
         </HeaderActions>
@@ -414,9 +419,7 @@ const SavedComparisonPage: React.FC = () => {
         transition={{ duration: 0.4 }}
       >
         <ResultHeader>
-          <ResultTitle>
-            Comparación de Palas
-          </ResultTitle>
+          <ResultTitle>Comparación de Palas</ResultTitle>
           <MetaInfo>
             <FiCalendar />
             {formatDate(comparison.created_at)}
@@ -447,29 +450,29 @@ const SavedComparisonPage: React.FC = () => {
             )}
 
             {/* Tabla Comparativa */}
-            {comparisonResult.comparisonTable && Array.isArray(comparisonResult.comparisonTable) && (
-              <Section>
-                <ComparisonTable
-                  data={comparisonResult.comparisonTable}
-                  metrics={comparison.metrics || []}
-                />
-              </Section>
-            )}
+            {comparisonResult.comparisonTable &&
+              Array.isArray(comparisonResult.comparisonTable) && (
+                <Section>
+                  <ComparisonTable
+                    data={comparisonResult.comparisonTable}
+                    metrics={comparison.metrics || []}
+                  />
+                </Section>
+              )}
 
             {/* Análisis Técnico */}
-            {comparisonResult.technicalAnalysis && comparisonResult.technicalAnalysis.length > 0 && (
-              <Section>
-                <SectionTitle>Análisis Técnico</SectionTitle>
-                {comparisonResult.technicalAnalysis.map((section, index) => (
-                  <SectionContent key={index}>
-                    <h4 style={{ color: '#1f2937', marginBottom: '0.5rem' }}>{section.title}</h4>
-                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                      {section.content}
-                    </ReactMarkdown>
-                  </SectionContent>
-                ))}
-              </Section>
-            )}
+            {comparisonResult.technicalAnalysis &&
+              comparisonResult.technicalAnalysis.length > 0 && (
+                <Section>
+                  <SectionTitle>Análisis Técnico</SectionTitle>
+                  {comparisonResult.technicalAnalysis.map((section, index) => (
+                    <SectionContent key={index}>
+                      <h4 style={{ color: '#1f2937', marginBottom: '0.5rem' }}>{section.title}</h4>
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
+                    </SectionContent>
+                  ))}
+                </Section>
+              )}
 
             {/* Perfiles Recomendados */}
             {comparisonResult.recommendedProfiles && (
@@ -510,9 +513,7 @@ const SavedComparisonPage: React.FC = () => {
         ) : (
           // Fallback: mostrar como markdown legacy
           <Section>
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {comparison.comparison_text}
-            </ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparison.comparison_text}</ReactMarkdown>
           </Section>
         )}
       </ResultSection>

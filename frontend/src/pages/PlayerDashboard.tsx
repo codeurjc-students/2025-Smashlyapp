@@ -10,12 +10,16 @@ import { Racket } from '../types/racket';
 import { ListService } from '../services/listService';
 
 const Container = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
-  padding: 2rem;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 40%),
+    linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  padding: 1rem;
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0));
 
-  @media (max-width: 768px) {
-    padding: 1rem;
+  @media (min-width: 1025px) {
+    padding: 2rem;
+    padding-bottom: 2rem;
   }
 `;
 
@@ -27,13 +31,13 @@ const MaxWidth = styled.div`
 const HeroSection = styled.div`
   background: white;
   border-radius: 24px;
-  padding: 3rem;
+  padding: clamp(1.25rem, 3vw, 3rem);
   margin-bottom: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(22, 163, 74, 0.1);
 
   @media (max-width: 768px) {
-    padding: 2rem 1.5rem;
+    border-radius: 18px;
   }
 `;
 
@@ -56,8 +60,13 @@ const SubGreeting = styled.p`
 
 const Stats = styled.div`
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 `;
 
 const Stat = styled.div`
@@ -91,21 +100,21 @@ const SectionTitle = styled.h2`
 
 const QuickActionsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(230px, 100%), 1fr));
+  gap: 1rem;
   margin-bottom: 2rem;
 `;
 
 const RacketsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(260px, 100%), 1fr));
+  gap: 1rem;
 `;
 
 const RacketCard = styled.div`
   background: white;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 1rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(22, 163, 74, 0.1);
   transition: all 0.3s ease;
@@ -155,6 +164,7 @@ const EmptyState = styled.div`
 const ViewAllButton = styled.button`
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
+  min-height: 44px;
   background: #f0fdf4;
   border: 1px solid #16a34a;
   color: #16a34a;
@@ -187,7 +197,7 @@ export const PlayerDashboard: React.FC = () => {
         const favoritasList = lists.find(list => list.name === 'Favoritas');
         if (favoritasList) {
           setFavoritesCount(favoritasList.racket_count || 0);
-          
+
           // If we want to show the rackets, fetch the list with details
           if (favoritasList.racket_count && favoritasList.racket_count > 0) {
             const listWithRackets = await ListService.getListById(favoritasList.id);
@@ -209,13 +219,12 @@ export const PlayerDashboard: React.FC = () => {
 
         // Filter offers and shuffle them to show different ones each time
         const onOffer = allRackets.filter((r: Racket) => r.en_oferta);
-        
+
         // Shuffle array using Fisher-Yates algorithm
         const shuffled = [...onOffer].sort(() => Math.random() - 0.5);
-        
+
         setOffers(shuffled.slice(0, 4));
         setRecentlyViewed(recentlyViewedData);
-
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -250,7 +259,7 @@ export const PlayerDashboard: React.FC = () => {
       title: 'Mi Cuenta',
       description: 'Ver y editar perfil',
       onClick: () => navigate('/profile'),
-    }
+    },
   ];
 
   return (
@@ -287,20 +296,21 @@ export const PlayerDashboard: React.FC = () => {
           <Section>
             <SectionTitle>❤️ Tus Favoritas</SectionTitle>
             <RacketsGrid>
-              {favorites.map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagenes?.[0] && <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />}
+              {favorites.map(racket => (
+                <RacketCard
+                  key={racket.id}
+                  onClick={() => navigate(`/racket-detail?id=${racket.id}`)}
+                >
+                  {racket.imagenes?.[0] && (
+                    <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />
+                  )}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
-                  {racket.precio_actual && (
-                    <RacketPrice>{racket.precio_actual}€</RacketPrice>
-                  )}
+                  {racket.precio_actual && <RacketPrice>{racket.precio_actual}€</RacketPrice>}
                 </RacketCard>
               ))}
             </RacketsGrid>
-            <ViewAllButton onClick={() => navigate('/favorites')}>
-              Ver todas →
-            </ViewAllButton>
+            <ViewAllButton onClick={() => navigate('/favorites')}>Ver todas →</ViewAllButton>
           </Section>
         )}
 
@@ -309,14 +319,17 @@ export const PlayerDashboard: React.FC = () => {
           <Section>
             <SectionTitle>👁️ Últimas Palas Vistas</SectionTitle>
             <RacketsGrid>
-              {recentlyViewed.slice(0, 4).map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagenes?.[0] && <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />}
+              {recentlyViewed.slice(0, 4).map(racket => (
+                <RacketCard
+                  key={racket.id}
+                  onClick={() => navigate(`/racket-detail?id=${racket.id}`)}
+                >
+                  {racket.imagenes?.[0] && (
+                    <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />
+                  )}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
-                  {racket.precio_actual && (
-                    <RacketPrice>{racket.precio_actual}€</RacketPrice>
-                  )}
+                  {racket.precio_actual && <RacketPrice>{racket.precio_actual}€</RacketPrice>}
                 </RacketCard>
               ))}
             </RacketsGrid>
@@ -328,14 +341,17 @@ export const PlayerDashboard: React.FC = () => {
           <Section>
             <SectionTitle>🔥 Ofertas que te pueden interesar</SectionTitle>
             <RacketsGrid>
-              {offers.map((racket) => (
-                <RacketCard key={racket.id} onClick={() => navigate(`/racket-detail?id=${racket.id}`)}>
-                  {racket.imagenes?.[0] && <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />}
+              {offers.map(racket => (
+                <RacketCard
+                  key={racket.id}
+                  onClick={() => navigate(`/racket-detail?id=${racket.id}`)}
+                >
+                  {racket.imagenes?.[0] && (
+                    <RacketImage src={racket.imagenes[0]} alt={racket.nombre} />
+                  )}
                   <RacketName>{racket.nombre}</RacketName>
                   <RacketBrand>{racket.marca}</RacketBrand>
-                  {racket.precio_actual && (
-                    <RacketPrice>{racket.precio_actual}€</RacketPrice>
-                  )}
+                  {racket.precio_actual && <RacketPrice>{racket.precio_actual}€</RacketPrice>}
                 </RacketCard>
               ))}
             </RacketsGrid>

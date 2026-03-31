@@ -90,10 +90,7 @@ const StoreRow = styled.div<{ $compact?: boolean; $isLowest?: boolean }>`
     &::before {
       content: '';
       position: absolute;
-      top: -3px;
-      left: -3px;
-      right: -3px;
-      bottom: -3px;
+      inset: 0;
       background: linear-gradient(135deg, #16a34a, #22c55e, #10b981, #16a34a);
       background-size: 200% 200%;
       border-radius: ${props.$compact ? '13px' : '15px'};
@@ -141,10 +138,10 @@ const StoreRow = styled.div<{ $compact?: boolean; $isLowest?: boolean }>`
       props.$isLowest
         ? props.$compact
           ? 'translateY(-4px) scale(1.05)'
-          : 'translateX(6px) scale(1.04)'
+          : 'translateY(-3px) scale(1.04)'
         : props.$compact
         ? 'translateY(-2px) scale(1.01)'
-        : 'translateX(4px)'};
+        : 'translateY(-2px)'};
     border-color: ${props => (props.$compact || props.$isLowest ? '#16a34a' : 'transparent')};
     box-shadow: ${props => {
       if (props.$isLowest) {

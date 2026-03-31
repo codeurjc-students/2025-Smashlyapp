@@ -9,15 +9,21 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 const Container = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
-  padding: 2rem 0;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 42%),
+    linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
+  padding: 1rem 0 calc(6.25rem + env(safe-area-inset-bottom, 0));
+
+  @media (min-width: 1025px) {
+    padding: 2rem 0;
+  }
 `;
 
 const ContentWrapper = styled.div`
   max-width: 900px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1rem, 3vw, 2rem);
 `;
 
 const Card = styled.div`
@@ -30,7 +36,7 @@ const Card = styled.div`
 const Header = styled.div`
   background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
   color: white;
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
   text-align: center;
 `;
 
@@ -44,6 +50,10 @@ const HeaderTitle = styled.h1`
   font-size: 1.75rem;
   font-weight: 700;
   margin: 0;
+
+  @media (max-width: 768px) {
+    font-size: 1.35rem;
+  }
 `;
 
 const HeaderSubtitle = styled.p`
@@ -53,7 +63,7 @@ const HeaderSubtitle = styled.p`
 `;
 
 const Body = styled.div`
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
 `;
 
 const Meta = styled.div`
@@ -85,6 +95,7 @@ const RacketTag = styled.span`
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  min-height: 36px;
   padding: 0.5rem 1rem;
   background: #f0fdf4;
   color: #16a34a;
@@ -134,6 +145,7 @@ const MarkdownContent = styled.div`
     margin: 1.5rem 0;
     overflow-x: auto;
     display: block;
+    -webkit-overflow-scrolling: touch;
   }
 
   thead {
@@ -180,7 +192,7 @@ const MarkdownContent = styled.div`
 
 const Footer = styled.div`
   background: #f9fafb;
-  padding: 1.5rem 2rem;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem);
   border-top: 1px solid #e5e7eb;
   text-align: center;
 `;
@@ -250,7 +262,9 @@ const ErrorText = styled.p`
 const BackButton = styled(Link)`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-height: 48px;
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
   color: white;
@@ -394,7 +408,9 @@ const SharedComparisonPage: React.FC = () => {
             </RacketsPreview>
 
             <MarkdownContent>
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{comparison.comparison_text}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {comparison.comparison_text}
+              </ReactMarkdown>
             </MarkdownContent>
           </Body>
 

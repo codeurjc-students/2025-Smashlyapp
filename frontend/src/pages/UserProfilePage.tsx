@@ -30,10 +30,14 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  background: #169B47;
+  background: linear-gradient(140deg, #169b47 0%, #12793a 100%);
   padding: 2rem;
   position: relative;
   overflow: hidden;
+
+  @media (max-width: 640px) {
+    padding: 1.25rem 1rem 1.5rem;
+  }
 
   &::before {
     content: '';
@@ -107,6 +111,11 @@ const MainContent = styled.div`
   position: relative;
   z-index: 2;
   margin-top: -1rem;
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin-top: -0.5rem;
+  }
 `;
 
 const NavigationTabs = styled.div`
@@ -118,18 +127,24 @@ const NavigationTabs = styled.div`
   border: 1px solid #e2e8f0;
   margin-bottom: 2rem;
   overflow-x: auto;
+
+  @media (max-width: 640px) {
+    padding: 0.375rem;
+    border-radius: 14px;
+    margin-bottom: 1rem;
+  }
 `;
 
 const NavTab = styled.button<{ $active: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding:  1.25rem;
-  border0.75rem-radius: 12px;
+  padding: 0.75rem 1rem;
   font-size: 0.9375rem;
   font-weight: 500;
   border: none;
   border-radius: 12px;
+  min-height: 44px;
   cursor: pointer;
   transition: all 0.2s ease;
   white-space: nowrap;
@@ -151,6 +166,10 @@ const ContentCard = styled.div`
 
 const CardContent = styled.div`
   padding: 1.5rem;
+
+  @media (max-width: 640px) {
+    padding: 1rem;
+  }
 `;
 
 const FormSection = styled.div`
@@ -280,23 +299,31 @@ const FormActions = styled.div`
   margin-top: 1.5rem;
   padding-top: 1.5rem;
   border-top: 1px solid #f1f5f9;
+
+  @media (max-width: 640px) {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
 `;
 
 const Button = styled(motion.button)<{ $primary?: boolean }>`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
   border-radius: 10px;
   font-size: 0.9375rem;
   font-weight: 600;
+  min-height: 44px;
   cursor: pointer;
   border: none;
   transition: all 0.2s ease;
-  background: ${props => props.$primary ? '#16a34a' : '#f1f5f9'};
-  color: ${props => props.$primary ? 'white' : '#64748b'};
+  background: ${props => (props.$primary ? '#16a34a' : '#f1f5f9')};
+  color: ${props => (props.$primary ? 'white' : '#64748b')};
 
-    background: ${props => props.$primary ? '#15803d' : '#e2e8f0'};
+  &:hover {
+    background: ${props => (props.$primary ? '#15803d' : '#e2e8f0')};
   }
 
   &:disabled {
@@ -388,7 +415,7 @@ const UserProfilePage: React.FC = () => {
   useEffect(() => {
     // No redirigir mientras está cargando la sesión
     if (loading) return;
-    
+
     if (!user) {
       navigate('/login');
     }
@@ -404,20 +431,20 @@ const UserProfilePage: React.FC = () => {
     try {
       const response = await fetch('/api/v1/users/me/activity', {
         headers: {
-          'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+          Authorization: `Bearer ${localStorage.getItem('auth_token')}`,
         },
       });
       if (response.ok) {
         const data = await response.json();
-        
+
         // Cargar nombres de palas para las comparaciones
         const comparisons = data.data.recentComparisons || [];
         if (comparisons.length > 0) {
           const allRacketIds = [...new Set(comparisons.flatMap((c: any) => c.racket_ids || []))];
           const racketsCache: Record<number, any> = {};
-          
+
           await Promise.all(
-            allRacketIds.map(async (id) => {
+            allRacketIds.map(async id => {
               try {
                 const racket = await RacketService.getRacketById(id as number);
                 racketsCache[id as number] = racket;
@@ -426,17 +453,20 @@ const UserProfilePage: React.FC = () => {
               }
             })
           );
-          
+
           // Agregar nombres a las comparaciones
           data.data.recentComparisons = comparisons.map((comp: any) => ({
             ...comp,
-            racket_names: comp.racket_ids?.map((id: number) => {
-              const racket = racketsCache[id];
-              return racket ? `${racket.marca} ${racket.nombre}` : `Pala ${id}`;
-            }).join(' vs ') || 'Comparación',
+            racket_names:
+              comp.racket_ids
+                ?.map((id: number) => {
+                  const racket = racketsCache[id];
+                  return racket ? `${racket.marca} ${racket.nombre}` : `Pala ${id}`;
+                })
+                .join(' vs ') || 'Comparación',
           }));
         }
-        
+
         setActivityData(data.data);
       }
     } catch (error) {
@@ -460,11 +490,11 @@ const UserProfilePage: React.FC = () => {
       }
 
       const avatarUrl = await UploadService.uploadAvatar(file);
-      
+
       await UserProfileService.updateUserProfile({
         avatar_url: avatarUrl,
       } as any);
-      
+
       await refreshUserProfile();
       sileo.success({ title: 'Éxito', description: 'Avatar actualizado correctamente' });
     } catch (error: any) {
@@ -527,7 +557,7 @@ const UserProfilePage: React.FC = () => {
     <Container>
       <Header>
         <HeaderContent>
-          <BackLink to="/">
+          <BackLink to='/'>
             <FiArrowLeft size={16} />
             Volver al inicio
           </BackLink>
@@ -562,10 +592,10 @@ const UserProfilePage: React.FC = () => {
           </NavTab>
         </NavigationTabs>
 
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode='wait'>
           {activeTab === 'profile' && (
             <motion.div
-              key="profile"
+              key='profile'
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -573,35 +603,40 @@ const UserProfilePage: React.FC = () => {
               <ContentCard>
                 <CardContent>
                   <InfoCard>
-                    <InfoIcon><FiAlertCircle size={18} /></InfoIcon>
+                    <InfoIcon>
+                      <FiAlertCircle size={18} />
+                    </InfoIcon>
                     <InfoText>
-                      Completa tu perfil para recibir recomendaciones personalizadas de palas de pádel.
+                      Completa tu perfil para recibir recomendaciones personalizadas de palas de
+                      pádel.
                     </InfoText>
                   </InfoCard>
 
                   <form onSubmit={handleSubmit}>
                     <FormSection>
-                      <SectionTitle><FiUser size={18} /> Información Personal</SectionTitle>
+                      <SectionTitle>
+                        <FiUser size={18} /> Información Personal
+                      </SectionTitle>
                       <FormGrid>
                         <FormGroup>
-                          <FormLabel htmlFor="full_name">Nombre completo</FormLabel>
+                          <FormLabel htmlFor='full_name'>Nombre completo</FormLabel>
                           <FormInput
-                            id="full_name"
-                            name="full_name"
-                            type="text"
-                            placeholder="Tu nombre"
+                            id='full_name'
+                            name='full_name'
+                            type='text'
+                            placeholder='Tu nombre'
                             value={formData.full_name}
                             onChange={handleInputChange}
                           />
                         </FormGroup>
                         <FormGroup>
-                          <FormLabel htmlFor="birthdate">
+                          <FormLabel htmlFor='birthdate'>
                             <FiCalendar size={14} /> Fecha de nacimiento
                           </FormLabel>
                           <FormInput
-                            id="birthdate"
-                            name="birthdate"
-                            type="date"
+                            id='birthdate'
+                            name='birthdate'
+                            type='date'
                             value={formData.birthdate}
                             onChange={handleInputChange}
                           />
@@ -613,32 +648,34 @@ const UserProfilePage: React.FC = () => {
                     </FormSection>
 
                     <FormSection>
-                      <SectionTitle><FiPhys size={18} /> Características Físicas</SectionTitle>
+                      <SectionTitle>
+                        <FiPhys size={18} /> Características Físicas
+                      </SectionTitle>
                       <FormGrid>
                         <FormGroup>
-                          <FormLabel htmlFor="peso">Peso (kg)</FormLabel>
+                          <FormLabel htmlFor='peso'>Peso (kg)</FormLabel>
                           <FormInput
-                            id="peso"
-                            name="peso"
-                            type="number"
-                            placeholder="70"
-                            min="20"
-                            max="200"
-                            step="0.1"
+                            id='peso'
+                            name='peso'
+                            type='number'
+                            placeholder='70'
+                            min='20'
+                            max='200'
+                            step='0.1'
                             value={formData.peso}
                             onChange={handleInputChange}
                           />
                           <HelperText>Nos ayuda a recomendar el peso ideal de la pala</HelperText>
                         </FormGroup>
                         <FormGroup>
-                          <FormLabel htmlFor="altura">Altura (cm)</FormLabel>
+                          <FormLabel htmlFor='altura'>Altura (cm)</FormLabel>
                           <FormInput
-                            id="altura"
-                            name="altura"
-                            type="number"
-                            placeholder="175"
-                            min="120"
-                            max="250"
+                            id='altura'
+                            name='altura'
+                            type='number'
+                            placeholder='175'
+                            min='120'
+                            max='250'
                             value={formData.altura}
                             onChange={handleInputChange}
                           />
@@ -648,43 +685,49 @@ const UserProfilePage: React.FC = () => {
                     </FormSection>
 
                     <FormSection>
-                      <SectionTitle><FiTrendingUp size={18} /> Nivel de Juego</SectionTitle>
+                      <SectionTitle>
+                        <FiTrendingUp size={18} /> Nivel de Juego
+                      </SectionTitle>
                       <FormGroup>
-                        <FormLabel htmlFor="game_level">Tu nivel</FormLabel>
+                        <FormLabel htmlFor='game_level'>Tu nivel</FormLabel>
                         <FormSelect
-                          id="game_level"
-                          name="game_level"
+                          id='game_level'
+                          name='game_level'
                           value={formData.game_level}
                           onChange={handleInputChange}
                         >
-                          <option value="">Selecciona tu nivel</option>
-                          <option value="principiante">Principiante (1.0 - 2.5)</option>
-                          <option value="intermedio">Intermedio (3.0 - 4.5)</option>
-                          <option value="avanzado">Avanzado (5.0 - 6.5)</option>
-                          <option value="profesional">Profesional (7.0+)</option>
+                          <option value=''>Selecciona tu nivel</option>
+                          <option value='principiante'>Principiante (1.0 - 2.5)</option>
+                          <option value='intermedio'>Intermedio (3.0 - 4.5)</option>
+                          <option value='avanzado'>Avanzado (5.0 - 6.5)</option>
+                          <option value='profesional'>Profesional (7.0+)</option>
                         </FormSelect>
                         <HelperText>Basado en el sistema de clasificación Playtomic</HelperText>
                       </FormGroup>
                     </FormSection>
 
                     <FormSection>
-                      <SectionTitle><FiAlertCircle size={18} /> Limitaciones</SectionTitle>
+                      <SectionTitle>
+                        <FiAlertCircle size={18} /> Limitaciones
+                      </SectionTitle>
                       <FormGroup>
-                        <FormLabel htmlFor="limitations">Condiciones especiales</FormLabel>
+                        <FormLabel htmlFor='limitations'>Condiciones especiales</FormLabel>
                         <FormTextarea
-                          id="limitations"
-                          name="limitations"
-                          placeholder="Ej: Problemas de codo, muñeca, espalda..."
+                          id='limitations'
+                          name='limitations'
+                          placeholder='Ej: Problemas de codo, muñeca, espalda...'
                           value={formData.limitations}
                           onChange={handleInputChange}
                         />
-                        <HelperText>Información opcional que nos ayuda a hacer mejores recomendaciones</HelperText>
+                        <HelperText>
+                          Información opcional que nos ayuda a hacer mejores recomendaciones
+                        </HelperText>
                       </FormGroup>
                     </FormSection>
 
                     <FormActions>
                       <Button
-                        type="submit"
+                        type='submit'
                         $primary
                         disabled={saving}
                         whileHover={{ scale: 1.02 }}
@@ -702,7 +745,7 @@ const UserProfilePage: React.FC = () => {
 
           {activeTab === 'activity' && (
             <motion.div
-              key="activity"
+              key='activity'
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -710,7 +753,9 @@ const UserProfilePage: React.FC = () => {
               <ContentCard>
                 <CardContent>
                   <ActivityStats
-                    stats={activityData?.stats || { reviewsCount: 0, listsCount: 0, comparisonsCount: 0 }}
+                    stats={
+                      activityData?.stats || { reviewsCount: 0, listsCount: 0, comparisonsCount: 0 }
+                    }
                     recentReviews={activityData?.recentReviews || []}
                     recentLists={activityData?.recentLists || []}
                     recentComparisons={activityData?.recentComparisons || []}
@@ -722,7 +767,7 @@ const UserProfilePage: React.FC = () => {
 
           {activeTab === 'collections' && (
             <motion.div
-              key="collections"
+              key='collections'
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -733,7 +778,7 @@ const UserProfilePage: React.FC = () => {
 
           {activeTab === 'account' && (
             <motion.div
-              key="account"
+              key='account'
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}

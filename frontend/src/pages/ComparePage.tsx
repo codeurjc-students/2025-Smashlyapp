@@ -6,17 +6,31 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
-  padding-bottom: 4rem;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 42%),
+    linear-gradient(150deg, #f8faf8 0%, #edf7ef 45%, #e6f4e7 100%);
+  padding: 1rem 1rem calc(6.5rem + env(safe-area-inset-bottom));
+
+  @media (min-width: 769px) {
+    padding: 1.5rem 1.5rem 4rem;
+  }
 `;
 
 const Header = styled.div`
   background: white;
   border-bottom: 1px solid #e5e7eb;
-  padding: 3rem 0;
+  border-radius: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   text-align: center;
+
+  @media (max-width: 768px) {
+    border-radius: 18px;
+    padding: 1.75rem 1rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -40,6 +54,10 @@ const Subtitle = styled.p`
   max-width: 600px;
   margin: 0 auto;
   line-height: 1.6;
+
+  @media (max-width: 768px) {
+    font-size: 1rem;
+  }
 `;
 
 const HeaderActions = styled.div`
@@ -47,6 +65,10 @@ const HeaderActions = styled.div`
   display: flex;
   justify-content: center;
   gap: 1rem;
+
+  @media (max-width: 640px) {
+    margin-top: 1.25rem;
+  }
 `;
 
 const SecondaryButton = styled.button`
@@ -54,6 +76,7 @@ const SecondaryButton = styled.button`
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
+  min-height: 44px;
   background: white;
   color: #16a34a;
   border: 2px solid #16a34a;
@@ -73,10 +96,16 @@ const SecondaryButton = styled.button`
 const MainContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 4rem 2rem;
+  padding: 2rem 0 0;
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
   gap: 2rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-top: 1.25rem;
+  }
 `;
 
 const Card = styled(motion.div)`
@@ -93,6 +122,7 @@ const Card = styled(motion.div)`
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-height: 320px;
 
   &:hover {
     transform: translateY(-8px);
@@ -110,6 +140,14 @@ const Card = styled(motion.div)`
       opacity: 1;
     }
   }
+
+  @media (max-width: 768px) {
+    padding: 1.75rem 1rem;
+    border-radius: 18px;
+    min-height: 260px;
+    text-align: left;
+    align-items: flex-start;
+  }
 `;
 
 const IconContainer = styled.div`
@@ -124,6 +162,14 @@ const IconContainer = styled.div`
   font-size: 2.5rem;
   margin-bottom: 2rem;
   transition: all 0.3s ease;
+
+  @media (max-width: 768px) {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
 `;
 
 const CardTitle = styled.h2`

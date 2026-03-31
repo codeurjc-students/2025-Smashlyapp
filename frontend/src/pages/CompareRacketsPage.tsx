@@ -14,21 +14,30 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { sileo } from 'sileo';
 import Fuse from 'fuse.js';
-// Importamos el nuevo servicio
-import { RacketPdfGenerator } from '../services/pdfGenerator';
 import RacketRadarChart from '../components/features/RacketRadarChart';
 import ComparisonTable from '../components/features/ComparisonTable';
 
 const Container = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
-  padding: 2rem;
-  padding-bottom: 6rem;
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 45%),
+    linear-gradient(145deg, #f8faf8 0%, #edf7ef 55%, #e8f5e8 100%);
+  padding: 1rem;
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+
+  @media (min-width: 769px) {
+    padding: 2rem;
+    padding-bottom: 4rem;
+  }
 `;
 
 const Header = styled.div`
   text-align: center;
   margin-bottom: 3rem;
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.5rem;
+  }
 `;
 
 const Title = styled.h1`
@@ -40,6 +49,11 @@ const Title = styled.h1`
   .highlight {
     color: #16a34a;
   }
+
+  @media (max-width: 768px) {
+    font-size: 1.75rem;
+    margin-bottom: 0.5rem;
+  }
 `;
 
 const Subtitle = styled.p`
@@ -47,6 +61,10 @@ const Subtitle = styled.p`
   color: #6b7280;
   max-width: 600px;
   margin: 0 auto;
+
+  @media (max-width: 768px) {
+    font-size: 0.95rem;
+  }
 `;
 
 const SelectionSection = styled.div`
@@ -56,6 +74,12 @@ const SelectionSection = styled.div`
   border-radius: 24px;
   padding: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    margin-bottom: 1.25rem;
+    border-radius: 16px;
+    padding: 1rem;
+  }
 `;
 
 const SearchContainer = styled.div`
@@ -66,6 +90,7 @@ const SearchContainer = styled.div`
 const SearchInput = styled.input`
   width: 100%;
   padding: 1rem 1rem 1rem 3rem;
+  min-height: 48px;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
   font-size: 1rem;
@@ -105,7 +130,8 @@ const SearchResults = styled.ul`
 `;
 
 const SearchResultItem = styled.li`
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1rem;
+  min-height: 52px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -149,8 +175,8 @@ const RemoveButton = styled.button`
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 50%;
-  width: 24px;
-  height: 24px;
+  width: 30px;
+  height: 30px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -201,6 +227,7 @@ const CompareButton = styled.button`
   color: white;
   border: none;
   padding: 1rem;
+  min-height: 48px;
   border-radius: 12px;
   font-size: 1.125rem;
   font-weight: 700;
@@ -287,7 +314,7 @@ const ActionButtons = styled.div`
   @media (max-width: 480px) {
     flex-direction: column;
     gap: 0.75rem;
-    
+
     & > button {
       width: 100%;
       justify-content: center;
@@ -784,12 +811,15 @@ const CompareRacketsPage: React.FC = () => {
       setComparisonResult(response.comparison);
       setComparisonMetrics(response.comparison.metrics || null);
 
-      sessionStorage.setItem('smashly_last_comparison', JSON.stringify({
-        comparison: response.comparison,
-        metrics: response.comparison.metrics,
-        rackets: selectedRackets,
-        timestamp: Date.now()
-      }));
+      sessionStorage.setItem(
+        'smashly_last_comparison',
+        JSON.stringify({
+          comparison: response.comparison,
+          metrics: response.comparison.metrics,
+          rackets: selectedRackets,
+          timestamp: Date.now(),
+        })
+      );
 
       const notification = await NotificationService.createNotification(
         'comparison_complete',
@@ -797,16 +827,16 @@ const CompareRacketsPage: React.FC = () => {
         'Tu comparación de palas está lista. ¡Descúbrela!',
         { racketCount: selectedRackets.length }
       );
-      
+
       if (notification) {
         addNotification(notification);
       } else {
         console.error('Error: No se pudo crear la notificación');
       }
-      
-      sileo.success({ 
-        title: '¡Comparación lista!', 
-        description: 'Tu comparación de palas está lista. ¡Descúbrela!'
+
+      sileo.success({
+        title: '¡Comparación lista!',
+        description: 'Tu comparación de palas está lista. ¡Descúbrela!',
       });
     } catch (error: any) {
       console.error('Error comparing rackets:', error);
@@ -845,6 +875,7 @@ const CompareRacketsPage: React.FC = () => {
     });
 
     try {
+      const { RacketPdfGenerator } = await import('../services/pdfGenerator');
       const generator = new RacketPdfGenerator();
 
       await generator.generatePDF({

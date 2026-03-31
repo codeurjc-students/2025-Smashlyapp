@@ -14,6 +14,7 @@ const PopupContainer = styled(motion.div)<{ $minimized: boolean }>`
   bottom: 20px;
   right: 20px;
   width: ${props => (props.$minimized ? '80px' : '500px')};
+  max-width: calc(100vw - 16px);
   height: ${props => (props.$minimized ? '80px' : 'auto')};
   background: white;
   border-radius: ${props => (props.$minimized ? '50%' : '20px')};
@@ -23,12 +24,19 @@ const PopupContainer = styled(motion.div)<{ $minimized: boolean }>`
   border: ${props => (props.$minimized ? 'none' : '2px solid #e5e7eb')};
   cursor: ${props => (props.$minimized ? 'pointer' : 'default')};
   transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+  @media (max-width: 768px) {
+    right: 8px;
+    bottom: calc(8px + env(safe-area-inset-bottom, 0));
+    width: ${props => (props.$minimized ? '72px' : 'min(500px, calc(100vw - 16px))')};
+    height: ${props => (props.$minimized ? '72px' : 'auto')};
+  }
 `;
 
 const CircularProgress = styled.svg<{ $status: string }>`
   position: absolute;
-  top: -4px;
-  left: -4px;
+  top: 0;
+  left: 0;
   width: 88px;
   height: 88px;
   transform: rotate(-90deg);
@@ -94,8 +102,9 @@ const MinimizedLabel = styled.div`
 
 const CompletionBadge = styled(motion.div)`
   position: absolute;
-  top: -5px;
-  right: -5px;
+  top: 0;
+  right: 0;
+  transform: translate(20%, -20%);
   width: 24px;
   height: 24px;
   background: #16a34a;

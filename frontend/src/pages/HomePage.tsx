@@ -14,7 +14,7 @@ const Container = styled.div`
 const HeroSection = styled.section`
   padding: clamp(60px, 10vw, 100px) 20px;
   text-align: center;
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  background: linear-gradient(145deg, #14532d 0%, #166534 45%, #15803d 100%);
   color: white;
   position: relative;
   overflow: hidden;
@@ -97,7 +97,7 @@ const RotatingText = styled.span`
 const Subtitle = styled(motion.p)`
   font-size: clamp(1rem, 2.5vw, 1.25rem);
   margin-bottom: clamp(24px, 5vw, 40px);
-  opacity: 0.9;
+  opacity: 0.95;
   line-height: 1.6;
   max-width: 600px;
   margin-left: auto;
@@ -111,14 +111,23 @@ const CTAButtons = styled(motion.div)`
   justify-content: center;
   flex-wrap: wrap;
   padding: 0 20px;
+
+  @media (max-width: 640px) {
+    flex-direction: column;
+    align-items: stretch;
+    max-width: 360px;
+    margin: 0 auto;
+  }
 `;
 
 const PrimaryButton = styled(Link)`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: white;
   color: #16a34a;
+  min-height: 52px;
   padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px);
   border-radius: 12px;
   text-decoration: none;
@@ -127,6 +136,10 @@ const PrimaryButton = styled(Link)`
   transition: all 0.2s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
 
   &:hover {
     transform: translateY(-2px);
@@ -139,7 +152,9 @@ const PrimaryButton = styled(Link)`
 const SecondaryButton = styled(Link)`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
+  min-height: 52px;
   background: transparent;
   color: white;
   padding: clamp(12px, 3vw, 16px) clamp(20px, 4vw, 32px);
@@ -150,6 +165,10 @@ const SecondaryButton = styled(Link)`
   font-size: clamp(0.9rem, 2vw, 1.125rem);
   transition: all 0.2s ease;
   white-space: nowrap;
+
+  @media (max-width: 640px) {
+    width: 100%;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);

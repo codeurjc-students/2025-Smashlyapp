@@ -36,8 +36,9 @@ const BellButton = styled.button`
 
 const Badge = styled.span`
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 0;
+  right: 0;
+  transform: translate(20%, -20%);
   background: #dc2626;
   color: white;
   font-size: 0.7rem;

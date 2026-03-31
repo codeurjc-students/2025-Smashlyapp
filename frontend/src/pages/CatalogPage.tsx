@@ -15,20 +15,23 @@ import { getLowestPrice } from '../utils/priceUtils';
 // Styled Components
 const Container = styled.div`
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
+  background:
+    radial-gradient(circle at 5% 0%, rgba(22, 163, 74, 0.08) 0%, transparent 42%),
+    linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
 `;
 
 const Header = styled.div`
-  background: white;
+  background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid #e5e7eb;
-  padding: 2rem 0;
+  padding: clamp(1.2rem, 3.5vw, 2rem) 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(10px);
 `;
 
 const HeaderContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1rem, 3vw, 2rem);
   text-align: center;
 `;
 
@@ -50,7 +53,7 @@ const Title = styled.h1`
 const Subtitle = styled.p`
   font-size: 1.25rem;
   color: #6b7280;
-  margin-bottom: 2rem;
+  margin-bottom: 1.4rem;
   line-height: 1.6;
 
   @media (max-width: 768px) {
@@ -88,13 +91,13 @@ const StatLabel = styled.div`
 const MainContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: clamp(1rem, 3vw, 2rem);
 `;
 
 const FiltersSection = styled.div`
   background: white;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
   margin-bottom: 2rem;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid rgba(22, 163, 74, 0.1);
@@ -115,11 +118,16 @@ const FiltersRow = styled.div`
 const SearchContainer = styled.div`
   flex: 1;
   position: relative;
-  min-width: 300px;
+  min-width: min(320px, 100%);
+
+  @media (max-width: 768px) {
+    min-width: 100%;
+  }
 `;
 
 const SearchInput = styled.input`
   width: 100%;
+  min-height: 46px;
   padding: 0.875rem 1rem 0.875rem 2.75rem;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -149,7 +157,8 @@ const FilterButton = styled.button<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.875rem 1rem;
+  min-height: 44px;
+  padding: 0.7rem 1rem;
   border: 2px solid ${props => (props.$active ? '#16a34a' : '#e5e7eb')};
   border-radius: 12px;
   background: ${props => (props.$active ? '#f0f9ff' : 'white')};
@@ -163,9 +172,15 @@ const FilterButton = styled.button<{ $active?: boolean }>`
     border-color: #16a34a;
     color: #16a34a;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+    justify-content: center;
+  }
 `;
 
 const FilterSelect = styled.select`
+  min-height: 44px;
   padding: 0.875rem 1rem;
   border: 2px solid #e5e7eb;
   border-radius: 12px;
@@ -197,6 +212,10 @@ const FilterSelect = styled.select`
     border-color: #16a34a;
     box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.1);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2316a34a' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
   }
 `;
 
@@ -254,12 +273,31 @@ const ResultsHeader = styled.div`
   align-items: center;
   margin-bottom: 2rem;
   flex-wrap: wrap;
-  gap: 1rem;
+  gap: 0.85rem;
+
+  @media (max-width: 768px) {
+    align-items: stretch;
+    margin-bottom: 1.2rem;
+  }
 `;
 
 const ResultsCount = styled.div`
   font-size: 1rem;
   color: #6b7280;
+`;
+
+const ResultsToolbar = styled.div`
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+  }
 `;
 
 const ViewToggle = styled.div`
@@ -269,9 +307,15 @@ const ViewToggle = styled.div`
   border-radius: 8px;
   padding: 0.25rem;
   background: white;
+
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
 `;
 
 const ViewButton = styled.button<{ $active: boolean }>`
+  min-width: 44px;
+  min-height: 40px;
   padding: 0.5rem;
   border: none;
   border-radius: 6px;
@@ -286,6 +330,7 @@ const ViewButton = styled.button<{ $active: boolean }>`
 `;
 
 const SortSelect = styled.select`
+  min-height: 40px;
   padding: 0.5rem 1rem;
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -297,16 +342,24 @@ const SortSelect = styled.select`
     outline: none;
     border-color: #16a34a;
   }
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
 `;
 
 const RacketsGrid = styled.ul<{ view: 'grid' | 'list' }>`
   display: grid;
   grid-template-columns: ${props =>
-    props.view === 'grid' ? 'repeat(auto-fill, minmax(280px, 1fr))' : '1fr'};
+    props.view === 'grid' ? 'repeat(auto-fill, minmax(min(280px, 100%), 1fr))' : '1fr'};
   gap: ${props => (props.view === 'grid' ? '1.5rem' : '1rem')};
   list-style: none;
   padding: 0;
   margin: 0;
+
+  @media (max-width: 640px) {
+    gap: 1rem;
+  }
 `;
 
 const EmptyState = styled.div`
@@ -393,6 +446,19 @@ const CompareButton = styled.button`
 
   &:hover {
     background: #15803d;
+  }
+`;
+
+const ClearFiltersIconButton = styled(FilterButton)`
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  justify-content: center;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    min-width: 0;
+    padding: 0.7rem 1rem;
   }
 `;
 
@@ -912,9 +978,9 @@ const CatalogPage: React.FC = () => {
               ))}
             </FilterSelect>
 
-            <FilterButton onClick={clearFilters}>
+            <ClearFiltersIconButton onClick={clearFilters}>
               <FiX />
-            </FilterButton>
+            </ClearFiltersIconButton>
           </FiltersRow>
 
           {/* Advanced Filters Toggle */}
@@ -1025,7 +1091,7 @@ const CatalogPage: React.FC = () => {
             Mostrando {displayedRackets.length} de {totalRackets} palas
           </ResultsCount>
 
-          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <ResultsToolbar>
             <FilterButton
               $active={showAvailableOnly}
               onClick={() => setShowAvailableOnly(!showAvailableOnly)}
@@ -1051,7 +1117,7 @@ const CatalogPage: React.FC = () => {
                 <FiList />
               </ViewButton>
             </ViewToggle>
-          </div>
+          </ResultsToolbar>
         </ResultsHeader>
 
         {/* Results */}

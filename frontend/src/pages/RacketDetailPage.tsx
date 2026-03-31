@@ -44,10 +44,17 @@ import { StorePriceComparison } from '../components/features/StorePriceCompariso
 // --- Styled Components ---
 
 const PageContainer = styled.div`
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--color-gray-50);
-  padding-bottom: 4rem;
+  padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   animation: fadeIn 0.4s ease-out;
+
+  @media (min-width: 1024px) {
+    padding-bottom: 4rem;
+  }
 
   @keyframes fadeIn {
     from {
@@ -71,6 +78,17 @@ const Breadcrumbs = styled.div`
   align-items: center;
   gap: 0.5rem;
 
+  @media (max-width: 768px) {
+    padding: 0.75rem 1rem;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   a {
     color: var(--color-gray-500);
     text-decoration: none;
@@ -81,10 +99,23 @@ const Breadcrumbs = styled.div`
   }
 `;
 
+const CurrentBreadcrumb = styled.span`
+  color: var(--color-gray-900);
+  max-width: min(56vw, 320px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
 const AuthBanner = styled.div`
   max-width: 1400px;
   margin: 3rem auto;
   padding: 0 2rem;
+
+  @media (max-width: 768px) {
+    margin: 1.5rem auto;
+    padding: 0 1rem;
+  }
 `;
 
 const AuthCard = styled.div`
@@ -171,6 +202,7 @@ const AuthButton = styled.a<{ $variant?: 'primary' | 'secondary' }>`
   align-items: center;
   justify-content: center;
   padding: 0.75rem 1.75rem;
+  min-height: 44px;
   font-size: 0.9375rem;
   font-weight: 600;
   text-decoration: none;
@@ -208,9 +240,14 @@ const MainGrid = styled.div`
   display: grid;
   grid-template-columns: 1.2fr 0.8fr;
   gap: 3rem;
-  max-width: 1400px;
+  width: min(100%, 1400px);
   margin: 0 auto;
   padding: 0 2rem;
+  min-width: 0;
+
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
 
   @media (max-width: 1200px) {
     grid-template-columns: 1fr 1fr;
@@ -233,6 +270,8 @@ const GallerySection = styled.div`
   align-items: center;
   justify-content: center;
   position: relative;
+  width: 100%;
+  min-width: 0;
   min-height: 600px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
   transition: box-shadow 0.3s ease;
@@ -242,7 +281,9 @@ const GallerySection = styled.div`
   }
 
   @media (max-width: 768px) {
+    padding: 1rem;
     min-height: 400px;
+    border-radius: 16px;
   }
 `;
 
@@ -250,6 +291,7 @@ const MainImage = styled.img`
   width: 100%;
   height: 100%;
   max-height: 450px;
+  min-width: 0;
   object-fit: contain;
   margin-bottom: 2rem;
   cursor: zoom-in;
@@ -266,11 +308,17 @@ const MainImage = styled.img`
 const CarouselWrapper = styled.div`
   position: relative;
   width: 100%;
-  max-width: 500px;
+  max-width: min(500px, 100%);
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  padding: 0 2.5rem;
+
+  @media (max-width: 768px) {
+    padding: 0;
+  }
 `;
 
 const CarouselTrack = styled.div`
@@ -280,6 +328,7 @@ const CarouselTrack = styled.div`
   scroll-behavior: smooth;
   padding: 0.5rem;
   width: 100%;
+  min-width: 0;
   scrollbar-width: none; // Hide scrollbar Firefox
   -ms-overflow-style: none; // Hide scrollbar IE/Edge
   -webkit-overflow-scrolling: touch; // Smooth touch scrolling iOS
@@ -291,6 +340,9 @@ const CarouselTrack = styled.div`
 `;
 
 const ScrollButton = styled.button`
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
   background: white;
   border: 1px solid var(--color-gray-200);
   border-radius: 50%;
@@ -315,6 +367,18 @@ const ScrollButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  @media (max-width: 768px) {
+    display: none;
+  }
+`;
+
+const LeftScrollButton = styled(ScrollButton)`
+  left: 0;
+`;
+
+const RightScrollButton = styled(ScrollButton)`
+  right: 0;
 `;
 
 const Thumbnail = styled.img<{ $isActive: boolean }>`
@@ -390,6 +454,7 @@ const InfoSection = styled.div`
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
 `;
 
 const ProductTag = styled.span`
@@ -893,7 +958,7 @@ const CompareRow = styled.div<{ $isBestPrice?: boolean }>`
       props.$isBestPrice
         ? 'linear-gradient(90deg, #dcfce7 0%, #bbf7d0 100%)'
         : 'var(--color-gray-50)'};
-    transform: translateX(4px);
+    transform: translateY(-2px);
     box-shadow: inset 4px 0 0 var(--color-primary);
   }
 
@@ -974,9 +1039,9 @@ const ShopButton = styled.a`
 // Sticky Price Bar for Mobile
 const StickyPriceBar = styled.div<{ $show: boolean }>`
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: calc(78px + env(safe-area-inset-bottom, 0));
+  left: env(safe-area-inset-left, 0);
+  right: env(safe-area-inset-right, 0);
   background: white;
   border-top: 1px solid var(--color-gray-200);
   padding: 1rem 1.5rem;
@@ -1183,7 +1248,7 @@ const RacketDetailPage: React.FC = () => {
     <PageContainer>
       <Breadcrumbs>
         <Link to='/'>Home</Link> / <Link to='/catalog'>Palas</Link> / {toTitleCase(racket.marca)} /{' '}
-        <span style={{ color: 'var(--color-gray-900)' }}>{toTitleCase(racket.modelo)}</span>
+        <CurrentBreadcrumb>{toTitleCase(racket.modelo)}</CurrentBreadcrumb>
       </Breadcrumbs>
 
       <MainGrid>
@@ -1214,12 +1279,9 @@ const RacketDetailPage: React.FC = () => {
                 }}
               >
                 <CarouselWrapper>
-                  <ScrollButton
-                    onClick={() => scrollCarousel('left')}
-                    style={{ position: 'absolute', left: '-40px', zIndex: 10 }}
-                  >
+                  <LeftScrollButton onClick={() => scrollCarousel('left')}>
                     <FiChevronLeft size={20} />
-                  </ScrollButton>
+                  </LeftScrollButton>
 
                   <CarouselTrack ref={carouselRef}>
                     {racket.imagenes.map((img, index) => (
@@ -1238,12 +1300,9 @@ const RacketDetailPage: React.FC = () => {
                     ))}
                   </CarouselTrack>
 
-                  <ScrollButton
-                    onClick={() => scrollCarousel('right')}
-                    style={{ position: 'absolute', right: '-40px', zIndex: 10 }}
-                  >
+                  <RightScrollButton onClick={() => scrollCarousel('right')}>
                     <FiChevronRight size={20} />
-                  </ScrollButton>
+                  </RightScrollButton>
                 </CarouselWrapper>
               </div>
 
@@ -1287,48 +1346,49 @@ const RacketDetailPage: React.FC = () => {
             )}
           </RatingRow>
 
-            {racket.solo_comparacion ? (
-              <ComparisonOnlyCard>
-                <ComparisonOnlyBadge>Solo comparación</ComparisonOnlyBadge>
-                <ComparisonOnlyTitle>Pala no disponible para venta</ComparisonOnlyTitle>
-                <ComparisonOnlyText>
-                  Actualmente no hemos encontrado stock de esta pala en las tiendas que monitorizamos. 
-                  Sin embargo, puedes seguir consultando sus características y compararla con otros modelos.
-                </ComparisonOnlyText>
-                <AlertButton onClick={() => setShowAddToListModal(true)}>
-                  <FiHeart /> Guardar en mis listas
-                </AlertButton>
-              </ComparisonOnlyCard>
-            ) : (
-              <PriceCard>
-                <BestPriceLabel>Mejor Precio del Mercado</BestPriceLabel>
-                <PriceRow>
-                  <BigPrice>
-                    {lowestPrice ? `${lowestPrice.price.toFixed(2)}€` : `${racket.precio_actual}€`}
-                  </BigPrice>
-                  {lowestPrice && lowestPrice.originalPrice > lowestPrice.price && (
-                    <OldPrice>{lowestPrice.originalPrice.toFixed(2)}€</OldPrice>
-                  )}
-                  {lowestPrice && lowestPrice.discount > 0 && (
-                    <SaveBadge>-{Math.round(lowestPrice.discount)}%</SaveBadge>
-                  )}
-                </PriceRow>
-                <UpdatedTime>Precio actualizado: hace un momento</UpdatedTime>
+          {racket.solo_comparacion ? (
+            <ComparisonOnlyCard>
+              <ComparisonOnlyBadge>Solo comparación</ComparisonOnlyBadge>
+              <ComparisonOnlyTitle>Pala no disponible para venta</ComparisonOnlyTitle>
+              <ComparisonOnlyText>
+                Actualmente no hemos encontrado stock de esta pala en las tiendas que monitorizamos.
+                Sin embargo, puedes seguir consultando sus características y compararla con otros
+                modelos.
+              </ComparisonOnlyText>
+              <AlertButton onClick={() => setShowAddToListModal(true)}>
+                <FiHeart /> Guardar en mis listas
+              </AlertButton>
+            </ComparisonOnlyCard>
+          ) : (
+            <PriceCard>
+              <BestPriceLabel>Mejor Precio del Mercado</BestPriceLabel>
+              <PriceRow>
+                <BigPrice>
+                  {lowestPrice ? `${lowestPrice.price.toFixed(2)}€` : `${racket.precio_actual}€`}
+                </BigPrice>
+                {lowestPrice && lowestPrice.originalPrice > lowestPrice.price && (
+                  <OldPrice>{lowestPrice.originalPrice.toFixed(2)}€</OldPrice>
+                )}
+                {lowestPrice && lowestPrice.discount > 0 && (
+                  <SaveBadge>-{Math.round(lowestPrice.discount)}%</SaveBadge>
+                )}
+              </PriceRow>
+              <UpdatedTime>Precio actualizado: hace un momento</UpdatedTime>
 
-                <PrimaryButton
-                  href={lowestPrice?.link || '#'}
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
-                  Ver en {lowestPrice?.store || 'Tienda'}
-                  <FiExternalLink />
-                </PrimaryButton>
+              <PrimaryButton
+                href={lowestPrice?.link || '#'}
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                Ver en {lowestPrice?.store || 'Tienda'}
+                <FiExternalLink />
+              </PrimaryButton>
 
-                <AlertButton>
-                  <FiBell /> Crear Alerta de Precio
-                </AlertButton>
-              </PriceCard>
-            )}
+              <AlertButton>
+                <FiBell /> Crear Alerta de Precio
+              </AlertButton>
+            </PriceCard>
+          )}
         </InfoSection>
       </MainGrid>
 
@@ -1445,7 +1505,7 @@ const RacketDetailPage: React.FC = () => {
                     <ProgressBarFill $value={racket?.radar_potencia || 0} />
                   </ProgressBarRoot>
                 </ProgressBarContainer>
-                
+
                 <ProgressBarContainer>
                   <ProgressHeader>
                     <ProgressBarLabel>Control</ProgressBarLabel>
@@ -1459,7 +1519,9 @@ const RacketDetailPage: React.FC = () => {
                 <ProgressBarContainer>
                   <ProgressHeader>
                     <ProgressBarLabel>Manejabilidad</ProgressBarLabel>
-                    <ProgressBarValue>{racket?.radar_manejabilidad?.toFixed(1)}/10</ProgressBarValue>
+                    <ProgressBarValue>
+                      {racket?.radar_manejabilidad?.toFixed(1)}/10
+                    </ProgressBarValue>
                   </ProgressHeader>
                   <ProgressBarRoot>
                     <ProgressBarFill $value={racket?.radar_manejabilidad || 0} />

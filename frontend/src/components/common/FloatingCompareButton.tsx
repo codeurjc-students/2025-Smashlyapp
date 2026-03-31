@@ -45,8 +45,9 @@ const FloatingButton = styled(motion.button)`
 
 const Badge = styled(motion.div)`
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: 0;
+  right: 0;
+  transform: translate(20%, -20%);
   width: 24px;
   height: 24px;
   border-radius: 50%;

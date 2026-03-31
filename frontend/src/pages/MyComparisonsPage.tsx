@@ -24,21 +24,34 @@ import remarkGfm from 'remark-gfm';
 import RacketRadarChart from '../components/features/RacketRadarChart';
 
 const Container = styled.div`
-  min-height: 100vh;
-  background: linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at top right, rgba(22, 163, 74, 0.08), transparent 45%),
+    linear-gradient(135deg, #f8faf8 0%, #e8f5e8 100%);
+  padding-bottom: calc(6.5rem + env(safe-area-inset-bottom, 0));
+
+  @media (min-width: 1025px) {
+    padding-bottom: 2rem;
+  }
 `;
 
 const Header = styled.div`
-  background: white;
+  background: rgba(255, 255, 255, 0.92);
   border-bottom: 1px solid #e5e7eb;
   padding: 1.5rem 0;
   margin-bottom: 2rem;
+  backdrop-filter: blur(10px);
+
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+    padding: 1rem 0;
+  }
 `;
 
 const HeaderContent = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 clamp(1rem, 3vw, 2rem);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -56,6 +69,7 @@ const BackButton = styled(Link)`
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  min-height: 44px;
   color: #16a34a;
   text-decoration: none;
   font-weight: 500;
@@ -94,7 +108,7 @@ const Stats = styled.div`
 const Content = styled.div`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem 2rem;
+  padding: 0 clamp(1rem, 3vw, 2rem) 2rem;
 `;
 
 const EmptyState = styled.div`
@@ -127,7 +141,9 @@ const EmptyText = styled.p`
 const CompareButton = styled(Link)`
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-height: 48px;
   padding: 0.75rem 1.5rem;
   background: linear-gradient(135deg, #16a34a 0%, #059669 100%);
   color: white;
@@ -156,7 +172,7 @@ const ComparisonsList = styled.div`
 const ComparisonCard = styled(motion.div)`
   background: white;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: clamp(1rem, 2vw, 1.5rem);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(22, 163, 74, 0.1);
   transition: all 0.3s ease;
@@ -164,6 +180,10 @@ const ComparisonCard = styled(motion.div)`
   &:hover {
     box-shadow: 0 8px 30px rgba(22, 163, 74, 0.15);
     border-color: #16a34a;
+  }
+
+  @media (max-width: 768px) {
+    border-radius: 14px;
   }
 `;
 
@@ -214,12 +234,20 @@ const RacketTag = styled.span`
 const ComparisonActions = styled.div`
   display: flex;
   gap: 0.5rem;
+
+  @media (max-width: 768px) {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
 `;
 
 const ActionButton = styled.button<{ variant?: 'primary' | 'danger' }>`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
+  min-height: 44px;
   padding: 0.5rem 1rem;
   border: none;
   border-radius: 8px;
@@ -251,6 +279,10 @@ const ActionButton = styled.button<{ variant?: 'primary' | 'danger' }>`
     opacity: 0.5;
     cursor: not-allowed;
     transform: none;
+  }
+
+  @media (max-width: 768px) {
+    width: 100%;
   }
 `;
 
