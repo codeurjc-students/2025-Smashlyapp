@@ -8,12 +8,13 @@ import GlobalSearch from '../features/GlobalSearch';
 import { NotificationBell } from '../notifications/NotificationBell';
 
 const HeaderContainer = styled.header`
-  background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+  background: linear-gradient(135deg, #169f4d 0%, #15743a 100%);
   padding: 0;
-  box-shadow: 0 2px 20px rgba(22, 163, 74, 0.15);
+  box-shadow: 0 10px 32px rgba(21, 116, 58, 0.2);
   top: 0;
-  z-index: 100;
-  position: relative;
+  z-index: 350;
+  position: sticky;
+  padding-top: env(safe-area-inset-top, 0);
 `;
 
 const HeaderContent = styled.div`
@@ -23,7 +24,7 @@ const HeaderContent = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 70px;
+  min-height: 72px;
   width: 100%;
 
   @media (max-width: 1600px) {
@@ -35,7 +36,8 @@ const HeaderContent = styled.div`
   }
 
   @media (max-width: 768px) {
-    padding: 0 20px;
+    padding: 0 16px;
+    min-height: 68px;
   }
 `;
 
@@ -100,6 +102,8 @@ const MobileSearchButton = styled.button`
   color: white;
   font-size: 1.25rem;
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
   padding: 10px;
   border-radius: 50%;
   transition: all 0.2s ease;
@@ -131,7 +135,9 @@ const MobileMenuDropdown = styled.div<{ $isOpen: boolean }>`
   visibility: ${props => (props.$isOpen ? 'visible' : 'hidden')};
   transition: all 0.3s ease;
   z-index: 100;
-  overflow: visible;
+  overflow: hidden;
+  max-height: min(76vh, 640px);
+  overflow-y: auto;
 `;
 
 // Mobile Search Container
@@ -183,7 +189,6 @@ const NavLink = styled(Link)<{ $isActive: boolean; $isMobile?: boolean }>`
     `
     border-left: 3px solid ${props.$isActive ? '#16a34a' : 'transparent'};
     padding-left: 16px;
-    margin-left: -1rem;
   `}
 
   &:hover {
@@ -200,6 +205,8 @@ const MobileMenuButton = styled.button`
   color: white;
   font-size: 1.5rem;
   cursor: pointer;
+  min-width: 44px;
+  min-height: 44px;
   padding: 8px;
   border-radius: 8px;
   transition: all 0.2s ease;

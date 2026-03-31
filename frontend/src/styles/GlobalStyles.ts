@@ -1,4 +1,4 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle } from 'styled-components';
 
 export const GlobalStyles = createGlobalStyle`
   /* CSS Reset and Global Styles */
@@ -17,23 +17,38 @@ export const GlobalStyles = createGlobalStyle`
     line-height: 1.15;
     -webkit-text-size-adjust: 100%;
     scroll-behavior: smooth;
+    background: #f3f7f1;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     color: #1f2937;
-    background-color: #fafafa;
+    background:
+      radial-gradient(circle at 90% -10%, rgba(22, 163, 74, 0.14), transparent 38%),
+      radial-gradient(circle at -5% 20%, rgba(2, 132, 199, 0.08), transparent 28%),
+      #f3f7f1;
     line-height: 1.6;
     font-size: 16px;
     font-weight: 400;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overscroll-behavior-y: contain;
+    min-height: 100dvh;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   #root {
-    min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
   }
 
   /* Typography */
@@ -83,6 +98,7 @@ export const GlobalStyles = createGlobalStyle`
     color: #16a34a;
     text-decoration: none;
     transition: color 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
   }
 
   a:hover {
@@ -99,6 +115,8 @@ export const GlobalStyles = createGlobalStyle`
     cursor: pointer;
     background: none;
     transition: all 0.2s ease;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
   }
 
   button:disabled {
@@ -116,6 +134,7 @@ export const GlobalStyles = createGlobalStyle`
     padding: 12px 16px;
     background-color: #fff;
     transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    min-height: 44px;
   }
 
   input:focus, textarea:focus, select:focus {
@@ -191,6 +210,9 @@ export const GlobalStyles = createGlobalStyle`
 
   /* Color variables as CSS custom properties */
   :root {
+    --header-height: 72px;
+    --subheader-height: 48px;
+    --mobile-nav-height: 78px;
     --color-primary: #16a34a;
     --color-primary-dark: #15803d;
     --color-primary-light: #22c55e;
@@ -249,6 +271,12 @@ export const GlobalStyles = createGlobalStyle`
     .container {
       padding: 0 16px;
     }
+
+    :root {
+      --header-height: 68px;
+      --subheader-height: 0px;
+      --mobile-nav-height: 82px;
+    }
   }
 
   @media (max-width: 480px) {
@@ -258,6 +286,18 @@ export const GlobalStyles = createGlobalStyle`
     
     .container {
       padding: 0 12px;
+    }
+  }
+
+  @media (hover: none) and (pointer: coarse) {
+    a,
+    button,
+    [role='button'],
+    input[type='checkbox'],
+    input[type='radio'],
+    summary {
+      min-height: 44px;
+      min-width: 44px;
     }
   }
 

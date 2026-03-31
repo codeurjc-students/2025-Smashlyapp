@@ -8,10 +8,14 @@ const SubHeaderContainer = styled.div`
   background: white;
   border-bottom: 1px solid #e5e7eb;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
-
-  top: 70px; /* Height of main header */
-  z-index: 90;
+  position: sticky;
+  top: calc(72px + env(safe-area-inset-top, 0));
+  z-index: 320;
   backdrop-filter: blur(8px);
+
+  @media (max-width: 1024px) {
+    display: none;
+  }
 `;
 
 const SubHeaderContent = styled.div`
