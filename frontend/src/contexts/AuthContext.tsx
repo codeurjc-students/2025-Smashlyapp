@@ -1,10 +1,6 @@
 import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { UserProfile, UserProfileService } from '../services/userProfileService';
-import {
-  forceCleanAuthStorage,
-  setAuthToken,
-  removeAuthToken,
-} from '../utils/authUtils';
+import { forceCleanAuthStorage, setAuthToken, removeAuthToken } from '../utils/authUtils';
 import { API_ENDPOINTS, buildApiUrl } from '../config/api';
 import { GoogleAuthService } from '../services/googleAuthService';
 
@@ -149,7 +145,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const url = buildApiUrl(API_ENDPOINTS.AUTH_REGISTER);
       const response = await fetch(url, {
         method: 'POST',
-        credentials: 'include',  // sends/receives httpOnly cookies
+        credentials: 'include', // sends/receives httpOnly cookies
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
@@ -217,7 +213,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       const url = buildApiUrl(API_ENDPOINTS.AUTH_LOGIN);
       const response = await fetch(url, {
         method: 'POST',
-        credentials: 'include',  // sends/receives httpOnly cookies
+        credentials: 'include', // sends/receives httpOnly cookies
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           email: email.trim().toLowerCase(),
@@ -349,7 +345,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         const url = buildApiUrl(API_ENDPOINTS.AUTH_LOGOUT);
         await fetch(url, {
           method: 'POST',
-          credentials: 'include',  // necesario para que el backend pueda limpiar la cookie
+          credentials: 'include', // necesario para que el backend pueda limpiar la cookie
           headers: { 'Content-Type': 'application/json' },
         });
       } catch (logoutError) {
