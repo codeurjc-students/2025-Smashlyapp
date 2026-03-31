@@ -27,7 +27,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   }
 
   // Si requiere admin pero el usuario no es admin, mostrar error 403
-  if (requireAdmin && user.role !== 'admin') {
+  // Comparar case-insensitive para permitir "admin", "Admin", "ADMIN", etc.
+  if (requireAdmin && user.role?.toLowerCase() !== 'admin') {
+    console.warn(
+      `🚫 Admin access denied for user:`,
+      { userId: user.id, userRole: user.role, expectedRole: 'admin' }
+    );
     const destination = redirectTo || '/error?type=403';
     return <Navigate to={destination} replace />;
   }

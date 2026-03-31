@@ -40,6 +40,7 @@ export class UserController {
       const profile = await UserService.getUserProfile(userId);
 
       if (!profile) {
+        logger.warn('📭 No profile found for authenticated user', { userId });
         res.status(404).json({
           success: false,
           error: 'Not Found',
@@ -48,6 +49,13 @@ export class UserController {
         } as ApiResponse);
         return;
       }
+
+      logger.info('✅ Profile retrieved successfully', {
+        userId: profile.id,
+        email: profile.email,
+        nickname: profile.nickname,
+        role: profile.role,
+      });
 
       res.json({
         success: true,

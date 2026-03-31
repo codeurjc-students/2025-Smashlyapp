@@ -95,6 +95,7 @@ export class AdminService {
   static async getDashboardMetrics(): Promise<AdminMetrics> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.METRICS), {
       method: "GET",
+      credentials: 'include',
       headers: getCommonHeaders(),
     });
 
@@ -107,6 +108,7 @@ export class AdminService {
   static async getAllUsers(): Promise<AdminUser[]> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.USERS), {
       method: "GET",
+      credentials: 'include',
       headers: getCommonHeaders(),
     });
 
@@ -124,6 +126,7 @@ export class AdminService {
       buildApiUrl(`${API_ENDPOINTS.ADMIN.USERS}/${userId}/role`),
       {
         method: "PATCH",
+        credentials: 'include',
         headers: getCommonHeaders(),
         body: JSON.stringify({ role }),
       }
@@ -140,6 +143,7 @@ export class AdminService {
       buildApiUrl(`${API_ENDPOINTS.ADMIN.USERS}/${userId}`),
       {
         method: "DELETE",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -155,6 +159,7 @@ export class AdminService {
       buildApiUrl(API_ENDPOINTS.ADMIN.STORE_REQUESTS),
       {
         method: "GET",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -170,6 +175,7 @@ export class AdminService {
       buildApiUrl(`${API_ENDPOINTS.ADMIN.STORE_REQUESTS}/${requestId}/approve`),
       {
         method: "POST",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -185,6 +191,7 @@ export class AdminService {
       buildApiUrl(`${API_ENDPOINTS.ADMIN.STORE_REQUESTS}/${requestId}/reject`),
       {
         method: "POST",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -200,6 +207,7 @@ export class AdminService {
       buildApiUrl(API_ENDPOINTS.ADMIN.RACKET_REQUESTS),
       {
         method: "GET",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -219,6 +227,7 @@ export class AdminService {
       ),
       {
         method: "POST",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -234,6 +243,7 @@ export class AdminService {
       buildApiUrl(`${API_ENDPOINTS.ADMIN.RACKET_REQUESTS}/${requestId}/reject`),
       {
         method: "POST",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -247,6 +257,7 @@ export class AdminService {
   static async createRacket(racketData: any): Promise<any> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.RACKETS), {
       method: "POST",
+      credentials: 'include',
       headers: getCommonHeaders(),
       body: JSON.stringify(racketData),
     });
@@ -262,6 +273,7 @@ export class AdminService {
       buildApiUrl(`${API_ENDPOINTS.RACKETS}/${racketId}`),
       {
         method: "PUT",
+        credentials: 'include',
         headers: getCommonHeaders(),
         body: JSON.stringify(racketData),
       }
@@ -278,6 +290,7 @@ export class AdminService {
       buildApiUrl(`${API_ENDPOINTS.RACKETS}/${racketId}`),
       {
         method: "DELETE",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -293,6 +306,7 @@ export class AdminService {
       buildApiUrl(API_ENDPOINTS.ADMIN.VERIFY_STORE(storeId)),
       {
         method: "POST",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -308,6 +322,7 @@ export class AdminService {
       buildApiUrl(API_ENDPOINTS.ADMIN.REJECT_STORE(storeId)),
       {
         method: "DELETE",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -323,6 +338,7 @@ export class AdminService {
       buildApiUrl(API_ENDPOINTS.ADMIN.RECENT_ACTIVITY, { limit }),
       {
         method: "GET",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -338,6 +354,7 @@ export class AdminService {
       buildApiUrl(API_ENDPOINTS.ADMIN.CONFLICTS),
       {
         method: "GET",
+        credentials: 'include',
         headers: getCommonHeaders(),
       }
     );
@@ -356,6 +373,7 @@ export class AdminService {
       buildApiUrl(API_ENDPOINTS.ADMIN.RESOLVE_CONFLICT(racketId)),
       {
         method: "POST",
+        credentials: 'include',
         headers: getCommonHeaders(),
         body: JSON.stringify({ action })
       }
@@ -370,6 +388,7 @@ export class AdminService {
   static async getBrands(): Promise<Brand[]> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.BRANDS), {
       method: "GET",
+      credentials: 'include',
       headers: getCommonHeaders(),
     });
 
@@ -382,6 +401,7 @@ export class AdminService {
   static async getCategories(): Promise<Category[]> {
     const response = await fetch(buildApiUrl(API_ENDPOINTS.ADMIN.CATEGORIES), {
       method: "GET",
+      credentials: 'include',
       headers: getCommonHeaders(),
     });
 

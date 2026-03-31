@@ -79,12 +79,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         // No limpiamos el token aquí, el usuario está autenticado pero sin perfil completo
         setUser(null);
         setUserProfile(null);
-        return;
+        return profile;
       }
+
+      // Log para debug del rol
+      console.log('🔍 Profile loaded from API:', {
+        id: profile.id,
+        email: profile.email,
+        nickname: profile.nickname,
+        role: profile.role,
+      });
 
       setUser(profile);
       setUserProfile(profile);
       // console.log('User profile loaded successfully:', profile);
+      return profile;
     } catch (error) {
       // Solo limpiamos en caso de error de autenticación, no si falta el perfil
       if (
@@ -103,6 +112,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(null);
         setUserProfile(null);
       }
+      return null;
     }
   };
 
@@ -247,15 +257,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         return { data: null, error: friendlyErrorMessage, errorCode };
       }
 
-      const { access_token, user: loggedInUser } = result.data;
+      const { access_token } = result.data;
 
       if (access_token) {
         console.log('Login successful, storing token...');
         setAuthToken(access_token);
-        await loadUserProfile();
+        // Load the profile with the correct role information
+        const loadedProfile = await loadUserProfile();
+        console.log('✅ SignIn complete - Profile with role loaded:', {
+          id: loadedProfile?.id,
+          email: loadedProfile?.email,
+          role: loadedProfile?.role,
+        });
+        return { data: loadedProfile, error: null };
       }
 
-      return { data: loggedInUser || userProfile, error: null };
+      return { data: null, error: 'No se recibió token de autenticación', errorCode: 'NO_TOKEN' };
     } catch (error: any) {
       console.error('SignIn unexpected error:', error);
       return {
@@ -293,12 +310,23 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (session?.access_token) {
         console.log('Google sign-in successful, storing token...');
         setAuthToken(session.access_token);
-        await loadUserProfile();
+        const loadedProfile = await loadUserProfile();
+        console.log('✅ Google SignIn complete - Profile with role loaded:', {
+          id: loadedProfile?.id,
+          email: loadedProfile?.email,
+          role: loadedProfile?.role,
+        });
+        return {
+          data: loadedProfile,
+          error: null,
+          isNewUser,
+          suggestedNickname,
+        };
       }
 
       return {
-        data: googleUser || userProfile,
-        error: null,
+        data: googleUser || null,
+        error: 'No se recibió token de autenticación',
         isNewUser,
         suggestedNickname,
       };

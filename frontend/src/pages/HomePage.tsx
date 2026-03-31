@@ -273,9 +273,17 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     if (isAuthenticated && user?.role) {
       const role = user.role.toLowerCase();
+      console.log('🔍 HomePage redirect check:', {
+        isAuthenticated,
+        userEmail: user.email,
+        userRole: user.role,
+        roleLowercase: role,
+      });
       if (role === 'player') {
+        console.log('↪️ Redirecting player to dashboard');
         navigate('/dashboard', { replace: true });
       } else if (role === 'admin') {
+        console.log('↪️ Redirecting admin to /admin');
         navigate('/admin', { replace: true });
       }
     }
