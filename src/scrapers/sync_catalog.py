@@ -114,13 +114,28 @@ def now_utc() -> str:
 def get_slug_id_map(client: Client) -> Dict[str, int]:
     """
     Devuelve un dict {slug: numeric_id} de todos los rackets en Supabase.
-    Para rackets sin slug aún asignado los ignora (se asignarán en el primer upsert).
+    Maneja la paginación de 1000 en 1000.
     """
-    result = client.table("rackets").select("id, slug, model, brand").execute()
     mapping = {}
-    for row in result.data or []:
-        if row.get("slug"):
-            mapping[row["slug"]] = row["id"]
+    page_size = 1000
+    current_page = 0
+    
+    while True:
+        start = current_page * page_size
+        end = start + page_size - 1
+        
+        result = client.table("rackets").select("id, slug").range(start, end).execute()
+        rows = result.data or []
+        
+        for row in rows:
+            if row.get("slug"):
+                mapping[row["slug"]] = row["id"]
+        
+        if len(rows) < page_size:
+            break
+            
+        current_page += 1
+        
     return mapping
 
 
@@ -133,8 +148,19 @@ def ensure_slug_column_populated(client: Client, dry_run: bool = False) -> Dict[
     que ya están en la DB, sin depender del JSON local.
     Las colisiones se resuelven añadiendo el ID numérico como sufijo.
     """
-    result = client.table("rackets").select("id, slug, model, brand").execute()
-    all_rows = result.data or []
+    all_rows = []
+    page_size = 1000
+    current_page = 0
+    while True:
+        start = current_page * page_size
+        end = start + page_size - 1
+        result = client.table("rackets").select("id, slug, model, brand").range(start, end).execute()
+        rows = result.data or []
+        all_rows.extend(rows)
+        if len(rows) < page_size:
+            break
+        current_page += 1
+
     rows_without_slug = [r for r in all_rows if not r.get("slug")]
 
     if not rows_without_slug:
@@ -215,7 +241,7 @@ def upsert_racket(client: Client, slug: str, racket: dict, slug_id_map: Dict[str
         payload[f"{store}_actual_price"]        = price
         payload[f"{store}_original_price"]      = original
         payload[f"{store}_discount_percentage"] = discount
-    payload[f"{store}_link"]                = url
+        payload[f"{store}_link"]                = url
 
     payload["on_offer"] = any_on_offer
     
@@ -275,19 +301,31 @@ def record_price_history(
 def get_current_db_prices(client: Client) -> Dict[int, Dict[str, Optional[float]]]:
     """
     Devuelve {racket_db_id: {store: current_price}} para detectar cambios de precio.
+    Maneja la paginación de 1000 en 1000.
     """
-    result = client.table("rackets").select(
-        "id,"
-        "padelnuestro_actual_price,padelmarket_actual_price,padelproshop_actual_price"
-    ).execute()
-
     prices: Dict[int, Dict[str, Optional[float]]] = {}
-    for row in result.data or []:
-        prices[row["id"]] = {
-            "padelnuestro": row.get("padelnuestro_actual_price"),
-            "padelmarket":  row.get("padelmarket_actual_price"),
-            "padelproshop": row.get("padelproshop_actual_price"),
-        }
+    page_size = 1000
+    current_page = 0
+    
+    while True:
+        start = current_page * page_size
+        end = start + page_size - 1
+        result = client.table("rackets").select(
+            "id, padelnuestro_actual_price, padelmarket_actual_price, padelproshop_actual_price"
+        ).range(start, end).execute()
+        
+        rows = result.data or []
+        for row in rows:
+            prices[row["id"]] = {
+                "padelnuestro": row.get("padelnuestro_actual_price"),
+                "padelmarket":  row.get("padelmarket_actual_price"),
+                "padelproshop": row.get("padelproshop_actual_price"),
+            }
+            
+        if len(rows) < page_size:
+            break
+        current_page += 1
+        
     return prices
 
 

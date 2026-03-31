@@ -14,7 +14,70 @@ class RacketManager:
     def __init__(self, db_path: str = "rackets.json"):
         self.db_path = db_path
         self.data: Dict[str, Any] = self._load_db()
+        self._sanitize_loaded_data()
         self.url_map: Dict[str, str] = self._build_url_map()
+
+    def _coerce_specs(self, raw_specs: Any) -> Dict[str, str]:
+        """Normalize specs to dict format (legacy DB can store JSON strings)."""
+        if isinstance(raw_specs, dict):
+            return raw_specs
+
+        if isinstance(raw_specs, str):
+            try:
+                parsed = json.loads(raw_specs)
+                if isinstance(parsed, dict):
+                    return parsed
+            except Exception:
+                return {}
+
+        return {}
+
+    @staticmethod
+    def _is_placeholder_value(value: Any) -> bool:
+        if value is None:
+            return True
+        text = str(value).strip().lower()
+        return text in {"", "n/a", "na", "n.a", "desconocido", "no disponible", "none", "null", "-"}
+
+    @staticmethod
+    def _is_invalid_shape_value(value: Any) -> bool:
+        if value is None:
+            return True
+        text = str(value).strip().lower()
+        if text in {"redonda", "diamante", "lagrima", "lágrima", "hibrida", "híbrida"}:
+            return False
+        if len(text) <= 2:
+            return True
+        invalid_tokens = {
+            "en", "parte", "geom", "h", "l", "rugosa", "rugoso", "mate", "brillo", "arenoso", "relieve"
+        }
+        return text in invalid_tokens
+
+    def _sanitize_loaded_data(self):
+        """Defensively normalize legacy/malformed records loaded from JSON."""
+        cleaned: Dict[str, Any] = {}
+
+        for slug, racket in self.data.items():
+            if not isinstance(racket, dict):
+                continue
+
+            racket["specs"] = self._coerce_specs(racket.get("specs"))
+            if "Forma" in racket["specs"] and self._is_invalid_shape_value(racket["specs"].get("Forma")):
+                racket["specs"].pop("Forma", None)
+
+            images = racket.get("images", [])
+            if not isinstance(images, list):
+                images = [images] if images else []
+            racket["images"] = [img for img in images if isinstance(img, str) and img]
+
+            prices = racket.get("prices", [])
+            if not isinstance(prices, list):
+                prices = []
+            racket["prices"] = [p for p in prices if isinstance(p, dict)]
+
+            cleaned[slug] = racket
+
+        self.data = cleaned
 
     def _load_db(self) -> Dict[str, Any]:
         if os.path.exists(self.db_path):
@@ -28,8 +91,10 @@ class RacketManager:
     def _build_url_map(self) -> Dict[str, str]:
         mapping = {}
         for slug, racket in self.data.items():
+            if not isinstance(racket, dict):
+                continue
             for price_entry in racket.get("prices", []):
-                if "url" in price_entry:
+                if isinstance(price_entry, dict) and "url" in price_entry:
                      mapping[price_entry["url"]] = slug
         return mapping
 
@@ -171,6 +236,8 @@ class RacketManager:
             best_match_slug = None
             
             for existing_slug, data in self.data.items():
+                if not isinstance(data, dict):
+                    continue
                 # Filter A: Brand must match (normalized)
                 existing_brand = data.get('brand', 'Unknown')
                 
@@ -181,7 +248,11 @@ class RacketManager:
                 if existing_brand.lower() != p_brand.lower():
                     continue
                 
-                existing_features = self._extract_features(data['model'])
+                existing_model = data.get('model', '')
+                if not isinstance(existing_model, str) or not existing_model:
+                    continue
+
+                existing_features = self._extract_features(existing_model)
 
                 # Filter B: Hard Compatibility
                 if not self._are_compatible(input_features, existing_features):
@@ -214,12 +285,20 @@ class RacketManager:
                      # Simple heuristic: shorter often means less marketing fluff
                      pass 
 
-        # 4. Create New Entry
-        if not slug:
             # Clean "Unknown" from slug generation
             slug_brand = p_brand if p_brand != "Unknown" else "generic"
-            base = f"{slug_brand}-{p_name}"
-            slug = self._slugify(base)
+            
+            # Evitar marca duplicada en el slug: 
+            # Si p_name ya empieza por la marca, no la volvemos a añadir como prefijo.
+            brand_prefix = slug_brand.lower()
+            model_lower = p_name.lower()
+            
+            if model_lower.startswith(brand_prefix):
+                # Ya contiene la marca
+                slug = slugify_paddle("", p_name) 
+            else:
+                slug = slugify_paddle(slug_brand, p_name)
+
             counter = 1
             original_slug = slug
             while slug in self.data:
@@ -240,6 +319,9 @@ class RacketManager:
         racket_entry = self.data[slug]
         self.url_map[p_url] = slug
 
+        # Legacy safeguard: old records may still contain specs as serialized JSON string.
+        racket_entry["specs"] = self._coerce_specs(racket_entry.get("specs"))
+
         # Force Brand update if it was Unknown before
         if racket_entry.get('brand') == "Unknown" and p_brand != "Unknown":
             racket_entry['brand'] = p_brand
@@ -247,7 +329,15 @@ class RacketManager:
         # 5. Merge Specs
         for key, value in p_dict.get('specs', {}).items():
             curr_val = racket_entry["specs"].get(key)
-            if not curr_val or (curr_val == "Desconocido" and value != "Desconocido"):
+
+            # Replace placeholder/garbage values with a valid incoming value.
+            should_replace = False
+            if key == "Forma":
+                should_replace = self._is_invalid_shape_value(curr_val) and not self._is_invalid_shape_value(value)
+            else:
+                should_replace = self._is_placeholder_value(curr_val) and not self._is_placeholder_value(value)
+
+            if should_replace or (not curr_val):
                 racket_entry["specs"][key] = value
 
         # 6. Merge Images
