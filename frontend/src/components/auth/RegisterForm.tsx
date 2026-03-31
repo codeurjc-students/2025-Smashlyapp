@@ -93,6 +93,18 @@ const RequirementItem = styled.li<{ $met: boolean }>`
   margin: 0.25rem 0;
 `;
 
+const TermsLink = styled(Link)`
+  color: #ccff00;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+`;
+
 type RegistrationType = 'player' | 'store';
 
 interface FormData {
@@ -102,6 +114,7 @@ interface FormData {
   email: string;
   password: string;
   confirmPassword: string;
+  acceptedTerms: boolean;
   // Store-specific fields
   storeName?: string;
   legalName?: string;
@@ -120,6 +133,7 @@ interface FormErrors {
   email?: string;
   password?: string;
   confirmPassword?: string;
+  acceptedTerms?: string;
   storeName?: string;
   legalName?: string;
   cifNif?: string;
@@ -159,6 +173,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
     email: '',
     password: '',
     confirmPassword: '',
+    acceptedTerms: false,
     storeName: '',
     legalName: '',
     cifNif: '',
@@ -199,6 +214,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
 
     if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = 'Passwords do not match';
+
+    // Terms and conditions - REQUIRED
+    if (!formData.acceptedTerms)
+      newErrors.acceptedTerms = 'You must accept the terms and conditions to continue';
 
     // Store specific
     if (formData.registrationType === 'store') {
@@ -652,14 +671,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({ onSuccess, onLoginClick }) 
 
       <FooterText>
         Al continuar, aceptas nuestros{' '}
-        <Link to='/terms' onClick={onSuccess}>
-          Términos de Servicio
-        </Link>{' '}
-        y{' '}
-        <Link to='/privacy' onClick={onSuccess}>
-          Política de Privacidad
-        </Link>
-        .
+        <TermsLink to='/terms-and-conditions'>Términos de Servicio</TermsLink> y{' '}
+        <TermsLink to='/privacy-policy'>Política de Privacidad</TermsLink>.
       </FooterText>
 
       <StoreRequestModal

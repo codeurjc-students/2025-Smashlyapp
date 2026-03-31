@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { sileo } from 'sileo';
 import { FiEye, FiEyeOff, FiLock, FiMail } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
-import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext.tsx';
 import NicknamePromptModal from './NicknamePromptModal.tsx';
 import { UserProfileService } from '../../services/userProfileService.ts';
+import styled from 'styled-components';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Form,
   FormGroup,
@@ -22,6 +23,18 @@ import {
   SocialButton,
   FooterText,
 } from './AuthStyles';
+
+const TermsLink = styled(Link)`
+  color: #ccff00;
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+  }
+`;
 
 interface LoginFormProps {
   onSuccess?: () => void;
@@ -83,9 +96,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
       const { error, errorCode } = await signIn(formData.email, formData.password);
       if (error) {
         if (errorCode === 'USER_NOT_FOUND') {
-          sileo.warning({ 
-            title: 'Cuenta no encontrada', 
-            description: error 
+          sileo.warning({
+            title: 'Cuenta no encontrada',
+            description: error,
           });
         } else if (errorCode === 'INVALID_PASSWORD') {
           sileo.error({ title: 'Error', description: error });
@@ -256,14 +269,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSuccess, onRegisterClick }) => 
 
       <FooterText>
         Al continuar, aceptas nuestros{' '}
-        <a href='/terms' onClick={onSuccess}>
-          Términos de Servicio
-        </a>{' '}
-        y{' '}
-        <a href='/privacy' onClick={onSuccess}>
-          Política de Privacidad
-        </a>
-        .
+        <TermsLink to='/terms-and-conditions'>Términos de Servicio</TermsLink> y{' '}
+        <TermsLink to='/privacy-policy'>Política de Privacidad</TermsLink>. .
       </FooterText>
     </>
   );

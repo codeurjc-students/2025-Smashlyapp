@@ -30,6 +30,8 @@ const BestRacketPage = lazy(() =>
   import('./pages/BestRacketPage').then(m => ({ default: m.BestRacketPage }))
 );
 const FAQPage = lazy(() => import('./pages/FAQPage'));
+const TermsAndConditionsPage = lazy(() => import('./pages/TermsAndConditionsPage'));
+const PrivacyPolicyPage = lazy(() => import('./pages/PrivacyPolicyPage'));
 const UserProfilePage = lazy(() => import('./pages/UserProfilePage'));
 const ListPage = lazy(() => import('./pages/ListPage'));
 const AdminPanelPage = lazy(() => import('./pages/AdminPanelPage'));
@@ -192,6 +194,24 @@ export default function App() {
                                 <ListPage />
                               </Suspense>
                             </ProtectedRoute>
+                          }
+                        />
+
+                        {/* Legal pages - public, no auth required */}
+                        <Route
+                          path='/terms-and-conditions'
+                          element={
+                            <Suspense fallback={<RouteLoadingFallback />}>
+                              <TermsAndConditionsPage />
+                            </Suspense>
+                          }
+                        />
+                        <Route
+                          path='/privacy-policy'
+                          element={
+                            <Suspense fallback={<RouteLoadingFallback />}>
+                              <PrivacyPolicyPage />
+                            </Suspense>
                           }
                         />
 
