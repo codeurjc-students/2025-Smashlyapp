@@ -171,14 +171,18 @@ class PadelNuestroScraper(BaseScraper):
         text = re.sub(r"<[^>]+>", "", text)
         text = re.sub(r"\s+", " ", text).strip()
 
-        # 1. Forma
-        match = re.search(
-            r"(?:forma|formato)\s+(?:de\s+)?([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)",
-            text,
-            re.IGNORECASE,
-        )
-        if match:
-            specs["Forma"] = match.group(1).title()
+        # 1. Forma — buscar por palabras clave normalizadas (no regex de una palabra)
+        _SHAPE_KW = [
+            (['lagrima', 'lágrima', 'gota', 'tear'],        'Lágrima'),
+            (['diamante', 'diamond'],                         'Diamante'),
+            (['redonda', 'round', 'redondo'],                 'Redonda'),
+            (['híbrida', 'hibrida', 'hybrid'],                'Híbrida'),
+        ]
+        text_l = text.lower()
+        for keywords, label in _SHAPE_KW:
+            if any(re.search(r'\b' + re.escape(kw) + r'\b', text_l) for kw in keywords):
+                specs['Forma'] = label
+                break
 
         # 2. Balance
         match = re.search(r"balance\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)", text, re.IGNORECASE)

@@ -34,65 +34,86 @@ class PadelProShopScraper(BaseScraper):
             data = json.loads(resp.read().decode('utf-8'))
         return data.get('product', {})
 
-    def _parse_specs_from_html(self, body_html: str) -> Dict[str, str]:
-        """Parse specs from Shopify body_html field using regex for natural language."""
+    # Palabras clave de forma y su valor normalizado
+    _SHAPE_KEYWORDS = [
+        (['lagrima', 'lágrima', 'tear', 'gota'], 'Lágrima'),
+        (['diamante', 'diamond'], 'Diamante'),
+        (['redonda', 'round', 'redondo'], 'Redonda'),
+        (['hibrida', 'híbrida', 'hybrid'], 'Híbrida'),
+    ]
+
+    def _infer_shape_from_text(self, text: str) -> Optional[str]:
+        """Intenta deducir la forma de la pala buscando palabras clave en cualquier contexto."""
+        text_l = text.lower()
+
+        # Patrón 1: "forma/formato [de] X"
+        match = re.search(r'(?:forma|formato)\s+(?:de\s+)?([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)', text_l, re.IGNORECASE)
+        if match:
+            word = match.group(1)
+            for keywords, label in self._SHAPE_KEYWORDS:
+                if any(kw in word for kw in keywords):
+                    return label
+
+        # Patrón 2: "tipo [de] X" / "diseño X" / "cabeza X"
+        match = re.search(r'(?:tipo|diseño|cabeza)\s+(?:de\s+)?([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)', text_l, re.IGNORECASE)
+        if match:
+            word = match.group(1)
+            for keywords, label in self._SHAPE_KEYWORDS:
+                if any(kw in word for kw in keywords):
+                    return label
+
+        # Patrón 3: presencia aislada de la palabra de forma como keyword
+        for keywords, label in self._SHAPE_KEYWORDS:
+            for kw in keywords:
+                # Exigimos que sea una "palabra" (no parte de otra: ej. "lagrimal")
+                if re.search(r'\b' + re.escape(kw) + r'\b', text_l):
+                    return label
+
+        return None
+
+    def _parse_specs_from_html(self, html: str) -> Dict[str, str]:
+        """Parse specs from Shopify body_html OR the full product page HTML."""
         specs: Dict[str, str] = {}
-        if not body_html:
+        if not html:
             return specs
 
-        # specific cleaning
-        text = body_html.replace('&nbsp;', ' ').replace('<br>', ' ').replace('</p>', ' ').replace('<p>', ' ')
-        text = re.sub(r'<[^>]+>', '', text) # Strip HTML tags
-        text = re.sub(r'\s+', ' ', text).strip() # Normalize whitespace
+        # Extract structured list items (Theme-specific)
+        # Structure: <li class="product__details-item"><strong>Key:</strong> Value</li>
+        matches = re.finditer(
+            r'<li[^>]*class=["\']?product__details-item["\']?[^>]*>\s*<strong[^>]*>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>',
+            html,
+            re.IGNORECASE | re.DOTALL
+        )
+        for m in matches:
+            key = m.group(1).strip().rstrip(':')
+            val = m.group(2).strip()
+            if key and val:
+                specs[normalize_spec_name(key)] = val
 
-        # 1. Forma
-        # "formato lágrima", "forma de diamante", "forma redonda"
-        match = re.search(r'(?:forma|formato)\s+(?:de\s+)?([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)', text, re.IGNORECASE)
-        if match:
-            specs['Forma'] = match.group(1).title()
+        # If still missing essential specs, try general regex on cleaned text
+        text = html.replace('&nbsp;', ' ').replace('<br>', ' ').replace('</p>', ' ').replace('<p>', ' ')
+        text = re.sub(r'<[^>]+>', '', text)
+        text = re.sub(r'\s+', ' ', text).strip()
+
+        # 1. Forma (Fallback extraction from text)
+        if 'Forma' not in specs:
+            shape = self._infer_shape_from_text(text)
+            if shape:
+                specs['Forma'] = shape
 
         # 2. Balance
-        # "balance medio", "balance alto", "balance bajo"
-        match = re.search(r'balance\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)', text, re.IGNORECASE)
-        if match:
-            specs['Balance'] = match.group(1).title()
+        if 'Balance' not in specs:
+            match = re.search(r'balance\s+([a-zA-ZáéíóúÁÉÍÓÚñÑ]+)', text, re.IGNORECASE)
+            if match:
+                specs['Balance'] = match.group(1).title()
 
         # 3. Peso
-        # "peso entre 355 y 375 gramos", "360-375 gr"
-        match = re.search(r'(\d{3}\s*[-–]\s*\d{3})\s*(?:gr|gramos|g)', text, re.IGNORECASE)
-        if not match:
-             match = re.search(r'peso\s+(?:aproximado\s+)?(?:de\s+)?(\d{3}(?:[-–]\d{3})?)', text, re.IGNORECASE)
-        if match:
-            specs['Peso'] = match.group(1) + " g"
-
-        # 4. Goma / Núcleo
-        # "goma HR3", "goma EVA Soft", "núcleo de EVA"
-        match = re.search(r'(?:goma|núcleo)\s+(?:de\s+)?([a-zA-Z0-9\s]+?)(?:(?=\.|,)|$)', text, re.IGNORECASE)
-        if match:
-            val = match.group(1).strip()
-            if len(val) < 40 and 'contiene' not in val.lower():
-                 specs['Núcleo'] = val
-
-        # 5. Material / Caras
-        # "caras de carbono 18K", "fabricadas con carbono 12K"
-        match = re.search(r'(?:caras|superficie|fabricad[ao]s?)\s+(?:de\s+|con\s+)?(carbono\s+[0-9]+[kK]|fibra de vidrio|carbono)', text, re.IGNORECASE)
-        if match:
-            specs['Cara'] = match.group(1).title()
-
-        # 6. Nivel
-        match = re.search(r'jugador(?:es)?\s+(?:de\s+)?(?:nivel\s+)?([a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+)', text, re.IGNORECASE)
-        if match:
-             val = match.group(1).strip()
-             if 'avanzado' in val.lower(): specs['Nivel'] = 'Avanzado'
-             elif 'intermedio' in val.lower(): specs['Nivel'] = 'Intermedio'
-             elif 'profesional' in val.lower(): specs['Nivel'] = 'Profesional/Avanzado'
-             elif 'iniciación' in val.lower(): specs['Nivel'] = 'Iniciación'
-
-        # Fallback for structured list items if present
-        if not specs:
-             matches = re.finditer(r'<li>\s*<strong>\s*([^<]+?)\s*:?\s*</strong>\s*([^<]+?)\s*</li>', body_html, re.IGNORECASE)
-             for m in matches:
-                 specs[m.group(1).strip().rstrip(':')] = m.group(2).strip()
+        if 'Peso' not in specs:
+            match = re.search(r'(\d{3}\s*[-–]\s*\d{3})\s*(?:gr|gramos|g)', text, re.IGNORECASE)
+            if not match:
+                match = re.search(r'peso\s+(?:aproximado\s+)?(?:de\s+)?(\d{3}(?:[-–]\d{3})?)', text, re.IGNORECASE)
+            if match:
+                specs['Peso'] = match.group(1) + " g"
 
         return specs
 
@@ -115,6 +136,8 @@ class PadelProShopScraper(BaseScraper):
 
         if not product_data:
             return None
+        if not isinstance(product_data, dict):
+            return None
         
         # Name
         name = product_data.get('title')
@@ -122,21 +145,24 @@ class PadelProShopScraper(BaseScraper):
             return None
 
         # Price
+        variants = product_data.get('variants') if isinstance(product_data.get('variants'), list) else []
+        first_variant = variants[0] if variants and isinstance(variants[0], dict) else {}
+
         price = 0.0
-        if product_data.get('variants'):
+        if first_variant:
             try:
-                price = float(product_data['variants'][0]['price'])
-            except (ValueError, TypeError, IndexError):
+                price = float(first_variant.get('price'))
+            except (ValueError, TypeError):
                 pass
 
         # Original Price
         original_price = None
-        if product_data.get('variants'):
+        if first_variant:
             try:
-                op = product_data['variants'][0].get('compare_at_price')
+                op = first_variant.get('compare_at_price')
                 if op:
                     original_price = float(op)
-            except (ValueError, TypeError):
+            except (ValueError, TypeError, AttributeError):
                 pass
 
         # Brand
@@ -144,8 +170,9 @@ class PadelProShopScraper(BaseScraper):
 
         # Images
         images = []
-        if product_data.get('images'):
-            for img in product_data['images']:
+        raw_images = product_data.get('images')
+        if isinstance(raw_images, list):
+            for img in raw_images:
                 src = img.get('src') if isinstance(img, dict) else img
                 if src:
                     images.append(src)
@@ -154,6 +181,33 @@ class PadelProShopScraper(BaseScraper):
 
         # Specs from body_html
         specs = self._parse_specs_from_html(product_data.get('body_html', ''))
+
+        # Si no se encontró Forma en el JSON (body_html), intentamos descargar el HTML completo
+        if 'Forma' not in specs:
+            try:
+                loop = asyncio.get_event_loop()
+                req = urllib.request.Request(url, headers={'User-Agent': self.user_agent})
+                with urllib.request.urlopen(req, timeout=15) as resp:
+                    full_html = resp.read().decode('utf-8')
+                
+                # Parse metadata/theme specific specs from HTML
+                more_specs = self._parse_specs_from_html(full_html)
+                specs.update(more_specs)
+            except Exception as e:
+                print(f"[PadelProShop] Error fetching HTML fallback for {handle}: {e}")
+
+        # Si aún no hay Forma, intentar desde los tags
+        if 'Forma' not in specs:
+            tags = product_data.get('tags', [])
+            if isinstance(tags, str):
+                tags = [t.strip() for t in tags.split(',')]
+            elif not isinstance(tags, list):
+                tags = []
+            tags_text = ' '.join(str(t) for t in tags if t is not None)
+            shape_from_tags = self._infer_shape_from_text(tags_text)
+            if shape_from_tags:
+                specs['Forma'] = shape_from_tags
+
         specs = normalize_specs(specs)
 
         return Product(
