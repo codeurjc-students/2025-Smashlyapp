@@ -25,7 +25,9 @@
     "quality:check": "npm run lint && npm run format:check",
     "quality:fix": "npm run lint:fix && npm run format",
     "clean": "rimraf dist",
-    "generate-api-docs": "redocly build-docs ../../docs/api-docs.yaml -o ../../docs/index.html"
+    "generate-api-docs": "redocly build-docs ../../docs/api-docs.yaml -o ../../docs/index.html",
+    "radar:populate": "tsx src/scripts/populate-radar-metrics.ts",
+    "radar:populate:heuristic": "cross-env USE_EXTERNAL_RADAR_SCORES=false tsx src/scripts/populate-radar-metrics.ts"
   },
   "keywords": [
     "padel",
