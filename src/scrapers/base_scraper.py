@@ -58,12 +58,17 @@ def normalize_spec_value(key: str, value: str) -> str:
     
     # Normalización de Forma
     if 'forma' in key_lower:
-        val_l = value.lower()
+        val_l = value.lower().strip()
         if any(x in val_l for x in ['lagrima', 'lágrima', 'tear', 'gota']): return 'Lágrima'
-        if any(x in val_l for x in ['redonda', 'round']): return 'Redonda'
-        if any(x in val_l for x in ['diamante', 'diamond']): return 'Diamante'
-        if any(x in val_l for x in ['híbrida', 'hibrida']): return 'Híbrida'
-    
+        if any(x in val_l for x in ['diamante', 'diamond']):                  return 'Diamante'
+        if any(x in val_l for x in ['redonda', 'redondo', 'round']):          return 'Redonda'
+        if any(x in val_l for x in ['híbrida', 'hibrida', 'hibrido', 'hybrid']): return 'Híbrida'
+        # Rechazar valores claramente inválidos para Forma
+        invalid = {'rugoso', 'rugosa', 'mate', 'brillo', 'relieve', 'arenoso'}
+        if val_l in invalid or len(val_l) <= 2:
+            return ''   # Se descartará en normalize_specs si está vacío
+        return value.strip()
+
     # Normalización de Balance
     if 'balance' in key_lower:
         val_l = value.lower()
@@ -95,8 +100,12 @@ def normalize_specs(specs: Dict[str, str]) -> Dict[str, str]:
     for key, value in specs.items():
         norm_key = normalize_spec_name(key)
         norm_value = normalize_spec_value(norm_key, value)
-        if norm_key.lower() != 'marca':
-            normalized[norm_key] = norm_value
+        # Descartar entradas inválidas: vacías, demasiado cortas (≤2 chars), o clave 'Marca'
+        if norm_key.lower() == 'marca':
+            continue
+        if not norm_value or len(norm_value.strip()) <= 2:
+            continue
+        normalized[norm_key] = norm_value
     return normalized
 
 
