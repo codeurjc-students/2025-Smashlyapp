@@ -1,20 +1,31 @@
 /**
  * SCRIPT: populate-radar-metrics.ts
  *
- * Calcula y persiste las 5 métricas del gráfico radar para todas las palas.
- * Los valores son DETERMINISTAS: la misma pala siempre produce el mismo resultado.
- * Esto elimina la inconsistencia de dejar que el LLM genere estos valores.
+ * Calcula y persiste las 5 métricas del gráfico radar para palas SIN datos externos.
+ * 
+ * FLUJO RECOMENDADO:
+ *   1. Ejecutar primero:   python src/scrapers/sync_radar_metrics.py
+ *      → Extrae de PadelZoom/TuMejorPala, actualiza Supabase con datos verificados
+ *   
+ *   2. Ejecutar este script para llenar las que quedan:
+ *      cd backend/api && npx ts-node src/scripts/populate-radar-metrics.ts
+ *      → SOLO actualiza palas con valores NULL (fallback determinista)
+ *      → NO sobrescribe datos que ya tienen valores (del scraper)
+ *
+ * CARACTERÍSTICA IMPORTANTE: Los valores son DETERMINISTAS cuando usando el algoritmo.
+ * Pero se PRIORIZA la fuente externa (PadelZoom) si la pala está dispobible allí.
  *
  * PRE-REQUISITO: Ejecutar src/sql/add_radar_columns.sql en Supabase primero.
  *
- * USO:
- *   cd backend/api
- *   npx ts-node src/scripts/populate-radar-metrics.ts
- *   npx ts-node --project tsconfig.json src/scripts/populate-radar-metrics.ts
+ * VARIABLES DE ENTORNO:
+ *   USE_EXTERNAL_RADAR_SCORES=false  (default true) → desactiva búsqueda en PadelZoom
+ *   PADELZOOM_MIN_CONFIDENCE=0.6     → confianza mínima de matching
+ *   PADELZOOM_REQUEST_DELAY_MS=350   → delay entre requests (respetuoso con servidor)
  */
 
 import 'dotenv/config';
 import { createClient } from '@supabase/supabase-js';
+import axios from 'axios';
 
 // ──────────────────────────────────────────────
 // Supabase client (usa las mismas env vars)
@@ -41,6 +52,12 @@ interface RadarValues {
   radar_manejabilidad: number;
   radar_punto_dulce: number;
   radar_salida_bola: number;
+}
+
+interface ExternalRadarMatch {
+  values: RadarValues;
+  sourceUrl: string;
+  confidence: number;
 }
 
 /**
@@ -160,6 +177,248 @@ function calculateRadarValues(racket: any): RadarValues {
   };
 }
 
+function normalizeText(input: string): string {
+  return String(input || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function slugify(input: string): string {
+  return normalizeText(input)
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function tokenizeSlug(input: string): string[] {
+  const STOP = new Set([
+    'de', 'del', 'la', 'el', 'by', 'con', 'para', 'and', 'pro', 'plus', 'new',
+    'pala', 'palas', 'padel', 'edition', 'edicion', 'review',
+  ]);
+  return slugify(input)
+    .split('-')
+    .filter(t => t && !STOP.has(t));
+}
+
+function computeSlugSimilarity(a: string, b: string): number {
+  const ta = new Set(tokenizeSlug(a));
+  const tb = new Set(tokenizeSlug(b));
+  if (ta.size === 0 || tb.size === 0) return 0;
+
+  let intersection = 0;
+  for (const t of ta) {
+    if (tb.has(t)) intersection++;
+  }
+
+  const union = new Set([...ta, ...tb]).size;
+  return union > 0 ? intersection / union : 0;
+}
+
+function parsePadelZoomScores(html: string): RadarValues | null {
+  const toNumber = (raw: string): number | null => {
+    const value = parseFloat(String(raw).replace(',', '.'));
+    if (Number.isNaN(value)) return null;
+    return Math.max(0, Math.min(10, Math.round(value * 10) / 10));
+  };
+
+  const metricsMap = new Map<string, number>();
+  const blockRegex = /<div class="type-puntuacion">[\s\S]*?<span>([^<]+)<\/span>[\s\S]*?<div class="value-puntuacion">[\s\S]*?<span>([0-9]+(?:[.,][0-9]+)?)<\/span>/gi;
+  let blockMatch: RegExpExecArray | null;
+  while ((blockMatch = blockRegex.exec(html)) !== null) {
+    const key = normalizeText(blockMatch[1] || '');
+    const val = toNumber(blockMatch[2] || '');
+    if (key && val !== null) metricsMap.set(key, val);
+  }
+
+  const inlineRegex = /(Potencia|Control|Salida\s+de\s+bola|Manejabilidad|Punto\s+dulce)\s*:\s*([0-9]+(?:[.,][0-9]+)?)/gi;
+  let inlineMatch: RegExpExecArray | null;
+  while ((inlineMatch = inlineRegex.exec(html)) !== null) {
+    const key = normalizeText(inlineMatch[1] || '');
+    const val = toNumber(inlineMatch[2] || '');
+    if (key && val !== null && !metricsMap.has(key)) metricsMap.set(key, val);
+  }
+
+  const potencia = metricsMap.get('potencia') ?? null;
+  const control = metricsMap.get('control') ?? null;
+  const salida = metricsMap.get('salida de bola') ?? null;
+  const manejabilidad = metricsMap.get('manejabilidad') ?? null;
+  const puntoDulce = metricsMap.get('punto dulce') ?? null;
+
+  if (
+    potencia === null ||
+    control === null ||
+    salida === null ||
+    manejabilidad === null ||
+    puntoDulce === null
+  ) {
+    return null;
+  }
+
+  return {
+    radar_potencia: potencia,
+    radar_control: control,
+    radar_manejabilidad: manejabilidad,
+    radar_punto_dulce: puntoDulce,
+    radar_salida_bola: salida,
+  };
+}
+
+async function fetchPadelZoomSitemapUrls(): Promise<string[]> {
+  const SITEMAP_URL = 'https://padelzoom.es/pala-sitemap.xml';
+  const response = await axios.get(SITEMAP_URL, {
+    timeout: 20000,
+    headers: {
+      'User-Agent': 'SmashlyBot/1.0 (+https://smashly.app)'
+    },
+  });
+
+  const xml = String(response.data || '');
+  const locMatches = [...xml.matchAll(/<loc>([^<]+)<\/loc>/gi)];
+  return locMatches
+    .map(m => (m[1] || '').trim())
+    .filter(u => u.startsWith('https://padelzoom.es/'));
+}
+
+function buildExternalMatches(rackets: any[], urls: string[]): Map<number, { url: string; confidence: number }> {
+  const bySlug = new Map<string, string>();
+  const slugList: string[] = [];
+
+  for (const url of urls) {
+    const slug = url.replace(/^https?:\/\/[^/]+\//i, '').replace(/\/$/, '');
+    if (!slug) continue;
+    bySlug.set(slug, url);
+    slugList.push(slug);
+  }
+
+  const result = new Map<number, { url: string; confidence: number }>();
+
+  for (const racket of rackets) {
+    const model = String(racket.model || racket.name || '').trim();
+    if (!model) continue;
+
+    const brand = String(racket.brand || '').trim();
+    const modelSlug = slugify(model);
+    const brandSlug = slugify(brand);
+    const prefixedModelSlug = brandSlug && !modelSlug.startsWith(`${brandSlug}-`)
+      ? `${brandSlug}-${modelSlug}`
+      : modelSlug;
+
+    const direct = bySlug.get(modelSlug) || bySlug.get(prefixedModelSlug);
+    if (direct) {
+      result.set(racket.id, { url: direct, confidence: 1 });
+      continue;
+    }
+
+    let bestSlug = '';
+    let bestScore = 0;
+
+    for (const candidateSlug of slugList) {
+      if (brandSlug && !candidateSlug.includes(brandSlug)) continue;
+
+      const score = computeSlugSimilarity(prefixedModelSlug, candidateSlug);
+      if (score > bestScore) {
+        bestScore = score;
+        bestSlug = candidateSlug;
+      }
+    }
+
+    if (bestSlug && bestScore >= 0.6) {
+      result.set(racket.id, {
+        url: bySlug.get(bestSlug) as string,
+        confidence: Math.round(bestScore * 100) / 100,
+      });
+    }
+  }
+
+  return result;
+}
+
+async function loadExternalScores(rackets: any[]): Promise<Map<number, ExternalRadarMatch>> {
+  const output = new Map<number, ExternalRadarMatch>();
+
+  const enabled = (process.env.USE_EXTERNAL_RADAR_SCORES || 'true').toLowerCase() !== 'false';
+  if (!enabled) {
+    console.log('ℹ️  USE_EXTERNAL_RADAR_SCORES=false -> se omite fuente externa.');
+    return output;
+  }
+
+  console.log('🌐 Cargando posibles puntuaciones reales desde PadelZoom...');
+
+  let sitemapUrls: string[] = [];
+  try {
+    sitemapUrls = await fetchPadelZoomSitemapUrls();
+  } catch (error: any) {
+    console.warn(`⚠️  No se pudo leer sitemap de PadelZoom: ${error?.message || error}`);
+    return output;
+  }
+
+  if (sitemapUrls.length === 0) {
+    console.warn('⚠️  Sitemap de PadelZoom sin URLs.');
+    return output;
+  }
+
+  const candidates = buildExternalMatches(rackets, sitemapUrls);
+  if (candidates.size === 0) {
+    console.warn('⚠️  No se encontraron candidatos de matching con PadelZoom.');
+    return output;
+  }
+
+  console.log(`🔎 Candidatos encontrados: ${candidates.size}/${rackets.length}`);
+
+  const cache = new Map<string, RadarValues | null>();
+  const MIN_CONF = parseFloat(process.env.PADELZOOM_MIN_CONFIDENCE || '0.6');
+  const DELAY_MS = Number(process.env.PADELZOOM_REQUEST_DELAY_MS || '350');
+
+  let done = 0;
+  for (const racket of rackets) {
+    const candidate = candidates.get(racket.id);
+    if (!candidate || candidate.confidence < MIN_CONF) continue;
+
+    let scores = cache.get(candidate.url);
+    if (scores === undefined) {
+      try {
+        const response = await axios.get(candidate.url, {
+          timeout: 20000,
+          headers: {
+            'User-Agent': 'SmashlyBot/1.0 (+https://smashly.app)'
+          },
+        });
+        scores = parsePadelZoomScores(String(response.data || ''));
+      } catch {
+        scores = null;
+      }
+
+      cache.set(candidate.url, scores);
+
+      if (DELAY_MS > 0) {
+        await new Promise(resolve => setTimeout(resolve, DELAY_MS));
+      }
+    }
+
+    if (scores) {
+      output.set(racket.id, {
+        values: scores,
+        sourceUrl: candidate.url,
+        confidence: candidate.confidence,
+      });
+    }
+
+    done++;
+    if (done % 50 === 0) {
+      process.stdout.write(`\r  🌐 PadelZoom procesado: ${done}/${candidates.size}`);
+    }
+  }
+
+  if (done >= 50) console.log('');
+  console.log(`✅ Puntuaciones reales válidas: ${output.size}`);
+
+  return output;
+}
+
 // ──────────────────────────────────────────────
 // Ejecución principal
 // ──────────────────────────────────────────────
@@ -171,8 +430,11 @@ async function main() {
   console.log('║   Smashly – Populate Radar Metrics       ║');
   console.log('╚══════════════════════════════════════════╝\n');
 
-  // 1. Obtener TODAS las palas paginando (Supabase limita a 1000 por query)
-  console.log('⏳ Obteniendo palas de la base de datos...');
+  // 1. Obtener SOLO palas SIN métricas radar (columnas NULL)
+  // Esto permite que:
+  //   - Datos del scraper (sync_radar_metrics.py) NO se sobrescriban
+  //   - Algoritmo determinista SOLO actúe como fallback
+  console.log('⏳ Obteniendo palas sin métricas radar (fallback)...');
   const PAGE_SIZE = 1000;
   const allRackets: any[] = [];
   let page = 0;
@@ -180,7 +442,10 @@ async function main() {
   while (true) {
     const { data, error } = await supabase
       .from('rackets')
-      .select('id, name, model, characteristics_shape, characteristics_balance, characteristics_hardness, specs')
+      .select('id, name, model, brand, characteristics_shape, characteristics_balance, characteristics_hardness, specs, radar_potencia, radar_control')
+      .or(
+        'radar_potencia.is.null,radar_control.is.null,radar_manejabilidad.is.null,radar_salida_bola.is.null,radar_punto_dulce.is.null'
+      )
       .order('id', { ascending: true })
       .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
 
@@ -204,7 +469,10 @@ async function main() {
 
   console.log(`✅ ${rackets.length} palas encontradas.\n`);
 
-  // 2. Calcular métricas para cada pala
+  // 2. Intentar cargar fuente real (PadelZoom) para sustituir heurística cuando exista
+  const externalScores = await loadExternalScores(rackets);
+
+  // 3. Calcular/actualizar métricas para cada pala
   let processed = 0;
   let errors = 0;
 
@@ -213,6 +481,8 @@ async function main() {
     potencia: [] as number[],
     control: [] as number[],
     manejabilidad: [] as number[],
+    usedExternalSource: 0,
+    usedHeuristicSource: 0,
     usedSpecsFallback: 0,   // palas que usaron specs JSONB porque no tenían columnas dedicadas
     usedDedicatedCols: 0,   // palas con columnas characteristics_* rellenas
   };
@@ -224,10 +494,14 @@ async function main() {
     // Calcular valores y lanzar un UPDATE individual por pala en paralelo
     const results = await Promise.all(
       batch.map(async (racket: any) => {
-        const values = calculateRadarValues(racket);
+        const external = externalScores.get(racket.id);
+        const values = external?.values || calculateRadarValues(racket);
         stats.potencia.push(values.radar_potencia);
         stats.control.push(values.radar_control);
         stats.manejabilidad.push(values.radar_manejabilidad);
+
+        if (external) stats.usedExternalSource++;
+        else stats.usedHeuristicSource++;
 
         // Contabilizar fuente de datos usada
         if (racket.characteristics_shape && String(racket.characteristics_shape).trim() !== '') {
@@ -274,6 +548,13 @@ async function main() {
   console.log('═══════════════════════ RESUMEN ═══════════════════════');
   console.log(`  ✅ Palas actualizadas    : ${processed}`);
   console.log(`  ❌ Errores               : ${errors}`);
+  console.log('');
+  console.log('  📝 NOTA: Este script SOLO actualiza palas sin métricas.');
+  console.log('     Palas con valores existentes (del scraper) NO se tocan.');
+  console.log('');
+  console.log('  Fuente de valores radar:');
+  console.log(`  Puntuación real externa   : ${stats.usedExternalSource} palas (PadelZoom fallback)`);
+  console.log(`  Cálculo heurístico        : ${stats.usedHeuristicSource} palas (algoritmo determinista)`);
   console.log('');
   console.log('  Fuente de características:');
   console.log(`  Columnas dedicadas       : ${stats.usedDedicatedCols} palas`);
