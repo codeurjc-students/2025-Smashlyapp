@@ -1124,6 +1124,11 @@ const RacketDetailPage: React.FC = () => {
   const carouselRef = useRef<HTMLDivElement>(null);
   const racketId = searchParams.get('id');
 
+  const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
+    const target = e.target as HTMLImageElement;
+    target.src = '/placeholder-racket.svg';
+  };
+
   // Obtener estadísticas de reviews
   const { stats: reviewStats, loading: reviewStatsLoading } = useReviewStats(racket?.id);
 
@@ -1265,6 +1270,7 @@ const RacketDetailPage: React.FC = () => {
               '/placeholder-racket.svg'
             }
             alt={racket.modelo}
+            onError={handleImageError}
             onClick={() => setShowLightbox(true)}
             loading='eager'
           />
@@ -1295,6 +1301,7 @@ const RacketDetailPage: React.FC = () => {
                         alt={`${racket.modelo} - imagen ${index + 1}`}
                         $isActive={index === selectedImageIndex}
                         onClick={() => setSelectedImageIndex(index)}
+                        onError={handleImageError}
                         loading='lazy'
                       />
                     ))}

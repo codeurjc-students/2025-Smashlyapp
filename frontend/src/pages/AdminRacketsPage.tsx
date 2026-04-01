@@ -244,9 +244,19 @@ const RacketDetails = styled.div`
   margin-top: 0.25rem;
 `;
 
-const Price = styled.span<{ sale?: boolean }>`
-  font-weight: 600;
-  color: ${props => (props.sale ? '#16a34a' : '#374151')};
+interface PriceProps {
+  sale?: boolean;
+  isBest?: boolean;
+}
+
+const Price = styled.span<PriceProps>`
+  font-weight: ${props => (props.isBest ? '700' : '600')};
+  color: ${props => (props.isBest ? '#10b981' : props.sale ? '#ef4444' : '#374151')};
+  font-size: ${props => (props.isBest ? '1rem' : '0.875rem')};
+  background: ${props => (props.isBest ? '#f0fdf4' : 'transparent')};
+  padding: ${props => (props.isBest ? '2px 6px' : '0')};
+  border-radius: ${props => (props.isBest ? '4px' : '0')};
+  border: ${props => (props.isBest ? '1px solid #bbf7d0' : 'none')};
 `;
 
 const Badge = styled.span<{ variant: 'success' | 'warning' | 'default' }>`
@@ -650,7 +660,10 @@ const AdminRacketsPage: React.FC = () => {
               <tr>
                 <Th>Pala</Th>
                 <Th>Marca</Th>
-                <Th>Precio</Th>
+                <Th>PadelNuestro</Th>
+                <Th>PadelMarket</Th>
+                <Th>PadelProShop</Th>
+                <Th>Precio Actual</Th>
                 <Th>Estado</Th>
                 <Th>Acciones</Th>
               </tr>
@@ -658,7 +671,7 @@ const AdminRacketsPage: React.FC = () => {
             <tbody>
               {filteredRackets.length === 0 ? (
                 <tr>
-                  <Td colSpan={5}>
+                  <Td colSpan={8}>
                     <EmptyState>
                       {searchQuery ? 'No se encontraron palas' : 'No hay palas disponibles'}
                     </EmptyState>
@@ -673,7 +686,7 @@ const AdminRacketsPage: React.FC = () => {
                           <RacketImage src={racket.imagenes[0]} alt={racket.modelo || 'Pala'} />
                         ) : (
                           <RacketImage
-                            src='data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" fill="%23d1d5db" viewBox="0 0 24 24"%3E%3Cpath d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/%3E%3C/svg%3E'
+                            src='/placeholder-racket.svg'
                             alt='Sin imagen'
                           />
                         )}
@@ -691,6 +704,33 @@ const AdminRacketsPage: React.FC = () => {
                       {racket.padelnuestro_precio_actual != null ? (
                         <Price sale={racket.en_oferta}>
                           {Number(racket.padelnuestro_precio_actual).toFixed(2)}€
+                        </Price>
+                      ) : (
+                        '-'
+                      )}
+                    </Td>
+                    <Td>
+                      {racket.padelmarket_precio_actual != null ? (
+                        <Price sale={racket.en_oferta}>
+                          {Number(racket.padelmarket_precio_actual).toFixed(2)}€
+                        </Price>
+                      ) : (
+                        '-'
+                      )}
+                    </Td>
+                    <Td>
+                      {racket.padelproshop_precio_actual != null ? (
+                        <Price sale={racket.en_oferta}>
+                          {Number(racket.padelproshop_precio_actual).toFixed(2)}€
+                        </Price>
+                      ) : (
+                        '-'
+                      )}
+                    </Td>
+                    <Td>
+                      {racket.precio_actual != null ? (
+                        <Price sale={racket.en_oferta} isBest={true}>
+                          {Number(racket.precio_actual).toFixed(2)}€
                         </Price>
                       ) : (
                         '-'
