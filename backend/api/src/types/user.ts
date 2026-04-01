@@ -5,6 +5,7 @@ export interface UserProfile {
   nickname: string;
   full_name?: string;
   avatar_url?: string;
+  role?: string; // rol del usuario (player, admin, etc)
   weight?: number; // peso en la base de datos
   height?: number; // altura en la base de datos
   birthdate?: string; // fecha_nacimiento en la base de datos
