@@ -13,6 +13,7 @@ import { AuthModalProvider } from './contexts/AuthModalContext';
 import { NotificationProvider } from './contexts/NotificationContext';
 import AuthModal from './components/auth/AuthModal';
 import { RouteLoadingFallback, CatalogSkeleton } from './components/common/LoadingFallbacks';
+import { PWAInstallPrompt } from './components/pwa/PWAInstallPrompt';
 
 // Code split routes - load on demand
 const HomePage = lazy(() => import('./pages/HomePage'));
@@ -56,6 +57,7 @@ export default function App() {
                   <AuthModalProvider>
                     <ScrollToTop />
                     <AuthModal />
+                    <PWAInstallPrompt />
                     <Layout>
                       <FloatingCompareButton />
                       <Routes>

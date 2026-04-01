@@ -14,10 +14,10 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['robots.txt', 'images/icons/smashly-icon.png'],
       manifest: {
-        name: 'Smashly - Paddle Racket Guide',
+        name: 'Smashly',
         short_name: 'Smashly',
         description:
-          'Find your perfect paddle racket. Compare specs, prices, and reviews from all major brands.',
+          'Encuentra tu pala de pádel perfecta. Compara especificaciones, precios y reseñas de todas las principales marcas.',
         start_url: '/',
         scope: '/',
         display: 'standalone',
