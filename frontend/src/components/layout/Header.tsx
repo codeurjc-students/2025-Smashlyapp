@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FiMenu, FiSearch, FiX, FiUser, FiLogOut } from 'react-icons/fi';
+import { FiMenu, FiSearch, FiX, FiUser, FiLogOut, FiHome, FiGrid, FiBarChart2, FiHelpCircle, FiLogIn, FiUserPlus } from 'react-icons/fi';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthModal } from '../../contexts/AuthModalContext';
 import GlobalSearch from '../features/GlobalSearch';
@@ -122,34 +123,33 @@ const MobileSearchButton = styled.button`
 `;
 
 // Mobile Menu Dropdown
-const MobileMenuDropdown = styled.div<{ $isOpen: boolean }>`
+// Mobile Menu Dropdown with Glassmorphism
+const MobileMenuDropdown = styled(motion.div)<{ $isOpen: boolean }>`
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  background: white;
-  border-radius: 0 0 16px 16px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-  transform: translateY(${props => (props.$isOpen ? '0' : '-10px')});
-  opacity: ${props => (props.$isOpen ? '1' : '0')};
-  visibility: ${props => (props.$isOpen ? 'visible' : 'hidden')};
-  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 0 0 24px 24px;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
   z-index: 100;
   overflow: hidden;
-  max-height: min(76vh, 640px);
+  max-height: min(85vh, 720px);
   overflow-y: auto;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-top: none;
 `;
 
 // Mobile Search Container
 const MobileSearchContainer = styled.div<{ $isOpen: boolean }>`
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
-  transform: translateY(${props => (props.$isOpen ? '0' : '-10px')});
-  opacity: ${props => (props.$isOpen ? '1' : '0')};
-  transition: all 0.3s ease 0.1s;
+  padding: 1.25rem 1rem;
+  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  transition: all 0.3s ease;
   overflow: visible;
   position: relative;
-  z-index: 100;
+  z-index: 101;
 
   @media (min-width: 1025px) {
     display: none;
@@ -157,44 +157,65 @@ const MobileSearchContainer = styled.div<{ $isOpen: boolean }>`
 `;
 
 // Navigation Section in Mobile Menu
-const MobileNavSection = styled.div`
-  padding: 1rem;
-  border-bottom: 1px solid #e5e7eb;
+const MobileNavSection = styled(motion.div)`
+  padding: 1.25rem 1rem;
+  
+  &:not(:last-child) {
+    border-bottom: 1px solid rgba(229, 231, 235, 0.5);
+  }
 `;
 
 const MobileNavTitle = styled.h4`
-  font-size: 0.875rem;
-  font-weight: 600;
-  color: #6b7280;
-  margin: 0 0 0.75rem 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #9ca3af;
+  margin: 0 0 1rem 0.5rem;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 1.2px;
 `;
 
 const NavLink = styled(Link)<{ $isActive: boolean; $isMobile?: boolean }>`
   color: ${props => (props.$isMobile ? '#374151' : 'white')};
   text-decoration: none;
-  font-weight: 500;
-  padding: ${props => (props.$isMobile ? '12px 0' : '8px 16px')};
-  border-radius: ${props => (props.$isMobile ? '0' : '8px')};
-  transition: all 0.2s ease;
+  font-weight: 600;
+  padding: ${props => (props.$isMobile ? '12px 16px' : '8px 16px')};
+  border-radius: ${props => (props.$isMobile ? '12px' : '8px')};
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   background: ${props =>
     props.$isActive && !props.$isMobile ? 'rgba(255, 255, 255, 0.15)' : 'transparent'};
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   position: relative;
   border: ${props => (props.$isMobile ? 'none' : '1px solid rgba(255, 255, 255, 0.3)')};
+  margin-bottom: ${props => (props.$isMobile ? '4px' : '0')};
 
   ${props =>
     props.$isMobile &&
     `
-    border-left: 3px solid ${props.$isActive ? '#16a34a' : 'transparent'};
-    padding-left: 16px;
+    background: ${props.$isActive ? 'rgba(22, 163, 74, 0.08)' : 'transparent'};
+    color: ${props.$isActive ? '#16a34a' : '#374151'};
+    
+    svg {
+      color: ${props.$isActive ? '#16a34a' : '#6b7280'};
+      font-size: 1.25rem;
+      transition: color 0.2s ease;
+    }
   `}
 
   &:hover {
     background: ${props => (props.$isMobile ? '#f9fafb' : 'rgba(255, 255, 255, 0.1)')};
     color: ${props => (props.$isMobile ? '#16a34a' : 'white')};
     text-decoration: none;
+    transform: ${props => (props.$isMobile ? 'translateX(4px)' : 'none')};
+    
+    svg {
+      color: #16a34a;
+    }
+  }
+
+  &:active {
+    transform: scale(0.98) ${props => (props.$isMobile ? 'translateX(4px)' : 'none')};
   }
 `;
 
@@ -241,33 +262,39 @@ const AuthButton = styled.button<{
   $variant?: 'primary' | 'secondary';
   $isMobile?: boolean;
 }>`
-  padding: ${props => (props.$isMobile ? '12px 16px' : '8px 20px')};
-  border-radius: ${props => (props.$isMobile ? '12px' : '8px')};
-  font-weight: 500;
+  padding: ${props => (props.$isMobile ? '14px 16px' : '8px 20px')};
+  border-radius: ${props => (props.$isMobile ? '14px' : '8px')};
+  font-weight: 600;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.3);
-  font-size: 1rem; // Ensure font size consistency
-  font-family: inherit; // Inherit font
+  font-size: 1rem;
+  font-family: inherit;
+  width: ${props => (props.$isMobile ? '100%' : 'auto')};
 
   ${props => {
     if (props.$isMobile) {
       return props.$variant === 'primary'
         ? `
-        background: #16a34a;
+        background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
         color: white;
+        border: none;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.2);
         
         &:hover {
-          background: #15803d;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(22, 163, 74, 0.3);
           color: white;
-          text-decoration: none;
         }
       `
         : `
-        background: transparent;
+        background: white;
         color: #374151;
         border: 2px solid #e5e7eb;
         
@@ -275,7 +302,6 @@ const AuthButton = styled.button<{
           background: #f9fafb;
           border-color: #16a34a;
           color: #16a34a;
-          text-decoration: none;
         }
       `;
     } else {
@@ -287,7 +313,6 @@ const AuthButton = styled.button<{
         &:hover {
           background: #f0f0f0;
           color: #15803d;
-          text-decoration: none;
         }
       `
         : `
@@ -297,25 +322,30 @@ const AuthButton = styled.button<{
         
         &:hover {
           background: rgba(255, 255, 255, 0.1);
-          color: white;
-          text-decoration: none;
         }
       `;
     }
   }}
+
+  &:active {
+    transform: scale(0.98);
+  }
 `;
 
 const LogoutButton = styled.button<{
   $variant?: 'primary' | 'secondary';
   $isMobile?: boolean;
 }>`
-  padding: ${props => (props.$isMobile ? '12px 16px' : '8px 20px')};
-  border-radius: ${props => (props.$isMobile ? '12px' : '8px')};
-  font-weight: 500;
+  padding: ${props => (props.$isMobile ? '14px 16px' : '8px 20px')};
+  border-radius: ${props => (props.$isMobile ? '14px' : '8px')};
+  font-weight: 600;
   text-decoration: none;
-  transition: all 0.2s ease;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   text-align: center;
-  display: block;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   border: 1px solid rgba(255, 255, 255, 0.3);
   background: transparent;
@@ -330,9 +360,10 @@ const LogoutButton = styled.button<{
   ${props =>
     props.$isMobile &&
     `
-    background: transparent;
+    background: white;
     color: #374151;
     border: 2px solid #e5e7eb;
+    width: 100%;
     
     &:hover {
       background: #f9fafb;
@@ -341,6 +372,10 @@ const LogoutButton = styled.button<{
       text-decoration: none;
     }
   `}
+
+  &:active {
+    transform: scale(0.98);
+  }
 `;
 
 // User Avatar Menu Styles
@@ -554,102 +589,144 @@ const Header: React.FC = () => {
         </MobileElements>
 
         {/* Mobile Menu Dropdown */}
-        <MobileMenuDropdown $isOpen={isMenuOpen || isMobileSearchOpen}>
-          {/* Mobile Search Section */}
-          <MobileSearchContainer $isOpen={isMobileSearchOpen}>
-            <GlobalSearch
-              onSearchToggle={setIsMobileSearchOpen}
-              isInHeader={true}
-              isMobileContext={true}
-            />
-          </MobileSearchContainer>
+        <AnimatePresence>
+          {(isMenuOpen || isMobileSearchOpen) && (
+            <MobileMenuDropdown
+              $isOpen={true}
+              initial={{ opacity: 0, y: -20, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -20, height: 0 }}
+              transition={{ duration: 0.3, ease: 'easeInOut' }}
+            >
+              {/* Mobile Search Section */}
+              <MobileSearchContainer $isOpen={isMobileSearchOpen}>
+                <GlobalSearch
+                  onSearchToggle={setIsMobileSearchOpen}
+                  isInHeader={true}
+                  isMobileContext={true}
+                />
+              </MobileSearchContainer>
 
-          {/* Navigation Section */}
-          {isMenuOpen && (
-            <>
-              <MobileNavSection>
-                <MobileNavTitle>Navegación</MobileNavTitle>
-                <NavLink to='/' $isActive={isActive('/')} $isMobile onClick={closeAllMenus}>
-                  Inicio
-                </NavLink>
-                <NavLink
-                  to='/catalog'
-                  $isActive={isActive('/catalog')}
-                  $isMobile
-                  onClick={closeAllMenus}
+              {/* Navigation Section */}
+              {isMenuOpen && (
+                <motion.div
+                  initial='hidden'
+                  animate='visible'
+                  variants={{
+                    hidden: { opacity: 0 },
+                    visible: {
+                      opacity: 1,
+                      transition: {
+                        staggerChildren: 0.05,
+                      },
+                    },
+                  }}
                 >
-                  Catálogo de Palas
-                </NavLink>
-                <NavLink
-                  to='/compare'
-                  $isActive={isActive('/compare')}
-                  $isMobile
-                  onClick={closeAllMenus}
-                >
-                  Comparar palas
-                </NavLink>
-                <NavLink to='/faq' $isActive={isActive('/faq')} $isMobile onClick={closeAllMenus}>
-                  FAQ
-                </NavLink>
-              </MobileNavSection>
-
-              {/* Auth Section for Mobile */}
-              <MobileNavSection>
-                <MobileNavTitle>Cuenta</MobileNavTitle>
-                {userProfile ? (
-                  <>
+                  <MobileNavSection
+                    variants={{
+                      hidden: { opacity: 0, x: -10 },
+                      visible: { opacity: 1, x: 0 },
+                    }}
+                  >
+                    <MobileNavTitle>Navegación</MobileNavTitle>
+                    <NavLink to='/' $isActive={isActive('/')} $isMobile onClick={closeAllMenus}>
+                      <FiHome />
+                      Inicio
+                    </NavLink>
                     <NavLink
-                      to='/profile'
-                      $isActive={isActive('/profile')}
+                      to='/catalog'
+                      $isActive={isActive('/catalog')}
                       $isMobile
                       onClick={closeAllMenus}
                     >
-                      <FiUser style={{ marginRight: '8px' }} />
-                      Mi cuenta
+                      <FiGrid />
+                      Catálogo de Palas
                     </NavLink>
-                    <LogoutButton
-                      $variant='secondary'
+                    <NavLink
+                      to='/compare'
+                      $isActive={isActive('/compare')}
                       $isMobile
-                      onClick={async () => {
-                        await signOut();
-                        closeAllMenus();
-                        navigate('/');
-                      }}
-                      style={{ cursor: 'pointer', marginTop: '0.5rem' }}
+                      onClick={closeAllMenus}
                     >
-                      <FiLogOut style={{ marginRight: '8px' }} />
-                      Cerrar sesión
-                    </LogoutButton>
-                  </>
-                ) : (
-                  <>
-                    <AuthButton
-                      $variant='secondary'
+                      <FiBarChart2 />
+                      Comparar palas
+                    </NavLink>
+                    <NavLink
+                      to='/faq'
+                      $isActive={isActive('/faq')}
                       $isMobile
-                      onClick={() => {
-                        closeAllMenus();
-                        openLogin();
-                      }}
+                      onClick={closeAllMenus}
                     >
-                      Iniciar sesión
-                    </AuthButton>
-                    <AuthButton
-                      $variant='primary'
-                      $isMobile
-                      onClick={() => {
-                        closeAllMenus();
-                        openRegister();
-                      }}
-                      style={{ marginTop: '0.5rem' }}
-                    >
-                      Registrarse
-                    </AuthButton>
-                  </>
-                )}
-              </MobileNavSection>
-            </>
+                      <FiHelpCircle />
+                      FAQ
+                    </NavLink>
+                  </MobileNavSection>
+
+                  {/* Auth Section for Mobile */}
+                  <MobileNavSection
+                    variants={{
+                      hidden: { opacity: 0, x: -10 },
+                      visible: { opacity: 1, x: 0 },
+                    }}
+                  >
+                    <MobileNavTitle>Cuenta</MobileNavTitle>
+                    {userProfile ? (
+                      <>
+                        <NavLink
+                          to='/profile'
+                          $isActive={isActive('/profile')}
+                          $isMobile
+                          onClick={closeAllMenus}
+                        >
+                          <FiUser />
+                          Mi cuenta
+                        </NavLink>
+                        <LogoutButton
+                          $variant='secondary'
+                          $isMobile
+                          onClick={async () => {
+                            await signOut();
+                            closeAllMenus();
+                            navigate('/');
+                          }}
+                          style={{ cursor: 'pointer', marginTop: '0.75rem', width: '100%' }}
+                        >
+                          <FiLogOut style={{ marginRight: '8px' }} />
+                          Cerrar sesión
+                        </LogoutButton>
+                      </>
+                    ) : (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                        <AuthButton
+                          $variant='secondary'
+                          $isMobile
+                          onClick={() => {
+                            closeAllMenus();
+                            openLogin();
+                          }}
+                        >
+                          <FiLogIn />
+                          Iniciar sesión
+                        </AuthButton>
+                        <AuthButton
+                          $variant='primary'
+                          $isMobile
+                          onClick={() => {
+                            closeAllMenus();
+                            openRegister();
+                          }}
+                        >
+                          <FiUserPlus />
+                          Registrarse
+                        </AuthButton>
+                      </div>
+                    )}
+                  </MobileNavSection>
+                </motion.div>
+              )}
+            </MobileMenuDropdown>
           )}
-        </MobileMenuDropdown>
+        </AnimatePresence>
       </HeaderContent>
     </HeaderContainer>
   );
