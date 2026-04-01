@@ -346,5 +346,23 @@ Thumbs.db
 .venv
 .agents
 
+# ===================================
+# MISC / DEBUG
+# ===================================
+# Debug output
+*.txt
+results.json
+full_racket*.json
+api_response.json
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Build artifacts
+frontend/dev-dist/
+
 .github/hooks/rtk-rewrite.json
 .github/copilot-instructions.md
