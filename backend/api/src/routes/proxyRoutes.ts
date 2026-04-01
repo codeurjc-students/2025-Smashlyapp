@@ -36,11 +36,15 @@ const ALLOWED_IMAGE_DOMAINS: string[] = [
   'cdn.padelmarket.com',
   'www.padelproshop.com',
   'padelproshop.com',
+  'www.padelproshop.es',
+  'padelproshop.es',
   'cdn.shopify.com',
+  'cdn.shopify.es',
   // Google CDN (for user avatars via Google OAuth)
   'lh3.googleusercontent.com',
   // Supabase storage
   'supabase.co',
+  'lrdgyfmkkboyhoycrnov.supabase.co',
 ];
 
 /**

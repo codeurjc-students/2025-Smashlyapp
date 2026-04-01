@@ -157,53 +157,95 @@ export function processRacketData(rawData: any[]): Racket[] {
 export function mapToFrontendFormat(racket: any): any {
   const normalizedSpecs = mapSpecsForFrontend(racket.specs);
 
+  // Función robusta para procesar imágenes que pueden estar mal formadas o anidadas
+  const parseImages = (imgs: any): string[] => {
+    if (!imgs) return [];
+    
+    // Si es un string, intentamos parsear como JSON
+    if (typeof imgs === 'string') {
+      try {
+        const parsed = JSON.parse(imgs);
+        return parseImages(parsed);
+      } catch {
+        // Si no es JSON válido pero empieza por http, es una URL directa
+        return imgs.startsWith('http') ? [imgs.trim()] : [];
+      }
+    }
+    
+    // Si es un array, procesamos cada elemento recursivamente
+    if (Array.isArray(imgs)) {
+      return imgs.flatMap(img => parseImages(img));
+    }
+    
+    return [];
+  };
+
+  // Procesar imágenes de la columna principal
+  let finalImages = parseImages(racket.images);
+  
+  // Si no hay imágenes en la columna principal, buscar en specs
+  if (finalImages.length === 0 && normalizedSpecs) {
+    const specImages = Object.entries(normalizedSpecs)
+      .filter(([key]) => key.toLowerCase().includes('image') || key.toLowerCase().includes('foto'))
+      .map(([_, value]) => value)
+      .filter(v => typeof v === 'string' && v.startsWith('http'));
+    
+    finalImages = [...specImages];
+  }
+
+  // Limpiar y deduplicar
+  finalImages = [...new Set(finalImages)]
+    .map(img => typeof img === 'string' ? img.trim() : '')
+    .filter(img => img.startsWith('http'))
+    .filter(img => !img.includes('placeholder'));
+
   return {
     id: racket.id,
     nombre: racket.name,
     marca: racket.brand,
     modelo: racket.model,
-    imagenes: typeof racket.images === 'string' ? JSON.parse(racket.images) : racket.images || [],
+    imagenes: finalImages,
     es_bestseller: false, // This field doesn't exist in current DB
     en_oferta: racket.on_offer,
     scrapeado_en: racket.created_at,
     descripcion: racket.description,
 
-    // Características individuales
-    caracteristicas_marca: racket.characteristics_brand,
-    caracteristicas_color: racket.characteristics_color,
+    // Características individuales con fallback a specs
+    caracteristicas_marca: racket.characteristics_brand || normalizedSpecs.marca || racket.brand,
+    caracteristicas_color: racket.characteristics_color || normalizedSpecs.color,
     caracteristicas_color_2: racket.characteristics_color_2,
-    caracteristicas_producto: racket.characteristics_product,
-    caracteristicas_balance: racket.characteristics_balance,
-    caracteristicas_nucleo: racket.characteristics_core,
-    caracteristicas_cara: racket.characteristics_face,
-    caracteristicas_formato: racket.characteristics_format,
-    caracteristicas_dureza: racket.characteristics_hardness,
-    caracteristicas_nivel_de_juego: racket.characteristics_game_level,
-    caracteristicas_acabado: racket.characteristics_finish,
-    caracteristicas_forma: racket.characteristics_shape,
-    caracteristicas_superficie: racket.characteristics_surface,
-    caracteristicas_tipo_de_juego: racket.characteristics_game_type,
+    caracteristicas_producto: racket.characteristics_product || normalizedSpecs.producto || 'Palas',
+    caracteristicas_balance: racket.characteristics_balance || normalizedSpecs.balance,
+    caracteristicas_nucleo: racket.characteristics_core || normalizedSpecs.nucleo,
+    caracteristicas_cara: racket.characteristics_face || normalizedSpecs.cara,
+    caracteristicas_formato: racket.characteristics_format || normalizedSpecs.formato || normalizedSpecs.forma,
+    caracteristicas_dureza: racket.characteristics_hardness || normalizedSpecs.dureza,
+    caracteristicas_nivel_de_juego: racket.characteristics_game_level || normalizedSpecs.nivel_de_juego,
+    caracteristicas_acabado: racket.characteristics_finish || normalizedSpecs.acabado || normalizedSpecs.rugosidad,
+    caracteristicas_forma: racket.characteristics_shape || normalizedSpecs.forma || normalizedSpecs.formato,
+    caracteristicas_superficie: racket.characteristics_surface || normalizedSpecs.superficie,
+    caracteristicas_tipo_de_juego: racket.characteristics_game_type || normalizedSpecs.tipo_de_juego,
     caracteristicas_coleccion_jugadores: racket.characteristics_player_collection,
-    caracteristicas_jugador: racket.characteristics_player,
+    caracteristicas_jugador: racket.characteristics_player || normalizedSpecs.jugador,
 
     // Especificaciones
     especificaciones: normalizedSpecs,
 
-    // Precios por tienda
-    padelnuestro_precio_actual: racket.padelnuestro_actual_price,
-    padelnuestro_precio_original: racket.padelnuestro_original_price,
-    padelnuestro_descuento_porcentaje: racket.padelnuestro_discount_percentage,
-    padelnuestro_enlace: racket.padelnuestro_link,
+    // Precios por tienda (asegurar mapeo correcto de nombres de columna)
+    padelnuestro_precio_actual: racket.padelnuestro_actual_price ?? racket.padelnuestro_precio_actual,
+    padelnuestro_precio_original: racket.padelnuestro_original_price ?? racket.padelnuestro_precio_original,
+    padelnuestro_descuento_porcentaje: racket.padelnuestro_discount_percentage ?? racket.padelnuestro_descuento_porcentaje,
+    padelnuestro_enlace: racket.padelnuestro_link ?? racket.padelnuestro_enlace,
 
-    padelmarket_precio_actual: racket.padelmarket_actual_price,
-    padelmarket_precio_original: racket.padelmarket_original_price,
-    padelmarket_descuento_porcentaje: racket.padelmarket_discount_percentage,
-    padelmarket_enlace: racket.padelmarket_link,
+    padelmarket_precio_actual: racket.padelmarket_actual_price ?? racket.padelmarket_precio_actual,
+    padelmarket_precio_original: racket.padelmarket_original_price ?? racket.padelmarket_precio_original,
+    padelmarket_descuento_porcentaje: racket.padelmarket_discount_percentage ?? racket.padelmarket_descuento_porcentaje,
+    padelmarket_enlace: racket.padelmarket_link ?? racket.padelmarket_enlace,
 
-    padelproshop_precio_actual: racket.padelproshop_actual_price,
-    padelproshop_precio_original: racket.padelproshop_original_price,
-    padelproshop_descuento_porcentaje: racket.padelproshop_discount_percentage,
-    padelproshop_enlace: racket.padelproshop_link,
+    padelproshop_precio_actual: racket.padelproshop_actual_price ?? racket.padelproshop_actual_price,
+    padelproshop_precio_original: racket.padelproshop_original_price ?? racket.padelproshop_original_price,
+    padelproshop_descuento_porcentaje: racket.padelproshop_discount_percentage ?? racket.padelproshop_discount_percentage,
+    padelproshop_enlace: racket.padelproshop_link ?? racket.padelproshop_link,
 
     created_at: racket.created_at,
     updated_at: racket.updated_at,
@@ -781,34 +823,94 @@ export class RacketService {
   }
 
   /**
-   * Realiza una actualización masiva de un campo para todas las palas que coincidan con un valor
+   * Realiza una actualización masiva de un campo para todas las palas que coincidan con un valor.
+   * Maneja tanto columnas planas como el campo JSONB 'specs' para asegurar consistencia.
    */
   static async bulkUpdateRackets(field: string, oldValue: any, newValue: any): Promise<number> {
-    const backendUpdates = mapToBackendFormat({ [field]: newValue });
-    const fieldNames = Object.keys(backendUpdates);
+    try {
+      // 1. Obtener todas las palas
+      const { data: allRackets, error: fetchError } = await supabase
+        .from('rackets')
+        .select('id, name, brand, characteristics_shape, characteristics_game_level, specs');
 
-    if (fieldNames.length === 0) {
-      throw new Error(`Campo no válido para actualización masiva: ${field}`);
+      if (fetchError) {
+        throw new Error(`Error al obtener palas para actualización: ${fetchError.message}`);
+      }
+
+      if (!allRackets || allRackets.length === 0) return 0;
+
+      // 2. Identificar qué palas coinciden con el filtro
+      const matchingRackets = allRackets.filter((racket: any) => {
+        const normalized = mapToFrontendFormat(racket);
+        // El campo 'field' que llega ya está en formato backend para el frontend (ej: 'caracteristicas_forma')
+        return normalized[field] === oldValue;
+      });
+
+      if (matchingRackets.length === 0) {
+        logger.info(`No se encontraron palas con ${field} = "${oldValue}" para actualizar.`);
+        return 0;
+      }
+
+      logger.info(`Iniciando actualización masiva de ${matchingRackets.length} palas...`);
+
+      // 3. Determinar qué campo plano y qué claves de specs actualizar
+      const backendUpdatesForNewValue = mapToBackendFormat({ [field]: newValue });
+      const flatFieldName = Object.keys(backendUpdatesForNewValue)[0];
+      
+      const specKeysToUpdate: string[] = [];
+      if (field === 'caracteristicas_forma') {
+        specKeysToUpdate.push('forma', 'shape', 'formato', 'format');
+      } else if (field === 'caracteristicas_nivel_de_juego') {
+        specKeysToUpdate.push('nivel', 'nivel de juego', 'game level');
+      } else if (field === 'marca') {
+        specKeysToUpdate.push('marca', 'brand');
+      }
+
+      // 4. Actualizar cada pala (en lotes pequeños para no saturar Supabase)
+      let updatedCount = 0;
+      const batchSize = 25;
+
+      for (let i = 0; i < matchingRackets.length; i += batchSize) {
+        const batch = matchingRackets.slice(i, i + batchSize);
+        
+        await Promise.all(batch.map(async (racket) => {
+          const currentSpecs = typeof racket.specs === 'string' ? JSON.parse(racket.specs) : (racket.specs || {});
+          const updatedSpecs = { ...currentSpecs };
+          
+          // Actualizar todas las posibles claves en specs que coincidan con oldValue
+          Object.keys(updatedSpecs).forEach(key => {
+            const normalizedKey = normalizeSpecKey(key);
+            if (specKeysToUpdate.includes(normalizedKey)) {
+              if (updatedSpecs[key] === oldValue) {
+                updatedSpecs[key] = newValue;
+              }
+            }
+          });
+
+          const updatePayload: any = {
+            [flatFieldName]: newValue,
+            specs: updatedSpecs,
+            updated_at: new Date().toISOString()
+          };
+
+          const { error: updateError } = await supabase
+            .from('rackets')
+            .update(updatePayload)
+            .eq('id', racket.id);
+
+          if (updateError) {
+            logger.error(`Error actualizando pala ${racket.id}:`, updateError);
+          } else {
+            updatedCount++;
+          }
+        }));
+      }
+
+      logger.info(`Actualización masiva completada: ${updatedCount} palas actualizadas.`);
+      return updatedCount;
+    } catch (error: unknown) {
+      logger.error('Error in bulkUpdateRackets:', error);
+      throw error;
     }
-
-    const fieldName = fieldNames[0];
-    const value = backendUpdates[fieldName];
-
-    // Para el filtro de búsqueda usamos el formato de backend del campo
-    const searchFilter = mapToBackendFormat({ [field]: oldValue });
-    const searchField = Object.keys(searchFilter)[0];
-
-    const { data, error } = await supabase
-      .from('rackets')
-      .update({ [fieldName]: value, updated_at: new Date().toISOString() })
-      .eq(searchField, oldValue)
-      .select('id');
-
-    if (error) {
-      logger.error(`Error in bulk update for field ${fieldName}:`, error);
-      throw new Error(`Error al realizar la actualización masiva: ${error.message}`);
-    }
-
-    return data?.length || 0;
   }
 }
