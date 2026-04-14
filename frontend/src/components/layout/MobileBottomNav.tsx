@@ -13,10 +13,19 @@ const NavShell = styled.nav`
   bottom: 0;
   z-index: 380;
   display: none;
-  background: rgba(255, 255, 255, 0.9);
+  background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-top: 1px solid #d9e8dc;
   box-shadow: 0 -12px 30px rgba(17, 24, 39, 0.08);
+  will-change: transform;
+  transform: translateZ(0);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: white;
+  }
   padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0));
 
   @media (max-width: 1024px) {

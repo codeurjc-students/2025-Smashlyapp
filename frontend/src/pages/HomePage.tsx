@@ -1,9 +1,10 @@
-import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
+import React, { useEffect } from 'react';
 import { FiDatabase, FiDollarSign, FiSearch, FiTarget, FiZap } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import AiBanner from '../components/features/AiBanner';
+import RotatingPhrases from '../components/features/RotatingPhrases';
 import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
@@ -48,7 +49,15 @@ const Badge = styled(motion.div)`
   font-size: clamp(0.75rem, 2vw, 14px);
   margin-bottom: clamp(16px, 4vw, 24px);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  will-change: transform, opacity;
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.2);
+  }
 `;
 
 const Title = styled(motion.h1)`
@@ -74,23 +83,6 @@ const TitleStaticBefore = styled.span`
 
   @media (max-width: 600px) {
     white-space: normal;
-  }
-`;
-
-const RotatingText = styled.span`
-  color: #fbbf24;
-  display: block;
-  text-align: center;
-  white-space: nowrap;
-
-  @media (max-width: 640px) {
-    font-size: 0.9em;
-    white-space: normal;
-    max-width: 90vw;
-  }
-
-  @media (max-width: 480px) {
-    font-size: 0.85em;
   }
 `;
 
@@ -316,14 +308,6 @@ const HomePage: React.FC = () => {
     'mejorar tu rendimiento en pista',
   ];
 
-  const [phraseIndex, setPhraseIndex] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => {
-      setPhraseIndex(prev => (prev + 1) % phrases.length);
-    }, 2500);
-    return () => clearInterval(id);
-  }, [phrases.length]);
   return (
     <Container>
       <HeroSection>
@@ -343,20 +327,7 @@ const HomePage: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
           >
             <TitleStaticBefore>La aplicacion que te permite</TitleStaticBefore>
-            <RotatingText aria-live='polite'>
-              <AnimatePresence mode='wait'>
-                <motion.span
-                  key={phrases[phraseIndex]}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.35 }}
-                  style={{ display: 'inline-block' }}
-                >
-                  {phrases[phraseIndex]}
-                </motion.span>
-              </AnimatePresence>
-            </RotatingText>
+            <RotatingPhrases phrases={phrases} />
           </Title>
 
           <Subtitle
@@ -392,10 +363,10 @@ const HomePage: React.FC = () => {
 
           <FeaturesGrid>
             <FeatureCard
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4 }}
+              viewport={{ once: true, amount: 0.2 }}
             >
               <FeatureIcon>
                 <FiTarget />
@@ -408,10 +379,10 @@ const HomePage: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
+              viewport={{ once: true, amount: 0.2 }}
             >
               <FeatureIcon>
                 <FiDatabase />
@@ -423,10 +394,10 @@ const HomePage: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              viewport={{ once: true, amount: 0.2 }}
             >
               <FeatureIcon>
                 <FiSearch />
@@ -439,10 +410,10 @@ const HomePage: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              viewport={{ once: true, amount: 0.3 }}
+              transition={{ duration: 0.4, delay: 0.3 }}
+              viewport={{ once: true, amount: 0.2 }}
             >
               <FeatureIcon>
                 <FiDollarSign />

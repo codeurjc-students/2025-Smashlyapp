@@ -21,6 +21,10 @@ export const GlobalStyles = createGlobalStyle`
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;
+    
+    @media (hover: none) and (pointer: coarse) {
+      scroll-behavior: auto; /* Smoother scrolling on mobile without behavioral conflicts */
+    }
   }
 
   body {
@@ -178,6 +182,13 @@ export const GlobalStyles = createGlobalStyle`
   }
 
   /* Utility classes */
+  .gpu-accelerated {
+    will-change: transform, opacity;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000px;
+  }
+
   .sr-only {
     position: absolute;
     width: 1px;

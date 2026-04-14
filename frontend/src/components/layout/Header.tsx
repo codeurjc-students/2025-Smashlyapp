@@ -12,10 +12,12 @@ const HeaderContainer = styled.header`
   background: linear-gradient(135deg, #169f4d 0%, #15743a 100%);
   padding: 0;
   box-shadow: 0 10px 32px rgba(21, 116, 58, 0.2);
+  position: sticky;
   top: 0;
   z-index: 350;
-  position: sticky;
   padding-top: env(safe-area-inset-top, 0);
+  will-change: transform;
+  transform: translateZ(0); /* Force layer decomposition for smoother scroll */
 `;
 
 const HeaderContent = styled.div`
@@ -132,6 +134,12 @@ const MobileMenuDropdown = styled(motion.div)`
   background: rgba(255, 255, 255, 0.98); /* Slightly more opaque for better performance during animation */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: white;
+  }
   border-radius: 0 0 24px 24px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
   z-index: 100;

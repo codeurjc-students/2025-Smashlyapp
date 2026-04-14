@@ -123,7 +123,15 @@ const CTAButton = styled(motion.button)<{ variant?: "primary" | "secondary" }>`
   align-items: center;
   gap: 0.5rem;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s ease;
+  will-change: transform, opacity;
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.3);
+  }
 
   &:hover {
     background: ${(props) =>
