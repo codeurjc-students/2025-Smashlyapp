@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState, useCallback, useMemo } from 'react';
 import { sileo } from 'sileo';
 import { Racket } from '../types/racket';
 
@@ -38,50 +38,53 @@ export const ComparisonProvider: React.FC<ComparisonProviderProps> = ({ children
   }, [rackets]);
 
   // Add racket to comparison
-  const addRacket = (racket: Racket): boolean => {
-    // Check if racket is already in comparison
-    if (rackets.some(r => r.nombre === racket.nombre)) {
-      sileo.error({ title: 'Error', description: 'Esta pala ya está en la comparación' });
-      return false; // Already exists
-    }
-
-    // Check if comparison is full (max 3 rackets)
-    if (rackets.length >= 3) {
-      sileo.error({ title: 'Error', description: 'Solo puedes comparar hasta 3 palas a la vez' });
-      return false; // Too many rackets
-    }
-
-    // Add racket
-    setRackets(prev => [...prev, racket]);
-    sileo.success({ title: 'Éxito', description: `${racket.nombre} añadida a la comparación` });
-    return true; // Success
-  };
+  const addRacket = useCallback((racket: Racket): boolean => {
+    let added = false;
+    setRackets(prev => {
+      if (prev.some(r => r.nombre === racket.nombre)) {
+        sileo.error({ title: 'Error', description: 'Esta pala ya está en la comparación' });
+        return prev;
+      }
+      if (prev.length >= 3) {
+        sileo.error({ title: 'Error', description: 'Solo puedes comparar hasta 3 palas a la vez' });
+        return prev;
+      }
+      added = true;
+      sileo.success({ title: 'Éxito', description: `${racket.nombre} añadida a la comparación` });
+      return [...prev, racket];
+    });
+    return added;
+  }, []);
 
   // Remove racket from comparison
-  const removeRacket = (racketName: string) => {
-    setRackets(prev => prev.filter(r => r.nombre !== racketName));
-    sileo.success({ title: 'Éxito', description: 'Pala eliminada de la comparación' });
-  };
+  const removeRacket = useCallback((racketName: string) => {
+    setRackets(prev => {
+      if (prev.some(r => r.nombre === racketName)) {
+        sileo.success({ title: 'Éxito', description: 'Pala eliminada de la comparación' });
+      }
+      return prev.filter(r => r.nombre !== racketName);
+    });
+  }, []);
 
   // Clear all rackets from comparison
-  const clearComparison = () => {
+  const clearComparison = useCallback(() => {
     setRackets([]);
     sileo.success({ title: 'Éxito', description: 'Comparación limpiada' });
-  };
+  }, []);
 
   // Check if racket is in comparison
-  const isRacketInComparison = (racketName: string): boolean => {
+  const isRacketInComparison = useCallback((racketName: string): boolean => {
     return rackets.some(r => r.nombre === racketName);
-  };
+  }, [rackets]);
 
-  const value: ComparisonContextType = {
+  const value = useMemo<ComparisonContextType>(() => ({
     rackets,
     count: rackets.length,
     addRacket,
     removeRacket,
     clearComparison,
     isRacketInComparison,
-  };
+  }), [rackets, addRacket, removeRacket, clearComparison, isRacketInComparison]);
 
   return <ComparisonContext.Provider value={value}>{children}</ComparisonContext.Provider>;
 };

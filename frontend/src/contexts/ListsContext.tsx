@@ -1,4 +1,4 @@
-import React, { createContext, ReactNode, useContext, useState } from 'react';
+import React, { createContext, ReactNode, useContext, useState, useCallback, useMemo } from 'react';
 import { sileo } from 'sileo';
 import { List, ListWithRackets, CreateListRequest } from '../types/list';
 import { ListService } from '../services/listService';
@@ -36,7 +36,7 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
   /**
    * Obtiene todas las listas del usuario
    */
-  const fetchLists = async () => {
+  const fetchLists = useCallback(async () => {
     try {
       setLoading(true);
       const userLists = await ListService.getUserLists();
@@ -47,12 +47,12 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   /**
    * Crea una nueva lista
    */
-  const createList = async (data: CreateListRequest): Promise<List | null> => {
+  const createList = useCallback(async (data: CreateListRequest): Promise<List | null> => {
     try {
       const newList = await ListService.createList(data);
       setLists(prev => [newList, ...prev]);
@@ -63,12 +63,12 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
       sileo.error({ title: 'Error', description: error.message || 'Error al crear la lista' });
       return null;
     }
-  };
+  }, []);
 
   /**
    * Actualiza una lista
    */
-  const updateList = async (listId: string, name: string, description?: string) => {
+  const updateList = useCallback(async (listId: string, name: string, description?: string) => {
     try {
       const updated = await ListService.updateList(listId, {
         name,
@@ -81,12 +81,12 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
       sileo.error({ title: 'Error', description: error.message || 'Error al actualizar la lista' });
       throw error;
     }
-  };
+  }, []);
 
   /**
    * Elimina una lista
    */
-  const deleteList = async (listId: string) => {
+  const deleteList = useCallback(async (listId: string) => {
     try {
       await ListService.deleteList(listId);
       setLists(prev => prev.filter(list => list.id !== listId));
@@ -96,12 +96,12 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
       sileo.error({ title: 'Error', description: error.message || 'Error al eliminar la lista' });
       throw error;
     }
-  };
+  }, []);
 
   /**
    * Obtiene una lista con sus palas
    */
-  const getListById = async (listId: string): Promise<ListWithRackets | null> => {
+  const getListById = useCallback(async (listId: string): Promise<ListWithRackets | null> => {
     try {
       return await ListService.getListById(listId);
     } catch (error: any) {
@@ -109,15 +109,14 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
       sileo.error({ title: 'Error', description: error.message || 'Error al obtener la lista' });
       return null;
     }
-  };
+  }, []);
 
   /**
    * Añade una pala a una lista
    */
-  const addRacketToList = async (listId: string, racketId: number) => {
+  const addRacketToList = useCallback(async (listId: string, racketId: number) => {
     try {
       await ListService.addRacketToList(listId, racketId);
-      // Actualizar el contador de palas en la lista
       setLists(prev =>
         prev.map(list =>
           list.id === listId ? { ...list, racket_count: (list.racket_count || 0) + 1 } : list
@@ -132,15 +131,14 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
   /**
    * Elimina una pala de una lista
    */
-  const removeRacketFromList = async (listId: string, racketId: number) => {
+  const removeRacketFromList = useCallback(async (listId: string, racketId: number) => {
     try {
       await ListService.removeRacketFromList(listId, racketId);
-      // Actualizar el contador de palas en la lista
       setLists(prev =>
         prev.map(list =>
           list.id === listId
@@ -160,9 +158,9 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
       });
       throw error;
     }
-  };
+  }, []);
 
-  const value: ListsContextType = {
+  const value = useMemo<ListsContextType>(() => ({
     lists,
     loading,
     fetchLists,
@@ -172,7 +170,7 @@ export const ListsProvider: React.FC<ListsProviderProps> = ({ children }) => {
     getListById,
     addRacketToList,
     removeRacketFromList,
-  };
+  }), [lists, loading, fetchLists, createList, updateList, deleteList, getListById, addRacketToList, removeRacketFromList]);
 
   return <ListsContext.Provider value={value}>{children}</ListsContext.Provider>;
 };

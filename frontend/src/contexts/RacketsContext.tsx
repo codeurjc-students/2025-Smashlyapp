@@ -4,6 +4,8 @@ import React, {
   useContext,
   useEffect,
   useState,
+  useCallback,
+  useMemo,
 } from "react";
 import { RacketService } from "../services/racketService";
 import { Racket } from "../types/racket";
@@ -42,12 +44,11 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchRackets = async (): Promise<void> => {
+  const fetchRackets = useCallback(async (): Promise<void> => {
     try {
       setLoading(true);
       setError(null);
 
-      // Cargar directamente desde la API REST
       const data = await RacketService.getAllRackets();
       setRackets(data);
       console.log(`Loaded ${data.length} rackets from API`);
@@ -57,23 +58,22 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const refreshRackets = async (): Promise<void> => {
+  const refreshRackets = useCallback(async (): Promise<void> => {
     await fetchRackets();
-  };
+  }, [fetchRackets]);
 
-  const getRacketById = (id: string | number): Racket | undefined => {
+  const getRacketById = useCallback((id: string | number): Racket | undefined => {
     const numericId = typeof id === "string" ? parseInt(id) : id;
     return rackets.find((racket) => racket.id === numericId);
-  };
+  }, [rackets]);
 
-  const getRacketsByCategory = (category: string): Racket[] => {
-    // Como no tenemos categoría en el JSON, filtraremos por marca
+  const getRacketsByCategory = useCallback((category: string): Racket[] => {
     return rackets.filter((racket) => racket.marca === category);
-  };
+  }, [rackets]);
 
-  const searchRackets = (query: string): Racket[] => {
+  const searchRackets = useCallback((query: string): Racket[] => {
     const lowerQuery = query.toLowerCase();
     return rackets.filter(
       (racket) =>
@@ -81,13 +81,13 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
         (racket.marca || '').toLowerCase().includes(lowerQuery) ||
         (racket.modelo || '').toLowerCase().includes(lowerQuery)
     );
-  };
+  }, [rackets]);
 
   useEffect(() => {
     fetchRackets();
-  }, []);
+  }, [fetchRackets]);
 
-  const value: RacketsContextType = {
+  const value = useMemo<RacketsContextType>(() => ({
     rackets,
     loading,
     error,
@@ -96,7 +96,7 @@ export const RacketsProvider: React.FC<RacketsProviderProps> = ({
     getRacketsByCategory,
     searchRackets,
     refreshRackets,
-  };
+  }), [rackets, loading, error, fetchRackets, getRacketById, getRacketsByCategory, searchRackets, refreshRackets]);
 
   return (
     <RacketsContext.Provider value={value}>{children}</RacketsContext.Provider>

@@ -392,10 +392,10 @@ const HomePage: React.FC = () => {
 
           <FeaturesGrid>
             <FeatureCard
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.3 }}
+              viewport={{ once: true, amount: 0.3 }}
             >
               <FeatureIcon>
                 <FiTarget />
@@ -408,10 +408,10 @@ const HomePage: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.3 }}
+              viewport={{ once: true, amount: 0.3 }}
             >
               <FeatureIcon>
                 <FiDatabase />
@@ -423,10 +423,10 @@ const HomePage: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.3 }}
+              viewport={{ once: true, amount: 0.3 }}
             >
               <FeatureIcon>
                 <FiSearch />
@@ -439,10 +439,10 @@ const HomePage: React.FC = () => {
             </FeatureCard>
 
             <FeatureCard
-              initial={{ opacity: 0, y: 50 }}
+              initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              viewport={{ once: true }}
+              transition={{ duration: 0.3 }}
+              viewport={{ once: true, amount: 0.3 }}
             >
               <FeatureIcon>
                 <FiDollarSign />

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
 import { FiCheck } from 'react-icons/fi';
 
@@ -41,11 +41,12 @@ const SceneContainer = styled.div`
   overflow: hidden;
 `;
 
-const PalaContainer = styled.div`
+const PalaContainer = styled.div<{ $isPaused: boolean }>`
   width: 200px;
   height: 280px;
   perspective: 1000px;
   animation: ${spin3D} 8s linear infinite;
+  animation-play-state: ${props => props.$isPaused ? 'paused' : 'running'};
 `;
 
 const PalaSVG = styled.svg`
@@ -54,7 +55,7 @@ const PalaSVG = styled.svg`
   filter: drop-shadow(0 20px 40px rgba(22, 163, 74, 0.3));
 `;
 
-const SuccessRing = styled.div`
+const SuccessRing = styled.div<{ $isPaused: boolean }>`
   position: absolute;
   width: 300px;
   height: 300px;
@@ -63,9 +64,10 @@ const SuccessRing = styled.div`
   opacity: 0;
   animation: ${pulse} 2s ease-in-out infinite;
   animation-delay: 0.5s;
+  animation-play-state: ${props => props.$isPaused ? 'paused' : 'running'};
 `;
 
-const Checkmark = styled.div`
+const Checkmark = styled.div<{ $isPaused: boolean }>`
   position: absolute;
   top: 50%;
   left: 50%;
@@ -81,14 +83,16 @@ const Checkmark = styled.div`
   font-size: 40px;
   animation: ${float} 2s ease-in-out infinite;
   animation-delay: 1s;
+  animation-play-state: ${props => props.$isPaused ? 'paused' : 'running'};
 `;
 
-const LoadingText = styled.p`
+const LoadingText = styled.p<{ $isPaused: boolean }>`
   margin-top: 2rem;
   font-size: 1.2rem;
   color: #374151;
   font-weight: 500;
   animation: ${pulse} 1.5s ease-in-out infinite;
+  animation-play-state: ${props => props.$isPaused ? 'paused' : 'running'};
 `;
 
 interface PalaRotatingSceneProps {
@@ -96,9 +100,28 @@ interface PalaRotatingSceneProps {
 }
 
 export const PalaRotatingScene: React.FC<PalaRotatingSceneProps> = ({ isComplete = false }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisible(entry.isIntersecting);
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <SceneContainer>
-      <PalaContainer>
+    <SceneContainer ref={containerRef}>
+      <PalaContainer $isPaused={!isVisible}>
         <PalaSVG viewBox="0 0 200 280" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <linearGradient id="palaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -132,12 +155,12 @@ export const PalaRotatingScene: React.FC<PalaRotatingSceneProps> = ({ isComplete
         </PalaSVG>
       </PalaContainer>
       
-      {!isComplete && <LoadingText>Analizando tu perfil...</LoadingText>}
+      {!isComplete && <LoadingText $isPaused={!isVisible}>Analizando tu perfil...</LoadingText>}
       
       {isComplete && (
         <>
-          <SuccessRing />
-          <Checkmark>
+          <SuccessRing $isPaused={!isVisible} />
+          <Checkmark $isPaused={!isVisible}>
             <FiCheck />
           </Checkmark>
         </>
