@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion';
-import React, { useEffect, useRef, useState, useMemo } from 'react';
+import React, { useEffect, useRef, useState, useMemo, useDeferredValue } from 'react';
 import { FiX, FiTag, FiGrid, FiBox } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
@@ -360,6 +360,7 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
 }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(isInHeader);
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredQuery = useDeferredValue(searchQuery);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -384,6 +385,16 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
     [rackets]
   );
 
+  // Pre-process rackets for faster searching
+  const searchReadyRackets = useMemo(() => {
+    return rackets.map(r => ({
+      ...r,
+      _lowName: (r.nombre || '').toLowerCase(),
+      _lowBrand: (r.marca || '').toLowerCase(),
+      _lowModel: (r.modelo || '').toLowerCase(),
+    }));
+  }, [rackets]);
+
   useEffect(() => {
     if (isInHeader && searchInputRef.current) {
       setTimeout(() => {
@@ -393,53 +404,49 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
   }, [isInHeader]);
 
   useEffect(() => {
-    if (searchQuery.trim() === '') {
+    if (deferredQuery.trim() === '') {
       setSearchResults([]);
       return;
     }
 
     setIsLoading(true);
 
-    const timeoutId = setTimeout(() => {
-      const query = searchQuery.toLowerCase().trim();
-      const queryWords = query.split(/\s+/);
+    const query = deferredQuery.toLowerCase().trim();
+    const queryWords = query.split(/\s+/);
 
-      const results: SearchResult[] = [];
+    const results: SearchResult[] = [];
 
-      const brandResults = uniqueBrands
-        .filter(brand => brand.toLowerCase().includes(query))
-        .slice(0, 4);
-      brandResults.forEach(brand => {
-        results.push({ type: 'brand', data: brand });
-      });
+    const brandResults = uniqueBrands
+      .filter(brand => brand.toLowerCase().includes(query))
+      .slice(0, 4);
+    brandResults.forEach(brand => {
+      results.push({ type: 'brand', data: brand });
+    });
 
-      const categoryResults = uniqueShapes
-        .filter(shape => shape.toLowerCase().includes(query))
-        .slice(0, 4);
-      categoryResults.forEach(shape => {
-        results.push({ type: 'category', data: shape });
-      });
+    const categoryResults = uniqueShapes
+      .filter(shape => shape.toLowerCase().includes(query))
+      .slice(0, 4);
+    categoryResults.forEach(shape => {
+      results.push({ type: 'category', data: shape });
+    });
 
-      const racketResults = rackets
-        .filter((racket: Racket) => {
-          const nombre = racket.nombre.toLowerCase();
-          const marca = (racket.marca || '').toLowerCase();
-          const modelo = (racket.modelo || '').toLowerCase();
-          const combinedText = `${nombre} ${marca} ${modelo}`;
-          return queryWords.every(word => combinedText.includes(word));
-        })
-        .slice(0, 6);
+    const racketResults = searchReadyRackets
+      .filter(racket => {
+        return queryWords.every(word => 
+          racket._lowName.includes(word) || 
+          racket._lowBrand.includes(word) || 
+          racket._lowModel.includes(word)
+        );
+      })
+      .slice(0, 6);
 
-      racketResults.forEach(racket => {
-        results.push({ type: 'racket', data: racket });
-      });
+    racketResults.forEach(racket => {
+      results.push({ type: 'racket', data: racket });
+    });
 
-      setSearchResults(results);
-      setIsLoading(false);
-    }, 200);
-
-    return () => clearTimeout(timeoutId);
-  }, [searchQuery, rackets, uniqueBrands, uniqueShapes]);
+    setSearchResults(results);
+    setIsLoading(false);
+  }, [deferredQuery, rackets, uniqueBrands, uniqueShapes]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -637,9 +644,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                         <SearchResultItem
                           key={`brand-${result.data}-${index}`}
                           $variant='brand'
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.1 }}
                           onClick={() => handleBrandSelect(result.data as string)}
                         >
                           <ResultIcon $variant='brand'>
@@ -668,9 +675,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                         <SearchResultItem
                           key={`category-${result.data}-${index}`}
                           $variant='category'
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: index * 0.03 }}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          transition={{ duration: 0.1 }}
                           onClick={() => handleCategorySelect(result.data as string)}
                         >
                           <ResultIcon $variant='category'>
@@ -700,9 +707,9 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                           <SearchResultItem
                             key={`racket-${racket.nombre}-${index}`}
                             $variant='racket'
-                            initial={{ opacity: 0, x: -10 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ delay: index * 0.03 }}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ duration: 0.1 }}
                             onClick={() => handleRacketSelect(racket)}
                           >
                             <ResultImage

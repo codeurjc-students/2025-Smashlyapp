@@ -123,13 +123,13 @@ const MobileSearchButton = styled.button`
 `;
 
 // Mobile Menu Dropdown
-// Mobile Menu Dropdown with Glassmorphism
-const MobileMenuDropdown = styled(motion.div)<{ $isOpen: boolean }>`
+// Mobile Menu Dropdown with High Performance Optimization
+const MobileMenuDropdown = styled(motion.div)`
   position: absolute;
   top: 100%;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(255, 255, 255, 0.98); /* Slightly more opaque for better performance during animation */
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-radius: 0 0 24px 24px;
@@ -140,6 +140,8 @@ const MobileMenuDropdown = styled(motion.div)<{ $isOpen: boolean }>`
   overflow-y: auto;
   border: 1px solid rgba(255, 255, 255, 0.3);
   border-top: none;
+  will-change: clip-path, opacity; /* Hardware acceleration hint */
+  transform-origin: top;
 `;
 
 // Mobile Search Container
@@ -588,15 +590,13 @@ const Header: React.FC = () => {
           </MobileMenuButton>
         </MobileElements>
 
-        {/* Mobile Menu Dropdown */}
         <AnimatePresence>
           {(isMenuOpen || isMobileSearchOpen) && (
             <MobileMenuDropdown
-              $isOpen={true}
-              initial={{ opacity: 0, y: -20, height: 0 }}
-              animate={{ opacity: 1, y: 0, height: 'auto' }}
-              exit={{ opacity: 0, y: -20, height: 0 }}
-              transition={{ duration: 0.3, ease: 'easeInOut' }}
+              initial={{ opacity: 0, clipPath: 'inset(0% 0% 100% 0%)' }}
+              animate={{ opacity: 1, clipPath: 'inset(0% 0% 0% 0%)' }}
+              exit={{ opacity: 0, clipPath: 'inset(0% 0% 100% 0%)' }}
+              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             >
               {/* Mobile Search Section */}
               <MobileSearchContainer $isOpen={isMobileSearchOpen}>
@@ -617,7 +617,7 @@ const Header: React.FC = () => {
                     visible: {
                       opacity: 1,
                       transition: {
-                        staggerChildren: 0.05,
+                        staggerChildren: 0.03, // Reduced stagger duration for better mobile perf
                       },
                     },
                   }}
