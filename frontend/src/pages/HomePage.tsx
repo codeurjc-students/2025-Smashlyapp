@@ -8,7 +8,7 @@ import RotatingPhrases from '../components/features/RotatingPhrases';
 import { useAuth } from '../contexts/AuthContext';
 
 const Container = styled.div`
-  min-height: 100vh;
+  min-height: 100dvh;
   background: linear-gradient(135deg, #f8faf8 0%, #ffffff 100%);
 `;
 
@@ -19,6 +19,8 @@ const HeroSection = styled.section`
   color: white;
   position: relative;
   overflow: hidden;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 
   &::before {
     content: '';
@@ -53,7 +55,7 @@ const Badge = styled(motion.div)`
   border: 1px solid rgba(255, 255, 255, 0.1);
   will-change: transform, opacity;
 
-  @media (hover: none) and (pointer: coarse) {
+  @media (max-width: 768px) {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     background: rgba(255, 255, 255, 0.2);

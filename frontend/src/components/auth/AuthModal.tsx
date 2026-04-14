@@ -36,7 +36,7 @@ const ModalContainer = styled(motion.div)`
   background: white;
   width: 100%;
   max-width: 1000px;
-  height: 85vh;
+  height: 85dvh;
   max-height: 800px;
   border-radius: 20px;
   overflow: hidden;
@@ -47,7 +47,7 @@ const ModalContainer = styled(motion.div)`
 
   @media (max-width: 768px) {
     height: auto;
-    max-height: 90vh;
+    max-height: 90dvh;
     overflow-y: auto;
     flex-direction: column;
   }

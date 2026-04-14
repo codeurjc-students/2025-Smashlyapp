@@ -131,24 +131,16 @@ const MobileMenuDropdown = styled(motion.div)`
   top: 100%;
   left: 0;
   right: 0;
-  background: rgba(255, 255, 255, 0.98); /* Slightly more opaque for better performance during animation */
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  
-  @media (hover: none) and (pointer: coarse) {
-    backdrop-filter: none;
-    -webkit-backdrop-filter: none;
-    background: white;
-  }
+  background: white;
   border-radius: 0 0 24px 24px;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
   z-index: 100;
   overflow: hidden;
-  max-height: min(85vh, 720px);
+  max-height: min(85dvh, 720px);
   overflow-y: auto;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   border-top: none;
-  will-change: clip-path, opacity; /* Hardware acceleration hint */
+  will-change: transform, opacity;
   transform-origin: top;
 `;
 
@@ -601,10 +593,10 @@ const Header: React.FC = () => {
         <AnimatePresence>
           {(isMenuOpen || isMobileSearchOpen) && (
             <MobileMenuDropdown
-              initial={{ opacity: 0, clipPath: 'inset(0% 0% 100% 0%)' }}
-              animate={{ opacity: 1, clipPath: 'inset(0% 0% 0% 0%)' }}
-              exit={{ opacity: 0, clipPath: 'inset(0% 0% 100% 0%)' }}
-              transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
             >
               {/* Mobile Search Section */}
               <MobileSearchContainer $isOpen={isMobileSearchOpen}>

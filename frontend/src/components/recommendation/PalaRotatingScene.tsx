@@ -52,7 +52,19 @@ const PalaContainer = styled.div<{ $isPaused: boolean }>`
 const PalaSVG = styled.svg`
   width: 100%;
   height: 100%;
-  filter: drop-shadow(0 20px 40px rgba(22, 163, 74, 0.3));
+`;
+
+const ShadowOverlay = styled.div<{ $isPaused: boolean }>`
+  position: absolute;
+  bottom: 60px;
+  width: 140px;
+  height: 20px;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  filter: blur(10px);
+  z-index: -1;
+  animation: ${pulse} 4s ease-in-out infinite;
+  animation-play-state: ${props => (props.$isPaused ? 'paused' : 'running')};
 `;
 
 const SuccessRing = styled.div<{ $isPaused: boolean }>`
@@ -132,12 +144,7 @@ export const PalaRotatingScene: React.FC<PalaRotatingSceneProps> = ({ isComplete
               <stop offset="0%" stopColor="#1f2937" />
               <stop offset="100%" stopColor="#374151" />
             </linearGradient>
-            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-              <feDropShadow dx="0" dy="4" stdDeviation="8" floodOpacity="0.3" />
-            </filter>
-          </defs>
-          
-          <ellipse cx="100" cy="100" rx="95" ry="95" fill="url(#palaGradient)" filter="url(#shadow)" />
+          <ellipse cx="100" cy="100" rx="95" ry="95" fill="url(#palaGradient)" />
           
           <ellipse cx="100" cy="100" rx="85" ry="85" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
           
@@ -153,6 +160,7 @@ export const PalaRotatingScene: React.FC<PalaRotatingSceneProps> = ({ isComplete
           <path d="M 50 100 Q 100 120 150 100" stroke="rgba(255,255,255,0.2)" strokeWidth="1" fill="none" />
           <path d="M 60 140 Q 100 160 140 140" stroke="rgba(255,255,255,0.2)" strokeWidth="1" fill="none" />
         </PalaSVG>
+        <ShadowOverlay $isPaused={!isVisible} />
       </PalaContainer>
       
       {!isComplete && <LoadingText $isPaused={!isVisible}>Analizando tu perfil...</LoadingText>}

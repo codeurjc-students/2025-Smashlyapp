@@ -13,6 +13,8 @@ const BannerContainer = styled(motion.div)`
   color: white;
   position: relative;
   overflow: hidden;
+  will-change: transform, opacity;
+  transform: translateZ(0);
 
   &::before {
     content: "";
@@ -114,7 +116,7 @@ const CTAButton = styled(motion.button)<{ variant?: "primary" | "secondary" }>`
       ? "2px solid rgba(255, 255, 255, 0.3)"
       : "none"};
   background: ${(props) =>
-    props.variant === "secondary" ? "transparent" : "rgba(255, 255, 255, 0.2)"};
+    props.variant === "secondary" ? "rgba(255, 255, 255, 0.1)" : "rgba(255, 255, 255, 0.25)"};
   color: white;
   font-weight: 600;
   font-size: 1rem;
@@ -127,17 +129,20 @@ const CTAButton = styled(motion.button)<{ variant?: "primary" | "secondary" }>`
   transition: all 0.3s ease;
   will-change: transform, opacity;
 
-  @media (hover: none) and (pointer: coarse) {
+  @media (max-width: 768px) {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
-    background: rgba(255, 255, 255, 0.3);
+    background: ${(props) =>
+      props.variant === "secondary"
+        ? "rgba(255, 255, 255, 0.15)"
+        : "rgba(255, 255, 255, 0.35)"};
   }
 
   &:hover {
     background: ${(props) =>
       props.variant === "secondary"
-        ? "rgba(255, 255, 255, 0.1)"
-        : "rgba(255, 255, 255, 0.3)"};
+        ? "rgba(255, 255, 255, 0.2)"
+        : "rgba(255, 255, 255, 0.4)"};
     transform: translateY(-2px);
   }
 `;
