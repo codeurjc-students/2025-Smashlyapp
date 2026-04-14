@@ -144,6 +144,7 @@ export const PalaRotatingScene: React.FC<PalaRotatingSceneProps> = ({ isComplete
               <stop offset="0%" stopColor="#1f2937" />
               <stop offset="100%" stopColor="#374151" />
             </linearGradient>
+          </defs>
           <ellipse cx="100" cy="100" rx="95" ry="95" fill="url(#palaGradient)" />
           
           <ellipse cx="100" cy="100" rx="85" ry="85" fill="none" stroke="rgba(255,255,255,0.2)" strokeWidth="2" />
