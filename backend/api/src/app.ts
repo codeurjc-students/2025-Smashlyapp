@@ -67,17 +67,11 @@ app.use(
 );
 
 // CORS configuration
+import { config } from './config';
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === 'production'
-        ? process.env.FRONTEND_URL
-        : [
-            'http://localhost:443',
-            'http://localhost:5173',
-            'https://localhost:443',
-            'https://localhost:5173',
-          ],
+    origin: config.corsOrigin,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
