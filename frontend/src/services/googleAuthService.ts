@@ -190,6 +190,7 @@ export class GoogleAuthService {
       const url = buildApiUrl(API_ENDPOINTS.AUTH_GOOGLE);
       const response = await fetch(url, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
