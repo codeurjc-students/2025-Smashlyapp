@@ -8,7 +8,7 @@ Disallow: /comparisons
 Disallow: /comparisons/
 Disallow: /api/
 
-Sitemap: https://smashly-app.onrender.com/sitemap.xml
+Sitemap: https://smashly-app.es/sitemap.xml
 
 # Google
 User-agent: Googlebot

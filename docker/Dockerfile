@@ -12,16 +12,19 @@ RUN npm ci
 ARG VITE_SUPABASE_URL
 ARG VITE_SUPABASE_ANON_KEY
 ARG VITE_GOOGLE_CLIENT_ID
+ARG VITE_API_URL
 
 # Pass build arguments to environment variables
 ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL \
   VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY \
-  VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
+  VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID \
+  VITE_API_URL=$VITE_API_URL
 
 # Create a .env file for Vite build and print debug info (masked)
 RUN echo "VITE_SUPABASE_URL=$VITE_SUPABASE_URL" > .env && \
   echo "VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY" >> .env && \
   echo "VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID" >> .env && \
+  echo "VITE_API_URL=$VITE_API_URL" >> .env && \
   echo "--- Build Debug Info ---" && \
   echo "VITE_GOOGLE_CLIENT_ID length: ${#VITE_GOOGLE_CLIENT_ID}" && \
   if [ -n "$VITE_GOOGLE_CLIENT_ID" ]; then echo "VITE_GOOGLE_CLIENT_ID starts with: ${VITE_GOOGLE_CLIENT_ID:0:5}..."; else echo "VITE_GOOGLE_CLIENT_ID is EMPTY!"; fi && \

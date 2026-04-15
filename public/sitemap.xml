@@ -3,7 +3,7 @@
 
   <!-- Homepage -->
   <url>
-    <loc>https://smashly-app.onrender.com/</loc>
+    <loc>https://smashly-app.es/</loc>
     <lastmod>2026-03-28</lastmod>
     <priority>1.0</priority>
     <changefreq>weekly</changefreq>
@@ -11,7 +11,7 @@
 
   <!-- Catálogo de palas -->
   <url>
-    <loc>https://smashly-app.onrender.com/catalog</loc>
+    <loc>https://smashly-app.es/catalog</loc>
     <lastmod>2026-03-28</lastmod>
     <priority>0.9</priority>
     <changefreq>daily</changefreq>
@@ -19,7 +19,7 @@
 
   <!-- Mejor pala (recomendador IA) -->
   <url>
-    <loc>https://smashly-app.onrender.com/best-racket</loc>
+    <loc>https://smashly-app.es/best-racket</loc>
     <lastmod>2026-03-28</lastmod>
     <priority>0.9</priority>
     <changefreq>weekly</changefreq>
@@ -27,7 +27,7 @@
 
   <!-- Comparador de palas -->
   <url>
-    <loc>https://smashly-app.onrender.com/compare</loc>
+    <loc>https://smashly-app.es/compare</loc>
     <lastmod>2026-03-28</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
@@ -35,7 +35,7 @@
 
   <!-- Preguntas frecuentes -->
   <url>
-    <loc>https://smashly-app.onrender.com/faq</loc>
+    <loc>https://smashly-app.es/faq</loc>
     <lastmod>2026-03-28</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
