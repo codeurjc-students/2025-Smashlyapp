@@ -1,0 +1,160 @@
+name: Catalog & Price Sync
+
+on:
+  schedule:
+    # Full sync: 1º domingo de cada mes a las 04:00 UTC
+    - cron: '0 4 1-7 * 0'
+    # Prices sync: Todos los domingos a las 05:00 UTC
+    - cron: '0 5 * * 0'
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Sync mode'
+        required: true
+        default: 'prices'
+        type: choice
+        options:
+          - prices
+          - full
+      limit:
+        description: 'Limit products (for testing)'
+        required: false
+        default: ''
+
+env:
+  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+  SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+  EMAIL_TO: info@smashly-app.es
+
+jobs:
+  prices-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: >
+      (github.event_name == 'schedule' && github.event.schedule == '0 5 * * 0') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'prices')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            src/scrapers
+            src/scrapers/rackets.json
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r src/scrapers/requirements.txt
+
+      - name: Run Prices Sync
+        run: |
+          LIMIT_ARG=""
+          if [ "${{ github.event.inputs.limit }}" != "" ]; then
+            LIMIT_ARG="--limit ${{ github.event.inputs.limit }}"
+          fi
+          echo "Running prices sync..."
+          python3 -m src.scrapers.sync_catalog --mode prices $LIMIT_ARG > sync.log 2>&1
+          EXIT_CODE=$?
+          cat sync.log
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "sync_failed=true" >> $GITHUB_ENV
+          fi
+          exit $EXIT_CODE
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/scrapers/rackets.json
+          git commit -m "chore: weekly prices update" || echo "No changes to commit"
+          git push || echo "Push failed"
+
+      - name: Send failure notification
+        if: env.sync_failed == 'true'
+        run: |
+          echo "📧 Enviando notificación de fallo a ${{ env.EMAIL_TO }}"
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "from": "Smashly <onboarding@resend.dev>",
+              "to": ["${{ env.EMAIL_TO }}"],
+              "subject": "[Smashly] Weekly Prices Sync - FALLO",
+              "text": "El sync semanal de precios ha fallado. Por favor revisa los logs en GitHub Actions."
+            }' || echo "Notification failed"
+
+  full-sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    if: >
+      (github.event_name == 'schedule' && github.event.schedule == '0 4 1-7 * 0') ||
+      (github.event_name == 'workflow_dispatch' && github.event.inputs.mode == 'full')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            src/scrapers
+            src/scrapers/rackets.json
+          sparse-checkout-cone-mode: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r src/scrapers/requirements.txt
+
+      - name: Run Full Sync
+        run: |
+          LIMIT_ARG=""
+          if [ "${{ github.event.inputs.limit }}" != "" ]; then
+            LIMIT_ARG="--limit ${{ github.event.inputs.limit }}"
+          fi
+          echo "Running full sync (new + discontinued + prices)..."
+          python3 -m src.scrapers.sync_catalog --mode full $LIMIT_ARG > sync.log 2>&1
+          EXIT_CODE=$?
+          cat sync.log
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "sync_failed=true" >> $GITHUB_ENV
+          fi
+          exit $EXIT_CODE
+
+      - name: Sync Radar Metrics
+        run: |
+          echo "Scraping radar metrics for new rackets..."
+          python3 -m src.scrapers.sync_radar_metrics >> radar-metrics.log 2>&1
+          EXIT_CODE=$?
+          cat radar-metrics.log
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "metrics_failed=true" >> $GITHUB_ENV
+          fi
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add src/scrapers/rackets.json
+          git commit -m "chore: monthly full sync update" || echo "No changes to commit"
+          git push || echo "Push failed"
+
+      - name: Send failure notification
+        if: env.sync_failed == 'true' || env.metrics_failed == 'true'
+        run: |
+          echo "📧 Enviando notificación de fallo a ${{ env.EMAIL_TO }}"
+          curl -s -X POST https://api.resend.com/emails \
+            -H "Authorization: Bearer ${{ secrets.RESEND_API_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "from": "Smashly <onboarding@resend.dev>",
+              "to": ["${{ env.EMAIL_TO }}"],
+              "subject": "[Smashly] Monthly Sync - FALLO",
+              "text": "El sync mensual ha fallado (catalog o radar metrics). Por favor revisa los logs."
+            }' || echo "Notification failed"

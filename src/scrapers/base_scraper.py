@@ -3,6 +3,34 @@ from typing import Dict, Optional, List
 import re
 import urllib.request
 import ssl
+import time
+import asyncio
+from functools import wraps
+
+# ============================================================================
+# Retry Decorator
+# ============================================================================
+
+def async_retry(max_retries: int = 3, backoff_base: float = 1.0, backoff_factor: float = 2.0):
+    """Decorator for async functions with exponential backoff retry."""
+    def decorator(func):
+        @wraps(func)
+        async def wrapper(*args, **kwargs):
+            last_exception = None
+            for attempt in range(max_retries):
+                try:
+                    return await func(*args, **kwargs)
+                except Exception as e:
+                    last_exception = e
+                    if attempt < max_retries - 1:
+                        sleep_time = backoff_base * (backoff_factor ** attempt)
+                        print(f"    ⚠️  Retry {attempt + 1}/{max_retries} after {sleep_time:.1f}s: {e}")
+                        await asyncio.sleep(sleep_time)
+                    else:
+                        print(f"    ❌ All retries failed: {e}")
+            raise last_exception
+        return wrapper
+    return decorator
 
 # ============================================================================
 # Shared Utility Functions

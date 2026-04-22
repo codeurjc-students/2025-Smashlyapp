@@ -372,5 +372,5 @@ class RacketManager:
                 "last_updated": now
             })
 
-        self.save_db()
+        # NOT calling save_db() here - it's called externally after batch processing
         return slug
