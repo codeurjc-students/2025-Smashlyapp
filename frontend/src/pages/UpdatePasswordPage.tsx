@@ -89,7 +89,7 @@ const Input = styled.input<{ $hasError?: boolean }>`
   border: 1.5px solid ${props => props.$hasError ? '#fca5a5' : '#e2e8f0'};
   background: ${props => props.$hasError ? '#fef2f2' : 'white'};
   font-size: 1rem;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   color: #1e293b;
 
   &:focus {
@@ -133,7 +133,7 @@ const SubmitButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
   margin-top: 0.5rem;
 
   &:hover:not(:disabled) {

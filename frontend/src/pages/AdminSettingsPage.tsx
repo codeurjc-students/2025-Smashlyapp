@@ -68,7 +68,7 @@ const Tab = styled.button<{ $active: boolean }>`
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   white-space: nowrap;
   background: ${props => (props.$active ? '#0f172a' : 'transparent')};
   color: ${props => (props.$active ? 'white' : '#64748b')};
@@ -181,7 +181,7 @@ const ListItem = styled(motion.div)`
   background: #f8fafc;
   border-radius: 12px;
   border: 1px solid transparent;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 
   &:hover {
     background: white;
@@ -236,7 +236,7 @@ const IconButton = styled(motion.button)<{ $variant?: 'danger' }>`
   justify-content: center;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, color 0.2s ease;
   background: ${props => props.$variant === 'danger' ? '#fef2f2' : '#f1f5f9'};
   color: ${props => props.$variant === 'danger' ? '#dc2626' : '#64748b'};
 
@@ -282,7 +282,7 @@ const FormInput = styled.input`
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 0.875rem;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background: white;
 
   &:focus {
@@ -311,7 +311,7 @@ const Button = styled(motion.button)<{ $variant?: 'primary' | 'secondary' }>`
   font-size: 0.8125rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   border: none;
 
   ${props =>
@@ -397,7 +397,7 @@ const SettingsInput = styled.input`
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   font-size: 0.875rem;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
   background: white;
 
   &:focus {

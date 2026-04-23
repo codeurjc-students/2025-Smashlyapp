@@ -117,7 +117,7 @@ const RacketCard = styled.div`
   padding: 1rem;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   border: 1px solid rgba(22, 163, 74, 0.1);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   cursor: pointer;
 
   &:hover {
@@ -171,7 +171,7 @@ const ViewAllButton = styled.button`
   border-radius: 8px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease;
 
   &:hover {
     background: #dcfce7;

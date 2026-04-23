@@ -1,5 +1,4 @@
 import React, { memo, useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import { FiEye, FiTag, FiHeart } from 'react-icons/fi';
 import styled from 'styled-components';
 import { Racket } from '../../types/racket';
@@ -7,18 +6,36 @@ import { getLowestPrice } from '../../utils/priceUtils';
 import { API_URL } from '../../config/api';
 
 // Styled Components
-const RacketCardContainer = styled(motion.li)<{ $view: 'grid' | 'list' }>`
+const RacketCardContainer = styled.li<{ $view: 'grid' | 'list'; $index: number }>`
   background: white;
   border-radius: 16px;
   overflow: hidden;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   border: 1px solid rgba(22, 163, 74, 0.1);
 
   display: ${props => (props.$view === 'list' ? 'flex' : 'flex')};
   flex-direction: ${props => (props.$view === 'list' ? 'row' : 'column')};
   height: ${props => (props.$view === 'grid' ? '100%' : 'auto')};
+
+  animation: cardFadeIn 0.4s ease forwards;
+  animation-delay: ${props => Math.min(props.$index * 0.05, 0.5)}s;
+  opacity: 0;
+
+  @keyframes cardFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(15px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Disable animation on mobile if needed, but CSS is usually fast enough. 
+     Keeping it simple for now. */
 
   &:hover {
     transform: translateY(-4px);
@@ -39,10 +56,16 @@ const RacketImageContainer = styled.div<{ $view: 'grid' | 'list' }>`
   overflow: hidden;
 `;
 
-const RacketImage = styled(motion.img)`
+const RacketImage = styled.img`
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+  animation: imgFadeIn 0.4s ease-in-out;
+
+  @keyframes imgFadeIn {
+    from { opacity: 0.4; }
+    to { opacity: 1; }
+  }
 `;
 
 const RacketBadge = styled.div<{ $variant: 'bestseller' | 'offer' | 'comparison' }>`
@@ -152,7 +175,7 @@ const ViewDetailsButton = styled.button`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.2s ease;
 
   &:hover {
     background: #15803d;
@@ -252,9 +275,7 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(
     return (
       <RacketCardContainer
         $view={view}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: index * 0.05 }}
+        $index={index}
         onClick={() => onClick(racket)}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
@@ -269,13 +290,6 @@ const RacketCardComponent: React.FC<RacketCardProps> = memo(
             }
             alt={racket.modelo}
             onError={handleImageError}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{
-              duration: 0.6,
-              ease: 'easeInOut',
-            }}
           />
           {racket.view_count !== undefined && racket.view_count > 10 && (
             <RacketBadge $variant='bestseller'>

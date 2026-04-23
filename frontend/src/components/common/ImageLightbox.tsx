@@ -39,7 +39,14 @@ const CloseButton = styled.button`
   right: 2rem;
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.2);
+  }
   color: white;
   width: 48px;
   height: 48px;
@@ -64,7 +71,14 @@ const NavigationButton = styled.button<{ direction: 'left' | 'right' }>`
   transform: translateY(-50%);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.2);
+  }
   color: white;
   width: 56px;
   height: 56px;
@@ -128,7 +142,14 @@ const Counter = styled.div`
   transform: translateX(-50%);
   background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.2);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.2);
+  }
   color: white;
   padding: 0.5rem 1rem;
   border-radius: 99px;

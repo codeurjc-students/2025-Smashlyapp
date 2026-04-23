@@ -23,6 +23,10 @@ const BlurredContent = styled.div`
   pointer-events: none;
   user-select: none;
   opacity: 0.6;
+
+  @media (hover: none) and (pointer: coarse) {
+    filter: blur(4px);
+  }
 `;
 
 const Overlay = styled.div`
@@ -42,6 +46,13 @@ const Overlay = styled.div`
     rgba(255, 255, 255, 0.7) 100%
   );
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.4);
+  }
   padding: 2rem;
   text-align: center;
   gap: 1.5rem;
@@ -58,6 +69,10 @@ const LockIcon = styled.div`
   color: white;
   box-shadow: 0 8px 24px rgba(22, 163, 74, 0.3);
   animation: float 3s ease-in-out infinite;
+
+  @media (hover: none) and (pointer: coarse) {
+    animation: none;
+  }
 
   @keyframes float {
     0%,
@@ -110,7 +125,7 @@ const CTAButton = styled(Link)`
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
 
   &:hover {
@@ -131,7 +146,7 @@ const CTAButtonSecondary = styled(Link)`
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease;
 
   &:hover {
     background: #f0fdf4;

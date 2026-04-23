@@ -127,7 +127,7 @@ const PrimaryButton = styled(Link)`
   text-decoration: none;
   font-weight: 600;
   font-size: clamp(0.9rem, 2vw, 1.125rem);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   white-space: nowrap;
 
@@ -157,7 +157,7 @@ const SecondaryButton = styled(Link)`
   text-decoration: none;
   font-weight: 600;
   font-size: clamp(0.9rem, 2vw, 1.125rem);
-  transition: all 0.2s ease;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
   white-space: nowrap;
 
   @media (max-width: 640px) {
@@ -215,7 +215,7 @@ const FeatureCard = styled(motion.div)`
   border-radius: 16px;
   text-align: center;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     transform: translateY(-8px);

@@ -351,11 +351,10 @@ const getTaskSubtitle = (task: BackgroundTask): string => {
 };
 
 export const BackgroundTaskPopup: React.FC = () => {
-  const { tasks, activeTask, dismissTask } = useBackgroundTasks();
+  const { tasks, dismissTask } = useBackgroundTasks();
   const navigate = useNavigate();
   const location = useLocation();
   const [minimized, setMinimized] = useState(true);
-  const [pulse, setPulse] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
 
   // Mostrar popup cuando hay una tarea activa o completada recientemente
@@ -376,16 +375,8 @@ export const BackgroundTaskPopup: React.FC = () => {
     }
   }, [tasks]);
 
-  // Efecto de pulso cuando está minimizado y hay una tarea completada
-  useEffect(() => {
-    if (minimized && activeTask?.status === 'completed') {
-      const interval = setInterval(() => {
-        setPulse(true);
-        setTimeout(() => setPulse(false), 1000);
-      }, 3000);
-      return () => clearInterval(interval);
-    }
-  }, [minimized, activeTask]);
+  // Removed setInterval-based pulse for performance. 
+  // The pulse animation is now handled directly by Framer Motion.
 
   // Mostrar popup solo si hay tareas
   const visibleTask = tasks.length > 0 ? tasks[tasks.length - 1] : null;
@@ -462,11 +453,16 @@ export const BackgroundTaskPopup: React.FC = () => {
         animate={{
           opacity: 1,
           y: 0,
-          scale: pulse ? 1.1 : 1,
+          scale: minimized && visibleTask.status === 'completed' ? [1, 1.05, 1] : 1,
         }}
         exit={{ opacity: 0, y: 100, scale: 0.8 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-        onClick={minimized ? handleToggleMinimize : undefined}
+        transition={{
+          y: { type: 'spring', stiffness: 300, damping: 25 },
+          opacity: { duration: 0.2 },
+          scale: minimized && visibleTask.status === 'completed' 
+            ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
+            : { type: 'spring', stiffness: 300, damping: 25 }
+        }}
       >
         {minimized ? (
           <>

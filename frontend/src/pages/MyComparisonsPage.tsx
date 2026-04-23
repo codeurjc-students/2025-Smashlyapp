@@ -41,6 +41,13 @@ const Header = styled.div`
   padding: 1.5rem 0;
   margin-bottom: 2rem;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.98);
+  }
 
   @media (max-width: 768px) {
     margin-bottom: 1rem;

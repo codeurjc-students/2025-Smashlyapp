@@ -76,6 +76,10 @@ const BlurredContent = styled.div`
   pointer-events: none;
   user-select: none;
   opacity: 0.6;
+
+  @media (hover: none) and (pointer: coarse) {
+    filter: blur(4px);
+  }
 `;
 
 const LockOverlay = styled.div`
@@ -89,8 +93,15 @@ const LockOverlay = styled.div`
   justify-content: center;
   background: rgba(255, 255, 255, 0.75);
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 10;
   padding: 2rem;
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.9);
+  }
 `;
 
 const LockCard = styled.div`
@@ -174,7 +185,7 @@ const LoginButton = styled(Link)`
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: transform 0.2s ease, background-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);
 
   &:hover {
@@ -203,7 +214,7 @@ const SignUpButton = styled(Link)`
   font-weight: 700;
   font-size: 1rem;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
 
   &:hover {
     background: #f0fdf4;

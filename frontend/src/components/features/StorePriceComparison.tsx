@@ -60,7 +60,7 @@ const StoreRow = styled.div<{ $compact?: boolean; $isLowest?: boolean }>`
       : '#f9fafb';
   }};
   border-radius: ${props => (props.$compact ? '10px' : '12px')};
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   flex: ${props => (props.$compact ? '1' : 'none')};
   display: flex;
   flex-direction: column;
@@ -97,6 +97,10 @@ const StoreRow = styled.div<{ $compact?: boolean; $isLowest?: boolean }>`
       z-index: -1;
       opacity: 0.2;
       animation: gradientShift 3s ease infinite, glow 2s ease-in-out infinite;
+
+      @media (hover: none) and (pointer: coarse) {
+        animation: none;
+      }
     }
 
     @keyframes gradientShift {
@@ -114,11 +118,9 @@ const StoreRow = styled.div<{ $compact?: boolean; $isLowest?: boolean }>`
     @keyframes glow {
       0%, 100% {
         opacity: 0.2;
-        filter: blur(8px);
       }
       50% {
         opacity: 0.35;
-        filter: blur(12px);
       }
     }
   `}
@@ -211,12 +213,17 @@ const Price = styled.div<{ isLowest?: boolean; $compact?: boolean }>`
     `
     animation: priceGlow 2s ease-in-out infinite;
 
+    @media (hover: none) and (pointer: coarse) {
+      animation: none;
+      text-shadow: 0 1px 2px rgba(22, 163, 74, 0.4);
+    }
+
     @keyframes priceGlow {
       0%, 100% {
         text-shadow: 0 2px 4px rgba(22, 163, 74, 0.2);
       }
       50% {
-        text-shadow: 0 2px 8px rgba(22, 163, 74, 0.4), 0 0 12px rgba(22, 163, 74, 0.2);
+        text-shadow: 0 2px 8px rgba(22, 163, 74, 0.4);
       }
     }
   `}
@@ -248,7 +255,7 @@ const StoreLink = styled.a<{ $compact?: boolean; $isLowest?: boolean }>`
   background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
   border: none;
   border-radius: ${props => (props.$compact ? '7px' : '8px')};
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
   box-shadow: ${props =>
     props.$isLowest
       ? '0 4px 12px rgba(22, 163, 74, 0.35)'
@@ -343,7 +350,7 @@ const GuestLink = styled.a`
   font-weight: 600;
   text-decoration: none;
   border-bottom: 2px solid rgba(255, 255, 255, 0.5);
-  transition: all 0.2s;
+  transition: border-bottom-color 0.2s ease, opacity 0.2s ease;
   padding-bottom: 2px;
 
   &:hover {

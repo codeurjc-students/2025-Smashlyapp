@@ -197,7 +197,7 @@ const SearchResultsList = styled.div`
   overflow-y: auto;
 `;
 
-const SearchResultItem = styled(motion.div)<{ $variant?: 'racket' | 'brand' | 'category' }>`
+const SearchResultItem = styled.div<{ $variant?: 'racket' | 'brand' | 'category' }>`
   display: flex;
   align-items: center;
   gap: 12px;
@@ -644,9 +644,6 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                         <SearchResultItem
                           key={`brand-${result.data}-${index}`}
                           $variant='brand'
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.1 }}
                           onClick={() => handleBrandSelect(result.data as string)}
                         >
                           <ResultIcon $variant='brand'>
@@ -675,9 +672,6 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                         <SearchResultItem
                           key={`category-${result.data}-${index}`}
                           $variant='category'
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          transition={{ duration: 0.1 }}
                           onClick={() => handleCategorySelect(result.data as string)}
                         >
                           <ResultIcon $variant='category'>
@@ -707,9 +701,6 @@ export const GlobalSearch: React.FC<GlobalSearchProps> = ({
                           <SearchResultItem
                             key={`racket-${racket.nombre}-${index}`}
                             $variant='racket'
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.1 }}
                             onClick={() => handleRacketSelect(racket)}
                           >
                             <ResultImage

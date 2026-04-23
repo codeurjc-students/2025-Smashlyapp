@@ -207,7 +207,7 @@ const AuthButton = styled.a<{ $variant?: 'primary' | 'secondary' }>`
   font-weight: 600;
   text-decoration: none;
   border-radius: 12px;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 
   ${props =>
     props.$variant === 'primary'
@@ -353,7 +353,7 @@ const ScrollButton = styled.button`
   justify-content: center;
   cursor: pointer;
   color: var(--color-gray-700);
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s, box-shadow 0.2s;
   flex-shrink: 0;
   box-shadow: var(--shadow-sm);
 
@@ -389,7 +389,7 @@ const Thumbnail = styled.img<{ $isActive: boolean }>`
   border: 2px solid ${props => (props.$isActive ? 'var(--color-primary)' : 'var(--color-gray-200)')};
   background: ${props => (props.$isActive ? '#f0fdf4' : 'white')};
   cursor: pointer;
-  transition: all 0.2s;
+  transition: border-color 0.2s, background-color 0.2s, transform 0.2s;
   padding: 0.25rem;
   flex-shrink: 0;
   scroll-snap-align: center; // Snap to center on mobile
@@ -414,7 +414,7 @@ const WishlistButton = styled.button`
   justify-content: center;
   box-shadow: var(--shadow-md);
   cursor: pointer;
-  transition: all 0.2s;
+  transition: transform 0.2s, background-color 0.2s;
   color: var(--color-error);
 
   &:hover {
@@ -439,7 +439,7 @@ const Dot = styled.button<{ isActive: boolean }>`
   border: none;
   background: ${props => (props.isActive ? 'var(--color-primary)' : 'var(--color-gray-300)')};
   cursor: pointer;
-  transition: all 0.2s;
+  transition: background-color 0.2s, transform 0.2s;
   padding: 0;
 
   &:hover {
@@ -638,7 +638,7 @@ const PrimaryButton = styled.a`
   font-weight: 700;
   font-size: 1.125rem;
   text-decoration: none;
-  transition: all 0.2s;
+  transition: background-color 0.2s, transform 0.2s, box-shadow 0.2s;
   box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);
   position: relative;
   overflow: hidden;
@@ -681,7 +681,7 @@ const AlertButton = styled.button`
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.25s cubic-bezier(0.4, 0, 0.2, 1), color 0.25s cubic-bezier(0.4, 0, 0.2, 1), transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   margin-top: 1rem;
   position: relative;
   overflow: hidden;
@@ -793,7 +793,7 @@ const SpecIconWrapper = styled.div`
   justify-content: center;
   flex-shrink: 0;
   color: var(--color-primary);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 const SpecCard = styled.div`
@@ -805,7 +805,7 @@ const SpecCard = styled.div`
   flex-direction: row;
   align-items: center;
   gap: 0.75rem;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
 
   &:hover {
@@ -950,7 +950,7 @@ const CompareRow = styled.div<{ $isBestPrice?: boolean }>`
   background: ${props =>
     props.$isBestPrice ? 'linear-gradient(90deg, #f0fdf4 0%, #dcfce7 100%)' : 'transparent'};
   position: relative;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: background 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: default;
 
   &:hover {
@@ -1009,7 +1009,7 @@ const PriceText = styled.div<{ $isBestPrice?: boolean }>`
   font-size: ${props => (props.$isBestPrice ? '1.5rem' : '1.25rem')};
   color: ${props => (props.$isBestPrice ? 'var(--color-primary)' : 'var(--color-gray-800)')};
   text-align: right;
-  transition: all 0.2s;
+  transition: color 0.2s, font-size 0.2s;
 `;
 
 const ShopButton = styled.a`
@@ -1022,7 +1022,7 @@ const ShopButton = styled.a`
   text-decoration: none;
   text-align: center;
   font-size: 0.9rem;
-  transition: all 0.2s;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1092,7 +1092,7 @@ const StickyCTA = styled.a`
   text-decoration: none;
   white-space: nowrap;
   flex-shrink: 0;
-  transition: all 0.2s;
+  transition: background-color 0.2s, transform 0.2s;
 
   &:hover {
     background: var(--color-primary-dark);

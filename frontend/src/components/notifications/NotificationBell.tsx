@@ -53,6 +53,10 @@ const Badge = styled.span`
   border: 2px solid #16a34a;
   animation: pulse 2s infinite;
 
+  @media (hover: none) and (pointer: coarse) {
+    animation: none;
+  }
+
   @keyframes pulse {
     0% {
       transform: scale(1);

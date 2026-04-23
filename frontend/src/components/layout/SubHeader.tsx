@@ -12,6 +12,13 @@ const SubHeaderContainer = styled.div`
   top: calc(72px + env(safe-area-inset-top, 0));
   z-index: 320;
   backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.98);
+  }
 
   @media (max-width: 1024px) {
     display: none;

@@ -33,6 +33,13 @@ const Overlay = styled(motion.div)`
   z-index: 1000;
   padding: 1rem;
   backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(0, 0, 0, 0.75);
+  }
 `;
 
 const Modal = styled(motion.div)`

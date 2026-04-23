@@ -26,6 +26,13 @@ const Header = styled.div`
   padding: clamp(1.2rem, 3.5vw, 2rem) 0;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  @media (hover: none) and (pointer: coarse) {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.98);
+  }
 `;
 
 const HeaderContent = styled.div`

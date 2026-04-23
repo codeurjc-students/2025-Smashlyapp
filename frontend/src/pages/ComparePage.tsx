@@ -84,7 +84,7 @@ const SecondaryButton = styled.button`
   font-weight: 600;
   font-size: 1rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
 
   &:hover {
     background: #f0fdf4;
@@ -119,7 +119,7 @@ const Card = styled(motion.div)`
   align-items: center;
   text-align: center;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
   position: relative;
   overflow: hidden;
   min-height: 320px;
@@ -161,7 +161,7 @@ const IconContainer = styled.div`
   justify-content: center;
   font-size: 2.5rem;
   margin-bottom: 2rem;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
 
   @media (max-width: 768px) {
     width: 64px;
@@ -197,7 +197,7 @@ const ActionButton = styled.div`
 `;
 
 const ArrowIcon = styled(FiArrowRight)`
-  transition: all 0.3s ease;
+  transition: transform 0.3s ease, opacity 0.3s ease;
   opacity: 0.7;
 `;
 
