@@ -43,7 +43,7 @@ export class AuthController {
         // (evita user enumeration attacks)
         res.status(401).json({
           success: false,
-          error: "INVALID_CREDENTIALS",
+          error: "INVALID_PASSWORD",
           message: "Email o contraseña incorrectos.",
           timestamp: new Date().toISOString(),
         } as ApiResponse);

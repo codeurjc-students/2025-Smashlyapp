@@ -98,7 +98,7 @@ describe('RacketService Helper Functions', () => {
         precio_original: null,
         descuento_porcentaje: 0,
         enlace: '',
-        fuente: 'No price available',
+        fuente: 'No disponible',
       });
     });
   });
