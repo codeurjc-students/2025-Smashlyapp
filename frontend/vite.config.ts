@@ -12,10 +12,11 @@ export default defineConfig(({ mode }) => ({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['robots.txt', 'images/icons/smashly-icon.png'],
+      includeAssets: ['robots.txt', 'images/icons/smashly-icon.png', 'icons/apple-touch-icon.png'],
       manifest: {
         name: 'Smashly',
         short_name: 'Smashly',
+        lang: 'es',
         description:
           'Encuentra tu pala de pádel perfecta. Compara especificaciones, precios y reseñas de todas las principales marcas.',
         start_url: '/',
@@ -56,6 +57,7 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        navigateFallback: 'index.html',
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {

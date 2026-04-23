@@ -366,3 +366,5 @@ frontend/dev-dist/
 
 .github/hooks/rtk-rewrite.json
 .github/copilot-instructions.md
+/scratch
+
