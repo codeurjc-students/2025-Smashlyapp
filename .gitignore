@@ -334,6 +334,7 @@ pnpm-lock.yaml
 .DS_Store?
 ehthumbs.db
 Icon?
+!public/icons/
 Thumbs.db
 
 # Other
