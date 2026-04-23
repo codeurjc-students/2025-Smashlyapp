@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FiMenu, FiSearch, FiX, FiUser, FiLogOut, FiHome, FiGrid, FiBarChart2, FiHelpCircle, FiLogIn, FiUserPlus } from 'react-icons/fi';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../contexts/AuthContext';
 import { useAuthModal } from '../../contexts/AuthModalContext';
 import GlobalSearch from '../features/GlobalSearch';
@@ -124,9 +124,8 @@ const MobileSearchButton = styled.button`
   }
 `;
 
-// Mobile Menu Dropdown
-// Mobile Menu Dropdown with High Performance Optimization
-const MobileMenuDropdown = styled(motion.div)`
+// Mobile Menu Dropdown - GPU Accelerated with CSS-only visibility toggle
+const MobileMenuDropdown = styled(motion.div)<{ $isOpen: boolean }>`
   position: absolute;
   top: 100%;
   left: 0;
@@ -140,8 +139,15 @@ const MobileMenuDropdown = styled(motion.div)`
   overflow-y: auto;
   border: 1px solid rgba(0, 0, 0, 0.05);
   border-top: none;
+  
+  /* GPU acceleration for smooth 60fps animation */
   will-change: transform, opacity;
   transform-origin: top;
+  transform: translateY(${props => props.$isOpen ? '0' : '-10px'});
+  opacity: ${props => props.$isOpen ? 1 : 0};
+  visibility: ${props => props.$isOpen ? 'visible' : 'hidden'};
+  pointer-events: ${props => props.$isOpen ? 'auto' : 'none'};
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 `;
 
 // Mobile Search Container
@@ -590,143 +596,136 @@ const Header: React.FC = () => {
           </MobileMenuButton>
         </MobileElements>
 
-        <AnimatePresence>
-          {(isMenuOpen || isMobileSearchOpen) && (
-            <MobileMenuDropdown
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+        {/* Mobile Menu Dropdown - Always rendered, toggled via CSS for 60fps */}
+        <MobileMenuDropdown
+          $isOpen={isMenuOpen || isMobileSearchOpen}
+          initial={false}
+        >
+          {/* Mobile Search Section */}
+          <MobileSearchContainer $isOpen={isMobileSearchOpen}>
+            <GlobalSearch
+              onSearchToggle={setIsMobileSearchOpen}
+              isInHeader={true}
+              isMobileContext={true}
+            />
+          </MobileSearchContainer>
+
+          {/* Navigation Section */}
+          <motion.div
+            initial='hidden'
+            animate={isMenuOpen ? 'visible' : 'hidden'}
+            variants={{
+              hidden: { opacity: 0 },
+              visible: {
+                opacity: 1,
+                transition: {
+                  staggerChildren: 0.03,
+                },
+              },
+            }}
+          >
+            <MobileNavSection
+              variants={{
+                hidden: { opacity: 0, x: -10 },
+                visible: { opacity: 1, x: 0 },
+              }}
             >
-              {/* Mobile Search Section */}
-              <MobileSearchContainer $isOpen={isMobileSearchOpen}>
-                <GlobalSearch
-                  onSearchToggle={setIsMobileSearchOpen}
-                  isInHeader={true}
-                  isMobileContext={true}
-                />
-              </MobileSearchContainer>
+              <MobileNavTitle>Navegación</MobileNavTitle>
+              <NavLink to='/' $isActive={isActive('/')} $isMobile onClick={closeAllMenus}>
+                <FiHome />
+                Inicio
+              </NavLink>
+              <NavLink
+                to='/catalog'
+                $isActive={isActive('/catalog')}
+                $isMobile
+                onClick={closeAllMenus}
+              >
+                <FiGrid />
+                Catálogo de Palas
+              </NavLink>
+              <NavLink
+                to='/compare'
+                $isActive={isActive('/compare')}
+                $isMobile
+                onClick={closeAllMenus}
+              >
+                <FiBarChart2 />
+                Comparar palas
+              </NavLink>
+              <NavLink
+                to='/faq'
+                $isActive={isActive('/faq')}
+                $isMobile
+                onClick={closeAllMenus}
+              >
+                <FiHelpCircle />
+                FAQ
+              </NavLink>
+            </MobileNavSection>
 
-              {/* Navigation Section */}
-              {isMenuOpen && (
-                <motion.div
-                  initial='hidden'
-                  animate='visible'
-                  variants={{
-                    hidden: { opacity: 0 },
-                    visible: {
-                      opacity: 1,
-                      transition: {
-                        staggerChildren: 0.03, // Reduced stagger duration for better mobile perf
-                      },
-                    },
-                  }}
-                >
-                  <MobileNavSection
-                    variants={{
-                      hidden: { opacity: 0, x: -10 },
-                      visible: { opacity: 1, x: 0 },
+            {/* Auth Section for Mobile */}
+            <MobileNavSection
+              variants={{
+                hidden: { opacity: 0, x: -10 },
+                visible: { opacity: 1, x: 0 },
+              }}
+            >
+              <MobileNavTitle>Cuenta</MobileNavTitle>
+              {userProfile ? (
+                <>
+                  <NavLink
+                    to='/profile'
+                    $isActive={isActive('/profile')}
+                    $isMobile
+                    onClick={closeAllMenus}
+                  >
+                    <FiUser />
+                    Mi cuenta
+                  </NavLink>
+                  <LogoutButton
+                    $variant='secondary'
+                    $isMobile
+                    onClick={async () => {
+                      await signOut();
+                      closeAllMenus();
+                      navigate('/');
+                    }}
+                    style={{ cursor: 'pointer', marginTop: '0.75rem', width: '100%' }}
+                  >
+                    <FiLogOut style={{ marginRight: '8px' }} />
+                    Cerrar sesión
+                  </LogoutButton>
+                </>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                  <AuthButton
+                    $variant='secondary'
+                    $isMobile
+                    onClick={() => {
+                      closeAllMenus();
+                      openLogin();
                     }}
                   >
-                    <MobileNavTitle>Navegación</MobileNavTitle>
-                    <NavLink to='/' $isActive={isActive('/')} $isMobile onClick={closeAllMenus}>
-                      <FiHome />
-                      Inicio
-                    </NavLink>
-                    <NavLink
-                      to='/catalog'
-                      $isActive={isActive('/catalog')}
-                      $isMobile
-                      onClick={closeAllMenus}
-                    >
-                      <FiGrid />
-                      Catálogo de Palas
-                    </NavLink>
-                    <NavLink
-                      to='/compare'
-                      $isActive={isActive('/compare')}
-                      $isMobile
-                      onClick={closeAllMenus}
-                    >
-                      <FiBarChart2 />
-                      Comparar palas
-                    </NavLink>
-                    <NavLink
-                      to='/faq'
-                      $isActive={isActive('/faq')}
-                      $isMobile
-                      onClick={closeAllMenus}
-                    >
-                      <FiHelpCircle />
-                      FAQ
-                    </NavLink>
-                  </MobileNavSection>
-
-                  {/* Auth Section for Mobile */}
-                  <MobileNavSection
-                    variants={{
-                      hidden: { opacity: 0, x: -10 },
-                      visible: { opacity: 1, x: 0 },
+                    <FiLogIn />
+                    Iniciar sesión
+                  </AuthButton>
+                  <AuthButton
+                    $variant='primary'
+                    $isMobile
+                    onClick={() => {
+                      closeAllMenus();
+                      openRegister();
                     }}
                   >
-                    <MobileNavTitle>Cuenta</MobileNavTitle>
-                    {userProfile ? (
-                      <>
-                        <NavLink
-                          to='/profile'
-                          $isActive={isActive('/profile')}
-                          $isMobile
-                          onClick={closeAllMenus}
-                        >
-                          <FiUser />
-                          Mi cuenta
-                        </NavLink>
-                        <LogoutButton
-                          $variant='secondary'
-                          $isMobile
-                          onClick={async () => {
-                            await signOut();
-                            closeAllMenus();
-                            navigate('/');
-                          }}
-                          style={{ cursor: 'pointer', marginTop: '0.75rem', width: '100%' }}
-                        >
-                          <FiLogOut style={{ marginRight: '8px' }} />
-                          Cerrar sesión
-                        </LogoutButton>
-                      </>
-                    ) : (
-                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                        <AuthButton
-                          $variant='secondary'
-                          $isMobile
-                          onClick={() => {
-                            closeAllMenus();
-                            openLogin();
-                          }}
-                        >
-                          <FiLogIn />
-                          Iniciar sesión
-                        </AuthButton>
-                        <AuthButton
-                          $variant='primary'
-                          $isMobile
-                          onClick={() => {
-                            closeAllMenus();
-                            openRegister();
-                          }}
-                        >
-                          <FiUserPlus />
-                          Registrarse
-                        </AuthButton>
-                      </div>
-                    )}
-                  </MobileNavSection>
-                </motion.div>
+                    <FiUserPlus />
+                    Registrarse
+                  </AuthButton>
+                </div>
               )}
-            </MobileMenuDropdown>
-          )}
-        </AnimatePresence>
+            </MobileNavSection>
+          </motion.div>
+        </MobileMenuDropdown>
       </HeaderContent>
     </HeaderContainer>
   );
