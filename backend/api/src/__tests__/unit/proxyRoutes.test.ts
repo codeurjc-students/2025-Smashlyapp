@@ -15,6 +15,8 @@ describe('Proxy Routes', () => {
   });
 
   describe('GET /image', () => {
+    const allowedDomain = 'cdn.shopify.com';
+
     it('should return 400 when URL parameter is missing', async () => {
       const response = await request(app).get('/api/v1/proxy/image');
 
@@ -31,7 +33,7 @@ describe('Proxy Routes', () => {
 
     it('should fetch image and return with correct headers', async () => {
       const mockImageData = Buffer.from('fake-image-data');
-      const mockImageUrl = 'https://example.com/image.jpg';
+      const mockImageUrl = `https://${allowedDomain}/image.jpg`;
 
       (axios.get as vi.Mock).mockResolvedValue({
         data: mockImageData,
@@ -60,7 +62,7 @@ describe('Proxy Routes', () => {
 
     it('should use default content-type when not provided', async () => {
       const mockImageData = Buffer.from('fake-image-data');
-      const mockImageUrl = 'https://example.com/image.png';
+      const mockImageUrl = `https://${allowedDomain}/image.png`;
 
       (axios.get as vi.Mock).mockResolvedValue({
         data: mockImageData,
@@ -76,7 +78,7 @@ describe('Proxy Routes', () => {
     });
 
     it('should handle network errors', async () => {
-      const mockImageUrl = 'https://example.com/image.jpg';
+      const mockImageUrl = `https://${allowedDomain}/image.jpg`;
 
       (axios.get as vi.Mock).mockRejectedValue(new Error('Network error'));
 
@@ -89,7 +91,7 @@ describe('Proxy Routes', () => {
     });
 
     it('should handle HTTP errors from source', async () => {
-      const mockImageUrl = 'https://example.com/image.jpg';
+      const mockImageUrl = `https://${allowedDomain}/image.jpg`;
 
       (axios.get as vi.Mock).mockRejectedValue({
         response: {
@@ -107,7 +109,7 @@ describe('Proxy Routes', () => {
     });
 
     it('should handle timeout errors', async () => {
-      const mockImageUrl = 'https://example.com/slow-image.jpg';
+      const mockImageUrl = `https://${allowedDomain}/slow-image.jpg`;
 
       (axios.get as vi.Mock).mockRejectedValue({
         code: 'ECONNABORTED',
@@ -124,9 +126,9 @@ describe('Proxy Routes', () => {
 
     it('should handle different image types', async () => {
       const testCases = [
-        { url: 'https://example.com/image.png', contentType: 'image/png' },
-        { url: 'https://example.com/image.gif', contentType: 'image/gif' },
-        { url: 'https://example.com/image.webp', contentType: 'image/webp' },
+        { url: `https://${allowedDomain}/image.png`, contentType: 'image/png' },
+        { url: `https://${allowedDomain}/image.gif`, contentType: 'image/gif' },
+        { url: `https://${allowedDomain}/image.webp`, contentType: 'image/webp' },
       ];
 
       for (const testCase of testCases) {
@@ -150,7 +152,7 @@ describe('Proxy Routes', () => {
 
     it('should handle URLs with special characters', async () => {
       const mockImageData = Buffer.from('fake-image-data');
-      const mockImageUrl = 'https://example.com/images/test image (1).jpg?size=large&format=jpg';
+      const mockImageUrl = `https://${allowedDomain}/images/test image (1).jpg?size=large&format=jpg`;
 
       (axios.get as vi.Mock).mockResolvedValue({
         data: mockImageData,

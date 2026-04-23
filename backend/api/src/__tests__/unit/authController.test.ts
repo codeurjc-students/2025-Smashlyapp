@@ -42,6 +42,12 @@ function createMockRes(): Partial<Response> & { body?: any; statusCode: number }
     res.body = payload;
     return res;
   });
+  res.cookie = vi.fn((name: string, value: string, options?: any) => {
+    return res;
+  });
+  res.clearCookie = vi.fn((name: string, options?: any) => {
+    return res;
+  });
   return res;
 }
 

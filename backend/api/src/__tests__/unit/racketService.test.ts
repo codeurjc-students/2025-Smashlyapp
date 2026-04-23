@@ -18,7 +18,7 @@ const baseRacketRow = () => ({
   name: "Adidas Pro",
   brand: "Adidas",
   model: "Pro",
-  images: ["img.jpg"],
+  images: ["https://cdn.shopify.com/img.jpg"],
   description: "desc",
   on_offer: false,
   created_at: "2025-01-01T00:00:00.000Z",
@@ -47,7 +47,7 @@ describe("racketService helpers", () => {
       precio_original: null,
       descuento_porcentaje: 0,
       enlace: "",
-      fuente: "No price available",
+      fuente: "No disponible",
     });
   });
 
@@ -100,7 +100,7 @@ describe("racketService helpers", () => {
     expect(mapped.nombre).toBe("Adidas Pro");
     expect(mapped.marca).toBe("Adidas");
     expect(mapped.modelo).toBe("Pro");
-    expect(mapped.imagenes).toEqual(["img.jpg"]);
+    expect(mapped.imagenes).toEqual(["https://cdn.shopify.com/img.jpg"]);
     expect(mapped.en_oferta).toBe(false);
     expect(mapped.precio_actual).toBe(180);
     expect(mapped.fuente).toBe("padelmarket");

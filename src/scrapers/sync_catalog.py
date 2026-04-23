@@ -539,7 +539,95 @@ async def run_full_sync(
     print(f"{'='*60}\n")
 
 
-# ── Modo PRICES ────────────────────────────────────────────────────────────────
+# ── Modo PRICES con Concurrencia ────────────────────────────────────────────────
+
+async def _process_single_price(
+    slug: str,
+    racket: dict,
+    model_name: str,
+    db_id: Optional[int],
+    scrapers: dict,
+    target_stores: list,
+    store_data_map: Dict[str, Optional[dict]],
+    current_db_prices: Dict[int, Dict[str, Optional[float]]],
+    supabase: Optional[Client],
+    dry_run: bool,
+    slug_id_map: Dict[str, int],
+):
+    """Procesa un solo producto (función helper para procesamiento concurrente)."""
+    
+    # Resolver db_id: primero por slug, luego fallback por model_name normalizado
+    resolved_db_id = db_id
+    if not resolved_db_id and supabase:
+        normalized_model = normalize_paddle_name(model_name)
+        try:
+            fb = supabase.table("rackets").select("id").eq("model", model_name).execute()
+            if not fb.data and normalized_model != model_name:
+                fb = supabase.table("rackets").select("id").eq("model", normalized_model).execute()
+            if fb.data:
+                resolved_db_id = fb.data[0]["id"]
+                slug_id_map[slug] = resolved_db_id
+        except Exception:
+            pass
+
+    db_updates: dict = {}
+    any_on_offer = False
+    racket_changed = False
+    prices_info = []
+
+    for price_entry in racket.get("prices", []):
+        store = price_entry.get("store")
+        url = price_entry.get("url")
+
+        if store not in scrapers or store not in target_stores:
+            continue
+
+        scraper = scrapers[store]
+
+        try:
+            product = await scraper.scrape_product(url)
+
+            if product and product.price and product.price > 0:
+                new_price = product.price
+                original = product.original_price
+                old_price = price_entry.get("price")
+
+                # Preparar update de Supabase
+                discount = 0
+                if original and original > new_price:
+                    discount = round((1 - new_price / original) * 100)
+                    any_on_offer = True
+
+                db_updates[f"{store}_actual_price"]        = new_price
+                db_updates[f"{store}_original_price"]      = original
+                db_updates[f"{store}_discount_percentage"] = discount
+
+                # Comparar con precio en DB para decidir si registrar historial
+                old_db_price = current_db_prices.get(resolved_db_id or -1, {}).get(store)
+
+                if old_db_price is None or abs(float(old_db_price) - float(new_price)) > 0.01:
+                    if old_price != new_price:
+                        racket_changed = True
+                        prices_info.append(f"{store}:{old_price}€→{new_price}€")
+
+                    if resolved_db_id and supabase:
+                        record_price_history(
+                            supabase, resolved_db_id, store,
+                            new_price, original, discount, dry_run
+                        )
+
+            else:
+                db_updates[f"{store}_actual_price"] = None
+                db_updates[f"{store}_link"] = url
+                prices_info.append(f"{store}:sin precio")
+
+        except Exception as e:
+            prices_info.append(f"{store}:ERROR")
+
+    return slug, resolved_db_id, db_updates, racket_changed, prices_info
+
+    return slug, resolved_db_id, db_updates, racket_changed
+
 
 async def run_prices_sync(
     target_stores: list,
@@ -549,6 +637,7 @@ async def run_prices_sync(
     """
     Actualización rápida de precios: re-rasca las URLs ya conocidas sin tocar
     el catálogo completo. Registra en price_history solo si el precio cambió.
+    Versión optimizada con concurrencia.
     """
     print(f"\n{'='*60}")
     print(f"💸 MODO PRICES — Tiendas: {target_stores}")
@@ -578,113 +667,80 @@ async def run_prices_sync(
         racket_ids = racket_ids[:limit]
 
     processed = updated = errors = 0
+    total = len(racket_ids)
 
-    for slug in racket_ids:
+    # Concurrencia: semaphore para limitar peticiones simultáneas
+    MAX_CONCURRENT = 5
+    RATE_LIMIT_DELAY = 0.5  # Segundos entre batches para evitar bloqueos
+    semaphore = asyncio.Semaphore(MAX_CONCURRENT)
+
+    async def process_with_semaphore(idx, slug):
+        async with semaphore:
+            racket = rackets_data[slug]
+            model_name = racket.get("model", slug)
+            db_id = slug_id_map.get(slug)
+            
+            # Rate limiting: delay incremental para evitar sobrecarga
+            if idx > 0 and idx % 20 == 0:
+                await asyncio.sleep(RATE_LIMIT_DELAY)
+            
+            # Mostrar progreso cada 20 productos
+            if idx % 20 == 0:
+                print(f"\n📦 [{idx+1}/{total}] Procesando...")
+
+            result = await _process_single_price(
+                slug, racket, model_name, db_id,
+                scrapers, target_stores, {}, current_db_prices,
+                supabase, dry_run, slug_id_map,
+            )
+            # Unpack new return value (including prices_info)
+            res = (idx, result) if isinstance(result, tuple) else (idx, (*result, []))
+            return res
+
+    # Procesar concurrentemente
+    tasks = [process_with_semaphore(i, slug) for i, slug in enumerate(racket_ids)]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    # Recolectar resultados y actualizar JSON
+    for task_result in results:
+        if isinstance(task_result, Exception):
+            errors += 1
+            continue
+        
+        # Handle both old tuple (4 items) and new tuple (5 items) formats
+        task_data = task_result[1]
+        if len(task_data) == 4:
+            slug, db_id, db_updates, racket_changed = task_data
+            prices_info = []
+        else:
+            slug, db_id, db_updates, racket_changed, prices_info = task_data
+        
+        idx = task_result[0]
         racket = rackets_data[slug]
-        model_name = racket.get("model", slug)
+        processed += 1
 
-        print(f"\n📦 [{processed+1}/{len(racket_ids)}] {model_name}")
+        # Loggear resultados de tiendas
+        if prices_info:
+            print(f"    📊 {' | '.join(prices_info)}")
 
-        # Resolver db_id: primero por slug, luego fallback por model_name normalizado
-        db_id = slug_id_map.get(slug)
-        if not db_id and supabase:
-            # Búsqueda en bloque propio — no se ve afectada por errores de slug.
-            # Se intenta primero con el nombre exacto almacenado en BD, luego
-            # con el nombre normalizado (por si fue importado con variante de tienda).
-            normalized_model = normalize_paddle_name(model_name)
-            try:
-                fb = supabase.table("rackets").select("id").eq("model", model_name).execute()
-                if not fb.data and normalized_model != model_name:
-                    # Segundo intento con nombre normalizado
-                    fb = supabase.table("rackets").select("id").eq("model", normalized_model).execute()
-                if fb.data:
-                    db_id = fb.data[0]["id"]
-                    slug_id_map[slug] = db_id
-                else:
-                    print(f"  ⚠️  No encontrado en Supabase: '{model_name}' (normalizado: '{normalized_model}')")
-            except Exception as e:
-                print(f"  ⚠️  Fallback lookup failed para '{model_name}': {e}")
-
-            # Reparar el slug en Supabase en bloque separado para que una
-            # colisión no anule el db_id ya obtenido
-            if db_id and not dry_run:
-                try:
-                    supabase.table("rackets").update({"slug": slug}).eq("id", db_id).execute()
-                    print(f"  🔧 Slug reparado en Supabase: '{slug}' → id={db_id}")
-                except Exception:
-                    # Colisión: el slug ya pertenece a otra fila.
-                    # No es crítico — db_id está en caché para esta ejecución.
-                    pass
-
-        db_updates: dict = {}
-        any_on_offer = False
-        racket_changed = False
-
-        for price_entry in racket.get("prices", []):
-            store = price_entry.get("store")
-            url = price_entry.get("url")
-
-            if store not in scrapers or store not in target_stores:
-                continue
-
-            scraper = scrapers[store]
-            print(f"  🔍 {store}...")
-
-            try:
-                product = await scraper.scrape_product(url)
-
-                if product and product.price and product.price > 0:
-                    new_price = product.price
-                    original = product.original_price
-                    old_price = price_entry.get("price")
-
-                    # Actualizar JSON
-                    price_entry["price"] = new_price
-                    price_entry["original_price"] = original
-                    price_entry["last_updated"] = now_utc()
-
-                    # Preparar update de Supabase
-                    discount = 0
-                    if original and original > new_price:
-                        discount = round((1 - new_price / original) * 100)
-                        any_on_offer = True
-
-                    db_updates[f"{store}_actual_price"]        = new_price
-                    db_updates[f"{store}_original_price"]      = original
-                    db_updates[f"{store}_discount_percentage"] = discount
-
-                    # Comparar con precio en DB para decidir si registrar historial
-                    old_db_price = current_db_prices.get(db_id or -1, {}).get(store)
-
-                    if old_db_price is None or abs(float(old_db_price) - float(new_price)) > 0.01:
-                        if old_price != new_price:
-                            print(f"    💰 {old_price} → {new_price} €")
-                            racket_changed = True
-
-                        if db_id and supabase:
-                            record_price_history(
-                                supabase, db_id, store,
-                                new_price, original, discount, dry_run
-                            )
+        # Actualizar prices en el JSON
+        for store in target_stores:
+            price_updated = db_updates.get(f"{store}_actual_price")
+            if price_updated is not None:
+                # Buscar y actualizar el price_entry correspondiente
+                for price_entry in racket.get("prices", []):
+                    if price_entry.get("store") == store:
+                        price_entry["price"] = price_updated
+                        price_entry["original_price"] = db_updates.get(f"{store}_original_price")
+                        price_entry["last_updated"] = now_utc()
+                        if racket_changed:
+                            print(f"    💰 [{store}] Actualizado en BD")
                         updated += 1
-                    else:
-                        print(f"    — Sin cambio: {new_price} €")
-
-                else:
-                    # URL devuelve sin precio → posible descatalogada o cambio de URL
-                    print(f"    ⚠️  Sin precio en {store} (URL: {url})")
-                    # Ponemos el precio a null para reflejar no disponibilidad
-                    db_updates[f"{store}_actual_price"] = None
-                    db_updates[f"{store}_link"] = url
-                    errors += 1
-
-            except Exception as e:
-                print(f"    ❌ Error: {e}")
+                        break
+            elif db_updates.get(f"{store}_actual_price") is not None:
                 errors += 1
 
-        # --- Lógica de Comparison Only ---
-        # Si TODAS las tiendas scrapeadas en este modo devolvieron Sin Precio,
-        # y antes tenía precios, marcar como comparison_only
+        # Lógica de Comparison Only
         all_prices_null = all(
             db_updates.get(f"{s}_actual_price") is None 
             for s in target_stores 
@@ -692,49 +748,26 @@ async def run_prices_sync(
         )
         
         if all_prices_null and db_id:
-            # Verificar si realmente no queda ni un solo precio en ninguna tienda (incluyendo las no elegidas)
             current = current_db_prices.get(db_id, {})
-            # Solo si los precios que NO estamos actualizando también son null
             other_stores_null = all(
                 current.get(s) is None 
                 for s in STORE_CONFIGS.keys() 
                 if s not in target_stores
             )
-            
             if other_stores_null:
                 db_updates["comparison_only"] = True
                 db_updates["on_offer"] = False
-                print(f"  🚩 Marcada como 'Solo comparación' (sin stock en ninguna tienda).")
-            else:
-                # Si hay otra tienda que no hemos scrapeado hoy que TIENE precio, 
-                # entonces la pala NO es solo_comparacion.
-                db_updates["comparison_only"] = False
-        elif db_id:
-            # Si al menos una tienda tiene precio, nos aseguramos de quitar el flag
-            db_updates["comparison_only"] = False
 
         # Actualizar Supabase
         if db_updates and supabase and not dry_run:
             db_updates["updated_at"] = now_utc()
-
             if db_id:
                 try:
                     supabase.table("rackets").update(db_updates).eq("id", db_id).execute()
-                    if racket_changed or db_updates.get("comparison_only"):
-                        print(f"  ✨ Supabase actualizado.")
                 except Exception as e:
                     print(f"  ❌ Supabase error: {e}")
-            else:
-                print(f"  ⚠️  No se encontró id de Supabase para slug '{slug}'.")
 
-        processed += 1
-
-        # Guardado periódico del JSON (cada 10 palas)
-        if processed % 10 == 0 and not dry_run:
-            with open(RACKETS_JSON, "w", encoding="utf-8") as f:
-                json.dump(rackets_data, f, indent=4, ensure_ascii=False)
-
-    # Guardado final del JSON
+    # Guardar JSON al final (una sola vez, no en cada iteración)
     if not dry_run:
         with open(RACKETS_JSON, "w", encoding="utf-8") as f:
             json.dump(rackets_data, f, indent=4, ensure_ascii=False)
@@ -748,12 +781,12 @@ async def run_prices_sync(
     print(f"\n{'='*60}")
     print(f"🏁 PRICES SYNC completado.")
     print(f"   Procesadas: {processed}")
-    print(f"   Actualizadas en price_history: {updated}")
-    print(f"   Errores/sin precio:            {errors}")
+    print(f"   Actualizadas: {updated}")
+    print(f"   Errores/sin precio: {errors}")
     print(f"{'='*60}\n")
 
 
-# ── Main ───────────────────────────────────────────────────────────────────────
+# ── Main ───────────────────────────────────────────────────��───────────────────
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
